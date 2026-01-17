@@ -23,6 +23,16 @@ GraphBox consolidates three previously separate BibGraph packages into a single,
 pnpm install graphbox
 ```
 
+## CLI
+
+```bash
+npx graphbox help       # Show available commands
+npx graphbox version    # Show version
+npx graphbox generate   # Generate a graph from a specification
+npx graphbox analyze    # Analyze graph properties
+npx graphbox validate   # Validate a graph against constraints
+```
+
 ## Key Features
 
 ### Graph Adapters
