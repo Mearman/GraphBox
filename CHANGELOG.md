@@ -1,3 +1,9 @@
+## [1.1.0](https://github.com/Mearman/GraphBox/compare/v1.0.8...v1.1.0) (2026-01-17)
+
+### Features
+
+* add browser-compatible dataset loading functions ([5c7d23b](https://github.com/Mearman/GraphBox/commit/5c7d23bc2c5988b79ae2d1fefb720f531aa8fac5))
+
 ## [1.0.8](https://github.com/Mearman/GraphBox/compare/v1.0.7...v1.0.8) (2026-01-17)
 
 ### Chores
