@@ -86,7 +86,12 @@ export {
 
 // Export graph loaders
 export {
+	// Decompression utilities
+	decompressGzip,
 	type EdgeListConfig,
+	fetchAndDecompressGzip,
+	fetchWithAutoDecompress,
+	isGzipUrl,
 	type LoadedEdge,
 	loadEdgeList,
 	type LoadedNode,

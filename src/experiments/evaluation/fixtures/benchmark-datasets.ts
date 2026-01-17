@@ -13,7 +13,7 @@ import { dirname,resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { Graph } from "../../../algorithms/graph/graph";
-import { type LoadedEdge,loadEdgeList, type LoadedNode } from "../loaders/index";
+import { fetchWithAutoDecompress, type LoadedEdge,loadEdgeList, type LoadedNode } from "../loaders/index";
 
 // ============================================================================
 // Types
@@ -296,30 +296,32 @@ export const loadAllBenchmarks = async (benchmarksRoot?: string): Promise<Map<st
 /**
  * Load a benchmark dataset from a URL.
  *
- * This function works in both browser and Node.js environments using fetch.
- * Use this when you have a direct URL to the edge list file.
+ * This function works in both browser and Node.js environments.
+ * Automatically handles gzip-compressed files (.gz extension).
  *
- * @param url - URL to the edge list file
+ * @param url - URL to the edge list file (can be .txt or .txt.gz)
  * @param meta - Dataset metadata (for parsing configuration)
  * @returns Loaded benchmark with graph and metadata
  * @throws Error if fetch fails or parsing fails
  *
  * @example
  * ```typescript
+ * // Plain text file
  * const benchmark = await loadBenchmarkFromUrl(
  *   'https://raw.githubusercontent.com/user/repo/main/data/karate.edges',
  *   KARATE
  * );
+ *
+ * // Gzip-compressed file (automatically decompressed)
+ * const compressed = await loadBenchmarkFromUrl(
+ *   'https://snap.stanford.edu/data/facebook_combined.txt.gz',
+ *   FACEBOOK
+ * );
  * ```
  */
 export const loadBenchmarkFromUrl = async (url: string, meta: BenchmarkDatasetMeta): Promise<LoadedBenchmark> => {
-	const response = await fetch(url);
-
-	if (!response.ok) {
-		throw new Error(`Failed to fetch ${url}: ${response.status} ${response.statusText}`);
-	}
-
-	const content = await response.text();
+	// Auto-detect and handle gzip compression
+	const content = await fetchWithAutoDecompress(url);
 
 	const result = loadEdgeList(content, {
 		directed: meta.directed,

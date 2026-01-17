@@ -5,6 +5,12 @@
  */
 
 export {
+	decompressGzip,
+	fetchAndDecompressGzip,
+	fetchWithAutoDecompress,
+	isGzipUrl,
+} from "./decompress";
+export {
 	type EdgeListConfig,
 	type LoadedEdge,
 	loadEdgeList,
