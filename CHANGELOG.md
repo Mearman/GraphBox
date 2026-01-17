@@ -1,3 +1,9 @@
+## [1.2.1](https://github.com/Mearman/GraphBox/compare/v1.2.0...v1.2.1) (2026-01-17)
+
+### Tests
+
+* add unit tests for evaluation framework and parsers ([8bda7e0](https://github.com/Mearman/GraphBox/commit/8bda7e0d5617deaf809c28944323619f6a626a83))
+
 ## [1.2.0](https://github.com/Mearman/GraphBox/compare/v1.1.0...v1.2.0) (2026-01-17)
 
 ### Features
