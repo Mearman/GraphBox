@@ -1,0 +1,730 @@
+/**
+ * Add all Pajek datasets to the catalog
+ */
+
+import { readFileSync, writeFileSync } from "fs";
+
+const catalogPath = "src/data/catalog.json";
+const catalog = JSON.parse(readFileSync(catalogPath, "utf-8"));
+
+interface Dataset {
+  id: string;
+  name: string;
+  description: string;
+  source: string;
+  url: string;
+  nodeCount?: number;
+  edgeCount?: number;
+  directed?: boolean;
+  weighted?: boolean;
+  bipartite?: boolean;
+  stub?: boolean;
+}
+
+// All Pajek datasets from http://vlado.fmf.uni-lj.si/pub/networks/data/
+const pajekDatasets: Dataset[] = [
+  // Biology
+  {
+    id: "pajek-yeast",
+    name: "Yeast Protein Interactions",
+    description: "Protein-protein interactions in yeast. 2361 proteins, 7182 interactions.",
+    source: "pajek",
+    url: "http://vlado.fmf.uni-lj.si/pub/networks/data/bio/Yeast/Yeast.htm",
+    nodeCount: 2361,
+    edgeCount: 7182,
+    directed: false,
+    stub: true,
+  },
+  // Sociology
+  {
+    id: "pajek-tina",
+    name: "Tina Social Network",
+    description: "Small social network with 6 different relations and measurements. 11 nodes.",
+    source: "pajek",
+    url: "http://vlado.fmf.uni-lj.si/pub/networks/data/soc/Tina/Tina.htm",
+    nodeCount: 11,
+    directed: false,
+    stub: true,
+  },
+  // Sport
+  {
+    id: "pajek-football",
+    name: "Football (Pajek)",
+    description: "Football network with 35 nodes and 118 valued edges.",
+    source: "pajek",
+    url: "http://vlado.fmf.uni-lj.si/pub/networks/data/sport/football.htm",
+    nodeCount: 35,
+    edgeCount: 118,
+    directed: false,
+    weighted: true,
+    stub: true,
+  },
+  {
+    id: "pajek-stranke94",
+    name: "Slovene Political Parties 1994",
+    description: "Valued signed network of Slovene political parties in 1994.",
+    source: "pajek",
+    url: "http://vlado.fmf.uni-lj.si/pub/networks/data/soc/Samo/Stranke94.htm",
+    nodeCount: 10,
+    edgeCount: 90,
+    directed: false,
+    weighted: true,
+    stub: true,
+  },
+  // Genealogy
+  {
+    id: "pajek-presidents",
+    name: "US Presidents Genealogy",
+    description: "Genealogical network of US presidents.",
+    source: "pajek",
+    url: "http://vlado.fmf.uni-lj.si/pub/networks/data/GED/Presdnts.GED",
+    directed: true,
+    stub: true,
+  },
+  {
+    id: "pajek-turkish",
+    name: "Turkish Nomads Genealogy",
+    description: "Genealogical network of Turkish nomads.",
+    source: "pajek",
+    url: "http://vlado.fmf.uni-lj.si/pub/networks/data/GED/P-Tur.GED",
+    directed: true,
+    stub: true,
+  },
+  // 2-mode networks
+  {
+    id: "pajek-dutch-elite",
+    name: "Dutch Elite 2006",
+    description: "Multirelational 2-mode network of Dutch elite. 3810 persons, 937 positions, 5221 affiliations.",
+    source: "pajek",
+    url: "http://vlado.fmf.uni-lj.si/pub/networks/data/2mode/DutchElite.htm",
+    nodeCount: 4747,
+    edgeCount: 5221,
+    bipartite: true,
+    stub: true,
+  },
+  {
+    id: "pajek-sandi",
+    name: "Graph Products Collaboration",
+    description: "Collaboration network on graph products. 674 authors, 314 papers.",
+    source: "pajek",
+    url: "http://vlado.fmf.uni-lj.si/pub/networks/data/2mode/Sandi/Sandi.htm",
+    nodeCount: 988,
+    bipartite: true,
+    stub: true,
+  },
+  {
+    id: "pajek-journals",
+    name: "Slovenian Magazines and Journals",
+    description: "Network of 124 Slovenian magazines/journals derived from 2-mode readership data.",
+    source: "pajek",
+    url: "http://vlado.fmf.uni-lj.si/pub/networks/data/2mode/journals.htm",
+    nodeCount: 124,
+    weighted: true,
+    stub: true,
+  },
+  // Collaboration
+  {
+    id: "pajek-netscience",
+    name: "Network Science Collaboration",
+    description: "Collaboration network of network theory researchers. 1589 authors, 2742 papers.",
+    source: "pajek",
+    url: "http://vlado.fmf.uni-lj.si/pub/networks/data/collab/netscience.htm",
+    nodeCount: 1589,
+    edgeCount: 2742,
+    directed: false,
+    stub: true,
+  },
+  // Text/Temporal
+  {
+    id: "pajek-sept11",
+    name: "September 11 News",
+    description: "Temporal text network from September 11 news coverage. 13332 nodes, 243447 edges.",
+    source: "pajek",
+    url: "http://vlado.fmf.uni-lj.si/pub/networks/data/CRA/terror.htm",
+    nodeCount: 13332,
+    edgeCount: 243447,
+    directed: true,
+    stub: true,
+  },
+  // Citation
+  {
+    id: "pajek-hep-th",
+    name: "HEP-TH Citations (KDD Cup 2003)",
+    description: "High-energy physics theory citation network from KDD Cup 2003. 27770 papers, 352807 citations.",
+    source: "pajek",
+    url: "http://vlado.fmf.uni-lj.si/pub/networks/data/hep-th/hep-th.htm",
+    nodeCount: 27770,
+    edgeCount: 352807,
+    directed: true,
+    stub: true,
+  },
+  {
+    id: "pajek-patents",
+    name: "US Patents (Pajek)",
+    description: "US patent citation network. 3.7M patents, 16.5M citations. Very large dataset.",
+    source: "pajek",
+    url: "http://vlado.fmf.uni-lj.si/pub/networks/data/patents/Patents.htm",
+    nodeCount: 3774768,
+    edgeCount: 16522438,
+    directed: true,
+    stub: true,
+  },
+  // Economics
+  {
+    id: "pajek-eva",
+    name: "EVA Ownership Network",
+    description: "Ownership network with 8343 nodes and 6726 edges.",
+    source: "pajek",
+    url: "http://vlado.fmf.uni-lj.si/pub/networks/data/econ/Eva/Eva.htm",
+    nodeCount: 8343,
+    edgeCount: 6726,
+    directed: true,
+    stub: true,
+  },
+  // Dictionary/Thesaurus
+  {
+    id: "pajek-glosstg",
+    name: "Graph and Digraph Glossary",
+    description: "Network of graph theory terms. 72 terms, 122 relationships.",
+    source: "pajek",
+    url: "http://vlado.fmf.uni-lj.si/pub/networks/data/DIC/TG/glossTG.htm",
+    nodeCount: 72,
+    edgeCount: 122,
+    directed: true,
+    stub: true,
+  },
+  {
+    id: "pajek-eat",
+    name: "Edinburgh Associative Thesaurus",
+    description: "Word association network. 23219 words, 325624 associations.",
+    source: "pajek",
+    url: "http://vlado.fmf.uni-lj.si/pub/networks/data/dic/eat/Eat.htm",
+    nodeCount: 23219,
+    edgeCount: 325624,
+    directed: true,
+    stub: true,
+  },
+  {
+    id: "pajek-odlis",
+    name: "ODLIS Dictionary",
+    description: "Online Dictionary for Library and Information Science. 2909 terms, 18419 links.",
+    source: "pajek",
+    url: "http://vlado.fmf.uni-lj.si/pub/networks/data/dic/odlis/Odlis.htm",
+    nodeCount: 2909,
+    edgeCount: 18419,
+    directed: true,
+    stub: true,
+  },
+  {
+    id: "pajek-foldoc",
+    name: "FOLDOC Dictionary",
+    description: "Free Online Dictionary of Computing. 13356 terms, 120238 links.",
+    source: "pajek",
+    url: "http://vlado.fmf.uni-lj.si/pub/networks/data/dic/foldoc/foldoc.htm",
+    nodeCount: 13356,
+    edgeCount: 120238,
+    directed: true,
+    stub: true,
+  },
+  {
+    id: "pajek-wordnet",
+    name: "WordNet",
+    description: "WordNet lexical database network. 82670 synsets, 133445 relationships.",
+    source: "pajek",
+    url: "http://vlado.fmf.uni-lj.si/pub/networks/data/dic/Wordnet/Wordnet.htm",
+    nodeCount: 82670,
+    edgeCount: 133445,
+    directed: true,
+    stub: true,
+  },
+  {
+    id: "pajek-freeassoc",
+    name: "USF Word Association Norms",
+    description: "Word association, rhyme, and fragment norms. 10617 cues, 72176 associations.",
+    source: "pajek",
+    url: "http://vlado.fmf.uni-lj.si/pub/networks/data/dic/fa/FreeAssoc.htm",
+    nodeCount: 10617,
+    edgeCount: 72176,
+    directed: true,
+    stub: true,
+  },
+  // Graph Drawing
+  {
+    id: "pajek-gd99",
+    name: "GD'99 Lindenstrasse",
+    description: "Graph Drawing 1999 contest: German TV show character interactions. Temporal, multi-relational.",
+    source: "pajek",
+    url: "http://vlado.fmf.uni-lj.si/pub/networks/data/GD/a99m.zip",
+    nodeCount: 234,
+    edgeCount: 278,
+    directed: false,
+    stub: true,
+  },
+  // KEDS
+  {
+    id: "pajek-keds",
+    name: "KEDS Political Events",
+    description: "Kansas Event Data System: political events network. Multi-relational, temporal.",
+    source: "pajek",
+    url: "http://vlado.fmf.uni-lj.si/pub/networks/data/KEDS/KEDS.htm",
+    directed: true,
+    stub: true,
+  },
+  // Notre Dame
+  {
+    id: "pajek-nd-www",
+    name: "Notre Dame WWW",
+    description: "Web graph from University of Notre Dame. 325729 pages, 1.5M links.",
+    source: "pajek",
+    url: "http://vlado.fmf.uni-lj.si/pub/networks/data/ND/NDnets.htm",
+    nodeCount: 325729,
+    edgeCount: 1497135,
+    directed: true,
+    stub: true,
+  },
+  {
+    id: "pajek-nd-actors",
+    name: "Notre Dame Actors",
+    description: "Actor collaboration network from Notre Dame. 520223 actors, 1.47M collaborations.",
+    source: "pajek",
+    url: "http://vlado.fmf.uni-lj.si/pub/networks/data/ND/NDnets.htm",
+    nodeCount: 520223,
+    edgeCount: 1470418,
+    bipartite: true,
+    stub: true,
+  },
+  // Food webs - individual networks
+  {
+    id: "pajek-foodweb-baydry",
+    name: "Florida Bay Food Web (Dry)",
+    description: "Food web of Florida Bay ecosystem during dry season.",
+    source: "pajek",
+    url: "http://vlado.fmf.uni-lj.si/pub/networks/data/bio/foodweb/foodweb.htm",
+    directed: true,
+    stub: true,
+  },
+  {
+    id: "pajek-foodweb-baywet",
+    name: "Florida Bay Food Web (Wet)",
+    description: "Food web of Florida Bay ecosystem during wet season.",
+    source: "pajek",
+    url: "http://vlado.fmf.uni-lj.si/pub/networks/data/bio/foodweb/foodweb.htm",
+    directed: true,
+    stub: true,
+  },
+  {
+    id: "pajek-foodweb-chesapeake",
+    name: "Chesapeake Bay Food Web",
+    description: "Food web of Chesapeake Bay ecosystem.",
+    source: "pajek",
+    url: "http://vlado.fmf.uni-lj.si/pub/networks/data/bio/foodweb/foodweb.htm",
+    directed: true,
+    stub: true,
+  },
+  {
+    id: "pajek-foodweb-cypwet",
+    name: "Cypress Food Web (Wet)",
+    description: "Food web of Cypress swamp ecosystem during wet season.",
+    source: "pajek",
+    url: "http://vlado.fmf.uni-lj.si/pub/networks/data/bio/foodweb/foodweb.htm",
+    directed: true,
+    stub: true,
+  },
+  {
+    id: "pajek-foodweb-cypdry",
+    name: "Cypress Food Web (Dry)",
+    description: "Food web of Cypress swamp ecosystem during dry season.",
+    source: "pajek",
+    url: "http://vlado.fmf.uni-lj.si/pub/networks/data/bio/foodweb/foodweb.htm",
+    directed: true,
+    stub: true,
+  },
+  {
+    id: "pajek-foodweb-everglades",
+    name: "Everglades Food Web",
+    description: "Food web of Florida Everglades ecosystem.",
+    source: "pajek",
+    url: "http://vlado.fmf.uni-lj.si/pub/networks/data/bio/foodweb/foodweb.htm",
+    directed: true,
+    stub: true,
+  },
+  {
+    id: "pajek-foodweb-mangdry",
+    name: "Mangrove Food Web (Dry)",
+    description: "Food web of mangrove estuary during dry season.",
+    source: "pajek",
+    url: "http://vlado.fmf.uni-lj.si/pub/networks/data/bio/foodweb/foodweb.htm",
+    directed: true,
+    stub: true,
+  },
+  {
+    id: "pajek-foodweb-mangwet",
+    name: "Mangrove Food Web (Wet)",
+    description: "Food web of mangrove estuary during wet season.",
+    source: "pajek",
+    url: "http://vlado.fmf.uni-lj.si/pub/networks/data/bio/foodweb/foodweb.htm",
+    directed: true,
+    stub: true,
+  },
+  {
+    id: "pajek-foodweb-stmarks",
+    name: "St. Marks Food Web",
+    description: "Food web of St. Marks estuary ecosystem.",
+    source: "pajek",
+    url: "http://vlado.fmf.uni-lj.si/pub/networks/data/bio/foodweb/foodweb.htm",
+    directed: true,
+    stub: true,
+  },
+
+  // ==================== GRAPH DRAWING CONTEST SERIES ====================
+  {
+    id: "pajek-gd95",
+    name: "GD'95 Contest",
+    description: "Graph Drawing 1995 contest dataset.",
+    source: "pajek",
+    url: "http://vlado.fmf.uni-lj.si/pub/networks/data/GD/GD.htm",
+    directed: false,
+    stub: true,
+  },
+  {
+    id: "pajek-gd96",
+    name: "GD'96 Contest",
+    description: "Graph Drawing 1996 contest: Internet traffic data.",
+    source: "pajek",
+    url: "http://vlado.fmf.uni-lj.si/pub/networks/data/GD/GD.htm",
+    directed: true,
+    stub: true,
+  },
+  {
+    id: "pajek-gd97",
+    name: "GD'97 Contest",
+    description: "Graph Drawing 1997 contest dataset.",
+    source: "pajek",
+    url: "http://vlado.fmf.uni-lj.si/pub/networks/data/GD/GD.htm",
+    directed: false,
+    stub: true,
+  },
+  {
+    id: "pajek-gd98",
+    name: "GD'98 Contest",
+    description: "Graph Drawing 1998 contest dataset.",
+    source: "pajek",
+    url: "http://vlado.fmf.uni-lj.si/pub/networks/data/GD/GD.htm",
+    directed: false,
+    stub: true,
+  },
+  {
+    id: "pajek-gd00",
+    name: "GD'00 Contest",
+    description: "Graph Drawing 2000 contest dataset.",
+    source: "pajek",
+    url: "http://vlado.fmf.uni-lj.si/pub/networks/data/GD/GD.htm",
+    directed: false,
+    stub: true,
+  },
+  {
+    id: "pajek-gd01",
+    name: "GD'01 Contest",
+    description: "Graph Drawing 2001 contest dataset.",
+    source: "pajek",
+    url: "http://vlado.fmf.uni-lj.si/pub/networks/data/GD/GD.htm",
+    directed: false,
+    stub: true,
+  },
+  {
+    id: "pajek-gd02",
+    name: "GD'02 Contest",
+    description: "Graph Drawing 2002 contest dataset.",
+    source: "pajek",
+    url: "http://vlado.fmf.uni-lj.si/pub/networks/data/GD/GD.htm",
+    directed: false,
+    stub: true,
+  },
+  {
+    id: "pajek-gd03",
+    name: "GD'03 Contest",
+    description: "Graph Drawing 2003 contest dataset.",
+    source: "pajek",
+    url: "http://vlado.fmf.uni-lj.si/pub/networks/data/GD/GD.htm",
+    directed: false,
+    stub: true,
+  },
+  {
+    id: "pajek-gd04",
+    name: "GD'04 Contest",
+    description: "Graph Drawing 2004 contest dataset.",
+    source: "pajek",
+    url: "http://vlado.fmf.uni-lj.si/pub/networks/data/GD/GD.htm",
+    directed: false,
+    stub: true,
+  },
+  {
+    id: "pajek-gd05",
+    name: "GD'05 Contest",
+    description: "Graph Drawing 2005 contest dataset.",
+    source: "pajek",
+    url: "http://vlado.fmf.uni-lj.si/pub/networks/data/GD/GD.htm",
+    directed: false,
+    stub: true,
+  },
+  {
+    id: "pajek-gd06",
+    name: "GD'06 Contest",
+    description: "Graph Drawing 2006 contest dataset.",
+    source: "pajek",
+    url: "http://vlado.fmf.uni-lj.si/pub/networks/data/GD/GD.htm",
+    directed: false,
+    stub: true,
+  },
+
+  // ==================== ERDŐS COLLABORATION VARIANTS ====================
+  {
+    id: "pajek-erdos-02",
+    name: "Erdős Collaboration 2002",
+    description: "Paul Erdős collaboration network as of 2002.",
+    source: "pajek",
+    url: "http://vlado.fmf.uni-lj.si/pub/networks/data/Erdos/Erdos02.htm",
+    directed: false,
+    stub: true,
+  },
+  {
+    id: "pajek-erdos-971",
+    name: "Erdős Collaboration 1997 (Core)",
+    description: "Paul Erdős collaboration network 1997, core component.",
+    source: "pajek",
+    url: "http://vlado.fmf.uni-lj.si/pub/networks/data/Erdos/Erdos02.htm",
+    directed: false,
+    stub: true,
+  },
+  {
+    id: "pajek-erdos-972",
+    name: "Erdős Collaboration 1997 (Extended)",
+    description: "Paul Erdős collaboration network 1997, extended.",
+    source: "pajek",
+    url: "http://vlado.fmf.uni-lj.si/pub/networks/data/Erdos/Erdos02.htm",
+    directed: false,
+    stub: true,
+  },
+  {
+    id: "pajek-erdos-981",
+    name: "Erdős Collaboration 1998 (Core)",
+    description: "Paul Erdős collaboration network 1998, core component.",
+    source: "pajek",
+    url: "http://vlado.fmf.uni-lj.si/pub/networks/data/Erdos/Erdos02.htm",
+    directed: false,
+    stub: true,
+  },
+  {
+    id: "pajek-erdos-982",
+    name: "Erdős Collaboration 1998 (Extended)",
+    description: "Paul Erdős collaboration network 1998, extended.",
+    source: "pajek",
+    url: "http://vlado.fmf.uni-lj.si/pub/networks/data/Erdos/Erdos02.htm",
+    directed: false,
+    stub: true,
+  },
+  {
+    id: "pajek-erdos-991",
+    name: "Erdős Collaboration 1999 (Core)",
+    description: "Paul Erdős collaboration network 1999, core component.",
+    source: "pajek",
+    url: "http://vlado.fmf.uni-lj.si/pub/networks/data/Erdos/Erdos02.htm",
+    directed: false,
+    stub: true,
+  },
+  {
+    id: "pajek-erdos-992",
+    name: "Erdős Collaboration 1999 (Extended)",
+    description: "Paul Erdős collaboration network 1999, extended.",
+    source: "pajek",
+    url: "http://vlado.fmf.uni-lj.si/pub/networks/data/Erdos/Erdos02.htm",
+    directed: false,
+    stub: true,
+  },
+
+  // ==================== COLLABORATION NETWORKS ====================
+  {
+    id: "pajek-geom",
+    name: "Computational Geometry Collaborations",
+    description: "Collaboration network from Computational Geometry. 9072 vertices, 22577 edges.",
+    source: "pajek",
+    url: "http://vlado.fmf.uni-lj.si/pub/networks/data/collab/geom.htm",
+    nodeCount: 9072,
+    edgeCount: 22577,
+    directed: false,
+    stub: true,
+  },
+  {
+    id: "pajek-csphd",
+    name: "Computer Science PhD",
+    description: "Computer Science PhD student-advisor network. 1025 vertices.",
+    source: "pajek",
+    url: "http://vlado.fmf.uni-lj.si/pub/networks/data/collab/CSphd.htm",
+    nodeCount: 1025,
+    directed: true,
+    stub: true,
+  },
+
+  // ==================== WEB AND INTERNET ====================
+  {
+    id: "pajek-california",
+    name: "California Web Graph",
+    description: "Web graph of California .edu domain.",
+    source: "pajek",
+    url: "http://vlado.fmf.uni-lj.si/pub/networks/data/mix/california.htm",
+    directed: true,
+    stub: true,
+  },
+  {
+    id: "pajek-epa",
+    name: "EPA Web Graph",
+    description: "Web graph from EPA (Environmental Protection Agency).",
+    source: "pajek",
+    url: "http://vlado.fmf.uni-lj.si/pub/networks/data/mix/epa.htm",
+    directed: true,
+    stub: true,
+  },
+
+  // ==================== CITATION NETWORKS ====================
+  {
+    id: "pajek-smallw",
+    name: "Small World Citations",
+    description: "Citation network on small-world research papers.",
+    source: "pajek",
+    url: "http://vlado.fmf.uni-lj.si/pub/networks/data/cite/smallw.htm",
+    directed: true,
+    stub: true,
+  },
+  {
+    id: "pajek-smagri",
+    name: "SmaGri Citations",
+    description: "Citation network from scientometrics.",
+    source: "pajek",
+    url: "http://vlado.fmf.uni-lj.si/pub/networks/data/cite/SmaGri.htm",
+    directed: true,
+    stub: true,
+  },
+  {
+    id: "pajek-scimet",
+    name: "Scientometrics Citations",
+    description: "Citation network from Scientometrics journal.",
+    source: "pajek",
+    url: "http://vlado.fmf.uni-lj.si/pub/networks/data/cite/SciMet.htm",
+    directed: true,
+    stub: true,
+  },
+  {
+    id: "pajek-kohonen",
+    name: "Kohonen Citations",
+    description: "Citation network on Kohonen self-organizing maps research.",
+    source: "pajek",
+    url: "http://vlado.fmf.uni-lj.si/pub/networks/data/cite/Kohonen.htm",
+    directed: true,
+    stub: true,
+  },
+  {
+    id: "pajek-zewail",
+    name: "Zewail Citations",
+    description: "Citation network of Ahmed Zewail's publications.",
+    source: "pajek",
+    url: "http://vlado.fmf.uni-lj.si/pub/networks/data/cite/Zewail.htm",
+    directed: true,
+    stub: true,
+  },
+  {
+    id: "pajek-lederberg",
+    name: "Lederberg Citations",
+    description: "Citation network of Joshua Lederberg's publications.",
+    source: "pajek",
+    url: "http://vlado.fmf.uni-lj.si/pub/networks/data/cite/Lederberg.htm",
+    directed: true,
+    stub: true,
+  },
+
+  // ==================== DICTIONARY/THESAURUS ====================
+  {
+    id: "pajek-roget",
+    name: "Roget's Thesaurus",
+    description: "Network derived from Roget's Thesaurus.",
+    source: "pajek",
+    url: "http://vlado.fmf.uni-lj.si/pub/networks/data/dic/roget/roget.htm",
+    directed: true,
+    stub: true,
+  },
+
+  // ==================== SOCIAL/ORGANIZATIONAL ====================
+  {
+    id: "pajek-sampson",
+    name: "Sampson's Monastery",
+    description: "Sampson's monastery social relations. 25 vertices.",
+    source: "pajek",
+    url: "http://vlado.fmf.uni-lj.si/pub/networks/data/UciNet/Sampson.htm",
+    nodeCount: 25,
+    directed: true,
+    stub: true,
+  },
+  {
+    id: "pajek-sawmill",
+    name: "Sawmill Communication",
+    description: "Communication network in a sawmill. 36 vertices.",
+    source: "pajek",
+    url: "http://vlado.fmf.uni-lj.si/pub/networks/data/mix/sawmill.htm",
+    nodeCount: 36,
+    directed: false,
+    stub: true,
+  },
+  {
+    id: "pajek-imdb",
+    name: "IMDB Movie Network",
+    description: "Movie actor collaboration network from IMDB.",
+    source: "pajek",
+    url: "http://vlado.fmf.uni-lj.si/pub/networks/data/IMDB/IMDB.htm",
+    directed: false,
+    stub: true,
+  },
+
+  // ==================== POWER GRID ====================
+  {
+    id: "pajek-uspowergrid",
+    name: "US Power Grid (Pajek)",
+    description: "Western US power grid network. 496 vertices.",
+    source: "pajek",
+    url: "http://vlado.fmf.uni-lj.si/pub/networks/data/mix/USPower.htm",
+    nodeCount: 496,
+    directed: false,
+    stub: true,
+  },
+
+  // ==================== WORLD CITIES ====================
+  {
+    id: "pajek-worldcities",
+    name: "World Cities Network",
+    description: "Network of global cities and their connections.",
+    source: "pajek",
+    url: "http://vlado.fmf.uni-lj.si/pub/networks/data/mix/cities.htm",
+    directed: false,
+    stub: true,
+  },
+];
+
+// Add all new datasets
+let added = 0;
+for (const dataset of pajekDatasets) {
+  if (!catalog.datasets[dataset.id]) {
+    catalog.datasets[dataset.id] = {
+      ...dataset,
+      retrieved: new Date().toISOString().split("T")[0],
+    };
+    added++;
+    console.log(`Added: ${dataset.id}`);
+  }
+}
+
+// Update counts
+catalog.datasetCount = Object.keys(catalog.datasets).length;
+catalog.generated = new Date().toISOString();
+
+writeFileSync(catalogPath, JSON.stringify(catalog, null, "\t"));
+
+console.log(`\nAdded ${added} Pajek datasets`);
+console.log(`Total datasets: ${catalog.datasetCount}`);
