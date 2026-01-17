@@ -11,7 +11,7 @@ GraphBox provides a toolkit for graph manipulation, analysis, and generation, sp
 
 ## Overview
 
-Graph-Box consolidates three previously separate BibGraph packages into a single, focused package:
+GraphBox consolidates three previously separate BibGraph packages into a single, focused package:
 
 - **graph-core**: Core graph interfaces and adapters
 - **graph-expansion**: Graph expansion, traversal algorithms, and neighborhood exploration
@@ -20,7 +20,7 @@ Graph-Box consolidates three previously separate BibGraph packages into a single
 ## Installation
 
 ```bash
-pnpm install graph-box
+pnpm install graphbox
 ```
 
 ## Key Features
@@ -30,7 +30,7 @@ pnpm install graph-box
 `GraphAdapter` provides a bridge between different graph implementations, allowing you to use generic algorithms with your specific graph data structures.
 
 ```typescript
-import { GraphAdapter } from 'graph-box';
+import { GraphAdapter } from 'graphbox';
 
 const adapter = new GraphAdapter(graph);
 ```
@@ -46,7 +46,7 @@ Multiple traversal algorithms for exploring graph neighborhoods:
 - **Priority Queue** - Custom priority-based expansion
 
 ```typescript
-import { bfs, dfs, extractEgoNetwork } from 'graph-box';
+import { bfs, dfs, extractEgoNetwork } from 'graphbox';
 
 const bfsResult = bfs(adapter, 'startNodeId');
 const dfsResult = dfs(adapter, 'startNodeId');
@@ -68,7 +68,7 @@ const egoNetwork = extractEgoNetwork(adapter, {
 Type-safe graph generation with mathematical constraint validation:
 
 ```typescript
-import { generateGraph, validateGraph } from 'graph-box';
+import { generateGraph, validateGraph } from 'graphbox';
 
 const spec = {
   type: 'complete',
@@ -90,7 +90,7 @@ const valid = validateGraph(graph, spec.constraints);
 Mathematical constraint validation for graph properties:
 
 ```typescript
-import { validateGraph, checkConstraints } from 'graph-box';
+import { validateGraph, checkConstraints } from 'graphbox';
 
 const isValid = validateGraph(graph, constraints);
 ```
@@ -100,7 +100,7 @@ const isValid = validateGraph(graph, constraints);
 ### Basic Traversal
 
 ```typescript
-import { GraphAdapter, bfs } from 'graph-box';
+import { GraphAdapter, bfs } from 'graphbox';
 
 const graph = { /* your graph */ };
 const adapter = new GraphAdapter(graph);
@@ -112,7 +112,7 @@ console.log(result.visited); // Array of visited node IDs
 ### Ego Network Extraction
 
 ```typescript
-import { extractEgoNetwork } from 'graph-box';
+import { extractEgoNetwork } from 'graphbox';
 
 const adapter = new GraphAdapter(graph);
 
@@ -128,7 +128,7 @@ console.log(egoNetwork);
 ### Graph Generation
 
 ```typescript
-import { generateGraph, GraphSpec } from 'graph-box';
+import { generateGraph, GraphSpec } from 'graphbox';
 
 const spec: GraphSpec = {
   type: 'complete',
@@ -142,7 +142,7 @@ const graph = generateGraph(spec);
 ### Graph Validation
 
 ```typescript
-import { validateGraph } from 'graph-box';
+import { validateGraph } from 'graphbox';
 
 const graph = { /* graph object */ };
 const isValid = validateGraph(graph);
