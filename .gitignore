@@ -38,7 +38,5 @@ pnpm-debug.log*
 *.tmp
 .cache/
 
-# Lock file (single package, not workspace)
-pnpm-lock.yaml
-
+# Benchmark data (downloaded separately)
 data/
