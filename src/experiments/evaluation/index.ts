@@ -152,6 +152,8 @@ export {
 	CITESEER,
 	// Dataset metadata constants
 	CORA,
+	// Factory
+	createBenchmarkMeta,
 	DATASETS_BY_ID,
 	DBLP,
 	FACEBOOK,
@@ -160,9 +162,13 @@ export {
 	KARATE,
 	LESMIS,
 	loadAllBenchmarks,
-	// Loaders
+	// Loaders (Node.js - file-based)
 	loadBenchmark,
 	loadBenchmarkById,
+	// Loaders (Universal - URL/content-based)
+	loadBenchmarkByIdFromUrl,
+	loadBenchmarkFromContent,
+	loadBenchmarkFromUrl,
 	type LoadedBenchmark,
 	resolveBenchmarkPath,
 	validateBenchmark,

@@ -16,6 +16,7 @@ import {
 	BENCHMARK_DATASETS,
 	CITESEER,
 	CORA,
+	createBenchmarkMeta,
 	DATASETS_BY_ID,
 	DBLP,
 	FACEBOOK,
@@ -24,6 +25,9 @@ import {
 	LESMIS,
 	loadBenchmark,
 	loadBenchmarkById,
+	loadBenchmarkByIdFromUrl,
+	loadBenchmarkFromContent,
+	loadBenchmarkFromUrl,
 	validateBenchmark,
 } from "./benchmark-datasets";
 
@@ -181,5 +185,149 @@ describe.skipIf(!hasBenchmarkData)("Benchmark Utilities", () => {
 
 		// Should be valid or have minor warnings
 		expect(result.warnings).toBeDefined();
+	});
+});
+
+describe("Browser-Compatible Loaders", () => {
+	describe("loadBenchmarkFromContent", () => {
+		it("should load graph from edge list content", () => {
+			const content = "1 2\n2 3\n3 1";
+			const meta = createBenchmarkMeta({
+				id: "test-graph",
+				name: "Test Graph",
+				expectedNodes: 3,
+				expectedEdges: 3,
+				directed: false,
+			});
+
+			const benchmark = loadBenchmarkFromContent(content, meta);
+
+			expect(benchmark.nodeCount).toBe(3);
+			expect(benchmark.edgeCount).toBe(3);
+			expect(benchmark.meta.id).toBe("test-graph");
+		});
+
+		it("should respect directed flag", () => {
+			const content = "a b\nb c";
+			const metaDirected = createBenchmarkMeta({
+				id: "directed",
+				name: "Directed",
+				directed: true,
+			});
+			const metaUndirected = createBenchmarkMeta({
+				id: "undirected",
+				name: "Undirected",
+				directed: false,
+			});
+
+			const directed = loadBenchmarkFromContent(content, metaDirected);
+			const undirected = loadBenchmarkFromContent(content, metaUndirected);
+
+			// Both should have same node/edge count, but graph internals differ
+			expect(directed.nodeCount).toBe(3);
+			expect(undirected.nodeCount).toBe(3);
+			expect(directed.graph.isDirected()).toBe(true);
+			expect(undirected.graph.isDirected()).toBe(false);
+		});
+
+		it("should handle custom delimiter", () => {
+			const content = "1,2\n2,3\n3,1";
+			const meta = createBenchmarkMeta({
+				id: "csv-graph",
+				name: "CSV Graph",
+				delimiter: /,/,
+			});
+
+			const benchmark = loadBenchmarkFromContent(content, meta);
+
+			expect(benchmark.nodeCount).toBe(3);
+			expect(benchmark.edgeCount).toBe(3);
+		});
+
+		it("should skip comment lines", () => {
+			const content = "# This is a comment\n1 2\n# Another comment\n2 3";
+			const meta = createBenchmarkMeta({
+				id: "with-comments",
+				name: "With Comments",
+			});
+
+			const benchmark = loadBenchmarkFromContent(content, meta);
+
+			expect(benchmark.nodeCount).toBe(3);
+			expect(benchmark.edgeCount).toBe(2);
+		});
+	});
+
+	describe("createBenchmarkMeta", () => {
+		it("should create metadata with required fields", () => {
+			const meta = createBenchmarkMeta({
+				id: "custom",
+				name: "Custom Dataset",
+			});
+
+			expect(meta.id).toBe("custom");
+			expect(meta.name).toBe("Custom Dataset");
+			expect(meta.directed).toBe(false); // default
+			expect(meta.delimiter).toEqual(/\s+/); // default
+			expect(meta.expectedNodes).toBe(0); // default
+		});
+
+		it("should allow overriding all optional fields", () => {
+			const meta = createBenchmarkMeta({
+				id: "full",
+				name: "Full Config",
+				description: "A fully configured dataset",
+				directed: true,
+				expectedNodes: 100,
+				expectedEdges: 500,
+				delimiter: /,/,
+				source: "Test source",
+				relativePath: "test/path.edges",
+				remoteUrl: "https://example.com/data.txt",
+			});
+
+			expect(meta.directed).toBe(true);
+			expect(meta.expectedNodes).toBe(100);
+			expect(meta.expectedEdges).toBe(500);
+			expect(meta.delimiter).toEqual(/,/);
+			expect(meta.source).toBe("Test source");
+			expect(meta.remoteUrl).toBe("https://example.com/data.txt");
+		});
+
+		it("should generate description if not provided", () => {
+			const meta = createBenchmarkMeta({
+				id: "auto-desc",
+				name: "Auto Description",
+			});
+
+			expect(meta.description).toContain("Auto Description");
+		});
+	});
+
+	describe("loadBenchmarkByIdFromUrl", () => {
+		it("should throw for unknown dataset ID", async () => {
+			await expect(loadBenchmarkByIdFromUrl("unknown")).rejects.toThrow(
+				"Unknown benchmark dataset"
+			);
+		});
+
+		it("should throw when no URL provided and no remoteUrl configured", async () => {
+			await expect(loadBenchmarkByIdFromUrl("karate")).rejects.toThrow(
+				"No URL provided"
+			);
+		});
+	});
+});
+
+describe("URL-based Loading (Integration)", () => {
+	// These tests require network access and may be skipped in CI
+	// They serve as examples of how to use the URL-based loaders
+
+	it("should export loadBenchmarkFromUrl function", () => {
+		expect(typeof loadBenchmarkFromUrl).toBe("function");
+	});
+
+	it("should export loadBenchmarkByIdFromUrl function", () => {
+		expect(typeof loadBenchmarkByIdFromUrl).toBe("function");
 	});
 });

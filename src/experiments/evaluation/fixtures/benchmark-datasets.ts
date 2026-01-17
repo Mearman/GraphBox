@@ -49,6 +49,13 @@ export interface BenchmarkDatasetMeta {
 
 	/** Source/citation for the dataset */
 	source: string;
+
+	/**
+	 * Remote URL for downloading the dataset.
+	 * Used for browser environments or when local files aren't available.
+	 * Should point to a raw text file in edge list format.
+	 */
+	remoteUrl?: string;
 }
 
 /**
@@ -281,6 +288,166 @@ export const loadAllBenchmarks = async (benchmarksRoot?: string): Promise<Map<st
 
 	return results;
 };
+
+// ============================================================================
+// Browser-Compatible URL Loaders
+// ============================================================================
+
+/**
+ * Load a benchmark dataset from a URL.
+ *
+ * This function works in both browser and Node.js environments using fetch.
+ * Use this when you have a direct URL to the edge list file.
+ *
+ * @param url - URL to the edge list file
+ * @param meta - Dataset metadata (for parsing configuration)
+ * @returns Loaded benchmark with graph and metadata
+ * @throws Error if fetch fails or parsing fails
+ *
+ * @example
+ * ```typescript
+ * const benchmark = await loadBenchmarkFromUrl(
+ *   'https://raw.githubusercontent.com/user/repo/main/data/karate.edges',
+ *   KARATE
+ * );
+ * ```
+ */
+export const loadBenchmarkFromUrl = async (url: string, meta: BenchmarkDatasetMeta): Promise<LoadedBenchmark> => {
+	const response = await fetch(url);
+
+	if (!response.ok) {
+		throw new Error(`Failed to fetch ${url}: ${response.status} ${response.statusText}`);
+	}
+
+	const content = await response.text();
+
+	const result = loadEdgeList(content, {
+		directed: meta.directed,
+		delimiter: meta.delimiter,
+	});
+
+	const nodeCount = result.graph.getAllNodes().length;
+	const edgeCount = result.graph.getAllEdges().length;
+
+	return {
+		graph: result.graph,
+		meta,
+		nodeCount,
+		edgeCount,
+	};
+};
+
+/**
+ * Load a benchmark dataset by ID from a URL.
+ *
+ * If the dataset has a remoteUrl configured, uses that. Otherwise, you must provide a URL.
+ * Works in both browser and Node.js environments.
+ *
+ * @param id - Dataset identifier (e.g., 'cora', 'karate')
+ * @param url - Optional URL override (required if dataset has no remoteUrl)
+ * @returns Loaded benchmark with graph and metadata
+ * @throws Error if dataset ID not found or no URL available
+ *
+ * @example
+ * ```typescript
+ * // Using custom URL
+ * const karate = await loadBenchmarkByIdFromUrl('karate',
+ *   'https://example.com/datasets/karate.edges'
+ * );
+ * ```
+ */
+export const loadBenchmarkByIdFromUrl = async (id: string, url?: string): Promise<LoadedBenchmark> => {
+	const meta = DATASETS_BY_ID.get(id.toLowerCase());
+	if (!meta) {
+		const available = BENCHMARK_DATASETS.map((d) => d.id).join(", ");
+		throw new Error(`Unknown benchmark dataset: '${id}'. Available: ${available}`);
+	}
+
+	const targetUrl = url ?? meta.remoteUrl;
+	if (!targetUrl) {
+		throw new Error(
+			`No URL provided for dataset '${id}'. Either provide a URL or configure remoteUrl in the dataset metadata.`
+		);
+	}
+
+	return loadBenchmarkFromUrl(targetUrl, meta);
+};
+
+/**
+ * Load a benchmark from edge list content string.
+ *
+ * This is the most flexible loader - works with any string content.
+ * Useful when you've already fetched the data or have it embedded.
+ *
+ * @param content - Edge list content as string
+ * @param meta - Dataset metadata (for parsing configuration)
+ * @returns Loaded benchmark with graph and metadata
+ *
+ * @example
+ * ```typescript
+ * const content = "1 2\n2 3\n3 1";
+ * const benchmark = loadBenchmarkFromContent(content, {
+ *   ...KARATE,
+ *   expectedNodes: 3,
+ *   expectedEdges: 3
+ * });
+ * ```
+ */
+export const loadBenchmarkFromContent = (content: string, meta: BenchmarkDatasetMeta): LoadedBenchmark => {
+	const result = loadEdgeList(content, {
+		directed: meta.directed,
+		delimiter: meta.delimiter,
+	});
+
+	const nodeCount = result.graph.getAllNodes().length;
+	const edgeCount = result.graph.getAllEdges().length;
+
+	return {
+		graph: result.graph,
+		meta,
+		nodeCount,
+		edgeCount,
+	};
+};
+
+/**
+ * Create a custom benchmark metadata for ad-hoc datasets.
+ *
+ * Helper function to create metadata for datasets not in the standard list.
+ *
+ * @param options - Partial metadata (id and name are required)
+ * @returns Complete benchmark metadata
+ *
+ * @example
+ * ```typescript
+ * const myDataset = createBenchmarkMeta({
+ *   id: 'my-graph',
+ *   name: 'My Custom Graph',
+ *   expectedNodes: 100,
+ *   expectedEdges: 500,
+ *   directed: false
+ * });
+ *
+ * const benchmark = await loadBenchmarkFromUrl(
+ *   'https://example.com/my-graph.edges',
+ *   myDataset
+ * );
+ * ```
+ */
+export const createBenchmarkMeta = (
+	options: Pick<BenchmarkDatasetMeta, "id" | "name"> &
+		Partial<Omit<BenchmarkDatasetMeta, "id" | "name">>
+): BenchmarkDatasetMeta => ({
+	description: options.description ?? `Custom dataset: ${options.name}`,
+	directed: options.directed ?? false,
+	expectedNodes: options.expectedNodes ?? 0,
+	expectedEdges: options.expectedEdges ?? 0,
+	relativePath: options.relativePath ?? "",
+	delimiter: options.delimiter ?? /\s+/,
+	source: options.source ?? "Custom dataset",
+	remoteUrl: options.remoteUrl,
+	...options,
+});
 
 // ============================================================================
 // Utility Functions
