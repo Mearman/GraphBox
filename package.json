@@ -1,6 +1,6 @@
 {
   "name": "graphbox",
-  "version": "0.0.0-development",
+  "version": "1.0.0",
   "description": "Graph Sandbox + Graph Toolbox: Abstract and experimental graph algorithms for academic research",
   "packageManager": "pnpm@10.27.0",
   "type": "module",
