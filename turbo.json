@@ -1,0 +1,27 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "tasks": {
+    "typecheck": {
+      "inputs": ["src/**/*.ts", "tsconfig.json"],
+      "outputs": ["tsconfig.tsbuildinfo"]
+    },
+    "lint": {
+      "dependsOn": ["typecheck"],
+      "inputs": ["src/**/*.ts", "eslint.config.ts"],
+      "outputs": []
+    },
+    "test": {
+      "dependsOn": ["typecheck", "lint"],
+      "inputs": ["src/**/*.ts", "vite.config.ts"],
+      "outputs": ["coverage/**", "node_modules/.vitest/**"]
+    },
+    "build": {
+      "dependsOn": ["test"],
+      "inputs": ["src/**/*.ts", "vite.config.ts", "tsconfig.json", "package.json"],
+      "outputs": ["dist/**"]
+    },
+    "validate": {
+      "dependsOn": ["build"]
+    }
+  }
+}
