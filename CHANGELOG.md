@@ -1,31 +1,69 @@
+# Changelog
+
 ## [1.0.7](https://github.com/Mearman/GraphBox/compare/v1.0.6...v1.0.7) (2026-01-17)
+
+### Documentation
+
+* add cli commands to readme ([12fc3f6](https://github.com/Mearman/GraphBox/commit/12fc3f6))
 
 ## [1.0.6](https://github.com/Mearman/GraphBox/compare/v1.0.5...v1.0.6) (2026-01-17)
 
+### Documentation
+
+* fix package name references to graphbox ([06c87dc](https://github.com/Mearman/GraphBox/commit/06c87dc))
+
 ## [1.0.5](https://github.com/Mearman/GraphBox/compare/v1.0.4...v1.0.5) (2026-01-17)
+
+### CI/CD
+
+* use node 24 and provenance for oidc publishing ([7dc0707](https://github.com/Mearman/GraphBox/commit/7dc0707))
 
 ## [1.0.4](https://github.com/Mearman/GraphBox/compare/v1.0.3...v1.0.4) (2026-01-17)
 
+### CI/CD
+
+* use npm token for reliable publishing ([517a78e](https://github.com/Mearman/GraphBox/commit/517a78e))
+
 ## [1.0.3](https://github.com/Mearman/GraphBox/compare/v1.0.2...v1.0.3) (2026-01-17)
+
+### CI/CD
+
+* fix oidc auth by removing registry-url conflict ([2552e68](https://github.com/Mearman/GraphBox/commit/2552e68))
+* add npm token fallback for release ([ea49fa1](https://github.com/Mearman/GraphBox/commit/ea49fa1))
 
 ## [1.0.2](https://github.com/Mearman/GraphBox/compare/v1.0.1...v1.0.2) (2026-01-17)
 
+### CI/CD
+
+* add workflow_dispatch input for manual release ([32dada3](https://github.com/Mearman/GraphBox/commit/32dada3))
+
 ## [1.0.1](https://github.com/Mearman/GraphBox/compare/v1.0.0...v1.0.1) (2026-01-17)
 
-# 1.0.0 (2026-01-17)
+### CI/CD
 
+* add workflow_dispatch trigger ([bd988dd](https://github.com/Mearman/GraphBox/commit/bd988dd))
 
-### Bug Fixes
-
-* correct ci configuration ([38689e6](https://github.com/Mearman/GraphBox/commit/38689e6efd666853b7026633a2e396924dc002f3))
-
+## 1.0.0 (2026-01-17)
 
 ### Features
 
-* add analyzer and validation modules ([9ad1c01](https://github.com/Mearman/GraphBox/commit/9ad1c01728df79c3aa2070e31ec184596244743e))
-* add core graph algorithms ([7b93ee6](https://github.com/Mearman/GraphBox/commit/7b93ee6472891a96fecf6fc7c09028dfb60c73a3))
-* add dataset management scripts ([ec1a26f](https://github.com/Mearman/GraphBox/commit/ec1a26f629e4c6c17b6c016f3c6214178bd1ab97))
-* add experiment evaluation framework ([8d84282](https://github.com/Mearman/GraphBox/commit/8d84282f474ca170a8df2079b7234f3d8905f7cb))
-* add format parsers and utilities ([7274f77](https://github.com/Mearman/GraphBox/commit/7274f77d3bdb31fa95d86bc180bac6496a4a09f4))
-* add graph generation system ([7b2d6d0](https://github.com/Mearman/GraphBox/commit/7b2d6d0f74e15aca6d9a22ae8f5210937baeadb2))
-* add library entry point and cli ([7220c5e](https://github.com/Mearman/GraphBox/commit/7220c5ef7832cbeecb5e6e879cdb67b87dff0d39))
+* add analyzer and validation modules ([9ad1c01](https://github.com/Mearman/GraphBox/commit/9ad1c01))
+* add core graph algorithms ([7b93ee6](https://github.com/Mearman/GraphBox/commit/7b93ee6))
+* add dataset management scripts ([ec1a26f](https://github.com/Mearman/GraphBox/commit/ec1a26f))
+* add experiment evaluation framework ([8d84282](https://github.com/Mearman/GraphBox/commit/8d84282))
+* add format parsers and utilities ([7274f77](https://github.com/Mearman/GraphBox/commit/7274f77))
+* add graph generation system ([7b2d6d0](https://github.com/Mearman/GraphBox/commit/7b2d6d0))
+* add library entry point and cli ([7220c5e](https://github.com/Mearman/GraphBox/commit/7220c5e))
+
+### Bug Fixes
+
+* correct ci configuration ([38689e6](https://github.com/Mearman/GraphBox/commit/38689e6))
+
+### Documentation
+
+* add readme ([060b63b](https://github.com/Mearman/GraphBox/commit/060b63b))
+
+### Chores
+
+* add build and test configuration ([0ee31a9](https://github.com/Mearman/GraphBox/commit/0ee31a9))
+* add project configuration files ([396c747](https://github.com/Mearman/GraphBox/commit/396c747))
