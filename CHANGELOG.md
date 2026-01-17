@@ -1,3 +1,9 @@
+## [1.2.0](https://github.com/Mearman/GraphBox/compare/v1.1.0...v1.2.0) (2026-01-17)
+
+### Features
+
+* add gzip decompression for in-memory dataset loading ([44582d8](https://github.com/Mearman/GraphBox/commit/44582d8c55a37975fc96d73cd102139a30d7ffb6))
+
 ## [1.1.0](https://github.com/Mearman/GraphBox/compare/v1.0.8...v1.1.0) (2026-01-17)
 
 ### Features
