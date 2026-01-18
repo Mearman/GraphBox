@@ -749,9 +749,29 @@ export const isTraceable = (g: AnalyzerGraph): boolean => axisKindIs("traceable"
 /**
  * Check if graph is perfect (ω(H) = χ(H) for all induced subgraphs H).
  * Perfect graphs have no odd holes or odd anti-holes.
+ * Uses sufficient conditions: bipartite graphs and chordal graphs are perfect.
  * @param g
  */
-export const isPerfect = (g: AnalyzerGraph): boolean => axisKindIs("perfect", "perfect")(g);
+export const isPerfect = (g: AnalyzerGraph): boolean => {
+	// Only valid for undirected binary graphs
+	const isUndirected = g.edges.every(e => !e.directed);
+	const isBinary = g.edges.every(e => e.endpoints.length === 2);
+
+	if (!isUndirected || !isBinary) return false;
+
+	// Bipartite graphs are perfect (no odd cycles at all)
+	if (isBipartiteUndirectedBinary(g)) return true;
+
+	// Chordal graphs are perfect (every cycle length >= 4 has a chord)
+	if (isChordalUndirectedBinary(g)) return true;
+
+	// Comparability graphs are perfect
+	if (isComparabilityUndirectedBinary(g)) return true;
+
+	// For other graphs, fall back to metadata check
+	// Full perfect graph recognition requires checking for odd holes/antiholes
+	return axisKindIs("perfect", "perfect")(g);
+};
 
 /**
  * Check if graph is a split graph (partition into clique + independent set).
