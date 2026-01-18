@@ -226,10 +226,13 @@ export const findInducedCycles = (vertices: string[], adjacency: Map<string, Set
 		path: string[],
 		pathSet: Set<string>
 	): void => {
-		if (path.length === length) {
-			// Check if we can close the cycle
+		// For a cycle of `length` vertices, path contains vertices after start
+		// So we need path.length === length - 1 vertices before closing back to start
+		if (path.length === length - 1) {
+			// Check if we can close the cycle back to start
 			if (adjacency.get(current)?.has(start) || (!directed && adjacency.get(start)?.has(current))) {
-				cycles.push([...path, start]);
+				// Output format: [start, ...path] - unique vertices only
+				cycles.push([start, ...path]);
 			}
 			return;
 		}
@@ -247,7 +250,9 @@ export const findInducedCycles = (vertices: string[], adjacency: Map<string, Set
 	};
 
 	for (const startNode of vertices) {
-		findCyclesFrom(startNode, startNode, [], new Set());
+		// Include start in pathSet to prevent revisiting it mid-path
+		// The cycle closure check at the end handles returning to start
+		findCyclesFrom(startNode, startNode, [], new Set([startNode]));
 	}
 
 	return cycles;
@@ -255,19 +260,25 @@ export const findInducedCycles = (vertices: string[], adjacency: Map<string, Set
 
 /**
  * Check if cycle has a chord (edge between non-consecutive vertices).
+ * Cycle format: [v0, v1, ..., vn-1] where vertices form a cycle v0-v1-...-vn-1-v0.
  * @param cycle
  * @param adjacency
  * @param directed
  */
 export const hasChord = (cycle: string[], adjacency: Map<string, Set<string>>, directed: boolean): boolean => {
-	// Check all pairs of non-consecutive vertices
-	for (let index = 0; index < cycle.length; index++) {
-		for (let index_ = index + 2; index_ < cycle.length; index_++) {
-			// Skip consecutive vertices and first-last pair
-			if ((index_ === index + 1) || (index === 0 && index_ === cycle.length - 1)) continue;
+	const n = cycle.length;
+
+	// Check all pairs of vertices
+	for (let index = 0; index < n; index++) {
+		for (let index_ = index + 2; index_ < n; index_++) {
+			// Skip if vertices are adjacent in the cycle
+			// In a cycle, vertex at i is adjacent to i+1 and i-1 (mod n)
+			// Since j >= i+2, we only need to check if j is i-1 (mod n)
+			// which happens when i=0 and j=n-1
+			if (index === 0 && index_ === n - 1) continue;
 
 			const hasEdge = adjacency.get(cycle[index])?.has(cycle[index_]) ||
-        (!directed && adjacency.get(cycle[index_])?.has(cycle[index]));
+				(!directed && adjacency.get(cycle[index_])?.has(cycle[index]));
 			if (hasEdge) {
 				return true; // Found chord
 			}
