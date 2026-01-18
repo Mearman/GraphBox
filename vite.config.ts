@@ -69,9 +69,6 @@ export default defineConfig({
 	test: {
 		globals: true,
 		environment: "node",
-		pool: "forks",
-		maxConcurrency: 1,
-		fileParallelism: false,
 		include: [
 			"src/**/*.unit.test.ts",
 			"src/**/*.integration.test.ts",
