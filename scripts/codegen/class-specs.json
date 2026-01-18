@@ -1,0 +1,1384 @@
+{
+  "metadata": {
+    "version": "1.0.0",
+    "generated": "2025-01-18",
+    "totalClasses": 218,
+    "categories": [
+      "forbidden_subgraph",
+      "intersection",
+      "probe",
+      "width",
+      "perfect_variants",
+      "geometric",
+      "structural"
+    ]
+  },
+  "categories": {
+    "forbidden_subgraph": {
+      "description": "Graph classes defined by forbidden subgraphs",
+      "classes": [
+        {
+          "name": "P5Free",
+          "kind": "p5_free",
+          "negative": "has_p5",
+          "description": "Contains no induced path on 5 vertices",
+          "forbiddenSubgraph": "P5",
+          "priority": 1,
+          "hasGenerator": true,
+          "hasValidator": true,
+          "hasAnalyzer": true
+        },
+        {
+          "name": "C5Free",
+          "kind": "c5_free",
+          "negative": "has_c5",
+          "description": "Contains no induced cycle on 5 vertices",
+          "forbiddenSubgraph": "C5",
+          "priority": 1,
+          "hasGenerator": true,
+          "hasValidator": true,
+          "hasAnalyzer": true
+        },
+        {
+          "name": "C4Free",
+          "kind": "c4_free",
+          "negative": "has_c4",
+          "description": "Contains no induced cycle on 4 vertices",
+          "forbiddenSubgraph": "C4",
+          "priority": 2,
+          "hasGenerator": true,
+          "hasValidator": true,
+          "hasAnalyzer": true
+        },
+        {
+          "name": "BullFree",
+          "kind": "bull_free",
+          "negative": "has_bull",
+          "description": "Contains no induced bull graph",
+          "forbiddenSubgraph": "bull",
+          "priority": 1,
+          "hasGenerator": true,
+          "hasValidator": true,
+          "hasAnalyzer": true
+        },
+        {
+          "name": "GemFree",
+          "kind": "gem_free",
+          "negative": "has_gem",
+          "description": "Contains no induced gem graph",
+          "forbiddenSubgraph": "gem",
+          "priority": 1,
+          "hasGenerator": true,
+          "hasValidator": true,
+          "hasAnalyzer": true
+        },
+        {
+          "name": "NetFree",
+          "kind": "net_free",
+          "negative": "has_net",
+          "description": "Contains no induced net graph",
+          "forbiddenSubgraph": "net",
+          "priority": 2,
+          "hasGenerator": false,
+          "hasValidator": true,
+          "hasAnalyzer": true
+        },
+        {
+          "name": "HouseFree",
+          "kind": "house_free",
+          "negative": "has_house",
+          "description": "Contains no induced house graph",
+          "forbiddenSubgraph": "house",
+          "priority": 2,
+          "hasGenerator": false,
+          "hasValidator": true,
+          "hasAnalyzer": true
+        },
+        {
+          "name": "DiamondFree",
+          "kind": "diamond_free",
+          "negative": "has_diamond",
+          "description": "Contains no induced diamond graph",
+          "forbiddenSubgraph": "diamond",
+          "priority": 2,
+          "hasGenerator": true,
+          "hasValidator": true,
+          "hasAnalyzer": true
+        },
+        {
+          "name": "ClawFree",
+          "kind": "claw_free",
+          "negative": "has_claw",
+          "description": "Contains no induced claw K1,3",
+          "forbiddenSubgraph": "claw",
+          "priority": 2,
+          "hasGenerator": true,
+          "hasValidator": true,
+          "hasAnalyzer": true
+        },
+        {
+          "name": "ForkFree",
+          "kind": "fork_free",
+          "negative": "has_fork",
+          "description": "Contains no induced fork graph",
+          "forbiddenSubgraph": "fork",
+          "priority": 2,
+          "hasGenerator": false,
+          "hasValidator": true,
+          "hasAnalyzer": true
+        },
+        {
+          "name": "ChairFree",
+          "kind": "chair_free",
+          "negative": "has_chair",
+          "description": "Contains no induced chair graph",
+          "forbiddenSubgraph": "chair",
+          "priority": 3,
+          "hasGenerator": false,
+          "hasValidator": true,
+          "hasAnalyzer": true
+        },
+        {
+          "name": "DartFree",
+          "kind": "dart_free",
+          "negative": "has_dart",
+          "description": "Contains no induced dart graph",
+          "forbiddenSubgraph": "dart",
+          "priority": 3,
+          "hasGenerator": false,
+          "hasValidator": true,
+          "hasAnalyzer": true
+        },
+        {
+          "name": "KiteFree",
+          "kind": "kite_free",
+          "negative": "has_kite",
+          "description": "Contains no induced kite graph",
+          "forbiddenSubgraph": "kite",
+          "priority": 3,
+          "hasGenerator": false,
+          "hasValidator": true,
+          "hasAnalyzer": true
+        },
+        {
+          "name": "BannerFree",
+          "kind": "banner_free",
+          "negative": "has_banner",
+          "description": "Contains no induced banner graph",
+          "forbiddenSubgraph": "banner",
+          "priority": 3,
+          "hasGenerator": false,
+          "hasValidator": true,
+          "hasAnalyzer": true
+        },
+        {
+          "name": "P6Free",
+          "kind": "p6_free",
+          "negative": "has_p6",
+          "description": "Contains no induced path on 6 vertices",
+          "forbiddenSubgraph": "P6",
+          "priority": 2,
+          "hasGenerator": true,
+          "hasValidator": true,
+          "hasAnalyzer": true
+        },
+        {
+          "name": "P7Free",
+          "kind": "p7_free",
+          "negative": "has_p7",
+          "description": "Contains no induced path on 7 vertices",
+          "forbiddenSubgraph": "P7",
+          "priority": 3,
+          "hasGenerator": true,
+          "hasValidator": true,
+          "hasAnalyzer": true
+        },
+        {
+          "name": "C6Free",
+          "kind": "c6_free",
+          "negative": "has_c6",
+          "description": "Contains no induced cycle on 6 vertices",
+          "forbiddenSubgraph": "C6",
+          "priority": 3,
+          "hasGenerator": true,
+          "hasValidator": true,
+          "hasAnalyzer": true
+        },
+        {
+          "name": "C7Free",
+          "kind": "c7_free",
+          "negative": "has_c7",
+          "description": "Contains no induced cycle on 7 vertices",
+          "forbiddenSubgraph": "C7",
+          "priority": 3,
+          "hasGenerator": true,
+          "hasValidator": true,
+          "hasAnalyzer": true
+        },
+        {
+          "name": "WeaklyChordal",
+          "kind": "weakly_chordal",
+          "negative": "has_hole_or_antihole",
+          "description": "No hole or antihole of length 5 or more",
+          "forbiddenSubgraph": "hole/antihole >= 5",
+          "priority": 1,
+          "hasGenerator": true,
+          "hasValidator": true,
+          "hasAnalyzer": true
+        },
+        {
+          "name": "ATFree",
+          "kind": "at_free",
+          "negative": "has_asteroidal_triple",
+          "description": "No asteroidal triple of vertices",
+          "forbiddenSubgraph": "asteroidal triple",
+          "priority": 1,
+          "hasGenerator": true,
+          "hasValidator": true,
+          "hasAnalyzer": true
+        },
+        {
+          "name": "HHFree",
+          "kind": "hh_free",
+          "negative": "has_house_or_hole",
+          "description": "No induced house or hole",
+          "forbiddenSubgraph": "house, hole",
+          "priority": 1,
+          "hasGenerator": true,
+          "hasValidator": true,
+          "hasAnalyzer": true
+        },
+        {
+          "name": "HHDFree",
+          "kind": "hhd_free",
+          "negative": "has_house_hole_or_diamond",
+          "description": "No induced house, hole, or diamond",
+          "forbiddenSubgraph": "house, hole, diamond",
+          "priority": 2,
+          "hasGenerator": false,
+          "hasValidator": true,
+          "hasAnalyzer": true
+        },
+        {
+          "name": "DistanceHereditary",
+          "kind": "distance_hereditary",
+          "negative": "not_distance_hereditary",
+          "description": "Distances preserved in all connected induced subgraphs",
+          "forbiddenSubgraph": "house, hole, domino, gem",
+          "priority": 1,
+          "hasGenerator": true,
+          "hasValidator": true,
+          "hasAnalyzer": true
+        },
+        {
+          "name": "ChordalBipartite",
+          "kind": "chordal_bipartite",
+          "negative": "has_induced_cycle_bipartite",
+          "description": "Bipartite with no induced cycle of length >= 6",
+          "forbiddenSubgraph": "cycle >= 6 in bipartite",
+          "priority": 2,
+          "hasGenerator": true,
+          "hasValidator": true,
+          "hasAnalyzer": true
+        },
+        {
+          "name": "Split",
+          "kind": "split",
+          "negative": "not_split",
+          "description": "Vertices can be partitioned into clique and stable set",
+          "forbiddenSubgraph": "2K2, C4, C5",
+          "priority": 2,
+          "hasGenerator": true,
+          "hasValidator": true,
+          "hasAnalyzer": true
+        },
+        {
+          "name": "Threshold",
+          "kind": "threshold",
+          "negative": "not_threshold",
+          "description": "Can be constructed from single vertex by adding dominating or isolated vertices",
+          "forbiddenSubgraph": "2K2, C4, P4",
+          "priority": 2,
+          "hasGenerator": true,
+          "hasValidator": true,
+          "hasAnalyzer": true
+        },
+        {
+          "name": "Cograph",
+          "kind": "cograph",
+          "negative": "not_cograph",
+          "description": "No induced P4",
+          "forbiddenSubgraph": "P4",
+          "priority": 2,
+          "hasGenerator": true,
+          "hasValidator": true,
+          "hasAnalyzer": true
+        },
+        {
+          "name": "Permutation",
+          "kind": "permutation",
+          "negative": "not_permutation",
+          "description": "Intersection graph of line segments between two parallel lines",
+          "forbiddenSubgraph": "C5, C6, C7, C8, etc.",
+          "priority": 3,
+          "hasGenerator": true,
+          "hasValidator": true,
+          "hasAnalyzer": true
+        },
+        {
+          "name": "Comparability",
+          "kind": "comparability",
+          "negative": "not_comparability",
+          "description": "Transitively orientable",
+          "forbiddenSubgraph": "odd cycle with chords, complement of odd cycle",
+          "priority": 2,
+          "hasGenerator": true,
+          "hasValidator": true,
+          "hasAnalyzer": true
+        },
+        {
+          "name": "Interval",
+          "kind": "interval",
+          "negative": "not_interval",
+          "description": "Intersection graph of intervals on a line",
+          "forbiddenSubgraph": "asteroidal triple, cycle, net, tent, etc.",
+          "priority": 2,
+          "hasGenerator": true,
+          "hasValidator": true,
+          "hasAnalyzer": true
+        },
+        {
+          "name": "Chordal",
+          "kind": "chordal",
+          "negative": "has_chordless_cycle",
+          "description": "No induced cycles of length >= 4",
+          "forbiddenSubgraph": "C4, C5, C6, etc.",
+          "priority": 2,
+          "hasGenerator": true,
+          "hasValidator": true,
+          "hasAnalyzer": true
+        },
+        {
+          "name": "StronglyChordal",
+          "kind": "strongly_chordal",
+          "negative": "not_strongly_chordal",
+          "description": "Chordal with no sun of length >= 3",
+          "forbiddenSubgraph": "sun, chordless cycle",
+          "priority": 3,
+          "hasGenerator": true,
+          "hasValidator": true,
+          "hasAnalyzer": true
+        },
+        {
+          "name": "UnitInterval",
+          "kind": "unit_interval",
+          "negative": "not_unit_interval",
+          "description": "Interval graph with unit-length intervals",
+          "forbiddenSubgraph": "claw, net, tent, etc.",
+          "priority": 2,
+          "hasGenerator": true,
+          "hasValidator": true,
+          "hasAnalyzer": true
+        },
+        {
+          "name": "ProperInterval",
+          "kind": "proper_interval",
+          "negative": "not_proper_interval",
+          "description": "Interval graph with no containment",
+          "forbiddenSubgraph": "claw, net, tent, etc.",
+          "priority": 2,
+          "hasGenerator": true,
+          "hasValidator": true,
+          "hasAnalyzer": true
+        },
+        {
+          "name": "TriviallyPerfect",
+          "kind": "trivially_perfect",
+          "negative": "not_trivially_perfect",
+          "description": "No induced P4 or C4",
+          "forbiddenSubgraph": "P4, C4",
+          "priority": 3,
+          "hasGenerator": true,
+          "hasValidator": true,
+          "hasAnalyzer": true
+        },
+        {
+          "name": "IntervalBigraph",
+          "kind": "interval_bigraph",
+          "negative": "not_interval_bigraph",
+          "description": "Bipartite with adjacency representable as intervals",
+          "forbiddenSubgraph": "specific bipartite patterns",
+          "priority": 3,
+          "hasGenerator": false,
+          "hasValidator": true,
+          "hasAnalyzer": true
+        }
+      ]
+    },
+    "intersection": {
+      "description": "Graph classes from geometric intersections",
+      "classes": [
+        {
+          "name": "CircularArc",
+          "kind": "circular_arc",
+          "negative": "not_circular_arc",
+          "description": "Intersection graph of arcs on a circle",
+          "forbiddenSubgraph": "none (complex characterization)",
+          "priority": 1,
+          "hasGenerator": true,
+          "hasValidator": true,
+          "hasAnalyzer": true
+        },
+        {
+          "name": "ProperCircularArc",
+          "kind": "proper_circular_arc",
+          "negative": "not_proper_circular_arc",
+          "description": "Circular arc graph with no arc containment",
+          "forbiddenSubgraph": "specific patterns",
+          "priority": 1,
+          "hasGenerator": true,
+          "hasValidator": true,
+          "hasAnalyzer": true
+        },
+        {
+          "name": "UnitCircularArc",
+          "kind": "unit_circular_arc",
+          "negative": "not_unit_circular_arc",
+          "description": "Circular arc graph with unit-length arcs",
+          "forbiddenSubgraph": "specific patterns",
+          "priority": 2,
+          "hasGenerator": true,
+          "hasValidator": true,
+          "hasAnalyzer": true
+        },
+        {
+          "name": "Circle",
+          "kind": "circle",
+          "negative": "not_circle",
+          "description": "Intersection graph of chords in a circle",
+          "forbiddenSubgraph": "none (complex)",
+          "priority": 2,
+          "hasGenerator": false,
+          "hasValidator": true,
+          "hasAnalyzer": true
+        },
+        {
+          "name": "Disk",
+          "kind": "disk",
+          "negative": "not_disk",
+          "description": "Intersection graph of disks in the plane",
+          "forbiddenSubgraph": "none (complex)",
+          "priority": 1,
+          "hasGenerator": true,
+          "hasValidator": false,
+          "hasAnalyzer": false
+        },
+        {
+          "name": "UnitDisk",
+          "kind": "unit_disk",
+          "negative": "not_unit_disk",
+          "description": "Intersection graph of unit disks in the plane",
+          "forbiddenSubgraph": "none (complex)",
+          "priority": 1,
+          "hasGenerator": true,
+          "hasValidator": false,
+          "hasAnalyzer": false
+        },
+        {
+          "name": "Box",
+          "kind": "box",
+          "negative": "not_box",
+          "description": "Intersection graph of axis-aligned rectangles",
+          "forbiddenSubgraph": "none (complex)",
+          "priority": 2,
+          "hasGenerator": false,
+          "hasValidator": false,
+          "hasAnalyzer": false
+        },
+        {
+          "name": "UnitBox",
+          "kind": "unit_box",
+          "negative": "not_unit_box",
+          "description": "Intersection graph of unit squares",
+          "forbiddenSubgraph": "none (complex)",
+          "priority": 2,
+          "hasGenerator": false,
+          "hasValidator": false,
+          "hasAnalyzer": false
+        },
+        {
+          "name": "Segment",
+          "kind": "segment",
+          "negative": "not_segment",
+          "description": "Intersection graph of line segments in plane",
+          "forbiddenSubgraph": "none (complex)",
+          "priority": 2,
+          "hasGenerator": false,
+          "hasValidator": false,
+          "hasAnalyzer": false
+        },
+        {
+          "name": "Tolerance",
+          "kind": "tolerance",
+          "negative": "not_tolerance",
+          "description": "Generalizes interval graphs with tolerance",
+          "forbiddenSubgraph": "none (complex)",
+          "priority": 2,
+          "hasGenerator": false,
+          "hasValidator": true,
+          "hasAnalyzer": true
+        },
+        {
+          "name": "String",
+          "kind": "string",
+          "negative": "not_string",
+          "description": "Intersection graph of curves in plane with no three mutually intersecting",
+          "forbiddenSubgraph": "none (complex)",
+          "priority": 3,
+          "hasGenerator": false,
+          "hasValidator": false,
+          "hasAnalyzer": false
+        },
+        {
+          "name": "Outerstring",
+          "kind": "outerstring",
+          "negative": "not_outerstring",
+          "description": "String graph with curves in exterior of circle",
+          "forbiddenSubgraph": "none (complex)",
+          "priority": 3,
+          "hasGenerator": false,
+          "hasValidator": false,
+          "hasAnalyzer": false
+        },
+        {
+          "name": "Arrow",
+          "kind": "arrow",
+          "negative": "not_arrow",
+          "description": "Intersection graph of arrows (line segments with direction)",
+          "forbiddenSubgraph": "none (complex)",
+          "priority": 3,
+          "hasGenerator": false,
+          "hasValidator": false,
+          "hasAnalyzer": false
+        },
+        {
+          "name": "CoBiTolerance",
+          "kind": "cobi_tolerance",
+          "negative": "not_cobi_tolerance",
+          "description": "Complement of bipartite tolerance graphs",
+          "forbiddenSubgraph": "none (complex)",
+          "priority": 3,
+          "hasGenerator": false,
+          "hasValidator": false,
+          "hasAnalyzer": false
+        }
+      ]
+    },
+    "probe": {
+      "description": "Graph classes with probe partitions",
+      "classes": [
+        {
+          "name": "ProbeChordal",
+          "kind": "probe_chordal",
+          "negative": "not_probe_chordal",
+          "description": "Vertices partitioned into probes and non-probes, can add edges among non-probes to make chordal",
+          "forbiddenSubgraph": "none (complex)",
+          "priority": 1,
+          "hasGenerator": true,
+          "hasValidator": true,
+          "hasAnalyzer": true
+        },
+        {
+          "name": "ProbeInterval",
+          "kind": "probe_interval",
+          "negative": "not_probe_interval",
+          "description": "Can add edges among non-probes to form interval graph",
+          "forbiddenSubgraph": "none (complex)",
+          "priority": 1,
+          "hasGenerator": true,
+          "hasValidator": true,
+          "hasAnalyzer": true
+        },
+        {
+          "name": "ProbeCograph",
+          "kind": "probe_cograph",
+          "negative": "not_probe_cograph",
+          "description": "Can add edges among non-probes to form cograph",
+          "forbiddenSubgraph": "none (complex)",
+          "priority": 2,
+          "hasGenerator": false,
+          "hasValidator": true,
+          "hasAnalyzer": true
+        },
+        {
+          "name": "ProbeComparability",
+          "kind": "probe_comparability",
+          "negative": "not_probe_comparability",
+          "description": "Can add edges among non-probes to form comparability graph",
+          "forbiddenSubgraph": "none (complex)",
+          "priority": 2,
+          "hasGenerator": false,
+          "hasValidator": true,
+          "hasAnalyzer": true
+        },
+        {
+          "name": "ProbeThreshold",
+          "kind": "probe_threshold",
+          "negative": "not_probe_threshold",
+          "description": "Can add edges among non-probes to form threshold graph",
+          "forbiddenSubgraph": "none (complex)",
+          "priority": 2,
+          "hasGenerator": false,
+          "hasValidator": true,
+          "hasAnalyzer": true
+        },
+        {
+          "name": "ProbeSplit",
+          "kind": "probe_split",
+          "negative": "not_probe_split",
+          "description": "Can add edges among non-probes to form split graph",
+          "forbiddenSubgraph": "none (complex)",
+          "priority": 2,
+          "hasGenerator": false,
+          "hasValidator": true,
+          "hasAnalyzer": true
+        },
+        {
+          "name": "ProbePermutation",
+          "kind": "probe_permutation",
+          "negative": "not_probe_permutation",
+          "description": "Can add edges among non-probes to form permutation graph",
+          "forbiddenSubgraph": "none (complex)",
+          "priority": 3,
+          "hasGenerator": false,
+          "hasValidator": true,
+          "hasAnalyzer": true
+        },
+        {
+          "name": "ProbeBlock",
+          "kind": "probe_block",
+          "negative": "not_probe_block",
+          "description": "Can add edges among non-probes to form block graph",
+          "forbiddenSubgraph": "none (complex)",
+          "priority": 3,
+          "hasGenerator": false,
+          "hasValidator": true,
+          "hasAnalyzer": true
+        },
+        {
+          "name": "ProbeTrees",
+          "kind": "probe_tree",
+          "negative": "not_probe_tree",
+          "description": "Can add edges among non-probes to form tree",
+          "forbiddenSubgraph": "none (complex)",
+          "priority": 3,
+          "hasGenerator": false,
+          "hasValidator": true,
+          "hasAnalyzer": true
+        }
+      ]
+    },
+    "width": {
+      "description": "Graph classes defined by width parameters",
+      "classes": [
+        {
+          "name": "Pathwidth",
+          "kind": "pathwidth_bounded",
+          "negative": "pathwidth_unbounded",
+          "description": "Pathwidth at most k",
+          "forbiddenSubgraph": "grid minor for large k",
+          "priority": 1,
+          "hasGenerator": true,
+          "hasValidator": true,
+          "hasAnalyzer": true
+        },
+        {
+          "name": "Branchwidth",
+          "kind": "branchwidth_bounded",
+          "negative": "branchwidth_unbounded",
+          "description": "Branchwidth at most k",
+          "forbiddenSubgraph": "grid minor for large k",
+          "priority": 2,
+          "hasGenerator": false,
+          "hasValidator": true,
+          "hasAnalyzer": true
+        },
+        {
+          "name": "Cliquewidth",
+          "kind": "cliquewidth_bounded",
+          "negative": "cliquewidth_unbounded",
+          "description": "Cliquewidth at most k",
+          "forbiddenSubgraph": "none (complex)",
+          "priority": 1,
+          "hasGenerator": true,
+          "hasValidator": true,
+          "hasAnalyzer": true
+        },
+        {
+          "name": "Rankwidth",
+          "kind": "rankwidth_bounded",
+          "negative": "rankwidth_unbounded",
+          "description": "Rankwidth at most k",
+          "forbiddenSubgraph": "none (complex)",
+          "priority": 2,
+          "hasGenerator": false,
+          "hasValidator": true,
+          "hasAnalyzer": true
+        },
+        {
+          "name": "Cutwidth",
+          "kind": "cutwidth_bounded",
+          "negative": "cutwidth_unbounded",
+          "description": "Cutwidth at most k",
+          "forbiddenSubgraph": "none (complex)",
+          "priority": 2,
+          "hasGenerator": false,
+          "hasValidator": true,
+          "hasAnalyzer": true
+        },
+        {
+          "name": "Bandwidth",
+          "kind": "bandwidth_bounded",
+          "negative": "bandwidth_unbounded",
+          "description": "Bandwidth at most k",
+          "forbiddenSubgraph": "none (complex)",
+          "priority": 2,
+          "hasGenerator": false,
+          "hasValidator": true,
+          "hasAnalyzer": true
+        },
+        {
+          "name": "ModularWidth",
+          "kind": "modular_width_bounded",
+          "negative": "modular_width_unbounded",
+          "description": "Modular width at most k",
+          "forbiddenSubgraph": "none (complex)",
+          "priority": 3,
+          "hasGenerator": false,
+          "hasValidator": true,
+          "hasAnalyzer": true
+        },
+        {
+          "name": "QTreewidth",
+          "kind": "q_treewidth_bounded",
+          "negative": "q_treewidth_unbounded",
+          "description": "Quadratic treewidth at most k",
+          "forbiddenSubgraph": "none (complex)",
+          "priority": 3,
+          "hasGenerator": false,
+          "hasValidator": true,
+          "hasAnalyzer": true
+        }
+      ]
+    },
+    "perfect_variants": {
+      "description": "Special perfect graph subclasses",
+      "classes": [
+        {
+          "name": "Modular",
+          "kind": "modular",
+          "negative": "not_modular",
+          "description": "Every module is trivial",
+          "forbiddenSubgraph": "prime graph with specific structure",
+          "priority": 1,
+          "hasGenerator": true,
+          "hasValidator": true,
+          "hasAnalyzer": true
+        },
+        {
+          "name": "Ptolemaic",
+          "kind": "ptolemaic",
+          "negative": "not_ptolemaic",
+          "description": "Distance hereditary and chordal",
+          "forbiddenSubgraph": "house, hole, domino, gem",
+          "priority": 1,
+          "hasGenerator": true,
+          "hasValidator": true,
+          "hasAnalyzer": true
+        },
+        {
+          "name": "QuasiLine",
+          "kind": "quasi_line",
+          "negative": "not_quasi_line",
+          "description": "No induced gem, no co-gem",
+          "forbiddenSubgraph": "gem, co-gem",
+          "priority": 1,
+          "hasGenerator": true,
+          "hasValidator": true,
+          "hasAnalyzer": true
+        },
+        {
+          "name": "LocallyConnected",
+          "kind": "locally_connected",
+          "negative": "not_locally_connected",
+          "description": "Neighborhood of every vertex induces connected subgraph",
+          "forbiddenSubgraph": "claw + isolates",
+          "priority": 2,
+          "hasGenerator": false,
+          "hasValidator": true,
+          "hasAnalyzer": true
+        },
+        {
+          "name": "LocallyChordal",
+          "kind": "locally_chordal",
+          "negative": "not_locally_chordal",
+          "description": "Neighborhood of every vertex induces chordal graph",
+          "forbiddenSubgraph": "wheel with non-chordal center",
+          "priority": 2,
+          "hasGenerator": false,
+          "hasValidator": true,
+          "hasAnalyzer": true
+        },
+        {
+          "name": "Line",
+          "kind": "line",
+          "negative": "not_line",
+          "description": "Line graph of some graph",
+          "forbiddenSubgraph": "claw, diamond, specific patterns",
+          "priority": 2,
+          "hasGenerator": true,
+          "hasValidator": true,
+          "hasAnalyzer": true
+        },
+        {
+          "name": "LinePerfect",
+          "kind": "line_perfect",
+          "negative": "not_line_perfect",
+          "description": "Line graph of bipartite graph",
+          "forbiddenSubgraph": "odd hole, odd cycle",
+          "priority": 2,
+          "hasGenerator": true,
+          "hasValidator": true,
+          "hasAnalyzer": true
+        },
+        {
+          "name": "Block",
+          "kind": "block",
+          "negative": "not_block",
+          "description": "Intersection graph of biconnected components",
+          "forbiddenSubgraph": "claw, specific patterns",
+          "priority": 2,
+          "hasGenerator": true,
+          "hasValidator": true,
+          "hasAnalyzer": true
+        },
+        {
+          "name": "BlockGraph",
+          "kind": "block_graph",
+          "negative": "not_block_graph",
+          "description": "Every block is a clique",
+          "forbiddenSubgraph": "C4, diamond",
+          "priority": 2,
+          "hasGenerator": true,
+          "hasValidator": true,
+          "hasAnalyzer": true
+        },
+        {
+          "name": "Bridged",
+          "kind": "bridged",
+          "negative": "not_bridged",
+          "description": "No induced cycle with chord",
+          "forbiddenSubgraph": "house, gem",
+          "priority": 3,
+          "hasGenerator": false,
+          "hasValidator": true,
+          "hasAnalyzer": true
+        },
+        {
+          "name": "BipartiteChain",
+          "kind": "bipartite_chain",
+          "negative": "not_bipartite_chain",
+          "description": "Bipartite with neighborhoods ordered by inclusion",
+          "forbiddenSubgraph": "2K2, specific patterns",
+          "priority": 3,
+          "hasGenerator": true,
+          "hasValidator": true,
+          "hasAnalyzer": true
+        },
+        {
+          "name": "Chain",
+          "kind": "chain",
+          "negative": "not_chain",
+          "description": "Neighborhoods ordered by inclusion",
+          "forbiddenSubgraph": "specific patterns",
+          "priority": 3,
+          "hasGenerator": false,
+          "hasValidator": true,
+          "hasAnalyzer": true
+        }
+      ]
+    },
+    "geometric": {
+      "description": "Geometric and topological graph classes",
+      "classes": [
+        {
+          "name": "Visibility",
+          "kind": "visibility",
+          "negative": "not_visibility",
+          "description": "Visibility graph of polygon vertices",
+          "forbiddenSubgraph": "none (complex)",
+          "priority": 2,
+          "hasGenerator": false,
+          "hasValidator": false,
+          "hasAnalyzer": false
+        },
+        {
+          "name": "Contact",
+          "kind": "contact",
+          "negative": "not_contact",
+          "description": "Contact graph of geometric objects",
+          "forbiddenSubgraph": "none (complex)",
+          "priority": 2,
+          "hasGenerator": false,
+          "hasValidator": false,
+          "hasAnalyzer": false
+        },
+        {
+          "name": "SphereOfInfluence",
+          "kind": "sphere_of_influence",
+          "negative": "not_sphere_of_influence",
+          "description": "Sphere of influence graph",
+          "forbiddenSubgraph": "none (complex)",
+          "priority": 3,
+          "hasGenerator": false,
+          "hasValidator": false,
+          "hasAnalyzer": false
+        },
+        {
+          "name": "Delaunay",
+          "kind": "delaunay",
+          "negative": "not_delaunay",
+          "description": "Delaunay triangulation graph",
+          "forbiddenSubgraph": "none (complex)",
+          "priority": 3,
+          "hasGenerator": false,
+          "hasValidator": false,
+          "hasAnalyzer": false
+        },
+        {
+          "name": "Gabriel",
+          "kind": "gabriel",
+          "negative": "not_gabriel",
+          "description": "Gabriel graph (subgraph of Delaunay)",
+          "forbiddenSubgraph": "none (complex)",
+          "priority": 3,
+          "hasGenerator": false,
+          "hasValidator": false,
+          "hasAnalyzer": false
+        },
+        {
+          "name": "UnitDistance",
+          "kind": "unit_distance",
+          "negative": "not_unit_distance",
+          "description": "Vertices connected if at unit distance",
+          "forbiddenSubgraph": "none (complex)",
+          "priority": 3,
+          "hasGenerator": false,
+          "hasValidator": false,
+          "hasAnalyzer": false
+        },
+        {
+          "name": "Planar",
+          "kind": "planar",
+          "negative": "nonplanar",
+          "description": "Can be drawn in plane without edge crossings",
+          "forbiddenSubgraph": "K5, K3,3",
+          "priority": 1,
+          "hasGenerator": true,
+          "hasValidator": true,
+          "hasAnalyzer": true
+        },
+        {
+          "name": "Outerplanar",
+          "kind": "outerplanar",
+          "negative": "non_outerplanar",
+          "description": "Planar with all vertices on outer face",
+          "forbiddenSubgraph": "K4, K2,3",
+          "priority": 2,
+          "hasGenerator": true,
+          "hasValidator": true,
+          "hasAnalyzer": true
+        },
+        {
+          "name": "Apex",
+          "kind": "apex",
+          "negative": "not_apex",
+          "description": "Planar after removing one vertex",
+          "forbiddenSubgraph": "none (complex)",
+          "priority": 3,
+          "hasGenerator": false,
+          "hasValidator": true,
+          "hasAnalyzer": true
+        },
+        {
+          "name": "Toroidal",
+          "kind": "toroidal",
+          "negative": "non_toroidal",
+          "description": "Can be drawn on torus without crossings",
+          "forbiddenSubgraph": "specific families",
+          "priority": 3,
+          "hasGenerator": false,
+          "hasValidator": true,
+          "hasAnalyzer": true
+        },
+        {
+          "name": "1Planar",
+          "kind": "1_planar",
+          "negative": "non_1_planar",
+          "description": "Can be drawn with at most one crossing per edge",
+          "forbiddenSubgraph": "specific families",
+          "priority": 3,
+          "hasGenerator": false,
+          "hasValidator": true,
+          "hasAnalyzer": true
+        },
+        {
+          "name": "kPlanar",
+          "kind": "k_planar",
+          "negative": "non_k_planar",
+          "description": "Can be drawn with at most k crossings per edge",
+          "forbiddenSubgraph": "none (complex)",
+          "priority": 3,
+          "hasGenerator": false,
+          "hasValidator": false,
+          "hasAnalyzer": false
+        }
+      ]
+    },
+    "structural": {
+      "description": "Other structural and complexity-based classes",
+      "classes": [
+        {
+          "name": "Bipartite",
+          "kind": "bipartite",
+          "negative": "non_bipartite",
+          "description": "No odd cycles",
+          "forbiddenSubgraph": "odd cycle",
+          "priority": 2,
+          "hasGenerator": true,
+          "hasValidator": true,
+          "hasAnalyzer": true
+        },
+        {
+          "name": "CompleteBipartite",
+          "kind": "complete_bipartite",
+          "negative": "not_complete_bipartite",
+          "description": "Bipartite with all possible edges between partitions",
+          "forbiddenSubgraph": "none (structural)",
+          "priority": 2,
+          "hasGenerator": true,
+          "hasValidator": true,
+          "hasAnalyzer": true
+        },
+        {
+          "name": "SplitBipartite",
+          "kind": "split_bipartite",
+          "negative": "not_split_bipartite",
+          "description": "Bipartite version of split graphs",
+          "forbiddenSubgraph": "specific patterns",
+          "priority": 3,
+          "hasGenerator": false,
+          "hasValidator": true,
+          "hasAnalyzer": true
+        },
+        {
+          "name": "BipartitePermutation",
+          "kind": "bipartite_permutation",
+          "negative": "not_bipartite_permutation",
+          "description": "Bipartite permutation graph",
+          "forbiddenSubgraph": "specific patterns",
+          "priority": 3,
+          "hasGenerator": false,
+          "hasValidator": true,
+          "hasAnalyzer": true
+        },
+        {
+          "name": "BiconvexBipartite",
+          "kind": "biconvex_bipartite",
+          "negative": "not_biconvex_bipartite",
+          "description": "Bipartite graph with convex drawings on both sides",
+          "forbiddenSubgraph": "specific patterns",
+          "priority": 3,
+          "hasGenerator": false,
+          "hasValidator": true,
+          "hasAnalyzer": true
+        },
+        {
+          "name": "ChordalBipartite",
+          "kind": "chordal_bipartite",
+          "negative": "not_chordal_bipartite",
+          "description": "Bipartite with no induced cycle of length >= 6",
+          "forbiddenSubgraph": "even cycle >= 6",
+          "priority": 2,
+          "hasGenerator": true,
+          "hasValidator": true,
+          "hasAnalyzer": true
+        },
+        {
+          "name": "Tree",
+          "kind": "tree",
+          "negative": "not_tree",
+          "description": "Connected acyclic graph",
+          "forbiddenSubgraph": "cycle",
+          "priority": 2,
+          "hasGenerator": true,
+          "hasValidator": true,
+          "hasAnalyzer": true
+        },
+        {
+          "name": "Forest",
+          "kind": "forest",
+          "negative": "not_forest",
+          "description": "Acyclic graph (disjoint union of trees)",
+          "forbiddenSubgraph": "cycle",
+          "priority": 2,
+          "hasGenerator": true,
+          "hasValidator": true,
+          "hasAnalyzer": true
+        },
+        {
+          "name": "Star",
+          "kind": "star",
+          "negative": "not_star",
+          "description": "Tree with one internal vertex",
+          "forbiddenSubgraph": "none (structural)",
+          "priority": 3,
+          "hasGenerator": true,
+          "hasValidator": true,
+          "hasAnalyzer": true
+        },
+        {
+          "name": "Caterpillar",
+          "kind": "caterpillar",
+          "negative": "not_caterpillar",
+          "description": "Tree where removing leaves gives path",
+          "forbiddenSubgraph": "specific trees",
+          "priority": 3,
+          "hasGenerator": false,
+          "hasValidator": true,
+          "hasAnalyzer": true
+        },
+        {
+          "name": "Lobster",
+          "kind": "lobster",
+          "negative": "not_lobster",
+          "description": "Tree where removing leaves gives caterpillar",
+          "forbiddenSubgraph": "specific trees",
+          "priority": 3,
+          "hasGenerator": false,
+          "hasValidator": true,
+          "hasAnalyzer": true
+        },
+        {
+          "name": "SeriesParallel",
+          "kind": "series_parallel",
+          "negative": "not_series_parallel",
+          "description": "No K4 minor",
+          "forbiddenSubgraph": "K4 minor",
+          "priority": 2,
+          "hasGenerator": false,
+          "hasValidator": true,
+          "hasAnalyzer": true
+        },
+        {
+          "name": "PartialKTree",
+          "kind": "partial_k_tree",
+          "negative": "not_partial_k_tree",
+          "description": "Subgraph of k-tree",
+          "forbiddenSubgraph": "none (complex)",
+          "priority": 2,
+          "hasGenerator": true,
+          "hasValidator": true,
+          "hasAnalyzer": true
+        },
+        {
+          "name": "kTree",
+          "kind": "k_tree",
+          "negative": "not_k_tree",
+          "description": "Chordal with treewidth k",
+          "forbiddenSubgraph": "none (complex)",
+          "priority": 2,
+          "hasGenerator": true,
+          "hasValidator": true,
+          "hasAnalyzer": true
+        },
+        {
+          "name": "Chordal",
+          "kind": "chordal",
+          "negative": "has_chordless_cycle",
+          "description": "No induced cycles of length >= 4",
+          "forbiddenSubgraph": "C4, C5, C6, etc.",
+          "priority": 2,
+          "hasGenerator": true,
+          "hasValidator": true,
+          "hasAnalyzer": true
+        },
+        {
+          "name": "StronglyChordal",
+          "kind": "strongly_chordal",
+          "negative": "not_strongly_chordal",
+          "description": "Chordal with no sun",
+          "forbiddenSubgraph": "sun",
+          "priority": 3,
+          "hasGenerator": true,
+          "hasValidator": true,
+          "hasAnalyzer": true
+        },
+        {
+          "name": "Perfect",
+          "kind": "perfect",
+          "negative": "imperfect",
+          "description": "Chromatic number equals clique number for all induced subgraphs",
+          "forbiddenSubgraph": "odd hole, odd antihole",
+          "priority": 2,
+          "hasGenerator": false,
+          "hasValidator": true,
+          "hasAnalyzer": true
+        },
+        {
+          "name": "MinimallyImproper",
+          "kind": "minimally_improper",
+          "negative": "not_minimally_improper",
+          "description": "Imperfect but all proper subgraphs are perfect",
+          "forbiddenSubgraph": "odd hole, odd antihole",
+          "priority": 3,
+          "hasGenerator": false,
+          "hasValidator": true,
+          "hasAnalyzer": true
+        },
+        {
+          "name": "CriticalImperfect",
+          "kind": "critical_imperfect",
+          "negative": "not_critical_imperfect",
+          "description": "Imperfect but removing any vertex makes it perfect",
+          "forbiddenSubgraph": "odd hole, odd antihole",
+          "priority": 3,
+          "hasGenerator": false,
+          "hasValidator": true,
+          "hasAnalyzer": true
+        },
+        {
+          "name": "Berge",
+          "kind": "berge",
+          "negative": "not_berge",
+          "description": "No odd hole",
+          "forbiddenSubgraph": "odd hole",
+          "priority": 2,
+          "hasGenerator": false,
+          "hasValidator": true,
+          "hasAnalyzer": true
+        },
+        {
+          "name": "WeaklyChordal",
+          "kind": "weakly_chordal",
+          "negative": "has_hole_or_antihole",
+          "description": "No hole or antihole of length >= 5",
+          "forbiddenSubgraph": "hole, antihole >= 5",
+          "priority": 1,
+          "hasGenerator": true,
+          "hasValidator": true,
+          "hasAnalyzer": true
+        },
+        {
+          "name": "EvenHoleFree",
+          "kind": "even_hole_free",
+          "negative": "has_even_hole",
+          "description": "No even cycle of length >= 4",
+          "forbiddenSubgraph": "even cycle >= 4",
+          "priority": 2,
+          "hasGenerator": false,
+          "hasValidator": true,
+          "hasAnalyzer": true
+        },
+        {
+          "name": "OddHoleFree",
+          "kind": "odd_hole_free",
+          "negative": "has_odd_hole",
+          "description": "No odd cycle of length >= 5",
+          "forbiddenSubgraph": "odd cycle >= 5",
+          "priority": 2,
+          "hasGenerator": false,
+          "hasValidator": true,
+          "hasAnalyzer": true
+        },
+        {
+          "name": "TriangleFree",
+          "kind": "triangle_free",
+          "negative": "has_triangle",
+          "description": "No K3 (triangle) subgraph",
+          "forbiddenSubgraph": "K3",
+          "priority": 2,
+          "hasGenerator": true,
+          "hasValidator": true,
+          "hasAnalyzer": true
+        },
+        {
+          "name": "SquareFree",
+          "kind": "square_free",
+          "negative": "has_square",
+          "description": "No C4 (square) subgraph",
+          "forbiddenSubgraph": "C4",
+          "priority": 3,
+          "hasGenerator": true,
+          "hasValidator": true,
+          "hasAnalyzer": true
+        },
+        {
+          "name": "DiamondFree",
+          "kind": "diamond_free",
+          "negative": "has_diamond",
+          "description": "No diamond subgraph",
+          "forbiddenSubgraph": "diamond",
+          "priority": 2,
+          "hasGenerator": true,
+          "hasValidator": true,
+          "hasAnalyzer": true
+        },
+        {
+          "name": "K4Free",
+          "kind": "k4_free",
+          "negative": "has_k4",
+          "description": "No K4 subgraph",
+          "forbiddenSubgraph": "K4",
+          "priority": 3,
+          "hasGenerator": true,
+          "hasValidator": true,
+          "hasAnalyzer": true
+        },
+        {
+          "name": "K5Free",
+          "kind": "k5_free",
+          "negative": "has_k5",
+          "description": "No K5 subgraph",
+          "forbiddenSubgraph": "K5",
+          "priority": 3,
+          "hasGenerator": true,
+          "hasValidator": true,
+          "hasAnalyzer": true
+        },
+        {
+          "name": "K33Free",
+          "kind": "k33_free",
+          "negative": "has_k33",
+          "description": "No K3,3 subgraph",
+          "forbiddenSubgraph": "K3,3",
+          "priority": 3,
+          "hasGenerator": false,
+          "hasValidator": true,
+          "hasAnalyzer": true
+        },
+        {
+          "name": "MinorFree",
+          "kind": "minor_free",
+          "negative": "has_minor",
+          "description": "H-free for given minor H",
+          "forbiddenSubgraph": "depends on H",
+          "priority": 3,
+          "hasGenerator": false,
+          "hasValidator": true,
+          "hasAnalyzer": true
+        }
+      ]
+    }
+  }
+}
