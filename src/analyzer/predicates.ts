@@ -189,25 +189,25 @@ const isChordalUndirectedBinary = (g: AnalyzerGraph): boolean => {
 	}
 
 	// Check if this is a perfect elimination ordering
-	// For each vertex, its later neighbors should form a clique
-	const laterNeighbors = new Map<AnalyzerVertexId, Set<AnalyzerVertexId>>();
+	// For MCS, we check that for each vertex, its earlier neighbors form a clique
+	const earlierNeighbors = new Map<AnalyzerVertexId, Set<AnalyzerVertexId>>();
 
 	for (let index = 0; index < order.length; index++) {
 		const v = order[index];
-		const laterNbs = new Set<AnalyzerVertexId>();
+		const earlierNbs = new Set<AnalyzerVertexId>();
 
-		// Find neighbors that appear later in ordering
+		// Find neighbors that appear earlier in ordering
 		for (const nb of adj[v] ?? []) {
 			const index_ = order.indexOf(nb);
-			if (index_ > index) laterNbs.add(nb);
+			if (index_ < index) earlierNbs.add(nb);
 		}
 
-		laterNeighbors.set(v, laterNbs);
+		earlierNeighbors.set(v, earlierNbs);
 	}
 
-	// Check each set of later neighbors forms a clique
-	for (const [, laterNbs] of laterNeighbors) {
-		const nbs = [...laterNbs];
+	// Check each set of earlier neighbors forms a clique
+	for (const [, earlierNbs] of earlierNeighbors) {
+		const nbs = [...earlierNbs];
 		for (let index = 0; index < nbs.length; index++) {
 			for (let index_ = index + 1; index_ < nbs.length; index_++) {
 				// Check if nbs[i] and nbs[j] are adjacent
