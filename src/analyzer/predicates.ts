@@ -372,9 +372,75 @@ const isPermutationUndirectedBinary = (g: AnalyzerGraph): boolean => {
 
 /**
  * Test if graph is a comparability graph (has transitive orientation).
+ * A graph is comparability iff we can orient edges to form a transitive relation.
+ * Algorithm: Try to find a valid transitive orientation using constraint propagation.
  * @param g
  */
-const isComparabilityUndirectedBinary = (g: AnalyzerGraph): boolean => isChordalUndirectedBinary(g);
+const isComparabilityUndirectedBinary = (g: AnalyzerGraph): boolean => {
+	if (g.vertices.length <= 2) return true;
+
+	const vertices = g.vertices.map(v => v.id);
+	const adj = buildAdjUndirectedBinary(g);
+
+	// Build edge set for quick lookup
+	const edgeSet = new Set<string>();
+	for (const e of g.edges) {
+		if (e.endpoints.length !== 2) continue;
+		const [u, v] = e.endpoints;
+		edgeSet.add(`${u}-${v}`);
+		edgeSet.add(`${v}-${u}`);
+	}
+
+	const hasEdge = (u: string, v: string): boolean => edgeSet.has(`${u}-${v}`);
+
+	// orientation[u][v] = 1 means u→v, -1 means v→u, 0 means unassigned
+	const orientation: Record<string, Record<string, number>> = {};
+	for (const v of vertices) {
+		orientation[v] = {};
+		for (const u of vertices) {
+			orientation[v][u] = 0;
+		}
+	}
+
+	// Set orientation and propagate transitivity constraints
+	// Returns false if contradiction found
+	const setOrientation = (from: string, to: string): boolean => {
+		if (orientation[from][to] === 1) return true; // Already set this way
+		if (orientation[from][to] === -1) return false; // Contradiction
+
+		orientation[from][to] = 1;
+		orientation[to][from] = -1;
+
+		// Transitivity: if from→to and to→x, need from→x
+		for (const x of adj[to] ?? []) {
+			if (x === from) continue;
+			if (orientation[to][x] === 1 && hasEdge(from, x) && !setOrientation(from, x)) return false;
+		}
+
+		// Transitivity: if x→from and from→to, need x→to
+		for (const x of adj[from] ?? []) {
+			if (x === to) continue;
+			if (orientation[x][from] === 1 && hasEdge(x, to) && !setOrientation(x, to)) return false;
+		}
+
+		return true;
+	};
+
+	// Try to orient all edges
+	for (const u of vertices) {
+		for (const v of adj[u] ?? []) {
+			if (u >= v) continue; // Process each edge once
+			if (orientation[u][v] !== 0) continue; // Already oriented
+
+			// Try orienting u→v (arbitrary choice for unforced edges)
+			if (!setOrientation(u, v)) {
+				return false; // Graph is not comparability
+			}
+		}
+	}
+
+	return true;
+};
 
 // ============================================================================
 // Convenience predicates for common graph classes
