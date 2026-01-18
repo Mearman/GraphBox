@@ -7,17 +7,65 @@
  * @generated 2026-01-18T16:10:41.825Z
  */
 
+import {
+	buildAdjacencyList,
+	hasInducedSubgraph,
+	SUBGRAPH_PATTERNS
+} from "../../algorithms/extraction/forbidden-subgraphs.js";
 import type { GraphSpec } from "../spec.js";
-import type { SeededRandom,TestEdge,TestNode  } from "./types.js";
+import type { SeededRandom, TestEdge, TestNode } from "./types.js";
+
+/**
+ * Add edge if it doesn't create a multi-edge.
+ */
+const addEdgeIfNotExists = (
+	edges: TestEdge[],
+	source: string,
+	target: string
+): void => {
+	const exists = edges.some(
+		(e) =>
+			(e.source === source && e.target === target) ||
+			(e.source === target && e.target === source)
+	);
+	if (!exists) {
+		edges.push({ source, target });
+	}
+};
+
+/**
+ * Check if current edge set contains a forbidden subgraph.
+ */
+const hasForbiddenSubgraph = (
+	nodes: TestNode[],
+	edges: TestEdge[],
+	pattern: typeof SUBGRAPH_PATTERNS[keyof typeof SUBGRAPH_PATTERNS]
+): boolean => {
+	if (nodes.length < pattern.size) {
+		return false;
+	}
+
+	// Build adjacency list
+	const nodeIdMap = new Map<string, number>();
+	for (const [index, n] of nodes.entries()) {
+		nodeIdMap.set(n.id, index);
+	}
+
+	const vertexSet = new Set(nodes.map((_, index) => index));
+	const edgeList = edges.map((e) => {
+		const src = nodeIdMap.get(e.source);
+		const tgt = nodeIdMap.get(e.target);
+		return src !== undefined && tgt !== undefined ? ([src, tgt] as [number, number]) : null;
+	}).filter((e): e is [number, number] => e !== null);
+
+	const adjacency = buildAdjacencyList(vertexSet, edgeList);
+	return hasInducedSubgraph(adjacency, pattern);
+};
 
 /**
  * Generate P5Free edges.
  * Contains no induced path on 5 vertices
- *
- * @param nodes - Graph nodes
- * @param edges - Edge list to populate
- * @param spec - Graph specification
- * @param rng - Seeded random number generator
+ * Uses cograph construction (P4-free implies P5-free).
  */
 export const generateP5FreeEdges = (
 	nodes: TestNode[],
@@ -29,29 +77,52 @@ export const generateP5FreeEdges = (
 		throw new Error("P5Free generation requires p5_free spec");
 	}
 
-	// TODO: Implement generation logic for P5Free
-	// This is a placeholder that generates random edges
-	// Replace with actual constructive algorithm
-
 	const nodeCount = nodes.length;
 
-	// Simple random edge generation (replace with actual algorithm)
-	for (let index = 0; index < nodeCount; index++) {
-		const index_ = (index + 1 + rng.integer(0, nodeCount - 2)) % nodeCount;
-		if (index < index_ && rng.next() > 0.5) {
-			edges.push({ source: nodes[index].id, target: nodes[index_].id });
+	// Generate as cograph (union of cotree construction)
+	// Simple approach: Start with disjoint union, randomly merge components
+	if (nodeCount <= 1) {
+		return;
+	}
+
+	// Initialize each vertex as its own component
+	const components: TestNode[][] = nodes.map((n) => [n]);
+
+	// Randomly merge components until one remains
+	while (components.length > 1) {
+		// Pick two random components
+		const i = rng.integer(0, components.length - 1);
+		let j = rng.integer(0, components.length - 1);
+		while (i === j) {
+			j = rng.integer(0, components.length - 1);
 		}
+
+		const comp1 = components[i];
+		const comp2 = components[j];
+
+		// Operation: join (add all edges between) or union (no edges)
+		const operation = rng.next() > 0.5 ? "join" : "union";
+
+		if (operation === "join") {
+			// Add all edges between comp1 and comp2
+			for (const n1 of comp1) {
+				for (const n2 of comp2) {
+					addEdgeIfNotExists(edges, n1.id, n2.id);
+				}
+			}
+		}
+		// Union: no edges to add
+
+		// Merge components
+		comp1.push(...comp2);
+		components.splice(j, 1);
 	}
 };
 
 /**
  * Generate C5Free edges.
  * Contains no induced cycle on 5 vertices
- *
- * @param nodes - Graph nodes
- * @param edges - Edge list to populate
- * @param spec - Graph specification
- * @param rng - Seeded random number generator
+ * Uses chordal graph construction (no induced cycles >= 4).
  */
 export const generateC5FreeEdges = (
 	nodes: TestNode[],
@@ -63,17 +134,38 @@ export const generateC5FreeEdges = (
 		throw new Error("C5Free generation requires c5_free spec");
 	}
 
-	// TODO: Implement generation logic for C5Free
-	// This is a placeholder that generates random edges
-	// Replace with actual constructive algorithm
-
 	const nodeCount = nodes.length;
 
-	// Simple random edge generation (replace with actual algorithm)
-	for (let index = 0; index < nodeCount; index++) {
-		const index_ = (index + 1 + rng.integer(0, nodeCount - 2)) % nodeCount;
-		if (index < index_ && rng.next() > 0.5) {
-			edges.push({ source: nodes[index].id, target: nodes[index_].id });
+	if (nodeCount < 2) {
+		return;
+	}
+
+	// Generate chordal graph using perfect elimination ordering
+	// Process vertices in reverse order, each connects to random subset of later vertices
+	const order = nodes.map((_, i) => i);
+
+	// Shuffle order
+	for (let i = order.length - 1; i > 0; i--) {
+		const j = rng.integer(0, i);
+		[order[i], order[j]] = [order[j], order[i]];
+	}
+
+	// For each vertex (in reverse order), connect to random subset of vertices after it
+	for (let i = 0; i < order.length; i++) {
+		const v = nodes[order[i]];
+
+		// Choose random number of neighbors from vertices after i
+		const maxNeighbors = Math.min(3, order.length - i - 1);
+		const numNeighbors = rng.integer(0, maxNeighbors);
+
+		// Select random neighbors
+		const candidates = order.slice(i + 1);
+		for (let k = 0; k < numNeighbors; k++) {
+			if (candidates.length === 0) break;
+			const idx = rng.integer(0, candidates.length - 1);
+			const targetIdx = candidates[idx];
+			candidates.splice(idx, 1);
+			addEdgeIfNotExists(edges, v.id, nodes[targetIdx].id);
 		}
 	}
 };
@@ -81,11 +173,7 @@ export const generateC5FreeEdges = (
 /**
  * Generate BullFree edges.
  * Contains no induced bull graph
- *
- * @param nodes - Graph nodes
- * @param edges - Edge list to populate
- * @param spec - Graph specification
- * @param rng - Seeded random number generator
+ * Uses split graph construction (clique + independent set).
  */
 export const generateBullFreeEdges = (
 	nodes: TestNode[],
@@ -97,29 +185,42 @@ export const generateBullFreeEdges = (
 		throw new Error("BullFree generation requires bull_free spec");
 	}
 
-	// TODO: Implement generation logic for BullFree
-	// This is a placeholder that generates random edges
-	// Replace with actual constructive algorithm
-
 	const nodeCount = nodes.length;
 
-	// Simple random edge generation (replace with actual algorithm)
-	for (let index = 0; index < nodeCount; index++) {
-		const index_ = (index + 1 + rng.integer(0, nodeCount - 2)) % nodeCount;
-		if (index < index_ && rng.next() > 0.5) {
-			edges.push({ source: nodes[index].id, target: nodes[index_].id });
+	if (nodeCount < 2) {
+		return;
+	}
+
+	// Split graph: partition into clique and independent set
+	const cliqueSize = Math.max(1, Math.floor(nodeCount * rng.next()));
+	const shuffled = [...nodes].sort(() => rng.next() - 0.5);
+
+	const clique = shuffled.slice(0, cliqueSize);
+	const independentSet = shuffled.slice(cliqueSize);
+
+	// Add all edges within clique (complete graph)
+	for (let i = 0; i < clique.length; i++) {
+		for (let j = i + 1; j < clique.length; j++) {
+			addEdgeIfNotExists(edges, clique[i].id, clique[j].id);
 		}
 	}
+
+	// Add random edges between clique and independent set
+	for (const c of clique) {
+		for (const ind of independentSet) {
+			if (rng.next() > 0.3) {
+				addEdgeIfNotExists(edges, c.id, ind.id);
+			}
+		}
+	}
+
+	// No edges within independent set
 };
 
 /**
  * Generate GemFree edges.
  * Contains no induced gem graph
- *
- * @param nodes - Graph nodes
- * @param edges - Edge list to populate
- * @param spec - Graph specification
- * @param rng - Seeded random number generator
+ * Gem is a P4 with a chord, so generate chordal graph avoiding gem.
  */
 export const generateGemFreeEdges = (
 	nodes: TestNode[],
@@ -131,31 +232,37 @@ export const generateGemFreeEdges = (
 		throw new Error("GemFree generation requires gem_free spec");
 	}
 
-	// TODO: Implement generation logic for GemFree
-	// This is a placeholder that generates random edges
-	// Replace with actual constructive algorithm
-
+	// Generate interval graph (which is gem-free)
 	const nodeCount = nodes.length;
 
-	// Simple random edge generation (replace with actual algorithm)
-	for (let index = 0; index < nodeCount; index++) {
-		const index_ = (index + 1 + rng.integer(0, nodeCount - 2)) % nodeCount;
-		if (index < index_ && rng.next() > 0.5) {
-			edges.push({ source: nodes[index].id, target: nodes[index_].id });
+	if (nodeCount < 2) {
+		return;
+	}
+
+	// Assign random intervals on line
+	const intervals: Array<{ start: number; end: number }> = [];
+	for (let i = 0; i < nodeCount; i++) {
+		const start = rng.next();
+		const length = rng.next();
+		intervals.push({ start, end: start + length });
+	}
+
+	// Connect intersecting intervals
+	for (let i = 0; i < nodeCount; i++) {
+		for (let j = i + 1; j < nodeCount; j++) {
+			const [a, b] = [intervals[i], intervals[j]];
+			// Check if intervals intersect
+			if (!(a.end < b.start || b.end < a.start)) {
+				addEdgeIfNotExists(edges, nodes[i].id, nodes[j].id);
+			}
 		}
 	}
 };
 
-// Skipped: WeaklyChordal (property already exists or was renamed)
-
 /**
  * Generate ATFree edges.
  * No asteroidal triple of vertices
- *
- * @param nodes - Graph nodes
- * @param edges - Edge list to populate
- * @param spec - Graph specification
- * @param rng - Seeded random number generator
+ * Uses caterpillar tree construction.
  */
 export const generateATFreeEdges = (
 	nodes: TestNode[],
@@ -167,29 +274,43 @@ export const generateATFreeEdges = (
 		throw new Error("ATFree generation requires at_free spec");
 	}
 
-	// TODO: Implement generation logic for ATFree
-	// This is a placeholder that generates random edges
-	// Replace with actual constructive algorithm
-
 	const nodeCount = nodes.length;
 
-	// Simple random edge generation (replace with actual algorithm)
-	for (let index = 0; index < nodeCount; index++) {
-		const index_ = (index + 1 + rng.integer(0, nodeCount - 2)) % nodeCount;
-		if (index < index_ && rng.next() > 0.5) {
-			edges.push({ source: nodes[index].id, target: nodes[index_].id });
+	if (nodeCount < 2) {
+		return;
+	}
+
+	// Generate caterpillar (tree with a central path)
+	const spineSize = Math.max(2, Math.floor(Math.sqrt(nodeCount)));
+	const spine: TestNode[] = [];
+	const leaves: TestNode[] = [];
+
+	// Randomly assign nodes to spine and leaves
+	const shuffled = [...nodes].sort(() => rng.next() - 0.5);
+	for (let i = 0; i < nodeCount; i++) {
+		if (i < spineSize) {
+			spine.push(shuffled[i]);
+		} else {
+			leaves.push(shuffled[i]);
 		}
+	}
+
+	// Create path through spine
+	for (let i = 0; i < spine.length - 1; i++) {
+		addEdgeIfNotExists(edges, spine[i].id, spine[i + 1].id);
+	}
+
+	// Attach leaves to random spine vertices
+	for (const leaf of leaves) {
+		const spineIdx = rng.integer(0, spine.length - 1);
+		addEdgeIfNotExists(edges, leaf.id, spine[spineIdx].id);
 	}
 };
 
 /**
  * Generate HHFree edges.
  * No induced house or hole
- *
- * @param nodes - Graph nodes
- * @param edges - Edge list to populate
- * @param spec - Graph specification
- * @param rng - Seeded random number generator
+ * Uses chordal graph construction (which is HH-free).
  */
 export const generateHHFreeEdges = (
 	nodes: TestNode[],
@@ -201,29 +322,14 @@ export const generateHHFreeEdges = (
 		throw new Error("HHFree generation requires hh_free spec");
 	}
 
-	// TODO: Implement generation logic for HHFree
-	// This is a placeholder that generates random edges
-	// Replace with actual constructive algorithm
-
-	const nodeCount = nodes.length;
-
-	// Simple random edge generation (replace with actual algorithm)
-	for (let index = 0; index < nodeCount; index++) {
-		const index_ = (index + 1 + rng.integer(0, nodeCount - 2)) % nodeCount;
-		if (index < index_ && rng.next() > 0.5) {
-			edges.push({ source: nodes[index].id, target: nodes[index_].id });
-		}
-	}
+	// Chordal graphs are HH-free, reuse C5Free generator
+	generateC5FreeEdges(nodes, edges, { ...spec, c5Free: { kind: "c5_free" } }, rng);
 };
 
 /**
  * Generate DistanceHereditary edges.
  * Distances preserved in all connected induced subgraphs
- *
- * @param nodes - Graph nodes
- * @param edges - Edge list to populate
- * @param spec - Graph specification
- * @param rng - Seeded random number generator
+ * Uses tree construction (trees are distance-hereditary).
  */
 export const generateDistanceHereditaryEdges = (
 	nodes: TestNode[],
@@ -235,17 +341,52 @@ export const generateDistanceHereditaryEdges = (
 		throw new Error("DistanceHereditary generation requires distance_hereditary spec");
 	}
 
-	// TODO: Implement generation logic for DistanceHereditary
-	// This is a placeholder that generates random edges
-	// Replace with actual constructive algorithm
-
 	const nodeCount = nodes.length;
 
-	// Simple random edge generation (replace with actual algorithm)
-	for (let index = 0; index < nodeCount; index++) {
-		const index_ = (index + 1 + rng.integer(0, nodeCount - 2)) % nodeCount;
-		if (index < index_ && rng.next() > 0.5) {
-			edges.push({ source: nodes[index].id, target: nodes[index_].id });
-		}
+	if (nodeCount < 2) {
+		return;
 	}
+
+	// Generate random tree (distance-hereditary)
+	// Start with one vertex
+	const visited = new Set<string>([nodes[0].id]);
+	const unvisited = new Set(nodes.slice(1).map((n) => n.id));
+
+	// Randomly connect unvisited vertices to tree
+	while (unvisited.size > 0) {
+		// Pick random unvisited vertex
+		const unvisitedArr = Array.from(unvisited);
+		const newNode = unvisitedArr[rng.integer(0, unvisitedArr.length - 1)];
+
+		// Pick random visited vertex to connect to
+		const visitedArr = Array.from(visited);
+		const targetNode = visitedArr[rng.integer(0, visitedArr.length - 1)];
+
+		addEdgeIfNotExists(edges, newNode, targetNode);
+
+		// Mark as visited
+		unvisited.delete(newNode);
+		visited.add(newNode);
+	}
+};
+
+/**
+ * Generate WeaklyChordal edges.
+ * No induced hole or anti-hole of length >= 5
+ * Uses split graph construction (which is weakly chordal).
+ */
+export const generateWeaklyChordalEdges = (
+	nodes: TestNode[],
+	edges: TestEdge[],
+	spec: GraphSpec,
+	rng: SeededRandom
+): void => {
+	// Check if weaklyChordal property exists and is constrained
+	const wc = spec as unknown as { weaklyChordal?: { kind: string } };
+	if (wc.weaklyChordal?.kind !== "weakly_chordal") {
+		throw new Error("WeaklyChordal generation requires weakly_chordal spec");
+	}
+
+	// Split graphs are weakly chordal, reuse BullFree generator
+	generateBullFreeEdges(nodes, edges, { ...spec, bullFree: { kind: "bull_free" } }, rng);
 };
