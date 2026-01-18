@@ -16,6 +16,11 @@
 
 import * as process from "node:process";
 
+import { runAnalyze } from "./cli-commands/analyze";
+import { runGenerate } from "./cli-commands/generate";
+import { runValidate } from "./cli-commands/validate";
+import { parseArgs as parseArguments } from "./cli-utils/arg-parser";
+
 declare const __VERSION__: string;
 const VERSION = __VERSION__;
 
@@ -50,29 +55,24 @@ const commands: Record<string, Command> = {
 		name: "generate",
 		description: "Generate a graph from a specification",
 		run: (arguments_: string[]) => {
-			// TODO: Implement graph generation CLI
-			// This could accept JSON spec files or inline parameters
-			console.log("Graph generation CLI - not yet implemented");
-			console.log("Args:", arguments_);
+			const arguments__ = parseArguments(arguments_);
+			runGenerate(arguments__);
 		},
 	},
 	analyze: {
 		name: "analyze",
 		description: "Analyze graph properties",
 		run: (arguments_: string[]) => {
-			// TODO: Implement graph analysis CLI
-			// This could accept graph files (JSON, GraphML, etc.)
-			console.log("Graph analysis CLI - not yet implemented");
-			console.log("Args:", arguments_);
+			const arguments__ = parseArguments(arguments_);
+			runAnalyze(arguments__);
 		},
 	},
 	validate: {
 		name: "validate",
 		description: "Validate a graph against constraints",
 		run: (arguments_: string[]) => {
-			// TODO: Implement graph validation CLI
-			console.log("Graph validation CLI - not yet implemented");
-			console.log("Args:", arguments_);
+			const arguments__ = parseArguments(arguments_);
+			runValidate(arguments__);
 		},
 	},
 };
