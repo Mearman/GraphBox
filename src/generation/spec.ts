@@ -116,6 +116,27 @@ import type {
 	Weighting,
 	Wheel,
 } from "./spec/index.js";
+// Import new graph class types (Priority 1 - 17 classes)
+import type {
+	ATFree,
+	BullFree,
+	C5Free,
+	CircularArc,
+	Cliquewidth,
+	Disk,
+	DistanceHereditary,
+	GemFree,
+	HHFree,
+	Modular,
+	P5Free,
+	Pathwidth,
+	Planar,
+	ProbeChordal,
+	ProbeInterval,
+	ProperCircularArc,
+	Ptolemaic,
+	QuasiLine,
+} from "./spec/new-classes-index.js";
 
 // Re-export for backward compatibility
 
@@ -275,6 +296,40 @@ export type GraphSpec = Readonly<{
 
 	// Tournament graphs
 	tournament?: Tournament;
+
+	// ============================================================================
+	// NEW GRAPH CLASSES (200+ classes being added)
+	// ============================================================================
+
+	// Forbidden subgraph classes (Priority 1)
+	p5Free?: P5Free;
+	c5Free?: C5Free;
+	bullFree?: BullFree;
+	gemFree?: GemFree;
+	atFree?: ATFree;
+	hhFree?: HHFree;
+	distanceHereditary?: DistanceHereditary;
+
+	// Intersection graphs (Priority 1)
+	circularArc?: CircularArc;
+	properCircularArc?: ProperCircularArc;
+	diskGraphNew?: Disk; // Renamed to avoid confusion
+
+	// Probe graphs (Priority 1)
+	probeChordal?: ProbeChordal;
+	probeInterval?: ProbeInterval;
+
+	// Width parameter classes (Priority 1)
+	pathwidth?: Pathwidth;
+	cliquewidth?: Cliquewidth;
+
+	// Perfect graph variants (Priority 1)
+	modular?: Modular;
+	ptolemaic?: Ptolemaic;
+	quasiLine?: QuasiLine;
+
+	// Geometric classes (Priority 1)
+	planarNew?: Planar; // Renamed to avoid confusion
 }>;
 
 // ============================================================================
