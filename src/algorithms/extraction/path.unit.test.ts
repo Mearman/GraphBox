@@ -178,10 +178,7 @@ describe("findShortestPath", () => {
 			}
 		});
 
-		// Note: Backward traversal in undirected graphs has a known limitation
-		// in GraphAdapter.getNeighbors - it always maps to edge.target instead
-		// of handling the case where the node is the edge's target (should return source).
-		it.skip("should find path in reverse direction for undirected graph", () => {
+		it("should find path in reverse direction for undirected graph", () => {
 			const graph = new Graph<TestNode, TestEdge>(false);
 			graph.addNode(createNode("A"));
 			graph.addNode(createNode("B"));

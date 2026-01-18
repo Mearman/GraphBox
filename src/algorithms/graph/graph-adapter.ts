@@ -42,7 +42,9 @@ export class GraphAdapter<N extends Node, E extends Edge> implements ReadableGra
 		if (!result.ok) {
 			return [];
 		}
-		return result.value.map(edge => edge.target);
+		// For undirected graphs, getOutgoingEdges returns edges where node is
+		// either source or target. We need to return the "other" node in each edge.
+		return result.value.map(edge => edge.source === id ? edge.target : edge.source);
 	}
 
 	getAllNodes(): N[] {
