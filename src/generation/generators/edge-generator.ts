@@ -33,8 +33,23 @@ import {
 	needsSelfLoop,
 } from "./density-helpers";
 import {
+	generateATFreeEdges,
+	generateBullFreeEdges,
+	generateC5FreeEdges,
+	generateDistanceHereditaryEdges,
+	generateGemFreeEdges,
+	generateHHFreeEdges,
+	// New Priority 1 graph class generators
+	generateP5FreeEdges,
+} from "./forbidden_subgraph";
+import {
 	generatePlanarEdges,
 	generateUnitDiskEdges} from "./geometric";
+import {
+	generateCircularArcEdges,
+	generateDiskEdges,
+	generateProperCircularArcEdges,
+} from "./intersection";
 import {
 	generateDominationNumberEdges,
 	generateHereditaryClassEdges,
@@ -51,6 +66,15 @@ import {
 	generateHamiltonianEdges,
 	generateRadiusEdges,
 	generateTraceableEdges} from "./path-cycle";
+import {
+	generateModularEdges as generateModularGraphEdges,
+	generatePtolemaicEdges,
+	generateQuasiLineEdges,
+} from "./perfect_variants";
+import {
+	generateProbeChordalEdges,
+	generateProbeIntervalEdges,
+} from "./probe";
 import {
 	generateChordalEdges,
 	generateClawFreeEdges,
@@ -489,6 +513,78 @@ const generateBaseStructure = (nodes: TestNode[], spec: GraphSpec, _config: Grap
 	} else {
 		// Generate disconnected graph with cycles
 		generateDisconnectedEdges(nodes, edges, spec, rng);
+	}
+
+	// ============================================================================
+	// PHASE 7: NEW PRIORITY 1 GRAPH CLASSES
+	// ============================================================================
+
+	// Handle forbidden subgraph classes
+	if (spec.p5Free?.kind === "p5_free") {
+		generateP5FreeEdges(nodes, edges, spec, rng);
+		return edges;
+	}
+	if (spec.c5Free?.kind === "c5_free") {
+		generateC5FreeEdges(nodes, edges, spec, rng);
+		return edges;
+	}
+	if (spec.bullFree?.kind === "bull_free") {
+		generateBullFreeEdges(nodes, edges, spec, rng);
+		return edges;
+	}
+	if (spec.gemFree?.kind === "gem_free") {
+		generateGemFreeEdges(nodes, edges, spec, rng);
+		return edges;
+	}
+	if (spec.atFree?.kind === "at_free") {
+		generateATFreeEdges(nodes, edges, spec, rng);
+		return edges;
+	}
+	if (spec.hhFree?.kind === "hh_free") {
+		generateHHFreeEdges(nodes, edges, spec, rng);
+		return edges;
+	}
+	if (spec.distanceHereditary?.kind === "distance_hereditary") {
+		generateDistanceHereditaryEdges(nodes, edges, spec, rng);
+		return edges;
+	}
+
+	// Handle intersection graphs
+	if (spec.circularArc?.kind === "circular_arc") {
+		generateCircularArcEdges(nodes, edges, spec, rng);
+		return edges;
+	}
+	if (spec.properCircularArc?.kind === "proper_circular_arc") {
+		generateProperCircularArcEdges(nodes, edges, spec, rng);
+		return edges;
+	}
+	if (spec.diskGraphNew?.kind === "disk") {
+		generateDiskEdges(nodes, edges, spec, rng);
+		return edges;
+	}
+
+	// Handle probe graphs
+	if (spec.probeChordal?.kind === "probe_chordal") {
+		generateProbeChordalEdges(nodes, edges, spec, rng);
+		return edges;
+	}
+	if (spec.probeInterval?.kind === "probe_interval") {
+		generateProbeIntervalEdges(nodes, edges, spec, rng);
+		return edges;
+	}
+
+	// Handle perfect graph variants
+	if (spec.modular?.kind === "modular") {
+		generateModularGraphEdges(nodes, edges, spec, rng);
+		return edges;
+	}
+	if (spec.ptolemaic?.kind === "ptolemaic") {
+		generatePtolemaicEdges(nodes, edges, spec, rng);
+		return edges;
+	}
+	if (spec.quasiLine?.kind === "quasi_line") {
+		generateQuasiLineEdges(nodes, edges, spec, rng);
+		return edges;
 	}
 
 	return edges;
