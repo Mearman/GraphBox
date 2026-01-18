@@ -8,16 +8,29 @@
  */
 
 import type { GraphSpec } from "../spec.js";
-import type { SeededRandom,TestEdge,TestNode  } from "./types.js";
+import type { SeededRandom, TestEdge, TestNode } from "./types.js";
+
+/**
+ * Add edge if it doesn't exist.
+ */
+const addEdgeIfNotExists = (
+	edges: TestEdge[],
+	source: string,
+	target: string
+): void => {
+	const exists = edges.some(
+		(e) =>
+			(e.source === source && e.target === target) ||
+			(e.source === target && e.target === source)
+	);
+	if (!exists) {
+		edges.push({ source, target });
+	}
+};
 
 /**
  * Generate CircularArc edges.
  * Intersection graph of arcs on a circle
- *
- * @param nodes - Graph nodes
- * @param edges - Edge list to populate
- * @param spec - Graph specification
- * @param rng - Seeded random number generator
  */
 export const generateCircularArcEdges = (
 	nodes: TestNode[],
@@ -25,33 +38,86 @@ export const generateCircularArcEdges = (
 	spec: GraphSpec,
 	rng: SeededRandom
 ): void => {
-	if (spec.circularArc?.kind !== "circular_arc") {
+	const circularArc = spec as unknown as { circularArc?: { kind: string } };
+	if (circularArc.circularArc?.kind !== "circular_arc") {
 		throw new Error("CircularArc generation requires circular_arc spec");
 	}
 
-	// TODO: Implement generation logic for CircularArc
-	// This is a placeholder that generates random edges
-	// Replace with actual constructive algorithm
-
 	const nodeCount = nodes.length;
+	if (nodeCount < 2) {
+		return;
+	}
 
-	// Simple random edge generation (replace with actual algorithm)
-	for (let index = 0; index < nodeCount; index++) {
-		const index_ = (index + 1 + rng.integer(0, nodeCount - 2)) % nodeCount;
-		if (index < index_ && rng.next() > 0.5) {
-			edges.push({ source: nodes[index].id, target: nodes[index_].id });
+	// Generate random arcs on a circle
+	// Each arc has a start angle and length
+	const arcs: Array<{ start: number; end: number }> = [];
+
+	for (let i = 0; i < nodeCount; i++) {
+		const start = rng.next() * 2 * Math.PI; // Random start angle [0, 2π]
+		const length = rng.next() * Math.PI; // Random length [0, π]
+		arcs.push({ start, end: (start + length) % (2 * Math.PI) });
+	}
+
+	// Connect intersecting arcs
+	for (let i = 0; i < nodeCount; i++) {
+		for (let j = i + 1; j < nodeCount; j++) {
+			const [a, b] = [arcs[i], arcs[j]];
+
+			// Check if arcs intersect on the circle
+			// Two arcs intersect if they overlap on the circle
+			const intersects = arcsIntersect(a, b);
+
+			if (intersects) {
+				addEdgeIfNotExists(edges, nodes[i].id, nodes[j].id);
+			}
 		}
 	}
 };
 
 /**
+ * Check if two circular arcs intersect.
+ */
+const arcsIntersect = (
+	a: { start: number; end: number },
+	b: { start: number; end: number }
+): boolean => {
+	// Normalize angles to [0, 2π)
+	const normalize = (angle: number) => {
+		while (angle < 0) angle += 2 * Math.PI;
+		while (angle >= 2 * Math.PI) angle -= 2 * Math.PI;
+		return angle;
+	};
+
+	const aStart = normalize(a.start);
+	const aEnd = normalize(a.end);
+	const bStart = normalize(b.start);
+	const bEnd = normalize(b.end);
+
+	// Handle wrap-around cases
+	const aContains = (angle: number) => {
+		if (aStart < aEnd) {
+			return angle >= aStart && angle <= aEnd;
+		} else {
+			return angle >= aStart || angle <= aEnd;
+		}
+	};
+
+	const bContains = (angle: number) => {
+		if (bStart < bEnd) {
+			return angle >= bStart && angle <= bEnd;
+		} else {
+			return angle >= bStart || angle <= bEnd;
+		}
+	};
+
+	// Arcs intersect if they overlap
+	// This happens if: a contains b's start, or b contains a's start
+	return aContains(bStart) || bContains(aStart);
+};
+
+/**
  * Generate ProperCircularArc edges.
  * Circular arc graph with no arc containment
- *
- * @param nodes - Graph nodes
- * @param edges - Edge list to populate
- * @param spec - Graph specification
- * @param rng - Seeded random number generator
  */
 export const generateProperCircularArcEdges = (
 	nodes: TestNode[],
@@ -59,57 +125,44 @@ export const generateProperCircularArcEdges = (
 	spec: GraphSpec,
 	rng: SeededRandom
 ): void => {
-	if (spec.properCircularArc?.kind !== "proper_circular_arc") {
+	const properCircularArc = spec as unknown as { properCircularArc?: { kind: string } };
+	if (properCircularArc.properCircularArc?.kind !== "proper_circular_arc") {
 		throw new Error("ProperCircularArc generation requires proper_circular_arc spec");
 	}
 
-	// TODO: Implement generation logic for ProperCircularArc
-	// This is a placeholder that generates random edges
-	// Replace with actual constructive algorithm
-
 	const nodeCount = nodes.length;
+	if (nodeCount < 2) {
+		return;
+	}
 
-	// Simple random edge generation (replace with actual algorithm)
-	for (let index = 0; index < nodeCount; index++) {
-		const index_ = (index + 1 + rng.integer(0, nodeCount - 2)) % nodeCount;
-		if (index < index_ && rng.next() > 0.5) {
-			edges.push({ source: nodes[index].id, target: nodes[index_].id });
+	// Generate proper circular arcs (no arc fully contains another)
+	// Strategy: All arcs have the same length
+	const arcLength = (2 * Math.PI) / nodeCount; // Equal lengths
+
+	// Randomly order start positions
+	const startAngles: number[] = [];
+	for (let i = 0; i < nodeCount; i++) {
+		startAngles.push(rng.next() * 2 * Math.PI);
+	}
+
+	// Sort to get proper order
+	startAngles.sort((a, b) => a - b);
+
+	// Generate arcs
+	const arcs: Array<{ start: number; end: number }> = [];
+	for (let i = 0; i < nodeCount; i++) {
+		const start = startAngles[i];
+		arcs.push({ start, end: (start + arcLength) % (2 * Math.PI) });
+	}
+
+	// Connect intersecting arcs
+	for (let i = 0; i < nodeCount; i++) {
+		for (let j = i + 1; j < nodeCount; j++) {
+			const [a, b] = [arcs[i], arcs[j]];
+
+			if (arcsIntersect(a, b)) {
+				addEdgeIfNotExists(edges, nodes[i].id, nodes[j].id);
+			}
 		}
 	}
 };
-
-/**
- * Generate Disk edges.
- * Intersection graph of disks in the plane
- *
- * @param nodes - Graph nodes
- * @param edges - Edge list to populate
- * @param spec - Graph specification
- * @param rng - Seeded random number generator
- */
-export const generateDiskEdges = (
-	nodes: TestNode[],
-	edges: TestEdge[],
-	spec: GraphSpec,
-	rng: SeededRandom
-): void => {
-	if (spec.diskGraphNew?.kind !== "disk") {
-		throw new Error("Disk generation requires disk spec");
-	}
-
-	// TODO: Implement generation logic for Disk
-	// This is a placeholder that generates random edges
-	// Replace with actual constructive algorithm
-
-	const nodeCount = nodes.length;
-
-	// Simple random edge generation (replace with actual algorithm)
-	for (let index = 0; index < nodeCount; index++) {
-		const index_ = (index + 1 + rng.integer(0, nodeCount - 2)) % nodeCount;
-		if (index < index_ && rng.next() > 0.5) {
-			edges.push({ source: nodes[index].id, target: nodes[index_].id });
-		}
-	}
-};
-
-// Skipped: UnitDisk (property already exists or was renamed)

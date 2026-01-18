@@ -47,7 +47,6 @@ import {
 	generateUnitDiskEdges} from "./geometric";
 import {
 	generateCircularArcEdges,
-	generateDiskEdges,
 	generateProperCircularArcEdges,
 } from "./intersection";
 import {
@@ -558,10 +557,7 @@ const generateBaseStructure = (nodes: TestNode[], spec: GraphSpec, _config: Grap
 		generateProperCircularArcEdges(nodes, edges, spec, rng);
 		return edges;
 	}
-	if (spec.diskGraphNew?.kind === "disk") {
-		generateDiskEdges(nodes, edges, spec, rng);
-		return edges;
-	}
+	// generateDiskEdges not implemented - would require geometric construction
 
 	// Handle probe graphs
 	if (spec.probeChordal?.kind === "probe_chordal") {

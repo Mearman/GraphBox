@@ -7,16 +7,174 @@
  * @generated 2026-01-18T16:10:41.826Z
  */
 
+import { buildAdjacencyList } from "../algorithms/extraction/forbidden-subgraphs.js";
 import type { TestGraph } from "../generation/generators/types.js";
 import type { PropertyValidationResult } from "./types.js";
 
 /**
+ * Check if graph can be represented as circular arc intersection model.
+ * Uses the characterization: G is a circular arc graph iff it has a
+ * circular ordering of vertices where for every vertex, its neighbors
+ * appear consecutively in the circular ordering (possibly wrapping around).
+ *
+ * @param adjacency - Graph adjacency list
+ * @param vertexCount - Number of vertices
+ * @returns true if graph is a circular arc graph
+ */
+const isCircularArcGraph = (
+	adjacency: Map<number, Set<number>>,
+	vertexCount: number
+): boolean => {
+	// For small graphs, all are circular arc graphs
+	if (vertexCount <= 4) {
+		return true;
+	}
+
+	// Heuristic: Try to find circular ordering
+	// For each permutation (with limited attempts), check if it's a valid circular arc model
+	const vertices = Array.from(adjacency.keys());
+	const maxAttempts = Math.min(50, vertexCount * 2);
+
+	for (let attempt = 0; attempt < maxAttempts; attempt++) {
+		// Try a random ordering
+		const ordering = [...vertices].sort(() => Math.random() - 0.5);
+
+		if (isValidCircularArcOrdering(adjacency, ordering)) {
+			return true;
+		}
+	}
+
+	// Also check natural ordering
+	if (isValidCircularArcOrdering(adjacency, vertices)) {
+		return true;
+	}
+
+	return false;
+};
+
+/**
+ * Check if given vertex ordering is a valid circular arc model.
+ * For each vertex, all its neighbors must appear consecutively in the
+ * circular ordering (possibly wrapping around).
+ */
+const isValidCircularArcOrdering = (
+	adjacency: Map<number, Set<number>>,
+	ordering: number[]
+): boolean => {
+	const n = ordering.length;
+	const position = new Map<number, number>();
+	for (let i = 0; i < n; i++) {
+		position.set(ordering[i], i);
+	}
+
+	for (const v of ordering) {
+		const neighbors = adjacency.get(v) || new Set();
+
+		if (neighbors.size === 0) {
+			continue; // Isolated vertices are fine
+		}
+
+		// Get positions of neighbors
+		const neighborPositions = Array.from(neighbors)
+			.map((nb) => position.get(nb))
+			.filter((p): p is number => p !== undefined)
+			.sort((a, b) => a - b);
+
+		if (neighborPositions.length === 0) {
+			continue;
+		}
+
+		// Check if neighbors appear consecutively (possibly with wrap-around)
+		// First, check without wrap-around
+		let consecutive = true;
+		for (let i = 1; i < neighborPositions.length; i++) {
+			if (neighborPositions[i] - neighborPositions[i - 1] !== 1) {
+				consecutive = false;
+				break;
+			}
+		}
+
+		if (consecutive) {
+			continue;
+		}
+
+		// Check with wrap-around (neighbors at start and end of ordering)
+		// This means there's a gap, and the gap is between max and min positions
+		const maxPos = neighborPositions[neighborPositions.length - 1];
+		const minPos = neighborPositions[0];
+
+		// Check if all positions except the gap are covered
+		consecutive = true;
+		for (let i = 1; i < neighborPositions.length; i++) {
+			const diff = neighborPositions[i] - neighborPositions[i - 1];
+			if (diff !== 1 && !(neighborPositions[i] === maxPos && neighborPositions[i - 1] === minPos)) {
+				consecutive = false;
+				break;
+			}
+		}
+
+		if (!consecutive) {
+			return false;
+		}
+	}
+
+	return true;
+};
+
+/**
+ * Check if a circular arc model is proper (no arc contains another).
+ */
+const isProperCircularArcGraph = (
+	adjacency: Map<number, Set<number>>,
+	vertexCount: number
+): boolean => {
+	// Proper circular arc graphs are a subset of circular arc graphs
+	if (!isCircularArcGraph(adjacency, vertexCount)) {
+		return false;
+	}
+
+	// Additional check: the graph must be claw-free
+	// Proper circular arc graphs = claw-free circular arc graphs
+	const vertices = Array.from(adjacency.keys());
+
+	for (const v of vertices) {
+		const neighborsSet = adjacency.get(v);
+		if (!neighborsSet) continue;
+
+		const neighbors: number[] = Array.from(neighborsSet);
+
+		// Check if any induced K1,3 (claw) exists centered at v
+		for (let i = 0; i < neighbors.length; i++) {
+			for (let j = i + 1; j < neighbors.length; j++) {
+				for (let k = j + 1; k < neighbors.length; k++) {
+					const n1: number = neighbors[i];
+					const n2: number = neighbors[j];
+					const n3: number = neighbors[k];
+
+					// Check if n1, n2, n3 form an independent set in the neighborhood
+					const n1Neighbors = adjacency.get(n1) || new Set();
+					const n2Neighbors = adjacency.get(n2) || new Set();
+					const n3Neighbors = adjacency.get(n3) || new Set();
+
+					const n1n2Connected = n1Neighbors.has(n2);
+					const n1n3Connected = n1Neighbors.has(n3);
+					const n2n3Connected = n2Neighbors.has(n3);
+
+					// If no edges between them, we have a claw
+					if (!n1n2Connected && !n1n3Connected && !n2n3Connected) {
+						return false;
+					}
+				}
+			}
+		}
+	}
+
+	return true;
+};
+
+/**
  * Validate CircularArc property.
  * Intersection graph of arcs on a circle
- *
- * @param graph - Test graph to validate
- * @param _adjustments - Optional validation adjustments
- * @returns PropertyValidationResult for validation details
  */
 export const validateCircularArc = (
 	graph: TestGraph,
@@ -34,10 +192,30 @@ export const validateCircularArc = (
 		};
 	}
 
-	// TODO: Implement validation logic for CircularArc
-	// For now, return placeholder validation
-	const actual = "circular_arc"; // Computed from graph structure
+	// Build adjacency
+	const nodeIdMap = new Map<string, number>();
+	for (const [index, n] of nodes.entries()) {
+		nodeIdMap.set(n.id, index);
+	}
+	const vertexSet = new Set(nodes.map((_, index) => index));
+	const edgeList = edges.map((e) => {
+		const src = nodeIdMap.get(e.source);
+		const tgt = nodeIdMap.get(e.target);
+		return src !== undefined && tgt !== undefined ? ([src, tgt] as [number, number]) : null;
+	}).filter((e): e is [number, number] => e !== null);
 
+	const adjacency = buildAdjacencyList(vertexSet, edgeList);
+	const adjMap = new Map<number, Set<number>>();
+	for (const v of vertexSet) {
+		adjMap.set(v, new Set());
+	}
+	for (const [u, v] of edgeList) {
+		adjMap.get(u)?.add(v);
+		adjMap.get(v)?.add(u);
+	}
+
+	const isCA = isCircularArcGraph(adjMap, nodes.length);
+	const actual = isCA ? "circular_arc" : "not_circular_arc";
 	const valid = actual === expected;
 
 	return {
@@ -54,10 +232,6 @@ export const validateCircularArc = (
 /**
  * Validate ProperCircularArc property.
  * Circular arc graph with no arc containment
- *
- * @param graph - Test graph to validate
- * @param _adjustments - Optional validation adjustments
- * @returns PropertyValidationResult for validation details
  */
 export const validateProperCircularArc = (
 	graph: TestGraph,
@@ -75,10 +249,30 @@ export const validateProperCircularArc = (
 		};
 	}
 
-	// TODO: Implement validation logic for ProperCircularArc
-	// For now, return placeholder validation
-	const actual = "proper_circular_arc"; // Computed from graph structure
+	// Build adjacency
+	const nodeIdMap = new Map<string, number>();
+	for (const [index, n] of nodes.entries()) {
+		nodeIdMap.set(n.id, index);
+	}
+	const vertexSet = new Set(nodes.map((_, index) => index));
+	const edgeList = edges.map((e) => {
+		const src = nodeIdMap.get(e.source);
+		const tgt = nodeIdMap.get(e.target);
+		return src !== undefined && tgt !== undefined ? ([src, tgt] as [number, number]) : null;
+	}).filter((e): e is [number, number] => e !== null);
 
+	const adjacency = buildAdjacencyList(vertexSet, edgeList);
+	const adjMap = new Map<number, Set<number>>();
+	for (const v of vertexSet) {
+		adjMap.set(v, new Set());
+	}
+	for (const [u, v] of edgeList) {
+		adjMap.get(u)?.add(v);
+		adjMap.get(v)?.add(u);
+	}
+
+	const isPCA = isProperCircularArcGraph(adjMap, nodes.length);
+	const actual = isPCA ? "proper_circular_arc" : "not_proper_circular_arc";
 	const valid = actual === expected;
 
 	return {
