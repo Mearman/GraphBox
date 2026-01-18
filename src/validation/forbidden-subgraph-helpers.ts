@@ -74,7 +74,10 @@ const canAvoidNeighborhood = (
 	visited.add(source);
 
 	while (queue.length > 0) {
-		const current = queue.shift()!;
+		const current = queue.shift();
+		if (current === undefined) {
+			break;
+		}
 
 		for (const neighbor of adjacency.get(current) || []) {
 			if (visited.has(neighbor)) {
@@ -115,7 +118,17 @@ export const hasInducedCycle = (
 		return false;
 	}
 
-	const vertices = Array.from(vertexSet);
+	// Early exit: count edges in graph, need at least k edges for a k-cycle
+	let edgeCount = 0;
+	for (const neighbors of adjacency.values()) {
+		edgeCount += neighbors.size;
+	}
+	edgeCount = edgeCount / 2; // Each edge counted twice
+	if (edgeCount < k) {
+		return false;
+	}
+
+	const vertices = [...vertexSet];
 
 	// Try all combinations of k vertices
 	for (const startCombo of getCombinations(vertices, k)) {
@@ -124,12 +137,12 @@ export const hasInducedCycle = (
 		// Check if these k vertices form an induced cycle
 		// Count edges in the induced subgraph
 		let edgeCount = 0;
-		const comboArray = Array.from(combo);
+		const comboArray = [...combo];
 
-		for (let i = 0; i < comboArray.length; i++) {
-			for (let j = i + 1; j < comboArray.length; j++) {
-				const u = comboArray[i];
-				const v = comboArray[j];
+		for (let index = 0; index < comboArray.length; index++) {
+			for (let index_ = index + 1; index_ < comboArray.length; index_++) {
+				const u = comboArray[index];
+				const v = comboArray[index_];
 				if (adjacency.get(u)?.has(v)) {
 					edgeCount++;
 				}
@@ -168,19 +181,20 @@ export const hasInducedCycle = (
  * Generate all combinations of size k from array.
  *
  * @param arr - Source array
+ * @param array
  * @param k - Combination size
  * @returns Array of combinations
  */
-const getCombinations = <T,>(arr: T[], k: number): T[][] => {
+const getCombinations = <T,>(array: T[], k: number): T[][] => {
 	if (k === 0) {
 		return [[]];
 	}
 
-	if (arr.length === 0) {
+	if (array.length === 0) {
 		return [];
 	}
 
-	const [first, ...rest] = arr;
+	const [first, ...rest] = array;
 
 	const combsWithFirst = getCombinations(rest, k - 1).map((comb) => [first, ...comb]);
 	const combsWithoutFirst = getCombinations(rest, k);
@@ -234,7 +248,7 @@ const hasIsometricCycle = (
 		return false;
 	}
 
-	const vertices = Array.from(vertexSet);
+	const vertices = [...vertexSet];
 
 	// Try all combinations of k vertices
 	for (const startCombo of getCombinations(vertices, k)) {
@@ -267,21 +281,21 @@ const isCycleIsometric = (
 	cycleVertices: Set<number>,
 	cycleLength: number
 ): boolean => {
-	const cycleArray = Array.from(cycleVertices);
+	const cycleArray = [...cycleVertices];
 
 	// For each pair of vertices in the cycle
-	for (let i = 0; i < cycleArray.length; i++) {
-		for (let j = i + 1; j < cycleArray.length; j++) {
-			const v1 = cycleArray[i];
-			const v2 = cycleArray[j];
+	for (let index = 0; index < cycleArray.length; index++) {
+		for (let index_ = index + 1; index_ < cycleArray.length; index_++) {
+			const v1 = cycleArray[index];
+			const v2 = cycleArray[index_];
 
 			// Get distance along the cycle (min of clockwise or counter-clockwise)
-			const cycleDist = Math.min(j - i, cycleLength - (j - i));
+			const cycleDistribution = Math.min(index_ - index, cycleLength - (index_ - index));
 
 			// Get actual shortest path distance in the graph
-			const actualDist = shortestPathDistance(adjacency, v1, v2, cycleVertices);
+			const actualDistribution = shortestPathDistance(adjacency, v1, v2, cycleVertices);
 
-			if (actualDist !== cycleDist) {
+			if (actualDistribution !== cycleDistribution) {
 				return false;
 			}
 		}
@@ -313,7 +327,11 @@ const shortestPathDistance = (
 	const queue: [number, number][] = [[source, 0]];
 
 	while (queue.length > 0) {
-		const [current, dist] = queue.shift()!;
+		const entry = queue.shift();
+		if (entry === undefined) {
+			break;
+		}
+		const [current, distribution] = entry;
 
 		for (const neighbor of adjacency.get(current) || []) {
 			if (!vertexSet.has(neighbor)) {
@@ -321,12 +339,12 @@ const shortestPathDistance = (
 			}
 
 			if (neighbor === target) {
-				return dist + 1;
+				return distribution + 1;
 			}
 
 			if (!visited.has(neighbor)) {
 				visited.add(neighbor);
-				queue.push([neighbor, dist + 1]);
+				queue.push([neighbor, distribution + 1]);
 			}
 		}
 	}

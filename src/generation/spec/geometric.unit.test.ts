@@ -4,7 +4,7 @@
 
 import { describe, expect, it } from "vitest";
 
-import type { Planarity, UnitDisk } from "./geometric";
+import type { Planar, UnitDisk } from "./geometric";
 
 describe("geometric and topological properties", () => {
 	describe("UnitDisk", () => {
@@ -47,19 +47,19 @@ describe("geometric and topological properties", () => {
 		});
 	});
 
-	describe("Planarity", () => {
+	describe("Planar", () => {
 		it("should support planar graphs", () => {
-			const planar: Planarity = { kind: "planar" };
+			const planar: Planar = { kind: "planar" };
 			expect(planar.kind).toBe("planar");
 		});
 
 		it("should support non-planar graphs", () => {
-			const nonPlanar: Planarity = { kind: "non_planar" };
-			expect(nonPlanar.kind).toBe("non_planar");
+			const nonPlanar: Planar = { kind: "nonplanar" };
+			expect(nonPlanar.kind).toBe("nonplanar");
 		});
 
 		it("should support unconstrained planarity", () => {
-			const unconstrained: Planarity = { kind: "unconstrained" };
+			const unconstrained: Planar = { kind: "unconstrained" };
 			expect(unconstrained.kind).toBe("unconstrained");
 		});
 	});
@@ -83,10 +83,10 @@ describe("geometric and topological properties", () => {
 			}
 		});
 
-		it("should handle all Planarity variants in switch", () => {
-			const values: Planarity[] = [
+		it("should handle all Planar variants in switch", () => {
+			const values: Planar[] = [
 				{ kind: "planar" },
-				{ kind: "non_planar" },
+				{ kind: "nonplanar" },
 				{ kind: "unconstrained" },
 			];
 
@@ -96,8 +96,8 @@ describe("geometric and topological properties", () => {
 						expect(property.kind).toBe("planar");
 						break;
 					}
-					case "non_planar": {
-						expect(property.kind).toBe("non_planar");
+					case "nonplanar": {
+						expect(property.kind).toBe("nonplanar");
 						break;
 					}
 					case "unconstrained": {

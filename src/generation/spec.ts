@@ -72,7 +72,6 @@ import type {
 	Perfect,
 	PerfectMatching,
 	Permutation,
-	Planarity,
 	Ports,
 	Radius,
 	Ramanujan,
@@ -189,7 +188,7 @@ export type GraphSpec = Readonly<{
 
 	// Geometric and topological properties
 	unitDisk?: UnitDisk;
-	planarity?: Planarity;
+	planar?: Planar;
 
 	// Path/cycle properties
 	hamiltonian?: Hamiltonian;
@@ -353,7 +352,7 @@ export const defaultGraphSpec: GraphSpec = {
 export type GraphSpecPatch = Partial<Omit<GraphSpec,
   "vertexCardinality" | "vertexIdentity" | "vertexOrdering" | "edgeArity" | "signedness" | "uncertainty" | "vertexData" | "edgeData" | "degreeConstraint" | "partiteness" | "embedding" | "rooting" | "temporal" | "layering" | "edgeOrdering" | "ports" | "observability" | "operationalSemantics" | "measureSemantics" |
   "scaleFree" | "smallWorld" | "communityStructure" |
-  "unitDisk" | "planarity" |
+  "unitDisk" | "planar" |
   "hamiltonian" | "traceable" |
   "perfect" | "split" | "cograph" | "threshold" | "line" | "clawFree" |
   "cubic" | "specificRegular" | "stronglyRegular" |
@@ -674,4 +673,4 @@ export const isMultigraph = (spec: GraphSpec): spec is GraphSpec & { edgeMultipl
  */
 export const allowsSelfLoops = (spec: GraphSpec): spec is GraphSpec & { selfLoops: { kind: "allowed" } } => spec.selfLoops.kind === "allowed";
 
-export {type AlgebraicConnectivity, type ArcTransitive, type BinaryTree, type Branchwidth, type Cage, type CartesianProduct, type Chordal, type ChromaticNumber, type Circumference, type ClawFree, type Cograph, type CommunityStructure, type Comparability, type CompleteBipartite, type Completeness, type Connectivity, type Cubic, type Cycles, type DegreeConstraint, type Density, type Diameter, type Directionality, type DominationNumber, type EdgeArity, type EdgeData, type EdgeMultiplicity, type EdgeOrdering, type EdgeTransitive, type Embedding, type Eulerian, type FlowNetwork, type Girth, type Grid, type Hamiltonian, type HereditaryClass, type IndependenceNumber, type Integrity, type Interval, type KColorable, type KEdgeConnected, type KVertexConnected, type Layering, type LexicographicProduct, type Line, type MeasureSemantics, type MinorFree, type MooreGraph, type Observability, type OperationalSemantics, type Partiteness, type Perfect, type PerfectMatching, type Permutation, type Planarity, type Ports, type Radius, type Ramanujan, type Rooting, type ScaleFree, type SchemaHomogeneity, type SelfComplementary, type SelfLoops, type Signedness, type SmallWorld, type SpanningTree, type SpecificRegular, type SpectralRadius, type Spectrum, type Split, type Star, type StronglyRegular, type StrongProduct, type Temporal, type TensorProduct, type Threshold, type TopologicalMinorFree, type Toroidal, type Toughness, type Tournament, type Traceable, type Treewidth, type Uncertainty, type UnitDisk, type VertexCardinality, type VertexCover, type VertexData, type VertexIdentity, type VertexOrdering, type VertexTransitive, type Weighting, type Wheel} from "./spec/index.js";
+export {type AlgebraicConnectivity, type ArcTransitive, type BinaryTree, type Branchwidth, type Cage, type CartesianProduct, type Chordal, type ChromaticNumber, type Circumference, type ClawFree, type Cograph, type CommunityStructure, type Comparability, type CompleteBipartite, type Completeness, type Connectivity, type Cubic, type Cycles, type DegreeConstraint, type Density, type Diameter, type Directionality, type DominationNumber, type EdgeArity, type EdgeData, type EdgeMultiplicity, type EdgeOrdering, type EdgeTransitive, type Embedding, type Eulerian, type FlowNetwork, type Girth, type Grid, type Hamiltonian, type HereditaryClass, type IndependenceNumber, type Integrity, type Interval, type KColorable, type KEdgeConnected, type KVertexConnected, type Layering, type LexicographicProduct, type Line, type MeasureSemantics, type MinorFree, type MooreGraph, type Observability, type OperationalSemantics, type Partiteness, type Perfect, type PerfectMatching, type Permutation, type Planar, type Ports, type Radius, type Ramanujan, type Rooting, type ScaleFree, type SchemaHomogeneity, type SelfComplementary, type SelfLoops, type Signedness, type SmallWorld, type SpanningTree, type SpecificRegular, type SpectralRadius, type Spectrum, type Split, type Star, type StronglyRegular, type StrongProduct, type Temporal, type TensorProduct, type Threshold, type TopologicalMinorFree, type Toroidal, type Toughness, type Tournament, type Traceable, type Treewidth, type Uncertainty, type UnitDisk, type VertexCardinality, type VertexCover, type VertexData, type VertexIdentity, type VertexOrdering, type VertexTransitive, type Weighting, type Wheel} from "./spec/index.js";

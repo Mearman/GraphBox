@@ -127,7 +127,7 @@ describe("geometric generators", () => {
 			const nodes = createNodes(6);
 			const edges: TestEdge[] = [];
 			const spec = createSpec({
-				planarity: { kind: "planar" },
+				planar: { kind: "planar" },
 			});
 			const rng = new SeededRandom(42);
 
@@ -141,7 +141,7 @@ describe("geometric generators", () => {
 			const nodes = createNodes(10);
 			const edges: TestEdge[] = [];
 			const spec = createSpec({
-				planarity: { kind: "planar" },
+				planar: { kind: "planar" },
 			});
 			const rng = new SeededRandom(42);
 

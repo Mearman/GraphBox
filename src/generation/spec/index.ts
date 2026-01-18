@@ -55,7 +55,7 @@ export type {
 
 // Geometric properties
 export type {
-	Planarity,
+	Planar,
 	UnitDisk,
 } from "./geometric.js";
 

@@ -8,8 +8,7 @@ import type {
 	AnalyzerGraph
 } from "./types";
 import {
-	edgeKeyBinary
-	,
+	edgeKeyBinary,
 	isBipartiteUndirectedBinary
 } from "./types";
 

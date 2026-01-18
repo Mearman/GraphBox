@@ -21,7 +21,7 @@ describe("Planar Graph Class", () => {
 					edgeMultiplicity: { kind: "simple" },
 					selfLoops: { kind: "disallowed" },
 				}),
-				planarity: { kind: "planar" },
+				planar: { kind: "planar" },
 			};
 
 			const testGraph = generateGraph(spec, { nodeCount: 10, seed: 42 });
@@ -37,7 +37,7 @@ describe("Planar Graph Class", () => {
 					edgeMultiplicity: { kind: "simple" },
 					selfLoops: { kind: "disallowed" },
 				}),
-				planarity: { kind: "planar" },
+				planar: { kind: "planar" },
 			};
 
 			for (const nodeCount of [4, 8, 12, 16]) {
@@ -90,7 +90,7 @@ describe("Planar Graph Class", () => {
 					edgeMultiplicity: { kind: "simple" },
 					selfLoops: { kind: "disallowed" },
 				}),
-				planarity: { kind: "planar" },
+				planar: { kind: "planar" },
 			};
 
 			const graph1 = generateGraph(spec, { nodeCount: 10, seed: 999 });

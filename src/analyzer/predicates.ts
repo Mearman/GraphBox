@@ -6,12 +6,18 @@
  */
 
 import {
+	computeCograph,
+	computeSplit} from "./advanced-structures";
+import {
 	computeEdgeMultiplicity,
 } from "./core-props";
 import {
 	computeGraphSpecFromGraph,
 	type InferredGraphSpec
 } from "./main";
+import {
+	computeDensity
+} from "./structure";
 import type {
 	AnalyzerGraph,
 	AnalyzerVertexId
@@ -482,9 +488,18 @@ export const isDAG = (g: AnalyzerGraph): boolean => hasGraphSpec({
 
 /**
  * Check if graph is bipartite.
+ * Uses direct bipartite check instead of full spec computation for performance.
  * @param g
  */
-export const isBipartite = (g: AnalyzerGraph): boolean => axisKindIs("partiteness", "bipartite")(g);
+export const isBipartite = (g: AnalyzerGraph): boolean => {
+	// For undirected binary graphs, use direct check (much faster)
+	const isUndirectedBinary = g.edges.every(e => !e.directed && e.endpoints.length === 2);
+	if (isUndirectedBinary) {
+		return isBipartiteUndirectedBinary(g);
+	}
+	// For other graph types, fall back to spec computation
+	return axisKindIs("partiteness", "bipartite")(g);
+};
 
 /**
  * Check if graph is complete.
@@ -496,13 +511,13 @@ export const isComplete = (g: AnalyzerGraph): boolean => axisKindIs("completenes
  * Check if graph is sparse (density <= 10%).
  * @param g
  */
-export const isSparse = (g: AnalyzerGraph): boolean => axisKindIs("density", "sparse")(g);
+export const isSparse = (g: AnalyzerGraph): boolean => computeDensity(g).kind === "sparse";
 
 /**
  * Check if graph is dense (density > 75%).
  * @param g
  */
-export const isDense = (g: AnalyzerGraph): boolean => axisKindIs("density", "dense")(g);
+export const isDense = (g: AnalyzerGraph): boolean => computeDensity(g).kind === "dense";
 
 /**
  * Check if graph is regular (all vertices have same degree).
@@ -775,15 +790,33 @@ export const isPerfect = (g: AnalyzerGraph): boolean => {
 
 /**
  * Check if graph is a split graph (partition into clique + independent set).
+ * Uses direct computation instead of full spec computation for performance.
  * @param g
  */
-export const isSplit = (g: AnalyzerGraph): boolean => axisKindIs("split", "split")(g);
+export const isSplit = (g: AnalyzerGraph): boolean => {
+	// Only valid for undirected binary graphs
+	const isUndirected = g.edges.every(e => !e.directed);
+	const isBinary = g.edges.every(e => e.endpoints.length === 2);
+	if (!isUndirected || !isBinary) return false;
+
+	// Import computeSplit dynamically to avoid circular dependency
+	return computeSplit(g).kind === "split";
+};
 
 /**
  * Check if graph is a cograph (P4-free, no induced path on 4 vertices).
+ * Uses direct computation instead of full spec computation for performance.
  * @param g
  */
-export const isCograph = (g: AnalyzerGraph): boolean => axisKindIs("cograph", "cograph")(g);
+export const isCograph = (g: AnalyzerGraph): boolean => {
+	// Only valid for undirected binary graphs
+	const isUndirected = g.edges.every(e => !e.directed);
+	const isBinary = g.edges.every(e => e.endpoints.length === 2);
+	if (!isUndirected || !isBinary) return false;
+
+	// Import computeCograph dynamically to avoid circular dependency
+	return computeCograph(g).kind === "cograph";
+};
 
 /**
  * Check if graph is a threshold graph (both split and cograph).

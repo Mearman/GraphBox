@@ -1661,7 +1661,7 @@ describe("Phase 5: Advanced Structural Graph Generators", () => {
 				edgeMultiplicity: { kind: "simple" },
 				selfLoops: { kind: "disallowed" },
 				schema: { kind: "homogeneous" },
-				planarity: { kind: "planar" },
+				planar: { kind: "planar" },
 			};
 
 			const result = generateGraph(spec, { nodeCount: 10, seed: 42 });
@@ -1683,7 +1683,7 @@ describe("Phase 5: Advanced Structural Graph Generators", () => {
 				edgeMultiplicity: { kind: "simple" },
 				selfLoops: { kind: "disallowed" },
 				schema: { kind: "homogeneous" },
-				planarity: { kind: "planar" },
+				planar: { kind: "planar" },
 			};
 
 			const result = generateGraph(spec, { nodeCount: 3, seed: 42 });

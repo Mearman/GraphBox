@@ -195,7 +195,7 @@ describe("validatePlanar", () => {
 			);
 			const result = validatePlanar(graph);
 			expect(result.valid).toBe(true);
-			expect(result.property).toBe("planarity");
+			expect(result.property).toBe("planar");
 		});
 	});
 
@@ -208,7 +208,7 @@ describe("validatePlanar", () => {
 					{ source: "b", target: "c" },
 					{ source: "c", target: "a" },
 				],
-				{ planarity: { kind: "planar" } }
+				{ planar: { kind: "planar" } }
 			);
 			const result = validatePlanar(graph);
 			expect(result.valid).toBe(true);
@@ -225,7 +225,7 @@ describe("validatePlanar", () => {
 					{ source: "c", target: "d" },
 					{ source: "d", target: "a" },
 				],
-				{ planarity: { kind: "planar" } }
+				{ planar: { kind: "planar" } }
 			);
 			const result = validatePlanar(graph);
 			expect(result.valid).toBe(true);
@@ -249,7 +249,7 @@ describe("validatePlanar", () => {
 					{ source: "c", target: "e" },
 					{ source: "d", target: "e" },
 				],
-				{ planarity: { kind: "planar" } }
+				{ planar: { kind: "planar" } }
 			);
 			const result = validatePlanar(graph);
 			expect(result.valid).toBe(false);
@@ -284,7 +284,7 @@ describe("validatePlanar", () => {
 					{ source: "c", target: "e" },
 					{ source: "d", target: "e" },
 				],
-				{ planarity: { kind: "planar" } }
+				{ planar: { kind: "planar" } }
 			);
 			const result = validatePlanar(graph);
 			expect(result.valid).toBe(true);
@@ -305,7 +305,7 @@ describe("validatePlanar", () => {
 					{ source: "a", target: "c" },
 					{ source: "a", target: "d" },
 				],
-				{ planarity: { kind: "planar" } }
+				{ planar: { kind: "planar" } }
 			);
 			const result = validatePlanar(graph);
 			expect(result.valid).toBe(true);

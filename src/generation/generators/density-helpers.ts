@@ -53,7 +53,7 @@ export const hasExactStructure = (spec: GraphSpec): boolean => {
 	// Advanced structural graphs
 	if (spec.threshold?.kind === "threshold") return true;
 	if (spec.unitDisk?.kind === "unit_disk") return true;
-	if (spec.planarity?.kind === "planar") return true;
+	if (spec.planar?.kind === "planar") return true;
 	if (spec.hamiltonian?.kind === "hamiltonian") return true;
 	if (spec.traceable?.kind === "traceable") return true;
 

@@ -16,7 +16,7 @@ export type {
 	GemFree,
 	HHFree,
 	P5Free,
-} from "./forbidden_subgraph.js";
+} from "./forbidden-subgraph.js";
 // Note: WeaklyChordal exists in both forbidden_subgraph and structural
 // The existing implementation already has a property for this
 
@@ -32,7 +32,7 @@ export type { Cliquewidth,Pathwidth } from "./width.js";
 // Note: Treewidth already exists in main spec, not re-exported here
 
 // Perfect graph variants
-export type { Modular, Ptolemaic, QuasiLine } from "./perfect_variants.js";
+export type { Modular, Ptolemaic, QuasiLine } from "./perfect-variants.js";
 
 // Geometric classes
 export type { Planar } from "./geometric.js";

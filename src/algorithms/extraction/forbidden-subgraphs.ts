@@ -279,7 +279,10 @@ export const detectMultipleSubgraphs = (
 		if (!bySize.has(size)) {
 			bySize.set(size, []);
 		}
-		bySize.get(size)!.push(pattern);
+		const sizePatterns = bySize.get(size);
+		if (sizePatterns) {
+			sizePatterns.push(pattern);
+		}
 	}
 
 	// Check each size class

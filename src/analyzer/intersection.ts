@@ -15,25 +15,26 @@ import type { AnalyzerGraph, ComputePolicy } from "./types.js";
 
 /**
  * Convert AnalyzerGraph to adjacency map format.
+ * @param g
  */
 const buildAdjacencyMap = (g: AnalyzerGraph): Map<number, Set<number>> => {
 	const adj = new Map<number, Set<number>>();
 
 	// Initialize all vertices
-	for (let i = 0; i < g.vertices.length; i++) {
-		adj.set(i, new Set());
+	for (let index = 0; index < g.vertices.length; index++) {
+		adj.set(index, new Set());
 	}
 
 	// Add edges
 	for (const edge of g.edges) {
 		if (edge.endpoints.length === 2) {
-			const [srcId, tgtId] = edge.endpoints;
-			const srcIdx = g.vertices.findIndex((v) => v.id === srcId);
-			const tgtIdx = g.vertices.findIndex((v) => v.id === tgtId);
+			const [sourceId, tgtId] = edge.endpoints;
+			const sourceIndex = g.vertices.findIndex((v) => v.id === sourceId);
+			const tgtIndex = g.vertices.findIndex((v) => v.id === tgtId);
 
-			if (srcIdx >= 0 && tgtIdx >= 0) {
-				adj.get(srcIdx)?.add(tgtIdx);
-				adj.get(tgtIdx)?.add(srcIdx);
+			if (sourceIndex !== -1 && tgtIndex !== -1) {
+				adj.get(sourceIndex)?.add(tgtIndex);
+				adj.get(tgtIndex)?.add(sourceIndex);
 			}
 		}
 	}
@@ -43,6 +44,8 @@ const buildAdjacencyMap = (g: AnalyzerGraph): Map<number, Set<number>> => {
 
 /**
  * Check if graph can be represented as circular arc intersection model.
+ * @param adjacency
+ * @param vertexCount
  */
 const isCircularArcGraph = (
 	adjacency: Map<number, Set<number>>,
@@ -52,7 +55,7 @@ const isCircularArcGraph = (
 		return true;
 	}
 
-	const vertices = Array.from(adjacency.keys());
+	const vertices = [...adjacency.keys()];
 	const maxAttempts = Math.min(50, vertexCount * 2);
 
 	for (let attempt = 0; attempt < maxAttempts; attempt++) {
@@ -72,6 +75,8 @@ const isCircularArcGraph = (
 
 /**
  * Check if given vertex ordering is a valid circular arc model.
+ * @param adjacency
+ * @param ordering
  */
 const isValidCircularArcOrdering = (
 	adjacency: Map<number, Set<number>>,
@@ -79,8 +84,8 @@ const isValidCircularArcOrdering = (
 ): boolean => {
 	const n = ordering.length;
 	const position = new Map<number, number>();
-	for (let i = 0; i < n; i++) {
-		position.set(ordering[i], i);
+	for (let index = 0; index < n; index++) {
+		position.set(ordering[index], index);
 	}
 
 	for (const v of ordering) {
@@ -89,7 +94,7 @@ const isValidCircularArcOrdering = (
 			continue;
 		}
 
-		const neighborPositions = Array.from(neighbors)
+		const neighborPositions = [...neighbors]
 			.map((nb) => position.get(nb))
 			.filter((p): p is number => p !== undefined)
 			.sort((a, b) => a - b);
@@ -99,8 +104,8 @@ const isValidCircularArcOrdering = (
 		}
 
 		let consecutive = true;
-		for (let i = 1; i < neighborPositions.length; i++) {
-			if (neighborPositions[i] - neighborPositions[i - 1] !== 1) {
+		for (let index = 1; index < neighborPositions.length; index++) {
+			if (neighborPositions[index] - neighborPositions[index - 1] !== 1) {
 				consecutive = false;
 				break;
 			}
@@ -110,13 +115,13 @@ const isValidCircularArcOrdering = (
 			continue;
 		}
 
-		const maxPos = neighborPositions[neighborPositions.length - 1];
+		const maxPos = neighborPositions.at(-1);
 		const minPos = neighborPositions[0];
 
 		consecutive = true;
-		for (let i = 1; i < neighborPositions.length; i++) {
-			const diff = neighborPositions[i] - neighborPositions[i - 1];
-			if (diff !== 1 && !(neighborPositions[i] === maxPos && neighborPositions[i - 1] === minPos)) {
+		for (let index = 1; index < neighborPositions.length; index++) {
+			const diff = neighborPositions[index] - neighborPositions[index - 1];
+			if (diff !== 1 && !(neighborPositions[index] === maxPos && neighborPositions[index - 1] === minPos)) {
 				consecutive = false;
 				break;
 			}
@@ -132,6 +137,8 @@ const isValidCircularArcOrdering = (
 
 /**
  * Check if a circular arc model is proper (no arc contains another).
+ * @param adjacency
+ * @param vertexCount
  */
 const isProperCircularArcGraph = (
 	adjacency: Map<number, Set<number>>,
@@ -142,19 +149,19 @@ const isProperCircularArcGraph = (
 	}
 
 	// Proper circular arc graphs = claw-free circular arc graphs
-	const vertices = Array.from(adjacency.keys());
+	const vertices = [...adjacency.keys()];
 
 	for (const v of vertices) {
 		const neighborsSet = adjacency.get(v);
 		if (!neighborsSet) continue;
 
-		const neighbors: number[] = Array.from(neighborsSet);
+		const neighbors: number[] = [...neighborsSet];
 
-		for (let i = 0; i < neighbors.length; i++) {
-			for (let j = i + 1; j < neighbors.length; j++) {
-				for (let k = j + 1; k < neighbors.length; k++) {
-					const n1: number = neighbors[i];
-					const n2: number = neighbors[j];
+		for (let index = 0; index < neighbors.length; index++) {
+			for (let index_ = index + 1; index_ < neighbors.length; index_++) {
+				for (let k = index_ + 1; k < neighbors.length; k++) {
+					const n1: number = neighbors[index];
+					const n2: number = neighbors[index_];
 					const n3: number = neighbors[k];
 
 					const n1Neighbors = adjacency.get(n1);
@@ -183,6 +190,8 @@ const isProperCircularArcGraph = (
 /**
  * Compute CircularArc property from graph structure.
  * Intersection graph of arcs on a circle
+ * @param g
+ * @param _policy
  */
 export const computeCircularArc = (
 	g: AnalyzerGraph,
@@ -196,6 +205,8 @@ export const computeCircularArc = (
 /**
  * Compute ProperCircularArc property from graph structure.
  * Circular arc graph with no arc containment
+ * @param g
+ * @param _policy
  */
 export const computeProperCircularArc = (
 	g: AnalyzerGraph,

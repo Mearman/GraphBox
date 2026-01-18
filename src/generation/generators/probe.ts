@@ -27,6 +27,10 @@ const addEdgeIfNotExists = (
 
 /**
  * Generate ProbeChordal edges.
+ * @param nodes
+ * @param edges
+ * @param spec
+ * @param rng
  */
 export const generateProbeChordalEdges = (
 	nodes: TestNode[],
@@ -45,26 +49,30 @@ export const generateProbeChordalEdges = (
 	if (nodeCount < 2) return;
 
 	// Perfect elimination ordering
-	const order = nodes.map((_, i) => i);
-	for (let i = order.length - 1; i > 0; i--) {
-		const j = rng.integer(0, i);
-		[order[i], order[j]] = [order[j], order[i]];
+	const order = nodes.map((_, index) => index);
+	for (let index = order.length - 1; index > 0; index--) {
+		const index_ = rng.integer(0, index);
+		[order[index], order[index_]] = [order[index_], order[index]];
 	}
 
-	for (let i = 0; i < order.length; i++) {
-		const v = nodes[order[i]];
-		const maxNeighbors = Math.min(3, order.length - i - 1);
+	for (let index = 0; index < order.length; index++) {
+		const v = nodes[order[index]];
+		const maxNeighbors = Math.min(3, order.length - index - 1);
 
 		for (let k = 0; k < maxNeighbors; k++) {
-			if (i + k + 1 >= order.length) break;
-			const targetIdx = i + rng.integer(1, Math.min(3, order.length - i - 1));
-			addEdgeIfNotExists(edges, v.id, nodes[targetIdx].id);
+			if (index + k + 1 >= order.length) break;
+			const targetIndex = index + rng.integer(1, Math.min(3, order.length - index - 1));
+			addEdgeIfNotExists(edges, v.id, nodes[targetIndex].id);
 		}
 	}
 };
 
 /**
  * Generate ProbeInterval edges.
+ * @param nodes
+ * @param edges
+ * @param spec
+ * @param rng
  */
 export const generateProbeIntervalEdges = (
 	nodes: TestNode[],
@@ -83,18 +91,18 @@ export const generateProbeIntervalEdges = (
 
 	// Assign random intervals on line
 	const intervals: Array<{ start: number; end: number }> = [];
-	for (let i = 0; i < nodeCount; i++) {
+	for (let index = 0; index < nodeCount; index++) {
 		const start = rng.next();
 		const length = rng.next() * 0.5;
 		intervals.push({ start, end: start + length });
 	}
 
 	// Connect intersecting intervals
-	for (let i = 0; i < nodeCount; i++) {
-		for (let j = i + 1; j < nodeCount; j++) {
-			const [a, b] = [intervals[i], intervals[j]];
+	for (let index = 0; index < nodeCount; index++) {
+		for (let index_ = index + 1; index_ < nodeCount; index_++) {
+			const [a, b] = [intervals[index], intervals[index_]];
 			if (!(a.end < b.start || b.end < a.start)) {
-				addEdgeIfNotExists(edges, nodes[i].id, nodes[j].id);
+				addEdgeIfNotExists(edges, nodes[index].id, nodes[index_].id);
 			}
 		}
 	}

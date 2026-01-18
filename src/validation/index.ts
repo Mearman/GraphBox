@@ -121,7 +121,7 @@ export {
 	validateGemFree,
 	validateHHFree,
 	validateP5Free,
-} from "./forbidden_subgraph";
+} from "./forbidden-subgraph";
 
 // Intersection graph validators
 export {
@@ -140,4 +140,4 @@ export {
 	validateModular as validateModularClass,
 	validatePtolemaic,
 	validateQuasiLine,
-} from "./perfect_variants";
+} from "./perfect-variants";

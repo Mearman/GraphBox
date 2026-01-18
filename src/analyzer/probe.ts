@@ -15,17 +15,17 @@ import type { AnalyzerGraph, ComputePolicy } from "./types.js";
 
 const buildAdjacencyMap = (g: AnalyzerGraph): Map<number, Set<number>> => {
 	const adj = new Map<number, Set<number>>();
-	for (let i = 0; i < g.vertices.length; i++) {
-		adj.set(i, new Set());
+	for (let index = 0; index < g.vertices.length; index++) {
+		adj.set(index, new Set());
 	}
 	for (const edge of g.edges) {
 		if (edge.endpoints.length === 2) {
-			const [srcId, tgtId] = edge.endpoints;
-			const srcIdx = g.vertices.findIndex((v) => v.id === srcId);
-			const tgtIdx = g.vertices.findIndex((v) => v.id === tgtId);
-			if (srcIdx >= 0 && tgtIdx >= 0) {
-				adj.get(srcIdx)?.add(tgtIdx);
-				adj.get(tgtIdx)?.add(srcIdx);
+			const [sourceId, tgtId] = edge.endpoints;
+			const sourceIndex = g.vertices.findIndex((v) => v.id === sourceId);
+			const tgtIndex = g.vertices.findIndex((v) => v.id === tgtId);
+			if (sourceIndex !== -1 && tgtIndex !== -1) {
+				adj.get(sourceIndex)?.add(tgtIndex);
+				adj.get(tgtIndex)?.add(sourceIndex);
 			}
 		}
 	}
@@ -34,11 +34,13 @@ const buildAdjacencyMap = (g: AnalyzerGraph): Map<number, Set<number>> => {
 
 /**
  * Check if graph is chordal.
+ * @param adjacency
+ * @param vertexCount
  */
 const isChordal = (adjacency: Map<number, Set<number>>, vertexCount: number): boolean => {
 	if (vertexCount < 4) return true;
 
-	const vertices = Array.from(adjacency.keys());
+	const vertices = [...adjacency.keys()];
 	const visited = new Set<number>();
 
 	while (visited.size < vertexCount) {
@@ -54,12 +56,12 @@ const isChordal = (adjacency: Map<number, Set<number>>, vertexCount: number): bo
 				break;
 			}
 
-			const neighborsArray = Array.from(neighbors).filter((n) => !visited.has(n));
+			const neighborsArray = [...neighbors].filter((n) => !visited.has(n));
 			let isClique = true;
 
-			for (let i = 0; i < neighborsArray.length && isClique; i++) {
-				for (let j = i + 1; j < neighborsArray.length && isClique; j++) {
-					if (!adjacency.get(neighborsArray[i])?.has(neighborsArray[j])) {
+			for (let index = 0; index < neighborsArray.length && isClique; index++) {
+				for (let index_ = index + 1; index_ < neighborsArray.length && isClique; index_++) {
+					if (!adjacency.get(neighborsArray[index])?.has(neighborsArray[index_])) {
 						isClique = false;
 					}
 				}
@@ -82,6 +84,8 @@ const isChordal = (adjacency: Map<number, Set<number>>, vertexCount: number): bo
 
 /**
  * Compute ProbeChordal property.
+ * @param g
+ * @param _policy
  */
 export const computeProbeChordal = (
 	g: AnalyzerGraph,
@@ -96,24 +100,24 @@ export const computeProbeChordal = (
 
 	// For small graphs, use exhaustive search
 	if (g.vertices.length <= 8) {
-		const vertices = Array.from(adj.keys());
+		const vertices = [...adj.keys()];
 
 		// Try all subsets as probe sets
 		for (let mask = 0; mask < (1 << g.vertices.length); mask++) {
 			const nonProbeSet: number[] = [];
 
-			for (let i = 0; i < g.vertices.length; i++) {
-				if (!(mask & (1 << i))) {
-					nonProbeSet.push(vertices[i]);
+			for (let index = 0; index < g.vertices.length; index++) {
+				if (!(mask & (1 << index))) {
+					nonProbeSet.push(vertices[index]);
 				}
 			}
 
 			// Add all edges among non-probe vertices
 			const testAdj = new Map(adj);
-			for (let i = 0; i < nonProbeSet.length; i++) {
-				for (let j = i + 1; j < nonProbeSet.length; j++) {
-					testAdj.get(nonProbeSet[i])?.add(nonProbeSet[j]);
-					testAdj.get(nonProbeSet[j])?.add(nonProbeSet[i]);
+			for (let index = 0; index < nonProbeSet.length; index++) {
+				for (let index_ = index + 1; index_ < nonProbeSet.length; index_++) {
+					testAdj.get(nonProbeSet[index])?.add(nonProbeSet[index_]);
+					testAdj.get(nonProbeSet[index_])?.add(nonProbeSet[index]);
 				}
 			}
 
@@ -129,6 +133,8 @@ export const computeProbeChordal = (
 
 /**
  * Compute ProbeInterval property.
+ * @param g
+ * @param _policy
  */
 export const computeProbeInterval = (
 	g: AnalyzerGraph,
@@ -142,7 +148,7 @@ export const computeProbeInterval = (
 	}
 
 	// Heuristic: check if interval-like (small max degree)
-	const maxDegree = Array.from(adj.values()).reduce(
+	const maxDegree = [...adj.values()].reduce(
 		(max, neighbors) => Math.max(max, neighbors.size),
 		0
 	);

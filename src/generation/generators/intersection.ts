@@ -12,6 +12,9 @@ import type { SeededRandom, TestEdge, TestNode } from "./types.js";
 
 /**
  * Add edge if it doesn't exist.
+ * @param edges
+ * @param source
+ * @param target
  */
 const addEdgeIfNotExists = (
 	edges: TestEdge[],
@@ -31,6 +34,10 @@ const addEdgeIfNotExists = (
 /**
  * Generate CircularArc edges.
  * Intersection graph of arcs on a circle
+ * @param nodes
+ * @param edges
+ * @param spec
+ * @param rng
  */
 export const generateCircularArcEdges = (
 	nodes: TestNode[],
@@ -52,23 +59,23 @@ export const generateCircularArcEdges = (
 	// Each arc has a start angle and length
 	const arcs: Array<{ start: number; end: number }> = [];
 
-	for (let i = 0; i < nodeCount; i++) {
+	for (let index = 0; index < nodeCount; index++) {
 		const start = rng.next() * 2 * Math.PI; // Random start angle [0, 2π]
 		const length = rng.next() * Math.PI; // Random length [0, π]
 		arcs.push({ start, end: (start + length) % (2 * Math.PI) });
 	}
 
 	// Connect intersecting arcs
-	for (let i = 0; i < nodeCount; i++) {
-		for (let j = i + 1; j < nodeCount; j++) {
-			const [a, b] = [arcs[i], arcs[j]];
+	for (let index = 0; index < nodeCount; index++) {
+		for (let index_ = index + 1; index_ < nodeCount; index_++) {
+			const [a, b] = [arcs[index], arcs[index_]];
 
 			// Check if arcs intersect on the circle
 			// Two arcs intersect if they overlap on the circle
 			const intersects = arcsIntersect(a, b);
 
 			if (intersects) {
-				addEdgeIfNotExists(edges, nodes[i].id, nodes[j].id);
+				addEdgeIfNotExists(edges, nodes[index].id, nodes[index_].id);
 			}
 		}
 	}
@@ -76,6 +83,12 @@ export const generateCircularArcEdges = (
 
 /**
  * Check if two circular arcs intersect.
+ * @param a
+ * @param a.start
+ * @param a.end
+ * @param b
+ * @param b.start
+ * @param b.end
  */
 const arcsIntersect = (
 	a: { start: number; end: number },
@@ -95,19 +108,11 @@ const arcsIntersect = (
 
 	// Handle wrap-around cases
 	const aContains = (angle: number) => {
-		if (aStart < aEnd) {
-			return angle >= aStart && angle <= aEnd;
-		} else {
-			return angle >= aStart || angle <= aEnd;
-		}
+		return aStart < aEnd ? angle >= aStart && angle <= aEnd : angle >= aStart || angle <= aEnd;
 	};
 
 	const bContains = (angle: number) => {
-		if (bStart < bEnd) {
-			return angle >= bStart && angle <= bEnd;
-		} else {
-			return angle >= bStart || angle <= bEnd;
-		}
+		return bStart < bEnd ? angle >= bStart && angle <= bEnd : angle >= bStart || angle <= bEnd;
 	};
 
 	// Arcs intersect if they overlap
@@ -118,6 +123,10 @@ const arcsIntersect = (
 /**
  * Generate ProperCircularArc edges.
  * Circular arc graph with no arc containment
+ * @param nodes
+ * @param edges
+ * @param spec
+ * @param rng
  */
 export const generateProperCircularArcEdges = (
 	nodes: TestNode[],
@@ -141,7 +150,7 @@ export const generateProperCircularArcEdges = (
 
 	// Randomly order start positions
 	const startAngles: number[] = [];
-	for (let i = 0; i < nodeCount; i++) {
+	for (let index = 0; index < nodeCount; index++) {
 		startAngles.push(rng.next() * 2 * Math.PI);
 	}
 
@@ -150,18 +159,18 @@ export const generateProperCircularArcEdges = (
 
 	// Generate arcs
 	const arcs: Array<{ start: number; end: number }> = [];
-	for (let i = 0; i < nodeCount; i++) {
-		const start = startAngles[i];
+	for (let index = 0; index < nodeCount; index++) {
+		const start = startAngles[index];
 		arcs.push({ start, end: (start + arcLength) % (2 * Math.PI) });
 	}
 
 	// Connect intersecting arcs
-	for (let i = 0; i < nodeCount; i++) {
-		for (let j = i + 1; j < nodeCount; j++) {
-			const [a, b] = [arcs[i], arcs[j]];
+	for (let index = 0; index < nodeCount; index++) {
+		for (let index_ = index + 1; index_ < nodeCount; index_++) {
+			const [a, b] = [arcs[index], arcs[index_]];
 
 			if (arcsIntersect(a, b)) {
-				addEdgeIfNotExists(edges, nodes[i].id, nodes[j].id);
+				addEdgeIfNotExists(edges, nodes[index].id, nodes[index_].id);
 			}
 		}
 	}

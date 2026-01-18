@@ -56,7 +56,7 @@ import {
 	computeGemFree,
 	computeHHFree,
 	computeP5Free,
-} from "./forbidden_subgraph";
+} from "./forbidden-subgraph";
 import {
 	computePlanar
 } from "./geometric";
@@ -72,7 +72,7 @@ import {
 	computeModular,
 	computePtolemaic,
 	computeQuasiLine,
-} from "./perfect_variants";
+} from "./perfect-variants";
 import {
 	computeProbeChordal,
 	computeProbeInterval

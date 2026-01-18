@@ -41,12 +41,11 @@ import {
 	generateHHFreeEdges,
 	// New Priority 1 graph class generators
 	generateP5FreeEdges,
-} from "./forbidden_subgraph";
+} from "./forbidden-subgraph";
 import {
+	generateDiskEdges,
 	generatePlanarEdges,
-	generateUnitDiskEdges,
-	generateDiskEdges
-} from "./geometric";
+	generateUnitDiskEdges} from "./geometric";
 import {
 	generateCircularArcEdges,
 	generateProperCircularArcEdges,
@@ -71,7 +70,7 @@ import {
 	generateModularEdges as generateModularGraphEdges,
 	generatePtolemaicEdges,
 	generateQuasiLineEdges,
-} from "./perfect_variants";
+} from "./perfect-variants";
 import {
 	generateProbeChordalEdges,
 	generateProbeIntervalEdges,
@@ -352,7 +351,7 @@ const generateBaseStructure = (nodes: TestNode[], spec: GraphSpec, _config: Grap
 		return edges;
 	}
 
-	if (spec.planarity?.kind === "planar") {
+	if (spec.planar?.kind === "planar") {
 		generatePlanarEdges(nodes, edges, spec, rng);
 		return edges;
 	}

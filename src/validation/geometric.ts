@@ -87,11 +87,11 @@ export const validateUnitDisk = (graph: TestGraph): PropertyValidationResult => 
 export const validatePlanar = (graph: TestGraph): PropertyValidationResult => {
 	const { spec, nodes, edges } = graph;
 
-	if (spec.planarity?.kind !== "planar") {
+	if (spec.planar?.kind !== "planar") {
 		return {
-			property: "planarity",
-			expected: spec.planarity?.kind ?? "unconstrained",
-			actual: spec.planarity?.kind ?? "unconstrained",
+			property: "planar",
+			expected: spec.planar?.kind ?? "unconstrained",
+			actual: spec.planar?.kind ?? "unconstrained",
 			valid: true,
 		};
 	}
@@ -101,7 +101,7 @@ export const validatePlanar = (graph: TestGraph): PropertyValidationResult => {
 	if (n < 4) {
 		// All graphs with < 4 vertices are planar
 		return {
-			property: "planarity",
+			property: "planar",
 			expected: "planar",
 			actual: "planar",
 			valid: true,
@@ -113,7 +113,7 @@ export const validatePlanar = (graph: TestGraph): PropertyValidationResult => {
 
 	if (edges.length > maxEdges) {
 		return {
-			property: "planarity",
+			property: "planar",
 			expected: "planar",
 			actual: "too_many_edges",
 			valid: false,
@@ -126,7 +126,7 @@ export const validatePlanar = (graph: TestGraph): PropertyValidationResult => {
 	// For now, just verify the edge count constraint
 
 	return {
-		property: "planarity",
+		property: "planar",
 		expected: "planar",
 		actual: "planar",
 		valid: true,
