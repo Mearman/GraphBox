@@ -7,6 +7,16 @@
  * @generated 2026-01-18T16:10:41.825Z
  */
 
+import {
+	buildAdjacencyList,
+	hasInducedSubgraph,
+	SUBGRAPH_PATTERNS
+} from "../algorithms/extraction/forbidden-subgraphs.js";
+import {
+	hasAsteroidalTriple,
+	hasInducedCycle as checkInducedCycle,
+	isDistanceHereditary as checkDistanceHereditary
+} from "../validation/forbidden-subgraph-helpers.js";
 import type {
 	ATFree,
 	BullFree,
@@ -15,181 +25,233 @@ import type {
 	GemFree,
 	HHFree,
 	P5Free,
-	WeaklyChordal} from "../generation/spec/forbidden_subgraph.js";
+	WeaklyChordal
+} from "../generation/spec/forbidden_subgraph.js";
 import type { AnalyzerGraph , ComputePolicy } from "./types.js";
+
+/**
+ * Convert AnalyzerGraph to adjacency list format.
+ *
+ * @param g - Analyzer graph
+ * @returns Tuple of (vertexSet, edgeList)
+ */
+const toAdjacencyFormat = (g: AnalyzerGraph): [Set<number>, Array<[number, number]>] => {
+	// Map vertex IDs to numbers
+	const nodeIdMap = new Map<string, number>();
+	for (const [index, v] of g.vertices.entries()) {
+		nodeIdMap.set(v.id, index);
+	}
+
+	// Create vertex set and edge list
+	const vertexSet = new Set<number>(g.vertices.map((_, index) => index));
+	const edgeList: Array<[number, number]> = [];
+
+	for (const edge of g.edges) {
+		if (edge.endpoints.length === 2) {
+			const [srcId, tgtId] = edge.endpoints;
+			const src = nodeIdMap.get(srcId);
+			const tgt = nodeIdMap.get(tgtId);
+			if (src !== undefined && tgt !== undefined) {
+				edgeList.push([src, tgt]);
+			}
+		}
+	}
+
+	return [vertexSet, edgeList];
+};
+
+/**
+ * Build mutable adjacency map from AnalyzerGraph.
+ *
+ * @param g - Analyzer graph
+ * @returns Adjacency map
+ */
+const buildAdjacencyMap = (g: AnalyzerGraph): Map<number, Set<number>> => {
+	const [vertexSet, edgeList] = toAdjacencyFormat(g);
+	const adj = new Map<number, Set<number>>();
+
+	for (const v of vertexSet) {
+		adj.set(v, new Set());
+	}
+
+	for (const [u, v] of edgeList) {
+		adj.get(u)?.add(v);
+		adj.get(v)?.add(u);
+	}
+
+	return adj;
+};
 
 /**
  * Compute P5Free property from graph structure.
  * Contains no induced path on 5 vertices
- *
- * @param g - Analyzer graph
- * @param _policy - Computation policy (unused in generated analyzers)
- * @returns P5Free with computed value
  */
 export const computeP5Free = (
 	g: AnalyzerGraph,
 	_policy: ComputePolicy
 ): P5Free => {
-	// TODO: Implement analysis logic for P5Free
-	// For now, return placeholder value
-
-	// Example: Check for forbidden subgraph
-	// const hasForbidden = checkForForbiddenSubgraph(g);
-	// return hasForbidden ? { kind: "has_p5" } : { kind: "p5_free" };
-
-	return { kind: "p5_free" };
+	const [vertexSet, edgeList] = toAdjacencyFormat(g);
+	const adjacency = buildAdjacencyList(vertexSet, edgeList);
+	const hasP5 = hasInducedSubgraph(adjacency, SUBGRAPH_PATTERNS.P5);
+	return hasP5 ? { kind: "has_p5" } : { kind: "p5_free" };
 };
 
 /**
  * Compute C5Free property from graph structure.
  * Contains no induced cycle on 5 vertices
- *
- * @param g - Analyzer graph
- * @param _policy - Computation policy (unused in generated analyzers)
- * @returns C5Free with computed value
  */
 export const computeC5Free = (
 	g: AnalyzerGraph,
 	_policy: ComputePolicy
 ): C5Free => {
-	// TODO: Implement analysis logic for C5Free
-	// For now, return placeholder value
-
-	// Example: Check for forbidden subgraph
-	// const hasForbidden = checkForForbiddenSubgraph(g);
-	// return hasForbidden ? { kind: "has_c5" } : { kind: "c5_free" };
-
-	return { kind: "c5_free" };
+	const [vertexSet, edgeList] = toAdjacencyFormat(g);
+	const adjacency = buildAdjacencyList(vertexSet, edgeList);
+	const hasC5 = hasInducedSubgraph(adjacency, SUBGRAPH_PATTERNS.C5);
+	return hasC5 ? { kind: "has_c5" } : { kind: "c5_free" };
 };
 
 /**
  * Compute BullFree property from graph structure.
  * Contains no induced bull graph
- *
- * @param g - Analyzer graph
- * @param _policy - Computation policy (unused in generated analyzers)
- * @returns BullFree with computed value
  */
 export const computeBullFree = (
 	g: AnalyzerGraph,
 	_policy: ComputePolicy
 ): BullFree => {
-	// TODO: Implement analysis logic for BullFree
-	// For now, return placeholder value
-
-	// Example: Check for forbidden subgraph
-	// const hasForbidden = checkForForbiddenSubgraph(g);
-	// return hasForbidden ? { kind: "has_bull" } : { kind: "bull_free" };
-
-	return { kind: "bull_free" };
+	const [vertexSet, edgeList] = toAdjacencyFormat(g);
+	const adjacency = buildAdjacencyList(vertexSet, edgeList);
+	const hasBull = hasInducedSubgraph(adjacency, SUBGRAPH_PATTERNS.bull);
+	return hasBull ? { kind: "has_bull" } : { kind: "bull_free" };
 };
 
 /**
  * Compute GemFree property from graph structure.
  * Contains no induced gem graph
- *
- * @param g - Analyzer graph
- * @param _policy - Computation policy (unused in generated analyzers)
- * @returns GemFree with computed value
  */
 export const computeGemFree = (
 	g: AnalyzerGraph,
 	_policy: ComputePolicy
 ): GemFree => {
-	// TODO: Implement analysis logic for GemFree
-	// For now, return placeholder value
-
-	// Example: Check for forbidden subgraph
-	// const hasForbidden = checkForForbiddenSubgraph(g);
-	// return hasForbidden ? { kind: "has_gem" } : { kind: "gem_free" };
-
-	return { kind: "gem_free" };
-};
-
-/**
- * Compute WeaklyChordal property from graph structure.
- * No hole or antihole of length 5 or more
- *
- * @param g - Analyzer graph
- * @param _policy - Computation policy (unused in generated analyzers)
- * @returns WeaklyChordal with computed value
- */
-export const computeWeaklyChordal = (
-	g: AnalyzerGraph,
-	_policy: ComputePolicy
-): WeaklyChordal => {
-	// TODO: Implement analysis logic for WeaklyChordal
-	// For now, return placeholder value
-
-	// Example: Check for forbidden subgraph
-	// const hasForbidden = checkForForbiddenSubgraph(g);
-	// return hasForbidden ? { kind: "has_hole_or_antihole" } : { kind: "weakly_chordal" };
-
-	return { kind: "weakly_chordal" };
+	const [vertexSet, edgeList] = toAdjacencyFormat(g);
+	const adjacency = buildAdjacencyList(vertexSet, edgeList);
+	const hasGem = hasInducedSubgraph(adjacency, SUBGRAPH_PATTERNS.gem);
+	return hasGem ? { kind: "has_gem" } : { kind: "gem_free" };
 };
 
 /**
  * Compute ATFree property from graph structure.
  * No asteroidal triple of vertices
- *
- * @param g - Analyzer graph
- * @param _policy - Computation policy (unused in generated analyzers)
- * @returns ATFree with computed value
  */
 export const computeATFree = (
 	g: AnalyzerGraph,
 	_policy: ComputePolicy
 ): ATFree => {
-	// TODO: Implement analysis logic for ATFree
-	// For now, return placeholder value
+	const adj = buildAdjacencyMap(g);
+	const vertices = Array.from(adj.keys());
 
-	// Example: Check for forbidden subgraph
-	// const hasForbidden = checkForForbiddenSubgraph(g);
-	// return hasForbidden ? { kind: "has_asteroidal_triple" } : { kind: "at_free" };
+	// Check all triples for asteroidal triples
+	let hasAT = false;
+	for (let i = 0; i < vertices.length && !hasAT; i++) {
+		for (let j = i + 1; j < vertices.length && !hasAT; j++) {
+			for (let k = j + 1; k < vertices.length && !hasAT; k++) {
+				if (hasAsteroidalTriple(adj, vertices[i], vertices[j], vertices[k])) {
+					hasAT = true;
+				}
+			}
+		}
+	}
 
-	return { kind: "at_free" };
+	return hasAT ? { kind: "has_asteroidal_triple" } : { kind: "at_free" };
 };
 
 /**
  * Compute HHFree property from graph structure.
- * No induced house or hole
- *
- * @param g - Analyzer graph
- * @param _policy - Computation policy (unused in generated analyzers)
- * @returns HHFree with computed value
+ * No induced house or hole (cycle of length >= 5)
  */
 export const computeHHFree = (
 	g: AnalyzerGraph,
 	_policy: ComputePolicy
 ): HHFree => {
-	// TODO: Implement analysis logic for HHFree
-	// For now, return placeholder value
+	const [vertexSet, edgeList] = toAdjacencyFormat(g);
+	const adjacency = buildAdjacencyList(vertexSet, edgeList);
+	const adj = buildAdjacencyMap(g);
 
-	// Example: Check for forbidden subgraph
-	// const hasForbidden = checkForForbiddenSubgraph(g);
-	// return hasForbidden ? { kind: "has_house_or_hole" } : { kind: "hh_free" };
+	// Check for house
+	const hasHouse = hasInducedSubgraph(adjacency, SUBGRAPH_PATTERNS.house);
 
-	return { kind: "hh_free" };
+	// Check for holes (cycles of length >= 5)
+	let hasHole = false;
+	for (let cycleLength = 5; cycleLength <= g.vertices.length; cycleLength++) {
+		if (checkInducedCycle(adj, vertexSet, cycleLength)) {
+			hasHole = true;
+			break;
+		}
+	}
+
+	return hasHouse || hasHole ? { kind: "has_house_or_hole" } : { kind: "hh_free" };
 };
 
 /**
  * Compute DistanceHereditary property from graph structure.
  * Distances preserved in all connected induced subgraphs
- *
- * @param g - Analyzer graph
- * @param _policy - Computation policy (unused in generated analyzers)
- * @returns DistanceHereditary with computed value
  */
 export const computeDistanceHereditary = (
 	g: AnalyzerGraph,
 	_policy: ComputePolicy
 ): DistanceHereditary => {
-	// TODO: Implement analysis logic for DistanceHereditary
-	// For now, return placeholder value
+	const adj = buildAdjacencyMap(g);
+	const vertexSet = new Set(g.vertices.map((_, index) => index));
+	const isDH = checkDistanceHereditary(adj, vertexSet);
+	return isDH ? { kind: "distance_hereditary" } : { kind: "not_distance_hereditary" };
+};
 
-	// Example: Check for forbidden subgraph
-	// const hasForbidden = checkForForbiddenSubgraph(g);
-	// return hasForbidden ? { kind: "not_distance_hereditary" } : { kind: "distance_hereditary" };
+/**
+ * Compute WeaklyChordal property from graph structure.
+ * No induced hole or anti-hole of length >= 5
+ */
+export const computeWeaklyChordal = (
+	g: AnalyzerGraph,
+	_policy: ComputePolicy
+): WeaklyChordal => {
+	const [vertexSet, edgeList] = toAdjacencyFormat(g);
+	const adj = buildAdjacencyMap(g);
 
-	return { kind: "distance_hereditary" };
+	// Check for holes (cycles of length >= 5)
+	let hasHole = false;
+	for (let cycleLength = 5; cycleLength <= g.vertices.length; cycleLength++) {
+		if (checkInducedCycle(adj, vertexSet, cycleLength)) {
+			hasHole = true;
+			break;
+		}
+	}
+
+	// Check for antiholes (complement has hole)
+	// Build complement adjacency
+	const complementAdj = new Map<number, Set<number>>();
+	for (const v of vertexSet) {
+		complementAdj.set(v, new Set());
+	}
+
+	const vertices = Array.from(vertexSet);
+	for (let i = 0; i < vertices.length; i++) {
+		for (let j = i + 1; j < vertices.length; j++) {
+			const u = vertices[i];
+			const v = vertices[j];
+			// Add edge in complement if not adjacent in original
+			if (!adj.get(u)?.has(v)) {
+				complementAdj.get(u)?.add(v);
+				complementAdj.get(v)?.add(u);
+			}
+		}
+	}
+
+	let hasAntihole = false;
+	for (let cycleLength = 5; cycleLength <= g.vertices.length; cycleLength++) {
+		if (checkInducedCycle(complementAdj, vertexSet, cycleLength)) {
+			hasAntihole = true;
+			break;
+		}
+	}
+
+	return hasHole || hasAntihole ? { kind: "has_hole_or_antihole" } : { kind: "weakly_chordal" };
 };

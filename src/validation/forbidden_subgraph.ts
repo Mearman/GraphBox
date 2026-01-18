@@ -8,6 +8,11 @@
  */
 
 import { buildAdjacencyList, hasInducedSubgraph, SUBGRAPH_PATTERNS } from "../algorithms/extraction/forbidden-subgraphs.js";
+import {
+	hasAsteroidalTriple,
+	hasInducedCycle,
+	isDistanceHereditary,
+} from "./forbidden-subgraph-helpers.js";
 import type { TestGraph } from "../generation/generators/types.js";
 import type { PropertyValidationResult } from "./types.js";
 
@@ -239,10 +244,39 @@ export const validateATFree = (
 		};
 	}
 
-	// TODO: Implement validation logic for ATFree
-	// For now, return placeholder validation
-	const actual = "at_free"; // Computed from graph structure
+	// Build adjacency list
+	const nodeIdMap = new Map<string, number>();
+	for (const [index, n] of nodes.entries()) nodeIdMap.set(n.id, index);
+	const vertexSet = new Set(nodes.map((_, index) => index));
+	const edgeList = edges.map((e) => [
+		nodeIdMap.get(e.source)!,
+		nodeIdMap.get(e.target)!,
+	] as [number, number]);
 
+	const adj = new Map<number, Set<number>>();
+	for (const v of vertexSet) {
+		adj.set(v, new Set());
+	}
+	for (const [u, v] of edgeList) {
+		adj.get(u)?.add(v);
+		adj.get(v)?.add(u);
+	}
+
+	// Check all triples of vertices for asteroidal triples
+	const vertices = Array.from(vertexSet);
+	let hasAT = false;
+
+	for (let i = 0; i < vertices.length && !hasAT; i++) {
+		for (let j = i + 1; j < vertices.length && !hasAT; j++) {
+			for (let k = j + 1; k < vertices.length && !hasAT; k++) {
+				if (hasAsteroidalTriple(adj, vertices[i], vertices[j], vertices[k])) {
+					hasAT = true;
+				}
+			}
+		}
+	}
+
+	const actual = hasAT ? "has_at" : "at_free";
 	const valid = actual === expected;
 
 	return {
@@ -258,7 +292,7 @@ export const validateATFree = (
 
 /**
  * Validate HHFree property.
- * No induced house or hole
+ * No induced house or hole (cycle of length >= 5)
  *
  * @param graph - Test graph to validate
  * @param _adjustments - Optional validation adjustments
@@ -268,7 +302,7 @@ export const validateHHFree = (
 	graph: TestGraph,
 	_adjustments: Partial<Record<string, boolean>> = {}
 ): PropertyValidationResult => {
-	const { spec, nodes, edges } = graph;
+	const { spec, nodes: _nodes, edges: _edges } = graph;
 	const expected = spec.hhFree?.kind;
 
 	if (expected === undefined || expected === "unconstrained") {
@@ -280,10 +314,38 @@ export const validateHHFree = (
 		};
 	}
 
-	// TODO: Implement validation logic for HHFree
-	// For now, return placeholder validation
-	const actual = "hh_free"; // Computed from graph structure
+	// Build adjacency list
+	const nodeIdMap = new Map<string, number>();
+	for (const [index, n] of _nodes.entries()) nodeIdMap.set(n.id, index);
+	const vertexSet = new Set(_nodes.map((_, index) => index));
+	const edgeList = _edges.map((e) => [
+		nodeIdMap.get(e.source)!,
+		nodeIdMap.get(e.target)!,
+	] as [number, number]);
 
+	const adj = new Map<number, Set<number>>();
+	for (const v of vertexSet) {
+		adj.set(v, new Set());
+	}
+	for (const [u, v] of edgeList) {
+		adj.get(u)?.add(v);
+		adj.get(v)?.add(u);
+	}
+
+	// Check for house (5-vertex pattern)
+	const adjacency = buildAdjacencyList(vertexSet, edgeList);
+	const hasHouse = hasInducedSubgraph(adjacency, SUBGRAPH_PATTERNS.house);
+
+	// Check for holes (cycles of length >= 5)
+	let hasHole = false;
+	for (let cycleLength = 5; cycleLength <= _nodes.length; cycleLength++) {
+		if (hasInducedCycle(adj, vertexSet, cycleLength)) {
+			hasHole = true;
+			break;
+		}
+	}
+
+	const actual = hasHouse || hasHole ? "has_hh" : "hh_free";
 	const valid = actual === expected;
 
 	return {
@@ -309,7 +371,7 @@ export const validateDistanceHereditary = (
 	graph: TestGraph,
 	_adjustments: Partial<Record<string, boolean>> = {}
 ): PropertyValidationResult => {
-	const { spec, nodes, edges } = graph;
+	const { spec, nodes: _nodes, edges: _edges } = graph;
 	const expected = spec.distanceHereditary?.kind;
 
 	if (expected === undefined || expected === "unconstrained") {
@@ -321,10 +383,27 @@ export const validateDistanceHereditary = (
 		};
 	}
 
-	// TODO: Implement validation logic for DistanceHereditary
-	// For now, return placeholder validation
-	const actual = "distance_hereditary"; // Computed from graph structure
+	// Build adjacency list
+	const nodeIdMap = new Map<string, number>();
+	for (const [index, n] of _nodes.entries()) nodeIdMap.set(n.id, index);
+	const vertexSet = new Set(_nodes.map((_, index) => index));
+	const edgeList = _edges.map((e) => [
+		nodeIdMap.get(e.source)!,
+		nodeIdMap.get(e.target)!,
+	] as [number, number]);
 
+	const adj = new Map<number, Set<number>>();
+	for (const v of vertexSet) {
+		adj.set(v, new Set());
+	}
+	for (const [u, v] of edgeList) {
+		adj.get(u)?.add(v);
+		adj.get(v)?.add(u);
+	}
+
+	// Check if distance hereditary (no isometric cycles of length >= 5)
+	const isDH = isDistanceHereditary(adj, vertexSet);
+	const actual = isDH ? "distance_hereditary" : "not_distance_hereditary";
 	const valid = actual === expected;
 
 	return {
