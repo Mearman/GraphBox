@@ -168,7 +168,7 @@ export const computeModular = (
 	}
 
 	// For large graphs, use heuristic
-	if (g.vertices.length > 10) {
+	if (g.vertices.length > 30) {
 		// Heuristic: Check degree sequence
 		// If all vertices have different degrees, no twins can exist
 		const degrees = new Map<string, number>();

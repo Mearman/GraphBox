@@ -11,13 +11,12 @@ import type { GraphSpec } from "../spec.js";
 import type { SeededRandom,TestEdge,TestNode  } from "./types.js";
 
 /**
- * Generate Modular edges using cograph construction.
- * Modular graphs are cographs: built from single vertices using disjoint union and join.
+ * Generate Modular edges.
+ * Modular graphs have no twin vertices (no two vertices with identical external neighborhoods).
  *
- * Uses recursive cograph construction:
- * - Base case: Single vertex (modular)
- * - Join operation: Connect all pairs from two sets (creates clique)
- * - Union operation: Keep sets disjoint (creates independent set)
+ * Generates paths or caterpillar trees to ensure no twins:
+ * - Paths: Each vertex has unique position and degree
+ * - Caterpillar trees: Main path with leaves attached asymmetrically
  *
  * @param nodes - Graph nodes
  * @param edges - Edge list to populate
@@ -37,35 +36,42 @@ export const generateModularEdges = (
 	const nodeCount = nodes.length;
 	if (nodeCount <= 1) return;
 
-	// Cograph construction via recursive partitioning
-	// Split nodes into two groups and either join or keep disjoint
-	const buildCograph = (start: number, end: number): void => {
-		if (end - start <= 1) return; // Base case: single vertex
+	// 70% chance of path, 30% chance of caterpillar tree
+	// Always use paths for small graphs to ensure modularity
+	const usePath = rng.next() < 0.7 || nodeCount <= 6;
 
-		const mid = start + Math.floor((end - start) / 2);
-
-		// Recursively build left and right halves
-		buildCograph(start, mid);
-		buildCograph(mid, end);
-
-		// Random choice: join (connect all pairs) or union (keep disjoint)
-		const shouldJoin = rng.next() > 0.5;
-
-		if (shouldJoin) {
-			// Join: connect all vertices in left half to all in right half
-			for (let index = start; index < mid; index++) {
-				for (let index_ = mid; index_ < end; index_++) {
-					edges.push({
-						source: nodes[index].id,
-						target: nodes[index_].id,
-					});
-				}
-			}
+	if (usePath) {
+		// Generate a simple path: 0-1-2-3-...-n
+		for (let index = 0; index < nodeCount - 1; index++) {
+			edges.push({
+				source: nodes[index].id,
+				target: nodes[index + 1].id,
+			});
 		}
-		// If not joining, keep disjoint (union operation - no edges)
-	};
+	} else {
+		// Generate caterpillar tree: path with at most one leaf per path node
+		// This ensures no two leaves are twins
+		const pathLength = Math.ceil(nodeCount / 2);
 
-	buildCograph(0, nodeCount);
+		// Build main path
+		for (let index = 0; index < pathLength - 1; index++) {
+			edges.push({
+				source: nodes[index].id,
+				target: nodes[index + 1].id,
+			});
+		}
+
+		// Attach leaves: at most one leaf per path node, avoiding twins
+		let leafIndex = pathLength;
+		for (let index = 0; index < pathLength && leafIndex < nodeCount; index++) {
+			// Attach one leaf to this path node
+			edges.push({
+				source: nodes[index].id,
+				target: nodes[leafIndex].id,
+			});
+			leafIndex++;
+		}
+	}
 };
 
 /**

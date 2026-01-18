@@ -1,102 +1,150 @@
 /**
- * Integration tests for Planar graph class
+ * Integration tests for planar graphs.
  *
- * Planar: can be drawn in the plane without edge crossings.
- * Equivalent: does not contain K5 or K3,3 as a minor (Kuratowski's theorem).
+ * Tests the complete pipeline: spec → generation → analysis → validation
+ * for planar graph property.
  */
 
 import { describe, expect, it } from "vitest";
 
-import { isPlanar } from "../../analyzer";
+import { computePlanar } from "../../analyzer/geometric";
 import { generateGraph } from "../../generation/generator";
-import { type GraphSpec,makeGraphSpec } from "../../generation/spec";
-import { toAnalyzerGraph } from "./helpers";
+import { makeGraphSpec } from "../../generation/spec";
+import type { GraphSpec } from "../../generation/spec";
+import { toAnalyzerGraph, toCoreGraph } from "../../utils/graph-adapters";
 
-describe("Planar Graph Class", () => {
-	describe("generation and classification roundtrip", () => {
-		it("should generate and classify a planar graph correctly", () => {
-			const spec: GraphSpec = {
-				...makeGraphSpec({
+describe("Planar Graph Integration", () => {
+	describe("Generation and Analysis Round-trip", () => {
+		const testSizes = [4, 8, 12, 20];
+
+		for (const nodeCount of testSizes) {
+			it(`should generate and correctly analyze planar graph with ${nodeCount} nodes`, () => {
+				// Create spec for planar graph
+				const spec: GraphSpec = {
+					...makeGraphSpec({}),
+					planar: { kind: "planar" },
 					directionality: { kind: "undirected" },
-					edgeMultiplicity: { kind: "simple" },
-					selfLoops: { kind: "disallowed" },
-				}),
+				};
+
+				// Generate graph
+				const graph = generateGraph(spec, { nodeCount, seed: 42 });
+
+				// Verify node count
+				expect(graph.nodes).toHaveLength(nodeCount);
+
+				// Analyze graph
+				const analyzerGraph = toAnalyzerGraph(toCoreGraph(graph));
+				const analyzed = computePlanar(analyzerGraph);
+
+				// Should be classified as planar
+				expect(analyzed.kind).toBe("planar");
+			});
+		}
+
+		it("should generate planar graphs deterministically", () => {
+			const spec: GraphSpec = {
+				...makeGraphSpec({}),
 				planar: { kind: "planar" },
+				directionality: { kind: "undirected" },
 			};
 
-			const testGraph = generateGraph(spec, { nodeCount: 10, seed: 42 });
-			const analyzerGraph = toAnalyzerGraph(testGraph);
+			// Generate two graphs with same seed
+			const graph1 = generateGraph(spec, { nodeCount: 10, seed: 321 });
+			const graph2 = generateGraph(spec, { nodeCount: 10, seed: 321 });
 
-			expect(isPlanar(analyzerGraph)).toBe(true);
+			// Should have identical structure
+			expect(graph1.nodes.length).toBe(graph2.nodes.length);
+			expect(graph1.edges.length).toBe(graph2.edges.length);
+
+			// Edges should match (after sorting)
+			const edges1 = graph1.edges
+				.map((e) => `${e.source}-${e.target}`)
+				.sort();
+			const edges2 = graph2.edges
+				.map((e) => `${e.source}-${e.target}`)
+				.sort();
+			expect(edges1).toEqual(edges2);
 		});
 
-		it("should classify planar graphs of various sizes", () => {
+		it("should generate planar graphs with edge count ≤ 3n-6", () => {
 			const spec: GraphSpec = {
-				...makeGraphSpec({
-					directionality: { kind: "undirected" },
-					edgeMultiplicity: { kind: "simple" },
-					selfLoops: { kind: "disallowed" },
-				}),
+				...makeGraphSpec({}),
 				planar: { kind: "planar" },
+				directionality: { kind: "undirected" },
 			};
 
-			for (const nodeCount of [4, 8, 12, 16]) {
-				const testGraph = generateGraph(spec, { nodeCount, seed: nodeCount });
-				const analyzerGraph = toAnalyzerGraph(testGraph);
+			for (const n of [5, 10, 15, 20]) {
+				const graph = generateGraph(spec, { nodeCount: n, seed: 42 });
+				const m = graph.edges.length;
 
-				expect(isPlanar(analyzerGraph)).toBe(true);
+				// For connected planar graphs: m ≤ 3n - 6 (when n ≥ 3)
+				if (n >= 3) {
+					expect(m).toBeLessThanOrEqual(3 * n - 6);
+				}
 			}
 		});
 	});
 
-	describe("small graphs are planar", () => {
-		it("should classify K4 as planar", () => {
-			const spec = makeGraphSpec({
-				directionality: { kind: "undirected" },
-				completeness: { kind: "complete" },
-				edgeMultiplicity: { kind: "simple" },
-				selfLoops: { kind: "disallowed" },
-			});
-
-			const testGraph = generateGraph(spec, { nodeCount: 4, seed: 42 });
-			const analyzerGraph = toAnalyzerGraph(testGraph);
-
-			// K4 is planar
-			expect(isPlanar(analyzerGraph)).toBe(true);
-		});
-
-		it("should classify trees as planar", () => {
-			const spec = makeGraphSpec({
-				directionality: { kind: "undirected" },
-				cycles: { kind: "acyclic" },
-				connectivity: { kind: "connected" },
-				edgeMultiplicity: { kind: "simple" },
-				selfLoops: { kind: "disallowed" },
-			});
-
-			const testGraph = generateGraph(spec, { nodeCount: 10, seed: 42 });
-			const analyzerGraph = toAnalyzerGraph(testGraph);
-
-			// Trees are planar
-			expect(isPlanar(analyzerGraph)).toBe(true);
-		});
-	});
-
-	describe("deterministic generation", () => {
-		it("should produce identical planar graphs with same seed", () => {
+	describe("Property Combinations", () => {
+		it("should generate planar + connected graph", () => {
 			const spec: GraphSpec = {
-				...makeGraphSpec({
-					directionality: { kind: "undirected" },
-					edgeMultiplicity: { kind: "simple" },
-					selfLoops: { kind: "disallowed" },
-				}),
+				...makeGraphSpec({}),
 				planar: { kind: "planar" },
+				connectivity: { kind: "connected" },
+				directionality: { kind: "undirected" },
 			};
 
-			const graph1 = generateGraph(spec, { nodeCount: 10, seed: 999 });
-			const graph2 = generateGraph(spec, { nodeCount: 10, seed: 999 });
+			const graph = generateGraph(spec, { nodeCount: 10, seed: 42 });
 
-			expect(graph1.edges).toEqual(graph2.edges);
+			// Verify planar property
+			const analyzerGraph = toAnalyzerGraph(toCoreGraph(graph));
+			const analyzed = computePlanar(analyzerGraph);
+			expect(analyzed.kind).toBe("planar");
+
+			// Verify edge count constraint
+			const n = graph.nodes.length;
+			const m = graph.edges.length;
+			if (n >= 3) {
+				expect(m).toBeLessThanOrEqual(3 * n - 6);
+			}
+		});
+
+		it("should generate planar + acyclic graph (tree)", () => {
+			const spec: GraphSpec = {
+				...makeGraphSpec({}),
+				planar: { kind: "planar" },
+				cycles: { kind: "acyclic" },
+				connectivity: { kind: "connected" },
+				directionality: { kind: "undirected" },
+			};
+
+			const graph = generateGraph(spec, { nodeCount: 10, seed: 42 });
+
+			// Verify planar property
+			const analyzerGraph = toAnalyzerGraph(toCoreGraph(graph));
+			const analyzed = computePlanar(analyzerGraph);
+			expect(analyzed.kind).toBe("planar");
+
+			// Trees are always planar
+			const n = graph.nodes.length;
+			const m = graph.edges.length;
+			expect(m).toBe(n - 1); // Tree property
+		});
+
+		it("should generate planar + sparse graph", () => {
+			const spec: GraphSpec = {
+				...makeGraphSpec({}),
+				planar: { kind: "planar" },
+				density: { kind: "sparse" },
+				directionality: { kind: "undirected" },
+			};
+
+			const graph = generateGraph(spec, { nodeCount: 15, seed: 42 });
+
+			// Verify planar property
+			const analyzerGraph = toAnalyzerGraph(toCoreGraph(graph));
+			const analyzed = computePlanar(analyzerGraph);
+			expect(analyzed.kind).toBe("planar");
 		});
 	});
 });
