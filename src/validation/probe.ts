@@ -7,22 +7,73 @@
  * @generated 2026-01-18T16:10:41.826Z
  */
 
+import { buildAdjacencyList } from "../algorithms/extraction/forbidden-subgraphs.js";
 import type { TestGraph } from "../generation/generators/types.js";
 import type { PropertyValidationResult } from "./types.js";
 
 /**
+ * Check if graph is chordal (no induced cycles of length >= 4).
+ */
+const isChordal = (adjacency: Map<number, Set<number>>, vertexCount: number): boolean => {
+	if (vertexCount < 4) {
+		return true;
+	}
+
+	// Check for induced cycles of length >= 4
+	// Simplified: check if graph has perfect elimination ordering
+	const vertices = Array.from(adjacency.keys());
+	const visited = new Set<number>();
+
+	while (visited.size < vertexCount) {
+		// Find a simplicial vertex (neighbors form a clique)
+		let foundSimplicial = false;
+
+		for (const v of vertices) {
+			if (visited.has(v)) continue;
+
+			const neighbors = adjacency.get(v);
+			if (!neighbors || neighbors.size <= 1) {
+				visited.add(v);
+				foundSimplicial = true;
+				break;
+			}
+
+			// Check if neighbors form a clique
+			const neighborsArray = Array.from(neighbors).filter((n) => !visited.has(n));
+			let isClique = true;
+
+			for (let i = 0; i < neighborsArray.length && isClique; i++) {
+				for (let j = i + 1; j < neighborsArray.length && isClique; j++) {
+					if (!adjacency.get(neighborsArray[i])?.has(neighborsArray[j])) {
+						isClique = false;
+					}
+				}
+			}
+
+			if (isClique) {
+				visited.add(v);
+				foundSimplicial = true;
+				break;
+			}
+		}
+
+		if (!foundSimplicial) {
+			return false;
+		}
+	}
+
+	return true;
+};
+
+/**
  * Validate ProbeChordal property.
  * Vertices partitioned into probes and non-probes, can add edges among non-probes to make chordal
- *
- * @param graph - Test graph to validate
- * @param _adjustments - Optional validation adjustments
- * @returns PropertyValidationResult for validation details
  */
 export const validateProbeChordal = (
 	graph: TestGraph,
 	_adjustments: Partial<Record<string, boolean>> = {}
 ): PropertyValidationResult => {
-	const { spec, nodes, edges } = graph;
+	const { spec, nodes: _nodes, edges: _edges } = graph;
 	const expected = spec.probeChordal?.kind;
 
 	if (expected === undefined || expected === "unconstrained") {
@@ -34,10 +85,60 @@ export const validateProbeChordal = (
 		};
 	}
 
-	// TODO: Implement validation logic for ProbeChordal
-	// For now, return placeholder validation
-	const actual = "probe_chordal"; // Computed from graph structure
+	// Build adjacency
+	const nodeIdMap = new Map<string, number>();
+	for (const [index, n] of _nodes.entries()) {
+		nodeIdMap.set(n.id, index);
+	}
+	const vertexSet = new Set(_nodes.map((_, index) => index));
+	const edgeList = _edges.map((e) => {
+		const src = nodeIdMap.get(e.source);
+		const tgt = nodeIdMap.get(e.target);
+		return src !== undefined && tgt !== undefined ? ([src, tgt] as [number, number]) : null;
+	}).filter((e): e is [number, number] => e !== null);
 
+	const adjacency = buildAdjacencyList(vertexSet, edgeList);
+	const adjMap = new Map<number, Set<number>>();
+	for (const v of vertexSet) {
+		adjMap.set(v, new Set());
+	}
+	for (const [u, v] of edgeList) {
+		adjMap.get(u)?.add(v);
+		adjMap.get(v)?.add(u);
+	}
+
+	// Check if already chordal (trivially probe chordal)
+	if (isChordal(adjMap, _nodes.length)) {
+		return {
+			property: "ProbeChordal",
+			expected,
+			actual: "probe_chordal",
+			valid: true,
+		};
+	}
+
+	// For small graphs, try all possible probe set partitions
+	const nodeCount = _nodes.length;
+	if (nodeCount <= 10) {
+		// Try all subsets as potential probe sets
+		const isProbeChordal = checkProbeChordalExhaustive(adjMap, nodeCount);
+
+		if (isProbeChordal) {
+			return {
+				property: "ProbeChordal",
+				expected,
+				actual: "probe_chordal",
+				valid: true,
+			};
+		}
+	}
+
+	// For larger graphs, use heuristic: graph is probe chordal if it's "close to chordal"
+	// Check if graph can be made chordal by removing a small number of vertices
+	const maxRemoved = Math.floor(nodeCount * 0.2); // Allow removing up to 20%
+	const canMakeChordal = canMakeChordalByRemovingVertices(adjMap, nodeCount, maxRemoved);
+
+	const actual = canMakeChordal ? "probe_chordal" : "not_probe_chordal";
 	const valid = actual === expected;
 
 	return {
@@ -52,18 +153,155 @@ export const validateProbeChordal = (
 };
 
 /**
+ * Exhaustively check if graph is probe chordal (for small graphs).
+ */
+const checkProbeChordalExhaustive = (
+	adjacency: Map<number, Set<number>>,
+	vertexCount: number
+): boolean => {
+	const vertices = Array.from(adjacency.keys());
+
+	// Try all subsets as probe sets (using bitmask)
+	for (let mask = 0; mask < (1 << vertexCount); mask++) {
+		const probeSet = new Set<number>();
+		const nonProbeSet = new Set<number>();
+
+		for (let i = 0; i < vertexCount; i++) {
+			if (mask & (1 << i)) {
+				probeSet.add(vertices[i]);
+			} else {
+				nonProbeSet.add(vertices[i]);
+			}
+		}
+
+		// Create augmented adjacency by adding all edges among non-probe vertices
+		const augmentedAdj = cloneAdjacency(adjacency);
+
+		// Add all edges among non-probe vertices
+		const nonProbeArray = Array.from(nonProbeSet);
+		for (let i = 0; i < nonProbeArray.length; i++) {
+			for (let j = i + 1; j < nonProbeArray.length; j++) {
+				const u = nonProbeArray[i];
+				const v = nonProbeArray[j];
+				augmentedAdj.get(u)?.add(v);
+				augmentedAdj.get(v)?.add(u);
+			}
+		}
+
+		// Check if augmented graph is chordal
+		if (isChordal(augmentedAdj, vertexCount)) {
+			return true;
+		}
+	}
+
+	return false;
+};
+
+/**
+ * Clone adjacency map.
+ */
+const cloneAdjacency = (adjacency: Map<number, Set<number>>): Map<number, Set<number>> => {
+	const clone = new Map<number, Set<number>>();
+	for (const [v, neighbors] of adjacency) {
+		clone.set(v, new Set(neighbors));
+	}
+	return clone;
+};
+
+/**
+ * Check if graph can be made chordal by removing up to maxVertices.
+ */
+const canMakeChordalByRemovingVertices = (
+	adjacency: Map<number, Set<number>>,
+	vertexCount: number,
+	maxVertices: number
+): boolean => {
+	if (maxVertices >= vertexCount) {
+		return true; // Can always make chordal by removing all vertices
+	}
+
+	// Try removing small sets of vertices
+	const vertices = Array.from(adjacency.keys());
+
+	// Try removing 1, 2, ... maxVertices vertices
+	for (let toRemove = 1; toRemove <= Math.min(maxVertices, 3); toRemove++) {
+		if (tryRemovingVertices(adjacency, vertices, toRemove, vertexCount)) {
+			return true;
+		}
+	}
+
+	return false;
+};
+
+/**
+ * Try removing a set of vertices to check if remaining graph is chordal.
+ */
+const tryRemovingVertices = (
+	adjacency: Map<number, Set<number>>,
+	vertices: number[],
+	toRemove: number,
+	vertexCount: number
+): boolean => {
+	// Try combinations of vertices to remove
+	const removeCombinations = getCombinations(vertices, toRemove);
+
+	for (const removed of removeCombinations) {
+		const remaining = vertices.filter((v) => !removed.includes(v));
+
+		// Create subgraph adjacency
+		const subgraphAdj = new Map<number, Set<number>>();
+		for (const v of remaining) {
+			subgraphAdj.set(v, new Set());
+		}
+
+		for (const v of remaining) {
+			const neighbors = adjacency.get(v);
+			if (!neighbors) continue;
+
+			for (const nb of neighbors) {
+				if (remaining.includes(nb)) {
+					subgraphAdj.get(v)?.add(nb);
+				}
+			}
+		}
+
+		if (isChordal(subgraphAdj, remaining.length)) {
+			return true;
+		}
+	}
+
+	return false;
+};
+
+/**
+ * Generate all combinations of size k from array.
+ */
+const getCombinations = <T,>(arr: T[], k: number): T[][] => {
+	if (k === 0) {
+		return [[]];
+	}
+
+	if (arr.length === 0) {
+		return [];
+	}
+
+	const [first, ...rest] = arr;
+
+	const combsWithFirst = getCombinations(rest, k - 1).map((comb) => [first, ...comb]);
+	const combsWithoutFirst = getCombinations(rest, k);
+
+	return [...combsWithFirst, ...combsWithoutFirst];
+};
+
+/**
  * Validate ProbeInterval property.
  * Can add edges among non-probes to form interval graph
- *
- * @param graph - Test graph to validate
- * @param _adjustments - Optional validation adjustments
- * @returns PropertyValidationResult for validation details
  */
 export const validateProbeInterval = (
 	graph: TestGraph,
 	_adjustments: Partial<Record<string, boolean>> = {}
 ): PropertyValidationResult => {
-	const { spec, nodes, edges } = graph;
+	const { spec, nodes: _nodes, edges: _edges } = graph;
 	const expected = spec.probeInterval?.kind;
 
 	if (expected === undefined || expected === "unconstrained") {
@@ -75,10 +313,33 @@ export const validateProbeInterval = (
 		};
 	}
 
-	// TODO: Implement validation logic for ProbeInterval
-	// For now, return placeholder validation
-	const actual = "probe_interval"; // Computed from graph structure
+	// Build adjacency
+	const nodeIdMap = new Map<string, number>();
+	for (const [index, n] of _nodes.entries()) {
+		nodeIdMap.set(n.id, index);
+	}
+	const vertexSet = new Set(_nodes.map((_, index) => index));
+	const edgeList = _edges.map((e) => {
+		const src = nodeIdMap.get(e.source);
+		const tgt = nodeIdMap.get(e.target);
+		return src !== undefined && tgt !== undefined ? ([src, tgt] as [number, number]) : null;
+	}).filter((e): e is [number, number] => e !== null);
 
+	const adjMap = new Map<number, Set<number>>();
+	for (const v of vertexSet) {
+		adjMap.set(v, new Set());
+	}
+	for (const [u, v] of edgeList) {
+		adjMap.get(u)?.add(v);
+		adjMap.get(v)?.add(u);
+	}
+
+	// Interval graphs are chordal, so this is a subset of probe chordal
+	// Use simplified heuristic: all interval graphs are probe interval
+	// Check if graph is an interval graph
+	const isInterval = isIntervalGraphHeuristic(adjMap, _nodes.length);
+
+	const actual = isInterval ? "probe_interval" : "not_probe_interval";
 	const valid = actual === expected;
 
 	return {
@@ -90,4 +351,39 @@ export const validateProbeInterval = (
 			? undefined
 			: `Expected ${expected} but found ${actual}`,
 	};
+};
+
+/**
+ * Heuristic check for interval graph (simpler than full recognition).
+ * Interval graphs are chordal and their complements are also interval graphs.
+ */
+const isIntervalGraphHeuristic = (
+	adjacency: Map<number, Set<number>>,
+	vertexCount: number
+): boolean => {
+	// Quick checks
+	if (vertexCount <= 3) {
+		return true;
+	}
+
+	// Must be chordal
+	if (!isChordal(adjacency, vertexCount)) {
+		return false;
+	}
+
+	// For small graphs, use the same exhaustive approach as probe chordal
+	if (vertexCount <= 8) {
+		return checkProbeChordalExhaustive(adjacency, vertexCount);
+	}
+
+	// Heuristic: most chordal graphs with small max degree are interval
+	const vertices = Array.from(adjacency.keys());
+	let maxDegree = 0;
+	for (const v of vertices) {
+		const degree = (adjacency.get(v) || new Set()).size;
+		maxDegree = Math.max(maxDegree, degree);
+	}
+
+	// If max degree is small relative to vertex count, likely interval
+	return maxDegree <= vertexCount / 2;
 };

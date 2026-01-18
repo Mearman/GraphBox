@@ -45,6 +45,51 @@ export const generateUnitDiskEdges = (nodes: TestNode[], edges: TestEdge[], spec
 };
 
 /**
+ * Generate disk graph edges.
+ * Disk graphs are created by placing points in a plane and connecting
+ * points within a specified distance (disk radius).
+ * @param nodes
+ * @param edges
+ * @param spec
+ * @param rng
+ */
+export const generateDiskEdges = (nodes: TestNode[], edges: TestEdge[], spec: GraphSpec, rng: SeededRandom): void => {
+	const disk = spec as unknown as { diskGraphNew?: { kind: string; diskRadius?: number } };
+
+	if (disk.diskGraphNew?.kind !== "disk") {
+		throw new Error("Disk graph generation requires disk spec");
+	}
+
+	const diskRadius = disk.diskGraphNew.diskRadius ?? 1;
+	const spaceSize = Math.sqrt(nodes.length);
+
+	// Place points randomly in the space
+	for (const node of nodes) {
+		if (!node.data) node.data = {};
+		node.data.x = rng.next() * spaceSize;
+		node.data.y = rng.next() * spaceSize;
+	}
+
+	// Connect points within disk radius
+	for (let index = 0; index < nodes.length; index++) {
+		for (let index_ = index + 1; index_ < nodes.length; index_++) {
+			const sourceData = nodes[index].data;
+			const targetData = nodes[index_].data;
+
+			if (!sourceData || !targetData) continue;
+
+			const dx = (sourceData.x as number) - (targetData.x as number);
+			const dy = (sourceData.y as number) - (targetData.y as number);
+			const distance = Math.hypot(dx, dy);
+
+			if (distance <= diskRadius) {
+				addEdge(edges, nodes[index].id, nodes[index_].id, spec, rng);
+			}
+		}
+	}
+};
+
+/**
  * Generate planar graph edges.
  * Planar graphs can be drawn in the plane without edge crossings.
  * Uses incremental construction starting from a cycle.

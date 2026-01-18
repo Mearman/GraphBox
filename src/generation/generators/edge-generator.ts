@@ -44,7 +44,9 @@ import {
 } from "./forbidden_subgraph";
 import {
 	generatePlanarEdges,
-	generateUnitDiskEdges} from "./geometric";
+	generateUnitDiskEdges,
+	generateDiskEdges
+} from "./geometric";
 import {
 	generateCircularArcEdges,
 	generateProperCircularArcEdges,
@@ -557,7 +559,10 @@ const generateBaseStructure = (nodes: TestNode[], spec: GraphSpec, _config: Grap
 		generateProperCircularArcEdges(nodes, edges, spec, rng);
 		return edges;
 	}
-	// generateDiskEdges not implemented - would require geometric construction
+	if (spec.diskGraphNew?.kind === "disk") {
+		generateDiskEdges(nodes, edges, spec, rng);
+		return edges;
+	}
 
 	// Handle probe graphs
 	if (spec.probeChordal?.kind === "probe_chordal") {

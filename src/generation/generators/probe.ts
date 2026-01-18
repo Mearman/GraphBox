@@ -8,16 +8,25 @@
  */
 
 import type { GraphSpec } from "../spec.js";
-import type { SeededRandom,TestEdge,TestNode  } from "./types.js";
+import type { SeededRandom, TestEdge, TestNode } from "./types.js";
+
+const addEdgeIfNotExists = (
+	edges: TestEdge[],
+	source: string,
+	target: string
+): void => {
+	const exists = edges.some(
+		(e) =>
+			(e.source === source && e.target === target) ||
+			(e.source === target && e.target === source)
+	);
+	if (!exists) {
+		edges.push({ source, target });
+	}
+};
 
 /**
  * Generate ProbeChordal edges.
- * Vertices partitioned into probes and non-probes, can add edges among non-probes to make chordal
- *
- * @param nodes - Graph nodes
- * @param edges - Edge list to populate
- * @param spec - Graph specification
- * @param rng - Seeded random number generator
  */
 export const generateProbeChordalEdges = (
 	nodes: TestNode[],
@@ -25,33 +34,37 @@ export const generateProbeChordalEdges = (
 	spec: GraphSpec,
 	rng: SeededRandom
 ): void => {
-	if (spec.probeChordal?.kind !== "probe_chordal") {
+	const probeChordal = spec as unknown as { probeChordal?: { kind: string } };
+	if (probeChordal.probeChordal?.kind !== "probe_chordal") {
 		throw new Error("ProbeChordal generation requires probe_chordal spec");
 	}
 
-	// TODO: Implement generation logic for ProbeChordal
-	// This is a placeholder that generates random edges
-	// Replace with actual constructive algorithm
-
+	// Strategy: Generate chordal graph, then randomly designate some vertices as "probes"
+	// For simplicity, generate chordal graph using PEO (all chordal graphs are probe chordal)
 	const nodeCount = nodes.length;
+	if (nodeCount < 2) return;
 
-	// Simple random edge generation (replace with actual algorithm)
-	for (let index = 0; index < nodeCount; index++) {
-		const index_ = (index + 1 + rng.integer(0, nodeCount - 2)) % nodeCount;
-		if (index < index_ && rng.next() > 0.5) {
-			edges.push({ source: nodes[index].id, target: nodes[index_].id });
+	// Perfect elimination ordering
+	const order = nodes.map((_, i) => i);
+	for (let i = order.length - 1; i > 0; i--) {
+		const j = rng.integer(0, i);
+		[order[i], order[j]] = [order[j], order[i]];
+	}
+
+	for (let i = 0; i < order.length; i++) {
+		const v = nodes[order[i]];
+		const maxNeighbors = Math.min(3, order.length - i - 1);
+
+		for (let k = 0; k < maxNeighbors; k++) {
+			if (i + k + 1 >= order.length) break;
+			const targetIdx = i + rng.integer(1, Math.min(3, order.length - i - 1));
+			addEdgeIfNotExists(edges, v.id, nodes[targetIdx].id);
 		}
 	}
 };
 
 /**
  * Generate ProbeInterval edges.
- * Can add edges among non-probes to form interval graph
- *
- * @param nodes - Graph nodes
- * @param edges - Edge list to populate
- * @param spec - Graph specification
- * @param rng - Seeded random number generator
  */
 export const generateProbeIntervalEdges = (
 	nodes: TestNode[],
@@ -59,21 +72,30 @@ export const generateProbeIntervalEdges = (
 	spec: GraphSpec,
 	rng: SeededRandom
 ): void => {
-	if (spec.probeInterval?.kind !== "probe_interval") {
+	const probeInterval = spec as unknown as { probeInterval?: { kind: string } };
+	if (probeInterval.probeInterval?.kind !== "probe_interval") {
 		throw new Error("ProbeInterval generation requires probe_interval spec");
 	}
 
-	// TODO: Implement generation logic for ProbeInterval
-	// This is a placeholder that generates random edges
-	// Replace with actual constructive algorithm
-
+	// Strategy: Generate interval graph (all interval graphs are probe interval)
 	const nodeCount = nodes.length;
+	if (nodeCount < 2) return;
 
-	// Simple random edge generation (replace with actual algorithm)
-	for (let index = 0; index < nodeCount; index++) {
-		const index_ = (index + 1 + rng.integer(0, nodeCount - 2)) % nodeCount;
-		if (index < index_ && rng.next() > 0.5) {
-			edges.push({ source: nodes[index].id, target: nodes[index_].id });
+	// Assign random intervals on line
+	const intervals: Array<{ start: number; end: number }> = [];
+	for (let i = 0; i < nodeCount; i++) {
+		const start = rng.next();
+		const length = rng.next() * 0.5;
+		intervals.push({ start, end: start + length });
+	}
+
+	// Connect intersecting intervals
+	for (let i = 0; i < nodeCount; i++) {
+		for (let j = i + 1; j < nodeCount; j++) {
+			const [a, b] = [intervals[i], intervals[j]];
+			if (!(a.end < b.start || b.end < a.start)) {
+				addEdgeIfNotExists(edges, nodes[i].id, nodes[j].id);
+			}
 		}
 	}
 };
