@@ -198,7 +198,7 @@ describe("isCoreGraph", () => {
 	});
 
 	it("should return false for undefined", () => {
-		expect(isCoreGraph(undefined)).toBe(false);
+		expect(isCoreGraph()).toBe(false);
 	});
 
 	it("should return false for non-object", () => {
