@@ -107,3 +107,37 @@ export {
 
 // Export flow validator
 export { validateFlowNetwork } from "./flow-validator";
+
+// ============================================================================
+// NEW GRAPH CLASS VALIDATORS (Priority 1 - 22 classes)
+// ============================================================================
+
+// Forbidden subgraph validators
+export {
+	validateATFree,
+	validateBullFree,
+	validateC5Free,
+	validateDistanceHereditary,
+	validateGemFree,
+	validateHHFree,
+	validateP5Free,
+} from "./forbidden_subgraph";
+
+// Intersection graph validators
+export {
+	validateCircularArc,
+	validateProperCircularArc,
+} from "./intersection";
+
+// Probe graph validators
+export {
+	validateProbeChordal,
+	validateProbeInterval,
+} from "./probe";
+
+// Perfect variant validators
+export {
+	validateModular as validateModularClass,
+	validatePtolemaic,
+	validateQuasiLine,
+} from "./perfect_variants";

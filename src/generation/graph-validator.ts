@@ -3,10 +3,14 @@ import {
 	type PropertyValidationResult,
 	validateAlgebraicConnectivity,
 	validateArcTransitive,
+	validateATFree,
 	validateBipartite,
+	validateBullFree,
+	validateC5Free,
 	validateCage,
 	validateCartesianProduct,
 	validateChordal,
+	validateCircularArc,
 	validateCircumference,
 	validateClawFree,
 	validateCograph,
@@ -16,14 +20,17 @@ import {
 	validateDensityAndCompleteness,
 	validateDiameter,
 	validateDirectionality,
+	validateDistanceHereditary,
 	validateDominationNumber,
 	validateEdgeMultiplicity,
 	validateEdgeTransitive,
 	validateEulerian,
 	validateFlowNetwork,
+	validateGemFree,
 	validateGirth,
 	validateHamiltonian,
 	validateHereditaryClass,
+	validateHHFree,
 	validateIndependenceNumber,
 	validateIntegrity,
 	validateInterval,
@@ -34,10 +41,18 @@ import {
 	validateLine,
 	validateMinorFree,
 	validateModular,
+	validateModular as validateModularClass,
 	validateMooreGraph,
+	// New graph class validators (Priority 1)
+	validateP5Free,
 	validatePerfect,
 	validatePermutation,
 	validatePlanar,
+	validateProbeChordal,
+	validateProbeInterval,
+	validateProperCircularArc,
+	validatePtolemaic,
+	validateQuasiLine,
 	validateRadius,
 	validateRamanujan,
 	validateRegularGraph,
@@ -61,7 +76,8 @@ import {
 	validateUnitDisk,
 	validateVertexCover,
 	validateVertexTransitive,
-	validateWeighting} from "../validation";
+	validateWeighting,
+} from "../validation";
 import { analyzeGraphSpecConstraints, getAdjustedValidationExpectations } from "./constraints";
 import type { TestGraph } from "./generator";
 
@@ -112,6 +128,52 @@ export const validateGraphProperties = (graph: TestGraph): GraphValidationResult
 	results.push(validateThreshold(graph));
 	results.push(validateUnitDisk(graph));
 	results.push(validatePlanar(graph));
+
+	// Validate new graph classes (Priority 1)
+	// Only validate if the property is specified in the spec
+	if (graph.spec.p5Free?.kind && graph.spec.p5Free.kind !== "unconstrained") {
+		results.push(validateP5Free(graph));
+	}
+	if (graph.spec.c5Free?.kind && graph.spec.c5Free.kind !== "unconstrained") {
+		results.push(validateC5Free(graph));
+	}
+	if (graph.spec.bullFree?.kind && graph.spec.bullFree.kind !== "unconstrained") {
+		results.push(validateBullFree(graph));
+	}
+	if (graph.spec.gemFree?.kind && graph.spec.gemFree.kind !== "unconstrained") {
+		results.push(validateGemFree(graph));
+	}
+	if (graph.spec.atFree?.kind && graph.spec.atFree.kind !== "unconstrained") {
+		results.push(validateATFree(graph));
+	}
+	if (graph.spec.hhFree?.kind && graph.spec.hhFree.kind !== "unconstrained") {
+		results.push(validateHHFree(graph));
+	}
+	if (graph.spec.distanceHereditary?.kind && graph.spec.distanceHereditary.kind !== "unconstrained") {
+		results.push(validateDistanceHereditary(graph));
+	}
+	if (graph.spec.circularArc?.kind && graph.spec.circularArc.kind !== "unconstrained") {
+		results.push(validateCircularArc(graph));
+	}
+	if (graph.spec.properCircularArc?.kind && graph.spec.properCircularArc.kind !== "unconstrained") {
+		results.push(validateProperCircularArc(graph));
+	}
+	if (graph.spec.probeChordal?.kind && graph.spec.probeChordal.kind !== "unconstrained") {
+		results.push(validateProbeChordal(graph));
+	}
+	if (graph.spec.probeInterval?.kind && graph.spec.probeInterval.kind !== "unconstrained") {
+		results.push(validateProbeInterval(graph));
+	}
+	if (graph.spec.modular?.kind && graph.spec.modular.kind !== "unconstrained") {
+		results.push(validateModularClass(graph));
+	}
+	if (graph.spec.ptolemaic?.kind && graph.spec.ptolemaic.kind !== "unconstrained") {
+		results.push(validatePtolemaic(graph));
+	}
+	if (graph.spec.quasiLine?.kind && graph.spec.quasiLine.kind !== "unconstrained") {
+		results.push(validateQuasiLine(graph));
+	}
+
 	results.push(validateHamiltonian(graph));
 	results.push(validateTraceable(graph));
 	results.push(validateStronglyRegular(graph));
