@@ -48,6 +48,17 @@ export const pairedTTest = (method1Results: number[], method2Results: number[], 
 
 	// Calculate t-statistic
 	const standardError = stdDiff / Math.sqrt(n);
+
+	// Handle zero standard error (all differences are identical)
+	// If all differences are zero, there's no evidence of difference
+	if (standardError === 0) {
+		return {
+			pValue: meanDiff === 0 ? 1 : 0,
+			tStatistic: meanDiff === 0 ? 0 : (meanDiff > 0 ? Infinity : -Infinity),
+			significant: meanDiff !== 0,
+		};
+	}
+
 	const tStatistic = meanDiff / standardError;
 
 	// Calculate p-value (two-tailed) using t-distribution approximation
