@@ -177,13 +177,12 @@ export const calculateCommunityModularity = <N extends Node, E extends Edge>(gra
 
 	// Calculate degrees for nodes in this community
 	const degrees = new Map<N, number>();
-	for (const nodeId of community.nodes) {
-		const nodeIdString = typeof nodeId === "string" ? nodeId : String(nodeId);
-		const neighborsResult = graph.getNeighbors(nodeIdString);
+	for (const node of community.nodes) {
+		const neighborsResult = graph.getNeighbors(node.id);
 		if (neighborsResult.ok) {
-			degrees.set(nodeId, neighborsResult.value.length);
+			degrees.set(node, neighborsResult.value.length);
 		} else {
-			degrees.set(nodeId, 0);
+			degrees.set(node, 0);
 		}
 	}
 
@@ -194,13 +193,10 @@ export const calculateCommunityModularity = <N extends Node, E extends Edge>(gra
 		// Directed: iterate over all pairs
 		for (const nodeI of nodesArray) {
 			for (const nodeJ of nodesArray) {
-				const nodeIString = typeof nodeI === "string" ? nodeI : String(nodeI);
-				const nodeJString = typeof nodeJ === "string" ? nodeJ : String(nodeJ);
-
 				// A_ij - check if nodes are neighbors
-				const neighborsResult = graph.getNeighbors(nodeIString);
+				const neighborsResult = graph.getNeighbors(nodeI.id);
 				const A_ij = neighborsResult.ok &&
-                     neighborsResult.value.includes(nodeJString) ? 1 : 0;
+                     neighborsResult.value.includes(nodeJ.id) ? 1 : 0;
 
 				// k_i and k_j
 				const k_index = degrees.get(nodeI) || 0;
@@ -219,13 +215,11 @@ export const calculateCommunityModularity = <N extends Node, E extends Edge>(gra
 			for (let index_ = index; index_ < nodesArray.length; index_++) {
 				const nodeI = nodesArray[index];
 				const nodeJ = nodesArray[index_];
-				const nodeIString = typeof nodeI === "string" ? nodeI : String(nodeI);
-				const nodeJString = typeof nodeJ === "string" ? nodeJ : String(nodeJ);
 
 				// A_ij - check if nodes are neighbors
-				const neighborsResult = graph.getNeighbors(nodeIString);
+				const neighborsResult = graph.getNeighbors(nodeI.id);
 				const A_ij = neighborsResult.ok &&
-                     neighborsResult.value.includes(nodeJString) ? 1 : 0;
+                     neighborsResult.value.includes(nodeJ.id) ? 1 : 0;
 
 				// k_i and k_j
 				const k_index = degrees.get(nodeI) || 0;
