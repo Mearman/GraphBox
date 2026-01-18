@@ -10,7 +10,7 @@
 
 import { writeFileSync } from "node:fs";
 
-import type { ParsedArgs as ParsedArguments } from "../cli-utils/arg-parser";
+import type { ParsedArguments } from "../cli-utils/arg-parser";
 import { getNumber, getOptional } from "../cli-utils/arg-parser";
 import { formatError } from "../cli-utils/error-formatter";
 import type { GraphFormat } from "../cli-utils/format-detection";
@@ -46,10 +46,10 @@ export interface GenerateOptions {
  * @param arguments_
  */
 export const parseGenerateArgs = (arguments_: ParsedArguments): GenerateOptions => {
-	const specFile = getOptional<string | undefined>(arguments_, "spec");
+	const specFile = getOptional<string>(arguments_, "spec");
 	const nodeCount = getNumber(arguments_, "nodes");
-	const seed = getOptional<number | undefined>(arguments_, "seed");
-	const output = getOptional<string | undefined>(arguments_, "output");
+	const seed = getOptional<number>(arguments_, "seed");
+	const output = getOptional<string>(arguments_, "output");
 	const format = getOptional<GraphFormat>(arguments_, "format", "json");
 
 	// Validate format

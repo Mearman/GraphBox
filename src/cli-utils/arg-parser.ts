@@ -15,6 +15,9 @@ export interface ParsedArguments {
 	[key: string]: unknown;
 }
 
+/** @deprecated Use ParsedArguments instead */
+export type ParsedArgs = ParsedArguments;
+
 /**
  * Parse command-line arguments.
  * @param args
@@ -123,14 +126,23 @@ export const getRequired = (arguments_: ParsedArguments, key: string): string =>
  * @param key
  * @param defaultValue
  */
-export const getOptional = <T>(
+export function getOptional<T>(
+	arguments_: ParsedArguments,
+	key: string
+): T | undefined;
+export function getOptional<T>(
 	arguments_: ParsedArguments,
 	key: string,
 	defaultValue: T
-): T => {
+): T;
+export function getOptional<T>(
+	arguments_: ParsedArguments,
+	key: string,
+	defaultValue?: T
+): T | undefined {
 	const value = arguments_[key];
 	return value === undefined ? defaultValue : (value as T);
-};
+}
 
 /**
  * Get numeric argument.

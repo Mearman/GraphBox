@@ -11,7 +11,7 @@
 import { writeFileSync } from "node:fs";
 
 import { computeGraphSpecFromGraph } from "../analyzer/main";
-import type { ParsedArgs as ParsedArguments } from "../cli-utils/arg-parser";
+import type { ParsedArguments } from "../cli-utils/arg-parser";
 import { getBoolean, getOptional, getRequired } from "../cli-utils/arg-parser";
 import { formatError } from "../cli-utils/error-formatter";
 import type { GraphFormat } from "../cli-utils/format-detection";
@@ -39,8 +39,8 @@ export interface AnalyzeOptions {
  */
 export const parseAnalyzeArgs = (arguments_: ParsedArguments): AnalyzeOptions => {
 	const input = getRequired(arguments_, "input");
-	const output = getOptional<string | undefined>(arguments_, "output");
-	const format = getOptional<GraphFormat | undefined>(arguments_, "format");
+	const output = getOptional<string>(arguments_, "output");
+	const format = getOptional<GraphFormat>(arguments_, "format");
 	const verbose = getBoolean(arguments_, "verbose", false);
 
 	return {
