@@ -49,13 +49,41 @@ import {
 	computeVertexOrdering,
 	computeWeighting} from "./core-props";
 import {
+	computeATFree,
+	computeBullFree,
+	computeC5Free,
+	computeDistanceHereditary,
+	computeGemFree,
+	computeHHFree,
+	computeP5Free,
+} from "./forbidden_subgraph";
+import {
+	computePlanar
+} from "./geometric";
+import {
+	computeCircularArc,
+	computeProperCircularArc
+} from "./intersection";
+import {
 	computeHamiltonian,
 	computeTraceable
 } from "./path-props";
 import {
+	computeModular,
+	computePtolemaic,
+	computeQuasiLine,
+} from "./perfect_variants";
+import {
+	computeProbeChordal,
+	computeProbeInterval
+} from "./probe";
+import {
 	computeCommunityStructure,
 	computeScaleFree,
 	computeSmallWorld} from "./spectral";
+import {
+	computeWeaklyChordal,
+} from "./structural";
 import {
 	computeCompleteness,
 	computeDensity,
@@ -126,6 +154,32 @@ export type InferredGraphSpec = Readonly<{
 	threshold: ReturnType<typeof computeThreshold>;
 	line: ReturnType<typeof computeLine>;
 	clawFree: ReturnType<typeof computeClawFree>;
+
+	// Priority 1: Perfect graph variants
+	modular: ReturnType<typeof computeModular>;
+	ptolemaic: ReturnType<typeof computePtolemaic>;
+	quasiLine: ReturnType<typeof computeQuasiLine>;
+
+	// Priority 1: Forbidden subgraph classes
+	p5Free: ReturnType<typeof computeP5Free>;
+	c5Free: ReturnType<typeof computeC5Free>;
+	bullFree: ReturnType<typeof computeBullFree>;
+	gemFree: ReturnType<typeof computeGemFree>;
+	atFree: ReturnType<typeof computeATFree>;
+	hhFree: ReturnType<typeof computeHHFree>;
+	distanceHereditary: ReturnType<typeof computeDistanceHereditary>;
+	weaklyChordal: ReturnType<typeof computeWeaklyChordal>;
+
+	// Priority 1: Intersection graphs
+	circularArc: ReturnType<typeof computeCircularArc>;
+	properCircularArc: ReturnType<typeof computeProperCircularArc>;
+
+	// Priority 1: Probe graphs
+	probeChordal: ReturnType<typeof computeProbeChordal>;
+	probeInterval: ReturnType<typeof computeProbeInterval>;
+
+	// Priority 1: Geometric
+	planarNew: ReturnType<typeof computePlanar>;
 
 	// Regularity properties
 	cubic: ReturnType<typeof computeCubic>;
@@ -212,6 +266,32 @@ export const computeGraphSpecFromGraph = (g: AnalyzerGraph, policy: Partial<Comp
 
 		// Special bipartite properties
 		completeBipartite: computeCompleteBipartite(g),
-	};
-};
 
+		// Priority 1: Perfect graph variants
+		modular: computeModular(g, p),
+		ptolemaic: computePtolemaic(g, p),
+		quasiLine: computeQuasiLine(g, p),
+
+		// Priority 1: Forbidden subgraph classes
+		p5Free: computeP5Free(g, p),
+		c5Free: computeC5Free(g, p),
+		bullFree: computeBullFree(g, p),
+		gemFree: computeGemFree(g, p),
+		atFree: computeATFree(g, p),
+		hhFree: computeHHFree(g, p),
+		distanceHereditary: computeDistanceHereditary(g, p),
+		weaklyChordal: computeWeaklyChordal(g, p),
+
+		// Priority 1: Intersection graphs
+		circularArc: computeCircularArc(g, p),
+		properCircularArc: computeProperCircularArc(g, p),
+
+		// Priority 1: Probe graphs
+		probeChordal: computeProbeChordal(g, p),
+		probeInterval: computeProbeInterval(g, p),
+
+		// Priority 1: Geometric
+		planarNew: computePlanar(g, p),
+	};
+
+}
