@@ -1,5 +1,5 @@
 import type { TestEdge, TestGraph, TestNode } from "../../generation/generators/types";
-import type { GraphExpander, Neighbor } from "../../interfaces/graph-expander";
+import type { GraphExpander, Neighbor, PriorityOptions } from "../../interfaces/graph-expander";
 
 /**
  * Mock implementation of GraphExpander for testing bidirectional BFS.
@@ -64,6 +64,27 @@ export class MockGraphExpander implements GraphExpander<TestNode> {
 
 	addEdge(source: string, target: string, relationshipType: string): void {
 		this.discoveredEdges.push({ source, target, relationshipType });
+	}
+
+	calculatePriority(nodeId: string, options: PriorityOptions = {}): number {
+		const { nodeWeight = 1, epsilon = 1e-10, useSimpleDegree = false } = options;
+
+		// Legacy behavior: simple degree count
+		if (useSimpleDegree) {
+			return this.getDegree(nodeId);
+		}
+
+		// For undirected or simple graphs, we treat all degree as "outgoing"
+		// In a full implementation with direction tracking, we would:
+		// 1. Separate incoming from outgoing neighbors
+		// 2. Count each with their weights
+		// 3. Apply the formula
+
+		// Current implementation: undirected graph, all edges count equally
+		const degree = this.getDegree(nodeId);
+
+		// Apply thesis formula: deg / (w_V + ε)
+		return degree / (nodeWeight + epsilon);
 	}
 
 	/**

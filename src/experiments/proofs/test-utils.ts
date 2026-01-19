@@ -106,6 +106,12 @@ export class ProofTestExpander implements GraphExpander<ProofTestNode> {
 		this.discoveredEdges.push({ source, target, relationshipType });
 	}
 
+	calculatePriority(nodeId: string, options: { nodeWeight?: number; epsilon?: number } = {}): number {
+		const { nodeWeight = 1, epsilon = 1e-10 } = options;
+		const degree = this.getDegree(nodeId);
+		return degree / (nodeWeight + epsilon);
+	}
+
 	getNodeCount(): number {
 		return this.nodes.size;
 	}
