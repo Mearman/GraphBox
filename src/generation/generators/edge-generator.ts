@@ -351,9 +351,18 @@ const generateBaseStructure = (nodes: TestNode[], spec: GraphSpec, _config: Grap
 		return edges;
 	}
 
-	if (spec.planar?.kind === "planar") {
+	// Only use planar generator if not also constrained to be acyclic (tree)
+	// Tree constraint (m = n-1) is stricter than planar (m ≤ 3n-6)
+	if (spec.planar?.kind === "planar" && spec.cycles.kind !== "acyclic") {
 		generatePlanarEdges(nodes, edges, spec, rng);
 		return edges;
+	}
+
+	// Handle planar + acyclic combination by using tree generator
+	// Trees are always planar, so we defer to the tree generator from Phase 1
+	if (spec.planar?.kind === "planar" && spec.cycles.kind === "acyclic") {
+		// Skip planar generation - let Phase 1 tree generator handle it
+		// Fall through to default generation
 	}
 
 	if (spec.hamiltonian?.kind === "hamiltonian") {
