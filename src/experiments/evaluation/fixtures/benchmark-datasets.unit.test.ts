@@ -183,9 +183,8 @@ describe("Benchmark Utilities", () => {
 		expect(result.warnings).toHaveLength(0);
 	});
 
-	// Note: DBLP is large (300K+ nodes, 14MB) - test skipped due to OOM in test environment
-	// Manually verified: downloads and parses correctly with 317080 nodes, 1049866 edges
-	it.skip("should validate DBLP matches metadata - OOM in test environment", async () => {
+	// Note: DBLP is large (300K+ nodes, 14MB) - requires increased memory
+	it("should validate DBLP matches metadata", async () => {
 		const benchmark = await loadBenchmark(DBLP);
 		const result = validateBenchmark(benchmark);
 
