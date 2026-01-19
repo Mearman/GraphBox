@@ -59,6 +59,22 @@ interface FrontierState {
 /**
  * Degree-Prioritised Bidirectional Expansion
  *
+ * **Thesis Alignment**: This is the primary implementation of the seed-bounded
+ * sampling algorithm described in Chapter 4 of the thesis. It embodies the
+ * parameter-free design with implicit termination via frontier exhaustion.
+ *
+ * **Design Relationship**:
+ * - BidirectionalBFS: Earlier design, N=2 only, has termination parameters (targetPaths, maxIterations)
+ * - DegreePrioritisedExpansion: Refined design (this file), N≥1 with identical code path, parameter-free
+ *
+ * Use this implementation when:
+ * - Representative sampling of graph structure is required
+ * - Evaluation dataset construction demands bias-free samples
+ * - N≥1 seed nodes need to be supported
+ * - Termination should be determined by graph structure, not arbitrary limits
+ *
+ * For production pathfinding with resource constraints, consider BidirectionalBFS instead.
+ *
  * A unified algorithm for representative graph sampling between N ≥ 1 seed nodes.
  * Uses node degree as priority (low degree = high priority) to explore peripheral
  * routes before hub-dominated paths.
@@ -94,6 +110,8 @@ interface FrontierState {
  * console.log(`Found ${result.paths.length} paths`);
  * console.log(`Sampled ${result.sampledNodes.size} nodes`);
  * ```
+ *
+ * @see BidirectionalBFS - Parameterised version for N=2 with resource constraints
  */
 export class DegreePrioritisedExpansion<T> {
 	private readonly frontiers: FrontierState[] = [];
@@ -119,8 +137,8 @@ export class DegreePrioritisedExpansion<T> {
 		// Initialize N frontiers, one per seed
 		for (const [index, seed] of seeds.entries()) {
 			const frontier = new PriorityQueue<string>();
-			const degree = expander.getDegree(seed);
-			frontier.push(seed, degree);
+			const priority = expander.calculatePriority(seed);
+			frontier.push(seed, priority);
 
 			this.frontiers.push({
 				index: index,
@@ -180,9 +198,9 @@ export class DegreePrioritisedExpansion<T> {
 				activeState.visited.add(targetId);
 				activeState.parents.set(targetId, { parent: node, edge: relationshipType });
 
-				// Add to frontier with degree as priority
-				const degree = this.expander.getDegree(targetId);
-				activeState.frontier.push(targetId, degree);
+				// Add to frontier with thesis priority as priority
+				const priority = this.expander.calculatePriority(targetId);
+				activeState.frontier.push(targetId, priority);
 
 				// Check intersection with ALL other frontiers (N ≥ 2 only)
 				// This loop naturally handles all N without branching:
@@ -262,10 +280,9 @@ export class DegreePrioritisedExpansion<T> {
 	 */
 	private peekPriority(queue: PriorityQueue<string>): number {
 		// The priority queue is a min-heap, so the front item has minimum priority.
-		// We need to access the heap internals for peek - for now use getDegree on first item.
-		// This is safe because items are added with their degree as priority.
+		// We use calculatePriority to ensure consistent prioritization across the algorithm.
 		for (const item of queue) {
-			return this.expander.getDegree(item);
+			return this.expander.calculatePriority(item);
 		}
 		return Infinity;
 	}

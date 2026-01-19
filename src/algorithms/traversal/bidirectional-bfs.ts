@@ -45,6 +45,19 @@ interface BFSState {
 /**
  * Generic bidirectional breadth-first search with degree-based node prioritization.
  *
+ * **NOTE: This is an earlier design with parameterised termination.**
+ * For the parameter-free version that aligns with the thesis theoretical framework,
+ * see DegreePrioritisedExpansion (N≥1 seeds, frontier exhaustion only).
+ *
+ * **Design Relationship**:
+ * - BidirectionalBFS: Earlier design, N=2 only, has termination parameters (targetPaths, maxIterations)
+ * - DegreePrioritisedExpansion: Refined design, N≥1 with identical code path, parameter-free
+ *
+ * This implementation is suitable for production use cases where:
+ * - Predictable resource consumption is required
+ * - Finding *a* path quickly is more important than exhaustive sampling
+ * - Service-level objectives constrain iteration count
+ *
  * Searches for paths between two seed nodes by expanding frontiers from both directions.
  * Uses priority queue to process low-degree nodes first, naturally prioritizing specific
  * connections over generic ones.
@@ -71,6 +84,8 @@ interface BFSState {
  * const result = await bfs.search();
  * console.log(`Found ${result.paths.length} paths in ${result.iterations} iterations`);
  * ```
+ *
+ * @see DegreePrioritisedExpansion - Parameter-free version for N≥1 seeds
  */
 export class BidirectionalBFS<T> {
 	private foundPaths: string[][] = [];
@@ -212,9 +227,9 @@ export class BidirectionalBFS<T> {
 				state.visited.add(targetId);
 				state.parents.set(targetId, { parent: nodeId, edge: relationshipType });
 
-				// Add to frontier with degree as priority
-				const degree = this.expander.getDegree(targetId);
-				state.frontier.push(targetId, degree);
+				// Add to frontier with thesis priority as priority
+				const priority = this.expander.calculatePriority(targetId);
+				state.frontier.push(targetId, priority);
 			}
 		}
 	}
@@ -307,15 +322,15 @@ export class BidirectionalBFS<T> {
 			for (const nodeId of path) {
 				// Add to frontier A if not already visited
 				if (!this.stateA.visited.has(nodeId)) {
-					const degree = this.expander.getDegree(nodeId);
-					this.stateA.frontier.push(nodeId, degree);
+					const priority = this.expander.calculatePriority(nodeId);
+					this.stateA.frontier.push(nodeId, priority);
 					this.stateA.visited.add(nodeId);
 				}
 
 				// Add to frontier B if not already visited
 				if (!this.stateB.visited.has(nodeId)) {
-					const degree = this.expander.getDegree(nodeId);
-					this.stateB.frontier.push(nodeId, degree);
+					const priority = this.expander.calculatePriority(nodeId);
+					this.stateB.frontier.push(nodeId, priority);
 					this.stateB.visited.add(nodeId);
 				}
 			}
