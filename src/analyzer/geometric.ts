@@ -82,6 +82,159 @@ const hasK33 = (g: AnalyzerGraph): boolean => {
 };
 
 /**
+ * Extended K5 detection for larger graphs (up to 20 vertices).
+ * Uses a more exhaustive search by checking all 5-vertex combinations.
+ * @param g
+ */
+const hasK5Extended = (g: AnalyzerGraph): boolean => {
+	const n = g.vertices.length;
+	if (n < 5) return false;
+
+	const [vertexSet, edgeList] = toAdjacencyFormat(g);
+	const adj = buildAdjacencyList(vertexSet, edgeList);
+
+	// For each 5-vertex combination, check if it forms K5
+	const vertices = [...vertexSet];
+	if (vertices.length < 5) return false;
+
+	// Check all combinations of 5 vertices
+	for (let index = 0; index < vertices.length - 4; index++) {
+		for (let index_ = index + 1; index_ < vertices.length - 3; index_++) {
+			for (let k = index_ + 1; k < vertices.length - 2; k++) {
+				for (let l = k + 1; l < vertices.length - 1; l++) {
+					for (let m = l + 1; m < vertices.length; m++) {
+						const subset = new Set([vertices[index], vertices[index_], vertices[k], vertices[l], vertices[m]]);
+						if (isCompleteGraph(adj, subset)) {
+							return true;
+						}
+					}
+				}
+			}
+		}
+	}
+
+	return false;
+};
+
+/**
+ * Extended K3,3 detection for larger graphs (up to 20 vertices).
+ * Uses a more exhaustive search by checking different bipartitions.
+ * @param g
+ */
+const hasK33Extended = (g: AnalyzerGraph): boolean => {
+	const n = g.vertices.length;
+	if (n < 6) return false;
+
+	const [vertexSet, edgeList] = toAdjacencyFormat(g);
+	const adj = buildAdjacencyList(vertexSet, edgeList);
+	const vertices = [...vertexSet];
+
+	// Try all possible 6-vertex combinations and bipartitions
+	for (let index = 0; index < vertices.length - 5; index++) {
+		for (let index_ = index + 1; index_ < vertices.length - 4; index_++) {
+			for (let k = index_ + 1; k < vertices.length - 3; k++) {
+				for (let l = k + 1; l < vertices.length - 2; l++) {
+					for (let m = l + 1; m < vertices.length - 1; m++) {
+						for (let n = m + 1; n < vertices.length; n++) {
+							const sixVertices = [vertices[index], vertices[index_], vertices[k], vertices[l], vertices[m], vertices[n]];
+
+							// Try all ways to split 6 vertices into two groups of 3
+							// There are C(6,3)/2 = 10 unique bipartitions
+							const bipartitions = [
+								[[0,1,2], [3,4,5]],
+								[[0,1,3], [2,4,5]],
+								[[0,1,4], [2,3,5]],
+								[[0,1,5], [2,3,4]],
+								[[0,2,3], [1,4,5]],
+								[[0,2,4], [1,3,5]],
+								[[0,2,5], [1,3,4]],
+								[[0,3,4], [1,2,5]],
+								[[0,3,5], [1,2,4]],
+								[[0,4,5], [1,2,3]],
+							] as Array<[Array<number>, Array<number>]>;
+
+							for (const [part1, part2] of bipartitions) {
+								if (isCompleteBipartite(adj, sixVertices, part1, part2)) {
+									return true;
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	return false;
+};
+
+/**
+ * Check if a subset of vertices forms a complete graph.
+ * @param adj
+ * @param vertices
+ */
+const isCompleteGraph = (
+	adj: ReadonlyMap<number, ReadonlySet<number>>,
+	vertices: Set<number>
+): boolean => {
+	const vertArray = [...vertices];
+	for (let index = 0; index < vertArray.length; index++) {
+		for (let index_ = index + 1; index_ < vertArray.length; index_++) {
+			const neighbors = adj.get(vertArray[index]) ?? new Set();
+			if (!neighbors.has(vertArray[index_])) {
+				return false;
+			}
+		}
+	}
+	return true;
+};
+
+/**
+ * Check if vertices form a complete bipartite graph K3,3.
+ * @param adj
+ * @param vertices
+ * @param part1
+ * @param part2
+ */
+const isCompleteBipartite = (
+	adj: ReadonlyMap<number, ReadonlySet<number>>,
+	vertices: number[],
+	part1: number[],
+	part2: number[]
+): boolean => {
+	// Check all edges between partitions exist
+	for (const index of part1) {
+		for (const index_ of part2) {
+			const neighbors = adj.get(vertices[index]) ?? new Set();
+			if (!neighbors.has(vertices[index_])) {
+				return false;
+			}
+		}
+	}
+
+	// Check no edges within partitions
+	for (const index of part1) {
+		const neighbors = adj.get(vertices[index]) ?? new Set();
+		for (const index_ of part1) {
+			if (index !== index_ && neighbors.has(vertices[index_])) {
+				return false;
+			}
+		}
+	}
+
+	for (const index of part2) {
+		const neighbors = adj.get(vertices[index]) ?? new Set();
+		for (const index_ of part2) {
+			if (index !== index_ && neighbors.has(vertices[index_])) {
+				return false;
+			}
+		}
+	}
+
+	return true;
+};
+
+/**
  * Compute Planar property from graph structure.
  * A graph is planar if it can be drawn in the plane without edge crossings.
  *
@@ -150,7 +303,25 @@ export const computePlanar = (
 		return { kind: "planar" };
 	}
 
-	// For large graphs, we can't exhaustively check without a full planarity test
-	// Return unconstrained if edge count heuristic passes
+	// For larger graphs, use conservative planarity heuristic
+	// Sparse graphs (m <= 2.5n - 5) are likely planar
+	if (m <= 2.5 * n - 5) {
+		return { kind: "planar" };
+	}
+
+	// For moderately sized graphs (n <= 20), try extended forbidden subgraph check
+	if (n <= 20) {
+		// Check for K5 with extended search
+		if (hasK5Extended(g)) {
+			return { kind: "nonplanar" };
+		}
+
+		// Check for K3,3 with extended search
+		if (hasK33Extended(g)) {
+			return { kind: "nonplanar" };
+		}
+	}
+
+	// Cannot determine for certain - pass edge count but too dense for heuristic
 	return { kind: "unconstrained" };
 };
