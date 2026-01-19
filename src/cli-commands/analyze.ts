@@ -123,15 +123,9 @@ export const executeAnalyze = (options: AnalyzeOptions): void => {
 		const spec = computeGraphSpecFromGraph(analyzerGraph);
 
 		// Format output
-		let output: string;
-
-		if (options.output?.endsWith(".json") ?? false) {
-			// JSON output
-			output = JSON.stringify(spec, null, 2);
-		} else {
-			// Human-readable text output
-			output = formatSpecAsText(spec as Record<string, unknown>, options.verbose);
-		}
+		const output: string = options.output?.endsWith(".json") ?? false
+			? JSON.stringify(spec, null, 2) // JSON output
+			: formatSpecAsText(spec as Record<string, unknown>, options.verbose); // Human-readable text
 
 		// Write output
 		if (options.output === undefined) {

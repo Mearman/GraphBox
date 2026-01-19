@@ -88,12 +88,13 @@ export const generateModularEdges = (
  * @param edges - Edge list to populate
  * @param spec - Graph specification
  * @param rng - Seeded random number generator
+ * @param _rng
  */
 export const generatePtolemaicEdges = (
 	nodes: TestNode[],
 	edges: TestEdge[],
 	spec: GraphSpec,
-	rng: SeededRandom
+	_rng: SeededRandom
 ): void => {
 	if (spec.ptolemaic?.kind !== "ptolemaic") {
 		throw new Error("Ptolemaic generation requires ptolemaic spec");

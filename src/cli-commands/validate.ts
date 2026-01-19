@@ -8,7 +8,7 @@
  *   graphbox validate --input graph.gml --format gml --strict
  */
 
-import type { ParsedArgs as ParsedArguments } from "../cli-utils/arg-parser";
+import type { ParsedArguments } from "../cli-utils/arg-parser";
 import { getBoolean, getOptional, getRequired } from "../cli-utils/arg-parser";
 import { formatError, formatValidationErrors } from "../cli-utils/error-formatter";
 import type { GraphFormat } from "../cli-utils/format-detection";
