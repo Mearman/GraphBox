@@ -245,7 +245,7 @@ describe("computeDegreeConstraint", () => {
 		expect(result.kind).toBe("degree_sequence");
 		if (result.kind === "degree_sequence") {
 			// center has degree 3, leaves have degree 1
-			const sorted = [...result.sequence].sort((a, b) => a - b);
+			const sorted = [...result.sequence].toSorted((a, b) => a - b);
 			expect(sorted).toEqual([1, 1, 1, 3]);
 		}
 	});
@@ -254,7 +254,7 @@ describe("computeDegreeConstraint", () => {
 		const result = computeDegreeConstraint(path3);
 		expect(result.kind).toBe("degree_sequence");
 		if (result.kind === "degree_sequence") {
-			const sorted = [...result.sequence].sort((a, b) => a - b);
+			const sorted = [...result.sequence].toSorted((a, b) => a - b);
 			expect(sorted).toEqual([1, 1, 2]);
 		}
 	});
@@ -269,7 +269,7 @@ describe("computeDegreeConstraint", () => {
 		expect(result.kind).toBe("degree_sequence");
 		if (result.kind === "degree_sequence") {
 			// a->b: a has out-degree 1, b has in-degree 1 and out-degree 1, c has in-degree 1
-			const sorted = [...result.sequence].sort((a, b) => a - b);
+			const sorted = [...result.sequence].toSorted((a, b) => a - b);
 			expect(sorted).toEqual([1, 1, 2]);
 		}
 	});

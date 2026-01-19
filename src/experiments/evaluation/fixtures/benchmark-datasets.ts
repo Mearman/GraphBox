@@ -14,13 +14,12 @@ import { fileURLToPath } from "node:url";
 
 import { Graph } from "../../../algorithms/graph/graph";
 import {
-	isGmlContent,
-	loadEdgeList,
-	loadFromGraphJson,
-	loadGml,
-	type LoadedEdge,
-	type LoadedNode,
 	fetchAndExtract,
+	isGmlContent,
+	type LoadedEdge,
+	loadEdgeList,
+	type LoadedNode,
+	loadGml,
 } from "../loaders/index";
 
 // ============================================================================
@@ -106,7 +105,7 @@ export const CORA: BenchmarkDatasetMeta = {
 	directed: true,
 	expectedNodes: 2708,
 	expectedEdges: 5429,
-	expectedContentSize: 69928,
+	expectedContentSize: 69_928,
 	relativePath: "cora/cora.edges",
 	delimiter: /\s+/,  // Local .edges file and remote .cites both use whitespace
 	source: "McCallum et al., Automating the Construction of Internet Portals with Machine Learning, 2000",
@@ -126,7 +125,7 @@ export const CITESEER: BenchmarkDatasetMeta = {
 	directed: true,
 	expectedNodes: 3327,  // LINQS remote dataset has 3327 nodes
 	expectedEdges: 4732,  // LINQS remote dataset has 4732 edges
-	expectedContentSize: 137062,
+	expectedContentSize: 137_062,
 	relativePath: "citeseer/citeseer.edges",
 	delimiter: /\s+/,  // Local .edges file and remote .cites both use whitespace
 	source: "Giles et al., CiteSeer: An Automatic Citation Indexing System, 1998",
@@ -146,7 +145,7 @@ export const FACEBOOK: BenchmarkDatasetMeta = {
 	directed: false,
 	expectedNodes: 4039,
 	expectedEdges: 88_234,
-	expectedContentSize: 854362,
+	expectedContentSize: 854_362,
 	relativePath: "facebook/facebook_combined.txt",
 	delimiter: /\s+/,
 	source: "Leskovec & McAuley, Learning to Discover Social Circles in Ego Networks, NIPS 2012",
@@ -186,7 +185,7 @@ export const LESMIS: BenchmarkDatasetMeta = {
 	directed: false,
 	expectedNodes: 77,  // UMich remote GML has 77 nodes
 	expectedEdges: 254,  // UMich remote GML has 254 edges
-	expectedContentSize: 17610,
+	expectedContentSize: 17_610,
 	relativePath: "lesmis/lesmis.edges",
 	delimiter: /\s+/,
 	source: "Knuth, The Stanford GraphBase: A Platform for Combinatorial Computing, 1993",
@@ -207,7 +206,7 @@ export const DBLP: BenchmarkDatasetMeta = {
 	directed: false,
 	expectedNodes: 317_080,
 	expectedEdges: 1_049_866,
-	expectedContentSize: 13931442,  // ~14MB uncompressed
+	expectedContentSize: 13_931_442,  // ~14MB uncompressed
 	relativePath: "dblp/com-dblp.ungraph.txt",
 	delimiter: /\t/,
 	source: "Yang & Leskovec, Defining and Evaluating Network Communities based on Ground-truth, ICDM 2012",

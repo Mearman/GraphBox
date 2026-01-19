@@ -4,6 +4,7 @@
 
 import { describe, expect, it } from "vitest";
 
+import { clearCache, getCacheStats } from "../loaders/decompress";
 import {
 	BENCHMARK_DATASETS,
 	CITESEER,
@@ -22,8 +23,6 @@ import {
 	loadBenchmarkFromUrl,
 	validateBenchmark,
 } from "./benchmark-datasets";
-
-import { clearCache, getCacheStats } from "../loaders/decompress";
 
 describe("Benchmark Dataset Metadata", () => {
 	it("should have all expected datasets", () => {
@@ -386,7 +385,7 @@ describe("URL-based Loading (Integration)", () => {
 			// Facebook dataset from SNAP is plain text edge list format
 			const benchmark = await loadBenchmarkByIdFromUrl("facebook");
 			expect(benchmark.nodeCount).toBe(4039);
-			expect(benchmark.edgeCount).toBeGreaterThan(80000);
+			expect(benchmark.edgeCount).toBeGreaterThan(80_000);
 
 			// Check cache stats
 			const stats = await getCacheStats();

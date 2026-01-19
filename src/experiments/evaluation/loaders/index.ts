@@ -23,13 +23,13 @@ export {
 	isZipUrl,
 } from "./decompress";
 export {
-	isGmlContent,
 	type EdgeListConfig,
+	isGmlContent,
 	type LoadedEdge,
 	loadEdgeList,
+	type LoadedNode,
 	loadFromGraphJson,
 	loadGml,
-	type LoadedNode,
 	loadGraph,
 	loadGraphFromUrl,
 	type LoadResult,

@@ -374,6 +374,10 @@ export const loadGraphFromUrl = async (url: string, hint?: "edge-list" | "triple
  * GraphJson format uses { nodes: [{id, ...}], edges: [{source, target, ...}] }
  *
  * @param json - Graph in GraphJson format
+ * @param json.nodes
+ * @param json.edges
+ * @param json.meta
+ * @param json.meta.directed
  * @param directed - Whether graph is directed (default: false)
  * @returns Loaded graph with metadata
  */
@@ -439,7 +443,7 @@ export const isGmlContent = (content: string): boolean => {
 		trimmed.includes("graph\t[") ||
 		trimmed.includes("graph\n[") ||
 		trimmed.startsWith("Creator") ||
-		/^[\s]*graph\s*\[/.test(trimmed)
+		/^\s*graph\s*\[/.test(trimmed)
 	);
 };
 
