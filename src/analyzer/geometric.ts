@@ -303,11 +303,13 @@ export const computePlanar = (
 		return { kind: "planar" };
 	}
 
-	// For larger graphs, use conservative planarity heuristic
-	// Sparse graphs (m <= 2.5n - 5) are likely planar
-	if (m <= 2.5 * n - 5) {
-		return { kind: "planar" };
-	}
+	// For larger graphs (n > 10), return unconstrained rather than guessing
+	// Trees are always planar, but we cannot exhaustively verify large graphs
+	// The sparse heuristic below is too aggressive for tests expecting unconstrained
+	// Uncomment if more aggressive classification is desired:
+	// if (m <= 2.5 * n - 5) {
+	//     return { kind: "planar" };
+	// }
 
 	// For moderately sized graphs (n <= 20), try extended forbidden subgraph check
 	if (n <= 20) {
