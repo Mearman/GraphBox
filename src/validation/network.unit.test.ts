@@ -104,7 +104,7 @@ describe("validateScaleFree", () => {
 			const graph = createGraph(nodes, [], { scaleFree: { kind: "scale_free" } });
 			const result = validateScaleFree(graph);
 			expect(result.valid).toBe(true);
-			expect(result.message).toContain("not yet implemented");
+			expect(result.message).toContain("Power-law validated with KS test");
 		});
 	});
 });
