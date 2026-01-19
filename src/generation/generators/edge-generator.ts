@@ -500,6 +500,24 @@ const generateBaseStructure = (nodes: TestNode[], spec: GraphSpec, _config: Grap
 		return handleTopologicalMinorFree(nodes, edges, spec, rng);
 	}
 
+	// ============================================================================
+	// PERFECT GRAPH VARIANTS (check before default connectivity/cycles handling)
+	// These generate exact structures that should not be modified
+	// ============================================================================
+
+	if (spec.modular?.kind === "modular") {
+		generateModularGraphEdges(nodes, edges, spec, rng);
+		return edges;
+	}
+	if (spec.ptolemaic?.kind === "ptolemaic") {
+		generatePtolemaicEdges(nodes, edges, spec, rng);
+		return edges;
+	}
+	if (spec.quasiLine?.kind === "quasi_line") {
+		generateQuasiLineEdges(nodes, edges, spec, rng);
+		return edges;
+	}
+
 	// Non-bipartite graphs
 	if (spec.connectivity.kind === "connected" && spec.cycles.kind === "acyclic") {
 		// Generate tree structure
@@ -570,20 +588,6 @@ const generateBaseStructure = (nodes: TestNode[], spec: GraphSpec, _config: Grap
 	}
 	if (spec.probeInterval?.kind === "probe_interval") {
 		generateProbeIntervalEdges(nodes, edges, spec, rng);
-		return edges;
-	}
-
-	// Handle perfect graph variants
-	if (spec.modular?.kind === "modular") {
-		generateModularGraphEdges(nodes, edges, spec, rng);
-		return edges;
-	}
-	if (spec.ptolemaic?.kind === "ptolemaic") {
-		generatePtolemaicEdges(nodes, edges, spec, rng);
-		return edges;
-	}
-	if (spec.quasiLine?.kind === "quasi_line") {
-		generateQuasiLineEdges(nodes, edges, spec, rng);
 		return edges;
 	}
 

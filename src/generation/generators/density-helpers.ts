@@ -19,6 +19,11 @@ export const hasExactStructure = (spec: GraphSpec): boolean => {
       spec.binaryTree?.kind === "complete_binary") return true;
 	if (spec.tournament?.kind === "tournament") return true;
 
+	// Perfect graph class generators (produce exact structures)
+	if (spec.modular?.kind === "modular") return true;
+	if (spec.ptolemaic?.kind === "ptolemaic") return true;
+	if (spec.quasiLine?.kind === "quasi_line") return true;
+
 	// Regularity constraints
 	if (spec.cubic?.kind === "cubic") return true;
 	if (spec.specificRegular?.kind === "k_regular") return true;
