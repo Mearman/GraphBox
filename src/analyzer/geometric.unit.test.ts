@@ -148,19 +148,19 @@ describe("computePlanar", () => {
 		expect(computePlanar(g).kind).toBe("planar");
 	});
 
-	it("should return unconstrained for large graphs within edge bound", () => {
-		// Create a graph with 15 vertices and edges within the bound
-		// but large enough that we can't exhaustively check
+	it("should use sparse heuristic for large graphs within edge bound", () => {
+		// Create a graph with 15 vertices and edges within the sparse bound
+		// The sparse heuristic (m <= 2.5n - 5) should classify this as planar
 		const vertices = Array.from({ length: 15 }, (_, index) => `V${index}`);
 		const edges: Array<[string, string]> = [];
 
-		// Create a tree (n-1 edges, definitely planar but graph is large)
+		// Create a tree (n-1 edges, definitely planar)
 		for (let index = 0; index < 14; index++) {
 			edges.push([`V${index}`, `V${index + 1}`]);
 		}
 
 		const g = makeGraph(vertices, edges);
-		expect(computePlanar(g).kind).toBe("unconstrained");
+		expect(computePlanar(g).kind).toBe("planar");
 	});
 
 	it("should return unconstrained for directed graphs", () => {

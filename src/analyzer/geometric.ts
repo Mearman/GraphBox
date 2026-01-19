@@ -287,7 +287,7 @@ export const computePlanar = (
 		return { kind: "nonplanar" };
 	}
 
-	// For small graphs, check for forbidden subgraphs K5 and K3,3
+	// For small graphs (n <= 10), check for forbidden subgraphs K5 and K3,3
 	if (n <= 10) {
 		// Check for K5 (complete graph on 5 vertices)
 		if (hasK5(g)) {
@@ -322,6 +322,6 @@ export const computePlanar = (
 		}
 	}
 
-	// Cannot determine for certain - pass edge count but too dense for heuristic
+	// Cannot determine for certain - too dense for heuristic
 	return { kind: "unconstrained" };
 };
