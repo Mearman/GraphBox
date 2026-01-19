@@ -103,37 +103,25 @@ export const generatePtolemaicEdges = (
 	if (nodeCount === 0) return;
 	if (nodeCount === 1) return;
 
-	// Partition nodes into 2-4 blocks (cliques)
-	const numberBlocks = Math.min(nodeCount, rng.integer(2, 4));
-	const blockSize = Math.floor(nodeCount / numberBlocks);
-	const blocks: number[][] = [];
-
-	for (let index = 0; index < numberBlocks; index++) {
-		const start = index * blockSize;
-		const end = index === numberBlocks - 1 ? nodeCount : (index + 1) * blockSize;
-		blocks.push(Array.from({ length: end - start }, (_, index) => start + index));
-	}
-
-	// Make each block a clique
-	for (const block of blocks) {
-		for (let index = 0; index < block.length; index++) {
-			for (let index_ = index + 1; index_ < block.length; index_++) {
-				edges.push({
-					source: nodes[block[index]].id,
-					target: nodes[block[index_]].id,
-				});
-			}
-		}
-	}
-
-	// Connect blocks in a tree structure (each block connects to next)
-	for (let index = 0; index < blocks.length - 1; index++) {
-		const u = blocks[index][rng.integer(0, blocks[index].length - 1)];
-		const v = blocks[index + 1][rng.integer(0, blocks[index + 1].length - 1)];
+	// Simple approach: Create a path with some triangles
+	// This is ptolemaic (chordal + distance-hereditary)
+	// Build main path
+	for (let index = 0; index < nodeCount - 1; index++) {
 		edges.push({
-			source: nodes[u].id,
-			target: nodes[v].id,
+			source: nodes[index].id,
+			target: nodes[index + 1].id,
 		});
+	}
+
+	// Add some chords to make small blocks (but keep it ptolemaic)
+	// Every 3 nodes, close the triangle if we have enough nodes
+	for (let index = 0; index < nodeCount - 2; index += 3) {
+		if (index + 2 < nodeCount) {
+			edges.push({
+				source: nodes[index].id,
+				target: nodes[index + 2].id,
+			});
+		}
 	}
 };
 
@@ -194,7 +182,6 @@ export const generateQuasiLineEdges = (
 	} else {
 		// Generate complete bipartite K_{m,n}
 		const m = Math.floor(nodeCount / 2);
-		const n = nodeCount - m;
 
 		// Partition nodes
 		for (let index = 0; index < m; index++) {

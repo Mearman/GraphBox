@@ -191,8 +191,8 @@ export const toSpecifiedGraph = (core: CoreGraph, spec: GraphSpec): SpecifiedGra
  * @returns CoreGraph without spec
  */
 export const fromSpecifiedGraph = (specified: SpecifiedGraph): CoreGraph => {
-	 
-	const { spec, ...core } = specified;
+
+	const { spec: _spec, ...core } = specified;
 	return core;
 };
 
@@ -217,8 +217,8 @@ export const toDocumentedGraph = (core: CoreGraph, meta: CoreGraphMeta): Documen
  * @returns CoreGraph without metadata
  */
 export const fromDocumentedGraph = (document: DocumentedGraph): CoreGraph => {
-	 
-	const { meta, ...core } = document;
+
+	const { meta: _meta, ...core } = document;
 	return core;
 };
 
@@ -342,8 +342,8 @@ export const toCoreGraph = (graph:
 	// Already CoreGraph
 	if ("nodes" in graph && "edges" in graph && !("vertices" in graph)) {
 		// Remove spec/meta if present
-		 
-		const { spec, meta, ...core } = graph as SpecifiedGraph &
+
+		const { spec: _spec, meta: _meta, ...core } = graph as SpecifiedGraph &
       DocumentedGraph &
       CoreGraph;
 		return core;
@@ -377,7 +377,7 @@ export const toCoreGraph = (graph:
  * @param node
  */
 const extractNodeAttributes = (node: CoreGraphNode): Record<string, unknown> | undefined => {
-	const { id, label, type, partition, ...rest } = node;
+	const { id: _id, label: _label, type: _type, partition: _partition, ...rest } = node;
 	return Object.keys(rest).length > 0 ? rest : undefined;
 };
 
@@ -386,7 +386,7 @@ const extractNodeAttributes = (node: CoreGraphNode): Record<string, unknown> | u
  * @param edge
  */
 const extractEdgeAttributes = (edge: CoreGraphEdge): Record<string, unknown> | undefined => {
-	const { source, target, weight, directed, type, ...rest } = edge;
+	const { source: _source, target: _target, weight: _weight, directed: _directed, type: _type, ...rest } = edge;
 	return Object.keys(rest).length > 0 ? rest : undefined;
 };
 
@@ -395,7 +395,7 @@ const extractEdgeAttributes = (edge: CoreGraphEdge): Record<string, unknown> | u
  * @param node
  */
 const extractGmlNodeAttributes = (node: GmlGraphNode): Record<string, unknown> | undefined => {
-	const { id, label, ...rest } = node;
+	const { id: _id, label: _label, ...rest } = node;
 	return Object.keys(rest).length > 0 ? rest : undefined;
 };
 
@@ -404,6 +404,6 @@ const extractGmlNodeAttributes = (node: GmlGraphNode): Record<string, unknown> |
  * @param edge
  */
 const extractGmlEdgeAttributes = (edge: GmlGraphEdge): Record<string, unknown> | undefined => {
-	const { source, target, weight, directed, ...rest } = edge;
+	const { source: _source, target: _target, weight: _weight, directed: _directed, ...rest } = edge;
 	return Object.keys(rest).length > 0 ? rest : undefined;
 };
