@@ -209,6 +209,10 @@ export default tseslint.config(
       '@typescript-eslint/no-unsafe-assignment': 'warn', // Type safety, but often false positives
       '@typescript-eslint/no-unsafe-return': 'warn', // Type safety, but often false positives
       '@typescript-eslint/no-unsafe-argument': 'warn', // Type safety, but often false positives
+
+      // Forbid type coercion - enforce === and !==
+      eqeqeq: ['error', 'always', { null: 'ignore' }], // Enforce === and !==, allow == null for convenience
+
       'prefer-const': 'warn', // Style preference
 
       // Import rules
