@@ -11,6 +11,129 @@ import type {
 import type { AnalyzerGraph , ComputePolicy } from "./types.js";
 
 /**
+ * Build complement of an undirected graph.
+ * Complement has edges wherever original doesn't (except self-loops).
+ * @param g
+ */
+const buildComplement = (g: AnalyzerGraph): AnalyzerGraph => {
+	const complementEdges: typeof g.edges = [];
+
+	// For each pair of vertices, add edge if not in original
+	const vertices = g.vertices;
+	for (let index = 0; index < vertices.length; index++) {
+		for (let index_ = index + 1; index_ < vertices.length; index_++) {
+			const v1 = vertices[index];
+			const v2 = vertices[index_];
+
+			// Check if edge exists in original graph
+			const hasEdge = g.edges.some(e =>
+				!e.directed &&
+				e.endpoints.length === 2 &&
+				((e.endpoints[0] === v1.id && e.endpoints[1] === v2.id) ||
+				 (e.endpoints[0] === v2.id && e.endpoints[1] === v1.id))
+			);
+
+			if (!hasEdge) {
+				complementEdges.push({
+					id: `comp_${index}_${index_}`,
+					endpoints: [v1.id, v2.id],
+					directed: false,
+				});
+			}
+		}
+	}
+
+	return {
+		vertices: g.vertices,
+		edges: complementEdges,
+	};
+};
+
+/**
+ * Check if graph has an induced cycle of given length.
+ * Uses a simple heuristic for performance.
+ * @param g
+ * @param length
+ */
+const hasInducedCycleOfLength = (g: AnalyzerGraph, length: number): boolean => {
+	const n = g.vertices.length;
+	if (n < length) return false;
+
+	// Build adjacency list for quick lookup
+	const adj = new Map<string, Set<string>>();
+	for (const v of g.vertices) {
+		adj.set(v.id, new Set());
+	}
+	for (const e of g.edges) {
+		if (!e.directed && e.endpoints.length === 2) {
+			const [u, v] = e.endpoints;
+			adj.get(u)?.add(v);
+			adj.get(v)?.add(u);
+		}
+	}
+
+	// Simple cycle detection using DFS
+	const vertices = g.vertices.map(v => v.id);
+
+	// Try all starting vertices
+	for (const start of vertices) {
+		if (dfsCycle(start, start, length, new Set([start]), adj, vertices)) {
+			return true;
+		}
+	}
+
+	return false;
+};
+
+/**
+ * DFS helper to find induced cycle of given length.
+ * @param current
+ * @param start
+ * @param remaining
+ * @param visited
+ * @param adj
+ * @param allVertices
+ */
+const dfsCycle = (
+	current: string,
+	start: string,
+	remaining: number,
+	visited: Set<string>,
+	adj: Map<string, Set<string>>,
+	allVertices: string[]
+): boolean => {
+	if (remaining === 0) {
+		// Check if we can close the cycle
+		return adj.get(current)?.has(start) ?? false;
+	}
+
+	for (const next of allVertices) {
+		if (visited.has(next)) continue;
+
+		// Check if edge exists
+		if (!adj.get(current)?.has(next)) continue;
+
+		// For induced cycle, check no extra edges to visited vertices
+		let hasExtraEdges = false;
+		for (const v of visited) {
+			if (v !== current && adj.get(next)?.has(v)) {
+				hasExtraEdges = true;
+				break;
+			}
+		}
+		if (hasExtraEdges) continue;
+
+		visited.add(next);
+		if (dfsCycle(next, start, remaining - 1, visited, adj, allVertices)) {
+			return true;
+		}
+		visited.delete(next);
+	}
+
+	return false;
+};
+
+/**
  * Compute WeaklyChordal property from graph structure.
  * No hole or antihole of length >= 5
  *
@@ -20,15 +143,33 @@ import type { AnalyzerGraph , ComputePolicy } from "./types.js";
  * @returns WeaklyChordal with computed value
  */
 export const computeWeaklyChordal = (
-	_g: AnalyzerGraph,
+	g: AnalyzerGraph,
 	_policy: ComputePolicy
 ): WeaklyChordal => {
-	// TODO: Implement analysis logic for WeaklyChordal
-	// For now, return placeholder value
+	const n = g.vertices.length;
+	if (n < 5) return { kind: "weakly_chordal" };
 
-	// Example: Check for forbidden subgraph
-	// const hasForbidden = checkForForbiddenSubgraph(g);
-	// return hasForbidden ? { kind: "has_hole_or_antihole" } : { kind: "weakly_chordal" };
+	// Skip directed graphs
+	if (g.edges.some(e => e.directed)) {
+		return { kind: "unconstrained" };
+	}
+
+	// Check for holes (induced cycles of length >= 5)
+	// Use heuristic: check for cycles up to length min(n, 12)
+	const maxCheck = Math.min(n, 12);
+	for (let length = 5; length <= maxCheck; length++) {
+		if (hasInducedCycleOfLength(g, length)) {
+			return { kind: "has_hole_or_antihole" };
+		}
+	}
+
+	// Check for antiholes (complement has hole)
+	const complement = buildComplement(g);
+	for (let length = 5; length <= maxCheck; length++) {
+		if (hasInducedCycleOfLength(complement, length)) {
+			return { kind: "has_hole_or_antihole" };
+		}
+	}
 
 	return { kind: "weakly_chordal" };
 };
