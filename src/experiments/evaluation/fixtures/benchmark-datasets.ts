@@ -13,7 +13,15 @@ import { dirname,resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { Graph } from "../../../algorithms/graph/graph";
-import { fetchWithAutoDecompress, type LoadedEdge,loadEdgeList, type LoadedNode } from "../loaders/index";
+import {
+	isGmlContent,
+	loadEdgeList,
+	loadFromGraphJson,
+	loadGml,
+	type LoadedEdge,
+	type LoadedNode,
+	fetchAndExtract,
+} from "../loaders/index";
 
 // ============================================================================
 // Types
@@ -35,11 +43,14 @@ export interface BenchmarkDatasetMeta {
 	/** Whether edges are directed */
 	directed: boolean;
 
-	/** Expected node count (approximate, for validation) */
+	/** Expected node count (for validation) */
 	expectedNodes: number;
 
-	/** Expected edge count (approximate, for validation) */
+	/** Expected edge count (for validation) */
 	expectedEdges: number;
+
+	/** Expected content size in bytes (for validation, helps detect remote changes) */
+	expectedContentSize: number;
 
 	/** File path relative to data/benchmarks/ */
 	relativePath: string;
@@ -73,6 +84,9 @@ export interface LoadedBenchmark {
 
 	/** Actual edge count after loading */
 	edgeCount: number;
+
+	/** Actual content size in bytes */
+	contentSize: number;
 }
 
 // ============================================================================
@@ -92,9 +106,11 @@ export const CORA: BenchmarkDatasetMeta = {
 	directed: true,
 	expectedNodes: 2708,
 	expectedEdges: 5429,
+	expectedContentSize: 69928,
 	relativePath: "cora/cora.edges",
-	delimiter: /,/,
+	delimiter: /\s+/,  // Local .edges file and remote .cites both use whitespace
 	source: "McCallum et al., Automating the Construction of Internet Portals with Machine Learning, 2000",
+	remoteUrl: "https://linqs-data.soe.ucsc.edu/public/lbc/cora.tgz",
 };
 
 /**
@@ -108,11 +124,13 @@ export const CITESEER: BenchmarkDatasetMeta = {
 	id: "citeseer",
 	description: "Citation network of computer science papers",
 	directed: true,
-	expectedNodes: 3264,
-	expectedEdges: 4536,
+	expectedNodes: 3327,  // LINQS remote dataset has 3327 nodes
+	expectedEdges: 4732,  // LINQS remote dataset has 4732 edges
+	expectedContentSize: 137062,
 	relativePath: "citeseer/citeseer.edges",
-	delimiter: /,/,
+	delimiter: /\s+/,  // Local .edges file and remote .cites both use whitespace
 	source: "Giles et al., CiteSeer: An Automatic Citation Indexing System, 1998",
+	remoteUrl: "https://linqs-data.soe.ucsc.edu/public/lbc/citeseer.tgz",
 };
 
 /**
@@ -128,9 +146,11 @@ export const FACEBOOK: BenchmarkDatasetMeta = {
 	directed: false,
 	expectedNodes: 4039,
 	expectedEdges: 88_234,
+	expectedContentSize: 854362,
 	relativePath: "facebook/facebook_combined.txt",
 	delimiter: /\s+/,
 	source: "Leskovec & McAuley, Learning to Discover Social Circles in Ego Networks, NIPS 2012",
+	remoteUrl: "https://snap.stanford.edu/data/facebook_combined.txt.gz",
 };
 
 /**
@@ -146,9 +166,11 @@ export const KARATE: BenchmarkDatasetMeta = {
 	directed: false,
 	expectedNodes: 34,
 	expectedEdges: 78,
+	expectedContentSize: 4194,
 	relativePath: "karate/karate.edges",
 	delimiter: /\s+/,
 	source: "Zachary, An Information Flow Model for Conflict and Fission in Small Groups, 1977",
+	remoteUrl: "https://websites.umich.edu/~mejn/netdata/karate.zip",
 };
 
 /**
@@ -162,11 +184,13 @@ export const LESMIS: BenchmarkDatasetMeta = {
 	id: "lesmis",
 	description: "Character co-appearance network from Les Misérables",
 	directed: false,
-	expectedNodes: 69,
-	expectedEdges: 279,
+	expectedNodes: 77,  // UMich remote GML has 77 nodes
+	expectedEdges: 254,  // UMich remote GML has 254 edges
+	expectedContentSize: 17610,
 	relativePath: "lesmis/lesmis.edges",
 	delimiter: /\s+/,
 	source: "Knuth, The Stanford GraphBase: A Platform for Combinatorial Computing, 1993",
+	remoteUrl: "https://websites.umich.edu/~mejn/netdata/lesmis.zip",
 };
 
 /**
@@ -183,9 +207,11 @@ export const DBLP: BenchmarkDatasetMeta = {
 	directed: false,
 	expectedNodes: 317_080,
 	expectedEdges: 1_049_866,
+	expectedContentSize: 13931442,  // ~14MB uncompressed
 	relativePath: "dblp/com-dblp.ungraph.txt",
 	delimiter: /\t/,
 	source: "Yang & Leskovec, Defining and Evaluating Network Communities based on Ground-truth, ICDM 2012",
+	remoteUrl: "https://snap.stanford.edu/data/bigdata/communities/com-dblp.ungraph.txt.gz",
 };
 
 /**
@@ -226,12 +252,20 @@ export const resolveBenchmarkPath = (meta: BenchmarkDatasetMeta, benchmarksRoot?
 /**
  * Load a benchmark dataset.
  *
+ * Uses remote URL with caching if configured, otherwise loads from local file.
+ *
  * @param meta - Dataset metadata
- * @param benchmarksRoot - Optional root directory for benchmarks
+ * @param benchmarksRoot - Optional root directory for benchmarks (only used if no remoteUrl)
  * @returns Loaded benchmark with graph and metadata
  * @throws Error if file not found or parsing fails
  */
 export const loadBenchmark = async (meta: BenchmarkDatasetMeta, benchmarksRoot?: string): Promise<LoadedBenchmark> => {
+	// Use remote URL with caching if available
+	if (meta.remoteUrl) {
+		return loadBenchmarkFromUrl(meta.remoteUrl, meta);
+	}
+
+	// Fall back to local file
 	const filePath = resolveBenchmarkPath(meta, benchmarksRoot);
 	const content = await readFile(filePath, "utf-8");
 
@@ -242,12 +276,14 @@ export const loadBenchmark = async (meta: BenchmarkDatasetMeta, benchmarksRoot?:
 
 	const nodeCount = result.graph.getAllNodes().length;
 	const edgeCount = result.graph.getAllEdges().length;
+	const contentSize = content.length;
 
 	return {
 		graph: result.graph,
 		meta,
 		nodeCount,
 		edgeCount,
+		contentSize,
 	};
 };
 
@@ -320,22 +356,34 @@ export const loadAllBenchmarks = async (benchmarksRoot?: string): Promise<Map<st
  * ```
  */
 export const loadBenchmarkFromUrl = async (url: string, meta: BenchmarkDatasetMeta): Promise<LoadedBenchmark> => {
-	// Auto-detect and handle gzip compression
-	const content = await fetchWithAutoDecompress(url);
+	// Auto-detect format and extract content (handles .zip, .tar.gz, .gz, .txt, .gml)
+	// Note: .gml must come before .txt because UMich datasets have both, and .txt is just a description
+	const content = await fetchAndExtract(url, [".edges", ".gml", ".txt", ".cites"]);
 
-	const result = loadEdgeList(content, {
-		directed: meta.directed,
-		delimiter: meta.delimiter,
-	});
+	// Detect format and use appropriate loader
+	let result: Awaited<ReturnType<typeof loadEdgeList>>;
+
+	if (isGmlContent(content)) {
+		// Use GML parser for GML format
+		result = await loadGml(content, meta.directed);
+	} else {
+		// Use edge list parser for text-based formats
+		result = loadEdgeList(content, {
+			directed: meta.directed,
+			delimiter: meta.delimiter,
+		});
+	}
 
 	const nodeCount = result.graph.getAllNodes().length;
 	const edgeCount = result.graph.getAllEdges().length;
+	const contentSize = content.length;
 
 	return {
 		graph: result.graph,
 		meta,
 		nodeCount,
 		edgeCount,
+		contentSize,
 	};
 };
 
@@ -403,12 +451,14 @@ export const loadBenchmarkFromContent = (content: string, meta: BenchmarkDataset
 
 	const nodeCount = result.graph.getAllNodes().length;
 	const edgeCount = result.graph.getAllEdges().length;
+	const contentSize = content.length;
 
 	return {
 		graph: result.graph,
 		meta,
 		nodeCount,
 		edgeCount,
+		contentSize,
 	};
 };
 
@@ -444,6 +494,7 @@ export const createBenchmarkMeta = (
 	directed: options.directed ?? false,
 	expectedNodes: options.expectedNodes ?? 0,
 	expectedEdges: options.expectedEdges ?? 0,
+	expectedContentSize: options.expectedContentSize ?? 0,
 	relativePath: options.relativePath ?? "",
 	delimiter: options.delimiter ?? /\s+/,
 	source: options.source ?? "Custom dataset",
@@ -476,7 +527,7 @@ export const getBenchmarkSummary = (benchmark: LoadedBenchmark): string => {
  */
 export const validateBenchmark = (benchmark: LoadedBenchmark, tolerance = 0.05): { valid: boolean; warnings: string[] } => {
 	const warnings: string[] = [];
-	const { meta, nodeCount, edgeCount } = benchmark;
+	const { meta, nodeCount, edgeCount, contentSize } = benchmark;
 
 	const nodeDiff = Math.abs(nodeCount - meta.expectedNodes) / meta.expectedNodes;
 	const edgeDiff = Math.abs(edgeCount - meta.expectedEdges) / meta.expectedEdges;
@@ -491,6 +542,16 @@ export const validateBenchmark = (benchmark: LoadedBenchmark, tolerance = 0.05):
 		warnings.push(
 			`Edge count ${edgeCount} differs from expected ${meta.expectedEdges} by ${(edgeDiff * 100).toFixed(1)}%`
 		);
+	}
+
+	// Content size validation (skip if expected size is 0)
+	if (meta.expectedContentSize > 0) {
+		const sizeDiff = Math.abs(contentSize - meta.expectedContentSize) / meta.expectedContentSize;
+		if (sizeDiff > tolerance) {
+			warnings.push(
+				`Content size ${contentSize} differs from expected ${meta.expectedContentSize} by ${(sizeDiff * 100).toFixed(1)}%`
+			);
+		}
 	}
 
 	return {

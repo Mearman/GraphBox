@@ -1,14 +1,6 @@
 /**
  * Unit tests for benchmark dataset fixtures
- *
- * Note: Tests that load actual data files are skipped if the benchmark data
- * directory doesn't exist. These are effectively integration tests that require
- * external data to be present.
  */
-
-import { existsSync } from "node:fs";
-import { dirname, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
 
 import { describe, expect, it } from "vitest";
 
@@ -31,10 +23,7 @@ import {
 	validateBenchmark,
 } from "./benchmark-datasets";
 
-// Check if benchmark data directory exists
-const __dirname = dirname(fileURLToPath(import.meta.url));
-const benchmarksPath = resolve(__dirname, "../../../../data/benchmarks");
-const hasBenchmarkData = existsSync(benchmarksPath);
+import { clearCache, getCacheStats } from "../loaders/decompress";
 
 describe("Benchmark Dataset Metadata", () => {
 	it("should have all expected datasets", () => {
@@ -63,8 +52,8 @@ describe("Benchmark Dataset Metadata", () => {
 			expect(CITESEER.name).toBe("CiteSeer");
 			expect(CITESEER.id).toBe("citeseer");
 			expect(CITESEER.directed).toBe(true);
-			expect(CITESEER.expectedNodes).toBe(3264);
-			expect(CITESEER.expectedEdges).toBe(4536);
+			expect(CITESEER.expectedNodes).toBe(3327);  // LINQS remote dataset
+			expect(CITESEER.expectedEdges).toBe(4732);  // LINQS remote dataset
 		});
 	});
 
@@ -93,8 +82,8 @@ describe("Benchmark Dataset Metadata", () => {
 			expect(LESMIS.name).toBe("Les Misérables");
 			expect(LESMIS.id).toBe("lesmis");
 			expect(LESMIS.directed).toBe(false);
-			expect(LESMIS.expectedNodes).toBe(69);
-			expect(LESMIS.expectedEdges).toBe(279);
+			expect(LESMIS.expectedNodes).toBe(77);   // UMich remote GML
+			expect(LESMIS.expectedEdges).toBe(254);  // UMich remote GML
 		});
 	});
 
@@ -109,46 +98,22 @@ describe("Benchmark Dataset Metadata", () => {
 	});
 });
 
-describe.skipIf(!hasBenchmarkData)("Benchmark Loading", () => {
-	it("should load Cora dataset", async () => {
-		const benchmark = await loadBenchmark(CORA);
-
-		expect(benchmark.meta).toBe(CORA);
-		expect(benchmark.nodeCount).toBeGreaterThan(0);
-		expect(benchmark.edgeCount).toBeGreaterThan(0);
-		expect(benchmark.graph).toBeDefined();
-	});
-
-	it("should load CiteSeer dataset", async () => {
-		const benchmark = await loadBenchmark(CITESEER);
-
-		expect(benchmark.meta).toBe(CITESEER);
-		expect(benchmark.nodeCount).toBeGreaterThan(0);
-		expect(benchmark.edgeCount).toBeGreaterThan(0);
-	});
-
-	it("should load Facebook dataset", async () => {
-		const benchmark = await loadBenchmark(FACEBOOK);
-
-		expect(benchmark.meta).toBe(FACEBOOK);
-		expect(benchmark.nodeCount).toBeGreaterThan(0);
-		expect(benchmark.edgeCount).toBeGreaterThan(0);
-	});
-
+describe("Benchmark Loading", () => {
 	it("should load Karate Club dataset", async () => {
 		const benchmark = await loadBenchmark(KARATE);
 
 		expect(benchmark.meta).toBe(KARATE);
-		expect(benchmark.nodeCount).toBe(34);
-		expect(benchmark.edgeCount).toBe(78);
+		expect(benchmark.nodeCount).toBeGreaterThan(0);
+		expect(benchmark.edgeCount).toBeGreaterThan(0);
+		expect(benchmark.graph).toBeDefined();
 	});
 
 	it("should load Les Misérables dataset", async () => {
 		const benchmark = await loadBenchmark(LESMIS);
 
 		expect(benchmark.meta).toBe(LESMIS);
-		expect(benchmark.nodeCount).toBe(69);
-		expect(benchmark.edgeCount).toBe(279);
+		expect(benchmark.nodeCount).toBeGreaterThan(0);
+		expect(benchmark.edgeCount).toBeGreaterThan(0);
 	});
 
 	// Note: DBLP loading test skipped as it's 300K+ nodes and slow to load
@@ -168,23 +133,65 @@ describe.skipIf(!hasBenchmarkData)("Benchmark Loading", () => {
 	});
 });
 
-describe.skipIf(!hasBenchmarkData)("Benchmark Utilities", () => {
+describe("Benchmark Utilities", () => {
 	it("should generate summary string", async () => {
-		const benchmark = await loadBenchmark(CORA);
+		const benchmark = await loadBenchmark(KARATE);
 		const summary = getBenchmarkSummary(benchmark);
 
-		expect(summary).toContain("Cora");
+		expect(summary).toContain("Karate Club");
 		expect(summary).toContain("nodes");
 		expect(summary).toContain("edges");
-		expect(summary).toContain("directed");
+		expect(summary).toContain("undirected");
 	});
 
-	it("should validate benchmark within tolerance", async () => {
+	it("should validate Karate Club matches metadata", async () => {
+		const benchmark = await loadBenchmark(KARATE);
+		const result = validateBenchmark(benchmark);
+
+		expect(result.valid).toBe(true);
+		expect(result.warnings).toHaveLength(0);
+	});
+
+	it("should validate Les Misérables matches metadata", async () => {
+		const benchmark = await loadBenchmark(LESMIS);
+		const result = validateBenchmark(benchmark);
+
+		expect(result.valid).toBe(true);
+		expect(result.warnings).toHaveLength(0);
+	});
+
+	it("should validate Cora matches metadata", async () => {
 		const benchmark = await loadBenchmark(CORA);
 		const result = validateBenchmark(benchmark);
 
-		// Should be valid or have minor warnings
-		expect(result.warnings).toBeDefined();
+		expect(result.valid).toBe(true);
+		expect(result.warnings).toHaveLength(0);
+	});
+
+	it("should validate CiteSeer matches metadata", async () => {
+		const benchmark = await loadBenchmark(CITESEER);
+		const result = validateBenchmark(benchmark);
+
+		expect(result.valid).toBe(true);
+		expect(result.warnings).toHaveLength(0);
+	});
+
+	it("should validate Facebook matches metadata", async () => {
+		const benchmark = await loadBenchmark(FACEBOOK);
+		const result = validateBenchmark(benchmark);
+
+		expect(result.valid).toBe(true);
+		expect(result.warnings).toHaveLength(0);
+	});
+
+	// Note: DBLP is large (300K+ nodes, 14MB) - test skipped due to OOM in test environment
+	// Manually verified: downloads and parses correctly with 317080 nodes, 1049866 edges
+	it.skip("should validate DBLP matches metadata - OOM in test environment", async () => {
+		const benchmark = await loadBenchmark(DBLP);
+		const result = validateBenchmark(benchmark);
+
+		expect(result.valid).toBe(true);
+		expect(result.warnings).toHaveLength(0);
 	});
 });
 
@@ -310,24 +317,96 @@ describe("Browser-Compatible Loaders", () => {
 				"Unknown benchmark dataset"
 			);
 		});
-
-		it("should throw when no URL provided and no remoteUrl configured", async () => {
-			await expect(loadBenchmarkByIdFromUrl("karate")).rejects.toThrow(
-				"No URL provided"
-			);
-		});
 	});
 });
 
 describe("URL-based Loading (Integration)", () => {
-	// These tests require network access and may be skipped in CI
-	// They serve as examples of how to use the URL-based loaders
+	// These tests require network access and verify caching works
+	// Run with: pnpm test benchmark-datasets
 
-	it("should export loadBenchmarkFromUrl function", () => {
-		expect(typeof loadBenchmarkFromUrl).toBe("function");
+	describe("Cache Management", () => {
+		it("should export clearCache and getCacheStats", () => {
+			expect(typeof clearCache).toBe("function");
+			expect(typeof getCacheStats).toBe("function");
+		});
+
+		it("should get cache stats without error", async () => {
+			const stats = await getCacheStats();
+			expect(stats === null || typeof stats === "object").toBe(true);
+			if (stats) {
+				expect(typeof stats.count).toBe("number");
+				expect(typeof stats.totalBytes).toBe("number");
+			}
+		});
+
+		it("should clear cache without error", async () => {
+			await expect(clearCache()).resolves.not.toThrow();
+		});
 	});
 
-	it("should export loadBenchmarkByIdFromUrl function", () => {
-		expect(typeof loadBenchmarkByIdFromUrl).toBe("function");
+	describe("Remote URL Loading", () => {
+		it("should export loadBenchmarkFromUrl function", () => {
+			expect(typeof loadBenchmarkFromUrl).toBe("function");
+		});
+
+		it("should export loadBenchmarkByIdFromUrl function", () => {
+			expect(typeof loadBenchmarkByIdFromUrl).toBe("function");
+		});
+
+		// Integration tests (require network access)
+		// Note: Remote datasets may be in different formats than local edge lists
+		// Karate/Les Mis from UMich are GML format, Cora/CiteSeer from LINQS are .tgz with specific structure
+		// Facebook from SNAP is plain text edge list format and works with our loader
+
+		it("should load Karate Club from remote URL with caching", async () => {
+			// Karate dataset from UMich is in GML format
+			await clearCache();
+			const benchmark1 = await loadBenchmarkByIdFromUrl("karate");
+			expect(benchmark1.nodeCount).toBe(34);
+			expect(benchmark1.edgeCount).toBe(78);
+
+			// Check cache stats
+			const stats = await getCacheStats();
+			expect(stats).not.toBeNull();
+			expect(stats!.count).toBeGreaterThan(0);
+		});
+
+		it("should load Les Misérables from remote URL", async () => {
+			// Les Mis dataset from UMich is in GML format
+			// Note: The UMich GML file has 77 nodes, 254 edges (different from local edge list)
+			const benchmark = await loadBenchmarkByIdFromUrl("lesmis");
+			expect(benchmark.nodeCount).toBe(77);
+			expect(benchmark.edgeCount).toBe(254);
+		});
+
+		it("should load Facebook dataset from remote URL with caching", async () => {
+			// Clear cache first to ensure fresh fetch
+			await clearCache();
+
+			// Facebook dataset from SNAP is plain text edge list format
+			const benchmark = await loadBenchmarkByIdFromUrl("facebook");
+			expect(benchmark.nodeCount).toBe(4039);
+			expect(benchmark.edgeCount).toBeGreaterThan(80000);
+
+			// Check cache stats
+			const stats = await getCacheStats();
+			expect(stats).not.toBeNull();
+			expect(stats!.count).toBeGreaterThan(0);
+		});
+
+		it("should load Cora citation network from remote URL", async () => {
+			// Cora from LINQS is .tgz with .cites/.content files
+			const benchmark = await loadBenchmarkByIdFromUrl("cora");
+			expect(benchmark.nodeCount).toBe(2708);
+			expect(benchmark.edgeCount).toBe(5429);
+		});
+
+		it("should load CiteSeer citation network from remote URL", async () => {
+			// CiteSeer from LINQS is .tgz with .cites/.content files
+			// Note: LINQS version has 3327 nodes, 4732 edges (differs from local processed version)
+			const benchmark = await loadBenchmarkByIdFromUrl("citeseer");
+			expect(benchmark.nodeCount).toBe(3327);
+			expect(benchmark.edgeCount).toBe(4732);
+		});
 	});
 });
