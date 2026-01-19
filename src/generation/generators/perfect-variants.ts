@@ -104,25 +104,15 @@ export const generatePtolemaicEdges = (
 	if (nodeCount === 0) return;
 	if (nodeCount === 1) return;
 
-	// Simple approach: Create a path with some triangles
-	// This is ptolemaic (chordal + distance-hereditary)
-	// Build main path
+	// Ptolemaic graphs are both chordal and distance-hereditary
+	// Trees and paths are the simplest ptolemaic graphs
+	// Use a simple path graph: 0-1-2-3-...-n
+	// Paths are always chordal (no cycles) and distance-hereditary
 	for (let index = 0; index < nodeCount - 1; index++) {
 		edges.push({
 			source: nodes[index].id,
 			target: nodes[index + 1].id,
 		});
-	}
-
-	// Add some chords to make small blocks (but keep it ptolemaic)
-	// Every 3 nodes, close the triangle if we have enough nodes
-	for (let index = 0; index < nodeCount - 2; index += 3) {
-		if (index + 2 < nodeCount) {
-			edges.push({
-				source: nodes[index].id,
-				target: nodes[index + 2].id,
-			});
-		}
 	}
 };
 
