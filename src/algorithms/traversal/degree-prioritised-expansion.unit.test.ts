@@ -16,14 +16,18 @@ class MockGraphExpander implements GraphExpander<string> {
 	private degrees: Map<string, number> = new Map();
 	private addedEdges: Array<{ source: string; target: string; type: string }> = [];
 	private nodes: Map<string, string> = new Map();
+	private nodeWeights: Map<string, number> = new Map();
 
-	addNode(id: string, degree?: number): void {
+	addNode(id: string, degree?: number, weight?: number): void {
 		if (!this.adjacency.has(id)) {
 			this.adjacency.set(id, []);
 		}
 		this.nodes.set(id, id);
 		if (degree !== undefined) {
 			this.degrees.set(id, degree);
+		}
+		if (weight !== undefined) {
+			this.nodeWeights.set(id, weight);
 		}
 	}
 
@@ -53,6 +57,19 @@ class MockGraphExpander implements GraphExpander<string> {
 
 	addEdge(source: string, target: string, relationshipType: string): void {
 		this.addedEdges.push({ source, target, type: relationshipType });
+	}
+
+	calculatePriority(nodeId: string, options: { nodeWeight?: number; epsilon?: number } = {}): number {
+		const { nodeWeight = 1, epsilon = 1e-10 } = options;
+
+		const outDegree = this.getDegree(nodeId); // Simplified: treats total as out-degree
+		const inDegree = 0; // MockGraphExpander doesn't track direction separately
+
+		// For undirected graphs, in = out, so total = 2 * out
+		// This mock treats edges as outgoing only, so we use degree as both
+		const weightedDegree = outDegree + inDegree;
+
+		return weightedDegree / (nodeWeight + epsilon);
 	}
 
 	getAddedEdges(): Array<{ source: string; target: string; type: string }> {
