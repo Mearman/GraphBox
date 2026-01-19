@@ -358,7 +358,7 @@ describe("URL-based Loading (Integration)", () => {
 
 		it("should load Karate Club from remote URL with caching", async () => {
 			// Karate dataset from UMich is in GML format
-			await clearCache();
+			// Note: Cache is NOT cleared here to allow persistent caching across test runs
 			const benchmark1 = await loadBenchmarkByIdFromUrl("karate");
 			expect(benchmark1.nodeCount).toBe(34);
 			expect(benchmark1.edgeCount).toBe(78);
@@ -378,10 +378,8 @@ describe("URL-based Loading (Integration)", () => {
 		});
 
 		it("should load Facebook dataset from remote URL with caching", async () => {
-			// Clear cache first to ensure fresh fetch
-			await clearCache();
-
 			// Facebook dataset from SNAP is plain text edge list format
+			// Note: Cache is NOT cleared here to allow persistent caching across test runs
 			const benchmark = await loadBenchmarkByIdFromUrl("facebook");
 			expect(benchmark.nodeCount).toBe(4039);
 			expect(benchmark.edgeCount).toBeGreaterThan(80_000);
