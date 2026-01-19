@@ -367,3 +367,124 @@ export const loadGraphFromUrl = async (url: string, hint?: "edge-list" | "triple
 	const content = await response.text();
 	return loadGraph(content, hint);
 };
+
+/**
+ * Load graph from GraphJson format (produced by GML/JSON parsers).
+ *
+ * GraphJson format uses { nodes: [{id, ...}], edges: [{source, target, ...}] }
+ *
+ * @param json - Graph in GraphJson format
+ * @param directed - Whether graph is directed (default: false)
+ * @returns Loaded graph with metadata
+ */
+export const loadFromGraphJson = (
+	json: { nodes: Array<{ id: string }>; edges: Array<{ source: string; target: string; value?: number; weight?: number }>; meta?: { directed?: boolean } },
+	directed = false
+): LoadResult => {
+	const graph = new Graph<LoadedNode, LoadedEdge>(directed);
+	const nodeIds = new Set<string>();
+	const warnings: string[] = [];
+	let edgeId = 0;
+
+	// Add nodes
+	for (const node of json.nodes) {
+		if (!nodeIds.has(node.id)) {
+			graph.addNode({
+				id: node.id,
+				type: "Node",
+				label: (node as { label?: string }).label,
+				attributes: node,
+			});
+			nodeIds.add(node.id);
+		}
+	}
+
+	// Add edges
+	for (const edge of json.edges) {
+		if (!nodeIds.has(edge.source) || !nodeIds.has(edge.target)) {
+			warnings.push(`Edge references unknown node: ${edge.source} -> ${edge.target}`);
+			continue;
+		}
+
+		graph.addEdge({
+			id: `e${edgeId++}`,
+			source: edge.source,
+			target: edge.target,
+			type: "Edge",
+			weight: edge.value ?? edge.weight,
+		});
+	}
+
+	return {
+		graph,
+		nodeCount: nodeIds.size,
+		edgeCount: edgeId,
+		nodeTypes: new Set(["Node"]),
+		edgeTypes: new Set(["Edge"]),
+		warnings,
+	};
+};
+
+/**
+ * Detect if a string contains GML format content.
+ *
+ * @param content - Content to check
+ * @returns True if content appears to be GML format
+ */
+export const isGmlContent = (content: string): boolean => {
+	const trimmed = content.trim();
+	// GML files typically start with a graph declaration or have key GML markers
+	return (
+		trimmed.includes("graph [") ||
+		trimmed.includes("graph\t[") ||
+		trimmed.includes("graph\n[") ||
+		trimmed.startsWith("Creator") ||
+		/^[\s]*graph\s*\[/.test(trimmed)
+	);
+};
+
+/**
+ * Load a graph from GML format content.
+ *
+ * Uses the GML parser to convert GML to GraphJson, then to our internal format.
+ *
+ * @param content - GML file content as string
+ * @param directed - Whether graph is directed (default: false, will be detected from GML if present)
+ * @returns Loaded graph with metadata
+ */
+export const loadGml = async (content: string, directed = false): Promise<LoadResult> => {
+	// Dynamic import to avoid breaking browser builds
+	const { parseGml, gmlToJson } = await import("../../../formats/gml/parse");
+
+	try {
+		const parsed = parseGml(content);
+		const json = gmlToJson(parsed, {
+			meta: {
+				name: "GML Graph",
+				description: "Graph loaded from GML format",
+				source: "GML",
+				url: "",
+				citation: {
+					authors: [],
+					title: "GML Graph",
+					year: new Date().getFullYear(),
+				},
+				retrieved: new Date().toISOString().split("T")[0],
+			},
+		});
+
+		// Use detected directed flag from GML if available
+		const isDirected = json.meta?.directed ?? directed;
+
+		return loadFromGraphJson(json, isDirected);
+	} catch (error) {
+		return {
+			graph: new Graph<LoadedNode, LoadedEdge>(directed),
+			nodeCount: 0,
+			edgeCount: 0,
+			nodeTypes: new Set(),
+			edgeTypes: new Set(),
+			warnings: [`Failed to parse GML: ${error}`],
+		};
+	}
+};
