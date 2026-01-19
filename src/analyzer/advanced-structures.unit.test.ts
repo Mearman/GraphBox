@@ -485,7 +485,7 @@ describe("computeCompleteBipartite", () => {
 		expect(result.kind).toBe("complete_bipartite");
 		if (result.kind === "complete_bipartite") {
 			// m and n can be in either order
-			expect([result.m, result.n].sort()).toEqual([2, 2]);
+			expect([result.m, result.n].toSorted()).toEqual([2, 2]);
 		}
 	});
 

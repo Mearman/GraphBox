@@ -126,7 +126,7 @@ describe("connectedComponents", () => {
 			expect(result.ok).toBe(true);
 			if (result.ok) {
 				expect(result.value).toHaveLength(2);
-				const sizes = result.value.map((c) => c.size).sort();
+				const sizes = result.value.map((c) => c.size).toSorted();
 				expect(sizes).toEqual([2, 2]);
 			}
 		});

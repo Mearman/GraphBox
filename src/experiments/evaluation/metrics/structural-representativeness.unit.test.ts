@@ -170,7 +170,7 @@ describe("degreeToRanking", () => {
 		const ranking = degreeToRanking(degrees);
 
 		// All have same degree, ranks should be 1, 2, 3 (order depends on sort stability)
-		const ranks = [...ranking.values()].sort((a, b) => a - b);
+		const ranks = [...ranking.values()].toSorted((a, b) => a - b);
 		expect(ranks).toEqual([1, 2, 3]);
 	});
 

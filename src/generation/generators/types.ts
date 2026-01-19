@@ -77,7 +77,7 @@ export class SeededRandom {
 	}
 
 	sample<T>(array: T[], count: number): T[] {
-		const shuffled = [...array].sort(() => this.next() - 0.5);
+		const shuffled = [...array].toSorted(() => this.next() - 0.5);
 		return shuffled.slice(0, count);
 	}
 }

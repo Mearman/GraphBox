@@ -226,7 +226,7 @@ export const extractKTruss = <N extends Node, E extends Edge>(graph: Graph<N, E>
 		for (const neighbor of sourceNeighbors) {
 			if (targetNeighbors.has(neighbor)) {
 				// Triangle: source-target-neighbor
-				const triangleId = [source, target, neighbor].sort().join("-");
+				const triangleId = [source, target, neighbor].toSorted().join("-");
 				edgeTriangles.get(id)?.add(triangleId);
 			}
 		}

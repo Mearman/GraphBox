@@ -67,7 +67,7 @@ describe("benjaminiHochberg", () => {
 		expect(result.adjustedPValues[0]).toBeLessThan(0.01);
 		// Adjusted p-values should be non-decreasing
 		for (let index = 1; index < result.adjustedPValues.length; index++) {
-			const currentSorted = [...result.adjustedPValues].sort((a, b) => pValues.indexOf(a) - pValues.indexOf(b));
+			const currentSorted = [...result.adjustedPValues].toSorted((a, b) => pValues.indexOf(a) - pValues.indexOf(b));
 			// Just check they're all defined
 			expect(currentSorted[index]).toBeDefined();
 		}

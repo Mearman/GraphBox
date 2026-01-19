@@ -142,10 +142,10 @@ describe("Equal-Length Invariance", () => {
 			];
 
 			// Sort by geometric mean
-			const byGeoMean = [...paths].sort((a, b) => geometricMean(b) - geometricMean(a));
+			const byGeoMean = [...paths].toSorted((a, b) => geometricMean(b) - geometricMean(a));
 
 			// Sort by product
-			const byProduct = [...paths].sort(
+			const byProduct = [...paths].toSorted(
 				(a, b) =>
 					b.reduce((x, y) => x * y, 1) - a.reduce((x, y) => x * y, 1),
 			);
@@ -165,10 +165,10 @@ describe("Equal-Length Invariance", () => {
 			];
 
 			// Sort by geometric mean
-			const byGeoMean = [...paths].sort((a, b) => geometricMean(b) - geometricMean(a));
+			const byGeoMean = [...paths].toSorted((a, b) => geometricMean(b) - geometricMean(a));
 
 			// Sort by sum of logs
-			const byLogSum = [...paths].sort(
+			const byLogSum = [...paths].toSorted(
 				(a, b) =>
 					b.reduce((s, v) => s + Math.log(v), 0) - a.reduce((s, v) => s + Math.log(v), 0),
 			);

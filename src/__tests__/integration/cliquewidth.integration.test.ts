@@ -60,7 +60,7 @@ describe("Cliquewidth Graph Integration", () => {
 			// Edges should match (after sorting)
 			const edges1 = graph1.edges
 				.map((e) => `${e.source}-${e.target}`)
-				.sort();
+				.toSorted();
 			const edges2 = graph2.edges
 				.map((e) => `${e.source}-${e.target}`)
 				.sort();

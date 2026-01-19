@@ -102,7 +102,7 @@ export const jsDivergence = (p: Map<number, number>, q: Map<number, number>): nu
  */
 export const earthMoversDistance = (p: Map<number, number>, q: Map<number, number>): number => {
 	// Get all unique degrees and sort them
-	const allDegrees = [...new Set([...p.keys(), ...q.keys()])].sort((a, b) => a - b);
+	const allDegrees = [...new Set([...p.keys(), ...q.keys()])].toSorted((a, b) => a - b);
 
 	if (allDegrees.length === 0) {
 		return 0;

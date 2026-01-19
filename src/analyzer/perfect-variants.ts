@@ -184,7 +184,7 @@ export const computeModular = (
 			}
 		}
 
-		const degreeList = [...degrees.values()].sort((a, b) => a - b);
+		const degreeList = [...degrees.values()].toSorted((a, b) => a - b);
 		const uniqueDegrees = new Set(degreeList);
 
 		if (uniqueDegrees.size === degreeList.length) {

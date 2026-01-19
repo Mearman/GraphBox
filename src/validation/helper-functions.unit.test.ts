@@ -25,7 +25,7 @@ describe("buildAdjacencyList", () => {
 		const adj = buildAdjacencyList(nodes, edges, false);
 		expect(adj.get("a")).toEqual(["b"]);
 		// Order depends on implementation - check contains both
-		expect(adj.get("b")?.sort()).toEqual(["a", "c"]);
+		expect(adj.get("b")?.toSorted()).toEqual(["a", "c"]);
 		expect(adj.get("c")).toEqual(["b"]);
 	});
 
@@ -102,7 +102,7 @@ describe("findComponentsForDensity", () => {
 		];
 		const components = findComponentsForDensity(nodes, edges, false);
 		expect(components.length).toBe(1);
-		const sortedComponent = [...components[0]].sort();
+		const sortedComponent = [...components[0]].toSorted();
 		expect(sortedComponent).toEqual(["a", "b", "c"]);
 	});
 

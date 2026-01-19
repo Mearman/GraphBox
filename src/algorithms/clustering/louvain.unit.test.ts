@@ -76,7 +76,7 @@ describe("shuffle", () => {
 		const shuffled = shuffle([...array]);
 
 		expect(shuffled).toHaveLength(5);
-		expect([...shuffled].sort((a, b) => a - b)).toEqual([...array].sort((a, b) => a - b));
+		expect([...shuffled].toSorted((a, b) => a - b)).toEqual([...array].toSorted((a, b) => a - b));
 	});
 
 	it("should produce deterministic results with seed", () => {

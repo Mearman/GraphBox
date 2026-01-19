@@ -268,7 +268,7 @@ describe("validation-helpers", () => {
 			// Should be same length
 			expect(array.length).toBe(original.length);
 			// Should contain same elements
-			const sortedArray = [...array].sort((a, b) => a - b);
+			const sortedArray = [...array].toSorted((a, b) => a - b);
 			expect(sortedArray).toEqual(original);
 		});
 

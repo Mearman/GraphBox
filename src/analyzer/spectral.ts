@@ -40,7 +40,7 @@ export const computeScaleFree = (g: AnalyzerGraph): { kind: "scale_free"; expone
 	// Remove degree 0 from distribution
 	delete degCounts[0];
 
-	const degrees = Object.keys(degCounts).map(Number).sort((a, b) => a - b);
+	const degrees = Object.keys(degCounts).map(Number).toSorted((a, b) => a - b);
 	if (degrees.length < 2) return { kind: "not_scale_free" };
 
 	// Simple power-law test: check if log-log plot is roughly linear

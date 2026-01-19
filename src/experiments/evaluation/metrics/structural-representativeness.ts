@@ -118,7 +118,7 @@ export const spearmanRankCorrelation = (ranking1: Map<string, number>, ranking2:
  * @returns Map from node ID to rank (1 = highest degree)
  */
 export const degreeToRanking = (degrees: Map<string, number>): Map<string, number> => {
-	const entries = [...degrees.entries()].sort((a, b) => b[1] - a[1]);
+	const entries = [...degrees.entries()].toSorted((a, b) => b[1] - a[1]);
 	const ranking = new Map<string, number>();
 
 	for (const [index, entry] of entries.entries()) {

@@ -202,7 +202,7 @@ describe("ReadableGraph interface", () => {
 		const allNodes = graph.getAllNodes();
 
 		expect(allNodes).toHaveLength(3);
-		expect(allNodes.map((n) => n.id).sort()).toEqual(["1", "2", "3"]);
+		expect(allNodes.map((n) => n.id).toSorted()).toEqual(["1", "2", "3"]);
 	});
 
 	it("should support isDirected to check graph directionality", () => {

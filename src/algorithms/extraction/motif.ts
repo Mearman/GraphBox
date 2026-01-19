@@ -141,7 +141,7 @@ export const detectTriangles = <N extends Node, E extends Edge>(graph: Graph<N, 
 			if (targetNeighbors.has(neighbor)) {
 				// Found triangle: source-target-neighbor
 				// Create sorted key to avoid duplicates
-				const triangleKey = [source, target, neighbor].sort().join(",");
+				const triangleKey = [source, target, neighbor].toSorted().join(",");
 
 				if (!processedTriangles.has(triangleKey)) {
 					processedTriangles.add(triangleKey);

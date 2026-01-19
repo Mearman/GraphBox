@@ -86,7 +86,7 @@ export const meanPairwiseEdgeJaccardDistance = (paths: string[][]): number => {
 		const edges = new Set<string>();
 		for (let index = 0; index < path.length - 1; index++) {
 			// Normalize edge direction for undirected comparison
-			const [a, b] = [path[index], path[index + 1]].sort();
+			const [a, b] = [path[index], path[index + 1]].toSorted();
 			edges.add(`${a}--${b}`);
 		}
 		return edges;
@@ -159,7 +159,7 @@ export const computePathDiversityMetrics = (paths: string[][]): PathDiversityMet
 			allNodes.add(node);
 		}
 		for (let index = 0; index < path.length - 1; index++) {
-			const [a, b] = [path[index], path[index + 1]].sort();
+			const [a, b] = [path[index], path[index + 1]].toSorted();
 			allEdges.add(`${a}--${b}`);
 		}
 	}
@@ -212,7 +212,7 @@ export const computeHubCoverage = (paths: string[][], hubNodes: Set<string>): nu
  * @returns Set of hub node IDs
  */
 export const identifyHubNodes = (nodeDegrees: Map<string, number>, percentile = 0.1): Set<string> => {
-	const entries = [...nodeDegrees.entries()].sort((a, b) => b[1] - a[1]);
+	const entries = [...nodeDegrees.entries()].toSorted((a, b) => b[1] - a[1]);
 	const hubCount = Math.max(1, Math.ceil(entries.length * percentile));
 	const hubs = new Set<string>();
 

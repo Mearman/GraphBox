@@ -184,7 +184,7 @@ describe("stronglyConnectedComponents", () => {
 				// Should have 3 SCCs: {A,B,C}, {D,E}, {F}
 				expect(result.value).toHaveLength(3);
 
-				const sizes = result.value.map((scc) => scc.size).sort((a, b) => a - b);
+				const sizes = result.value.map((scc) => scc.size).toSorted((a, b) => a - b);
 				expect(sizes).toEqual([1, 2, 3]);
 			}
 		});

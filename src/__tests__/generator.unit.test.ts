@@ -220,7 +220,7 @@ describe("generateGraph", () => {
 			}
 
 			// Star should have one node with degree 5 and 5 nodes with degree 1
-			const degrees = [...degreeCount.values()].sort((a, b) => b - a);
+			const degrees = [...degreeCount.values()].toSorted((a, b) => b - a);
 			expect(degrees[0]).toBe(5); // Center
 		});
 

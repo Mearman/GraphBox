@@ -52,7 +52,7 @@ export const computeEdgeMultiplicity = (g: AnalyzerGraph): { kind: "simple" } | 
 			if (seen.has(k)) return { kind: "multi" };
 			seen.add(k);
 		} else {
-			const k = `H:${[...e.endpoints].sort().join("|")}`;
+			const k = `H:${[...e.endpoints].toSorted().join("|")}`;
 			if (seen.has(k)) return { kind: "multi" };
 			seen.add(k);
 		}

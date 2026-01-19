@@ -59,7 +59,7 @@ const isCircularArcGraph = (
 	const maxAttempts = Math.min(50, vertexCount * 2);
 
 	for (let attempt = 0; attempt < maxAttempts; attempt++) {
-		const ordering = [...vertices].sort(() => Math.random() - 0.5);
+		const ordering = [...vertices].sort(() => Math.random() - 0.5); // eslint-disable-line unicorn/no-array-sort -- intentional shuffle
 
 		if (isValidCircularArcOrdering(adjacency, ordering)) {
 			return true;
