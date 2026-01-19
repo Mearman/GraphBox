@@ -8,9 +8,223 @@
  * - Compressed TAR (.tar.gz, .tgz)
  *
  * Uses fflate for universal decompression across all environments.
+ * In Node.js, fetched datasets are cached to os.tmpdir() for performance.
  */
 
-import { strFromU8, unzipSync, unzlibSync } from "fflate";
+import { gunzipSync, strFromU8, unzipSync } from "fflate";
+
+// ============================================================================
+// Environment Detection
+// ============================================================================
+
+/**
+ * Detect if running in Node.js environment.
+ */
+const isNode = (): boolean => {
+	return typeof process !== "undefined" &&
+		process.versions?.node != undefined;
+};
+
+// ============================================================================
+// Node.js Caching (lazy import to avoid breaking browser builds)
+// ============================================================================
+
+type NodeCache = {
+	cacheDir: string;
+	mkdir: typeof import("node:fs/promises").mkdir;
+	readFile: typeof import("node:fs/promises").readFile;
+	writeFile: typeof import("node:fs/promises").writeFile;
+	readdir: typeof import("node:fs/promises").readdir;
+	unlink: typeof import("node:fs/promises").unlink;
+	stat: typeof import("node:fs/promises").stat;
+	createHash: (algorithm: string) => { update: (data: string) => { digest: (encoding: string) => string | Buffer } };
+};
+
+let nodeCache: NodeCache | null = null;
+
+/**
+ * Initialise Node.js cache utilities.
+ */
+const initNodeCache = async (): Promise<void> => {
+	if (nodeCache !== null || !isNode()) return;
+
+	try {
+		const [{ mkdir, readFile, writeFile, readdir, unlink, stat }, { createHash }, { tmpdir }] =
+			await Promise.all([
+				import("node:fs/promises"),
+				import("node:crypto"),
+				import("node:os"),
+			]);
+
+		const cacheDir = `${tmpdir()}/graphbox-cache`;
+
+		// Ensure cache directory exists
+		await mkdir(cacheDir, { recursive: true });
+
+		nodeCache = {
+			cacheDir,
+			mkdir,
+			readFile,
+			writeFile,
+			readdir,
+			unlink,
+			stat,
+			createHash,
+		};
+	} catch {
+		// Silently fail if Node.js modules aren't available
+		nodeCache = null;
+	}
+};
+
+/**
+ * Get cache file path for a URL.
+ * @param url
+ */
+const getCachePath = (url: string): string | null => {
+	if (!nodeCache) return null;
+
+	const urlHash = String(nodeCache.createHash("sha256").update(url).digest("hex"));
+	return `${nodeCache.cacheDir}/${urlHash}`;
+};
+
+/**
+ * Check if a cache file exists and is readable.
+ * @param cachePath
+ */
+const cacheExists = async (cachePath: string): Promise<boolean> => {
+	if (!nodeCache) return false;
+
+	try {
+		await nodeCache.stat(cachePath);
+		return true;
+	} catch {
+		return false;
+	}
+};
+
+/**
+ * Read cached data.
+ * @param cachePath
+ */
+const readCache = async (cachePath: string): Promise<Uint8Array> => {
+	if (!nodeCache) throw new Error("Cache not initialised");
+
+	const buffer = await nodeCache.readFile(cachePath);
+	return new Uint8Array(buffer.buffer, buffer.byteOffset, buffer.byteLength);
+};
+
+/**
+ * Write data to cache.
+ * @param cachePath
+ * @param data
+ */
+const writeCache = async (cachePath: string, data: Uint8Array): Promise<void> => {
+	if (!nodeCache) throw new Error("Cache not initialised");
+
+	await nodeCache.writeFile(cachePath, Buffer.from(data));
+};
+
+// ============================================================================
+// Cached Fetch
+// ============================================================================
+
+/**
+ * Fetch with Node.js caching support.
+ *
+ * In Node.js, caches responses to os.tmpdir()/graphbox-cache/.
+ * In browsers, fetches directly without caching.
+ * @param url
+ */
+const cachedFetch = async (url: string): Promise<Uint8Array> => {
+	// Browser or non-Node environment: fetch directly
+	if (!isNode()) {
+		const response = await fetch(url);
+		if (!response.ok) {
+			throw new Error(`Failed to fetch ${url}: ${response.status} ${response.statusText}`);
+		}
+		return new Uint8Array(await response.arrayBuffer());
+	}
+
+	// Node.js: try cache first
+	await initNodeCache();
+
+	if (nodeCache) {
+		const cachePath = getCachePath(url);
+		if (cachePath && await cacheExists(cachePath)) {
+			try {
+				const cachedData = await readCache(cachePath);
+				return cachedData;
+			} catch {
+				// Cache read failed, fall through to fetch
+			}
+		}
+	}
+
+	// Fetch from URL
+	const response = await fetch(url);
+	if (!response.ok) {
+		throw new Error(`Failed to fetch ${url}: ${response.status} ${response.statusText}`);
+	}
+	const data = new Uint8Array(await response.arrayBuffer());
+
+	// Save to cache
+	if (nodeCache) {
+		const cachePath = getCachePath(url);
+		if (cachePath) {
+			try {
+				await writeCache(cachePath, data);
+			} catch {
+				// Cache write failed, but we have the data
+			}
+		}
+	}
+
+	return data;
+};
+
+// ============================================================================
+// Cache Management Utilities
+// ============================================================================
+
+/**
+ * Clear all cached datasets.
+ *
+ * Only works in Node.js environments. No-op in browsers.
+ */
+export const clearCache = async (): Promise<void> => {
+	if (!isNode() || !nodeCache) return;
+
+	try {
+		const files = await nodeCache.readdir(nodeCache.cacheDir);
+		await Promise.all(files.map((file) => nodeCache!.unlink(`${nodeCache!.cacheDir}/${file}`)));
+	} catch {
+		// Cache directory doesn't exist or other error
+	}
+};
+
+/**
+ * Get cache statistics.
+ *
+ * Returns null in browser environments.
+ */
+export const getCacheStats = async (): Promise<{ count: number; totalBytes: number } | null> => {
+	if (!isNode() || !nodeCache) return null;
+
+	try {
+		const files = await nodeCache.readdir(nodeCache.cacheDir);
+		let totalBytes = 0;
+
+		for (const file of files) {
+			const stats = await nodeCache.stat(`${nodeCache.cacheDir}/${file}`);
+			totalBytes += stats.size;
+		}
+
+		return { count: files.length, totalBytes };
+	} catch {
+		return { count: 0, totalBytes: 0 };
+	}
+};
 
 /**
  * Detect if a URL points to a gzip-compressed file based on extension.
@@ -62,7 +276,7 @@ export const isTgzUrl = (url: string): boolean => {
  */
 export const decompressGzip = async (data: Uint8Array): Promise<string> => {
 	try {
-		const decompressed = unzlibSync(data);
+		const decompressed = gunzipSync(data);
 		return strFromU8(decompressed);
 	} catch (error) {
 		throw new Error(`Failed to decompress gzip data: ${error}`);
@@ -159,7 +373,7 @@ const readNullTerminatedString = (data: Uint8Array, offset: number, maxLength: n
 export const decompressTgz = async (data: Uint8Array): Promise<Map<string, string>> => {
 	try {
 		// First decompress the gzip layer
-		const decompressed = unzlibSync(data);
+		const decompressed = gunzipSync(data);
 		// Then extract the TAR
 		return decompressTar(decompressed);
 	} catch (error) {
@@ -174,15 +388,7 @@ export const decompressTgz = async (data: Uint8Array): Promise<Map<string, strin
  * @returns Promise resolving to decompressed UTF-8 string
  */
 export const fetchAndDecompressGzip = async (url: string): Promise<string> => {
-	const response = await fetch(url);
-
-	if (!response.ok) {
-		throw new Error(`Failed to fetch ${url}: ${response.status} ${response.statusText}`);
-	}
-
-	const arrayBuffer = await response.arrayBuffer();
-	const data = new Uint8Array(arrayBuffer);
-
+	const data = await cachedFetch(url);
 	return decompressGzip(data);
 };
 
@@ -195,15 +401,7 @@ export const fetchAndDecompressGzip = async (url: string): Promise<string> => {
  * @returns Promise resolving to map of filename to content
  */
 export const fetchAndDecompressZip = async (url: string): Promise<Map<string, string>> => {
-	const response = await fetch(url);
-
-	if (!response.ok) {
-		throw new Error(`Failed to fetch ${url}: ${response.status} ${response.statusText}`);
-	}
-
-	const arrayBuffer = await response.arrayBuffer();
-	const data = new Uint8Array(arrayBuffer);
-
+	const data = await cachedFetch(url);
 	return decompressZip(data);
 };
 
@@ -216,15 +414,7 @@ export const fetchAndDecompressZip = async (url: string): Promise<Map<string, st
  * @returns Promise resolving to map of filename to content
  */
 export const fetchAndDecompressTar = async (url: string): Promise<Map<string, string>> => {
-	const response = await fetch(url);
-
-	if (!response.ok) {
-		throw new Error(`Failed to fetch ${url}: ${response.status} ${response.statusText}`);
-	}
-
-	const arrayBuffer = await response.arrayBuffer();
-	const data = new Uint8Array(arrayBuffer);
-
+	const data = await cachedFetch(url);
 	return decompressTar(data);
 };
 
@@ -237,15 +427,7 @@ export const fetchAndDecompressTar = async (url: string): Promise<Map<string, st
  * @returns Promise resolving to map of filename to content
  */
 export const fetchAndDecompressTgz = async (url: string): Promise<Map<string, string>> => {
-	const response = await fetch(url);
-
-	if (!response.ok) {
-		throw new Error(`Failed to fetch ${url}: ${response.status} ${response.statusText}`);
-	}
-
-	const arrayBuffer = await response.arrayBuffer();
-	const data = new Uint8Array(arrayBuffer);
-
+	const data = await cachedFetch(url);
 	return decompressTgz(data);
 };
 
@@ -302,13 +484,9 @@ export const fetchWithAutoDecompress = async (
 	}
 
 	// Plain text file
-	const response = await fetch(url);
-
-	if (!response.ok) {
-		throw new Error(`Failed to fetch ${url}: ${response.status} ${response.statusText}`);
-	}
-
-	return response.text();
+	const data = await cachedFetch(url);
+	// Decode Uint8Array to string
+	return new TextDecoder().decode(data);
 };
 
 /**
@@ -332,7 +510,7 @@ export const fetchWithAutoDecompress = async (
  */
 export const fetchAndExtract = async (
 	url: string,
-	preferredExtensions: string[] = [".edges", ".txt", ".cites", ".content"]
+	preferredExtensions: string[] = [".edges", ".gml", ".txt", ".cites", ".content"]
 ): Promise<string> => {
 	const result = await fetchWithAutoDecompress(url);
 

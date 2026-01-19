@@ -6,7 +6,16 @@ import { gzipSync } from "node:zlib";
 
 import { describe, expect, it } from "vitest";
 
-import { decompressGzip, fetchWithAutoDecompress, isGzipUrl } from "./decompress";
+import {
+	clearCache,
+	decompressGzip,
+	fetchWithAutoDecompress,
+	getCacheStats,
+	isGzipUrl,
+	isTarUrl,
+	isTgzUrl,
+	isZipUrl,
+} from "./decompress";
 
 describe("Decompression Utilities", () => {
 	describe("isGzipUrl", () => {
@@ -112,5 +121,75 @@ describe("Decompression Utilities", () => {
 
 		// Network tests would require mocking fetch or using a test server
 		// These are integration tests that verify the function exists and has the right signature
+	});
+
+	describe("isZipUrl", () => {
+		it("should detect .zip extension", () => {
+			expect(isZipUrl("https://example.com/data.zip")).toBe(true);
+			expect(isZipUrl("/path/to/file.zip")).toBe(true);
+			expect(isZipUrl("https://example.com/data.ZIP")).toBe(true);
+		});
+
+		it("should return false for non-zip URLs", () => {
+			expect(isZipUrl("https://example.com/data.txt")).toBe(false);
+			expect(isZipUrl("https://example.com/data.gz")).toBe(false);
+			expect(isZipUrl("https://example.com/data.tar")).toBe(false);
+		});
+	});
+
+	describe("isTarUrl", () => {
+		it("should detect .tar extension", () => {
+			expect(isTarUrl("https://example.com/data.tar")).toBe(true);
+			expect(isTarUrl("/path/to/file.tar")).toBe(true);
+			expect(isTarUrl("https://example.com/data.TAR")).toBe(true);
+		});
+
+		it("should return false for non-tar URLs", () => {
+			expect(isTarUrl("https://example.com/data.txt")).toBe(false);
+			expect(isTarUrl("https://example.com/data.gz")).toBe(false);
+			expect(isTarUrl("https://example.com/data.zip")).toBe(false);
+		});
+	});
+
+	describe("isTgzUrl", () => {
+		it("should detect .tar.gz extension", () => {
+			expect(isTgzUrl("https://example.com/data.tar.gz")).toBe(true);
+			expect(isTgzUrl("/path/to/file.tar.gz")).toBe(true);
+			expect(isTgzUrl("https://example.com/data.TAR.GZ")).toBe(true);
+		});
+
+		it("should detect .tgz extension", () => {
+			expect(isTgzUrl("https://example.com/data.tgz")).toBe(true);
+			expect(isTgzUrl("/path/to/file.tgz")).toBe(true);
+			expect(isTgzUrl("https://example.com/data.TGZ")).toBe(true);
+		});
+
+		it("should return false for non-tgz URLs", () => {
+			expect(isTgzUrl("https://example.com/data.txt")).toBe(false);
+			expect(isTgzUrl("https://example.com/data.tar")).toBe(false);
+			expect(isTgzUrl("https://example.com/data.gz")).toBe(false);
+		});
+	});
+});
+
+describe("Cache Management (Node.js only)", () => {
+	it("should export clearCache function", () => {
+		expect(typeof clearCache).toBe("function");
+	});
+
+	it("should export getCacheStats function", () => {
+		expect(typeof getCacheStats).toBe("function");
+	});
+
+	it("should get cache stats (returns null in browser/mock environment)", async () => {
+		const stats = await getCacheStats();
+		// In a browser or test environment without Node.js, returns null
+		// In Node.js with cache, returns { count, totalBytes }
+		expect(stats === null || typeof stats === "object").toBe(true);
+	});
+
+	it("should clear cache without error", async () => {
+		// Should not throw, even in browser environment
+		await expect(clearCache()).resolves.not.toThrow();
 	});
 });
