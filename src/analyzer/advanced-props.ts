@@ -17,10 +17,12 @@ import {
 export const computeEmbedding = (g: AnalyzerGraph, policy: ComputePolicy): { kind: "abstract" } | { kind: "geometric_metric_space" } | { kind: "spatial_coordinates"; dims: 2 | 3 } => {
 	// Convention: if every vertex has pos {x,y} or {x,y,z}, treat as spatial_coordinates.
 	const poss = g.vertices.map(v => v.attrs?.[policy.posKey]);
-	const allHavePos = poss.length > 0 && poss.every(p => typeof p === "object" && p != undefined);
+	const allHavePos = poss.length > 0 && poss.every(p => typeof p === "object" && p !== undefined);
 	if (!allHavePos) return { kind: "abstract" };
 
 	const dims = poss.map(p => {
+		if (p === null || p === undefined) return null;
+		if (typeof p !== "object") return null;
 		const o = p as Record<string, unknown>;
 		const hasX = typeof o.x === "number";
 		const hasY = typeof o.y === "number";
@@ -30,8 +32,9 @@ export const computeEmbedding = (g: AnalyzerGraph, policy: ComputePolicy): { kin
 		return null;
 	});
 
-	if (dims.some(d => d == undefined)) return { kind: "abstract" };
-	const uniq = unique(dims as Array<2 | 3>);
+	if (dims.includes(null)) return { kind: "abstract" };
+	const nonNullDims = dims.filter((d): d is 2 | 3 => d !== null);
+	const uniq = unique(nonNullDims);
 	if (uniq.length === 1) return { kind: "spatial_coordinates", dims: uniq[0] };
 	// mixed dims -> fall back
 	return { kind: "abstract" };
@@ -61,11 +64,11 @@ export const computeTemporal = (g: AnalyzerGraph, policy: ComputePolicy):
 	// - static otherwise
 	const vTimes = g.vertices.map(v => v.attrs?.[policy.timeKey]);
 	const eTimes = g.edges.map(e => e.attrs?.[policy.timeKey]);
-	const anyV = vTimes.some(t => t != undefined);
-	const anyE = eTimes.some(t => t != undefined);
+	const anyV = vTimes.some(t => t !== undefined);
+	const anyE = eTimes.some(t => t !== undefined);
 
-	const allNumericV = anyV && vTimes.every(t => t == undefined || typeof t === "number");
-	const allNumericE = anyE && eTimes.every(t => t == undefined || typeof t === "number");
+	const allNumericV = anyV && vTimes.every(t => t === undefined || typeof t === "number");
+	const allNumericE = anyE && eTimes.every(t => t === undefined || typeof t === "number");
 
 	if (anyV && anyE && allNumericV && allNumericE) return { kind: "time_ordered" };
 	if (anyV) return { kind: "temporal_vertices" };
@@ -101,7 +104,7 @@ export const computeEdgeOrdering = (g: AnalyzerGraph, policy: ComputePolicy): { 
 
 export const computePorts = (g: AnalyzerGraph, policy: ComputePolicy): { kind: "none" } | { kind: "port_labelled_vertices" } => {
 	// Convention: vertex.attrs[portKey] exists => ports
-	const anyPorts = g.vertices.some(v => v.attrs?.[policy.portKey] != undefined);
+	const anyPorts = g.vertices.some(v => v.attrs?.[policy.portKey] !== undefined);
 	return anyPorts ? { kind: "port_labelled_vertices" } : { kind: "none" };
 };
 
