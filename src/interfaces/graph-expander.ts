@@ -46,6 +46,24 @@ export interface GraphExpander<T> {
 	getDegree(nodeId: string): number;
 
 	/**
+	 * Calculate weighted priority for thesis-aligned degree-prioritised expansion.
+	 *
+	 * Implements the priority function from Equation 4.106:
+	 * $$\pi(v) = \frac{\deg^{+}(v) + \deg^{-}(v)}{w_V(v) + \epsilon}$$
+	 *
+	 * Where:
+	 * - $\deg^{+}(v)$: Weighted out-degree (sum of outgoing edge weights)
+	 * - $\deg^{-}(v)$: Weighted in-degree (sum of incoming edge weights)
+	 * - $w_V(v)$: Node weight for normalization (default 1)
+	 * - $\epsilon$: Small constant to prevent division by zero (default 1e-10)
+	 *
+	 * @param nodeId - Node to calculate priority for
+	 * @param options - Optional configuration for weighted calculation
+	 * @returns Priority value (lower = higher priority, expanded earlier)
+	 */
+	calculatePriority(nodeId: string, options?: PriorityOptions): number;
+
+	/**
 	 * Get node data (may fetch from cache/API).
 	 *
 	 * @param nodeId - Node to retrieve
@@ -59,14 +77,42 @@ export interface GraphExpander<T> {
 	 * Called during node expansion to track discovered relationships.
 	 * This is separated from fetching to allow algorithms to:
 	 * - Discover edges without storing them
-	 * - Filter edges before adding
-	 * - Build output graphs separately from input graphs
+	 * Filter edges before adding
+	 * Build output graphs separately from input graphs
 	 *
 	 * @param source - Source node ID
 	 * @param target - Target node ID
 	 * @param relationshipType - Type of relationship
 	 */
 	addEdge(source: string, target: string, relationshipType: string): void;
+}
+
+/**
+ * Options for weighted priority calculation.
+ *
+ * Used by calculatePriority() to implement the thesis-aligned priority function.
+ */
+export interface PriorityOptions {
+	/**
+	 * Node weight for normalization (w_V(v) in thesis formula).
+	 * Higher values decrease priority (node is considered more important/central).
+	 * Default: 1 (unweighted nodes).
+	 */
+	nodeWeight?: number;
+
+	/**
+	 * Small constant to prevent division by zero.
+	 * Default: 1e-10.
+	 */
+	epsilon?: number;
+
+	/**
+	 * Whether to use simple degree count (legacy behavior) or weighted formula.
+	 * Default: false (use weighted formula).
+	 *
+	 * @deprecated Use weighted formula for thesis alignment. Set true only for backward compatibility.
+	 */
+	useSimpleDegree?: boolean;
 }
 
 /**
