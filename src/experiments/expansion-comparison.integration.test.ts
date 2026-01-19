@@ -78,6 +78,12 @@ class TestGraphExpander implements GraphExpander<TestNode> {
 		// No-op for tests
 	}
 
+	calculatePriority(nodeId: string, options: { nodeWeight?: number; epsilon?: number } = {}): number {
+		const { nodeWeight = 1, epsilon = 1e-10 } = options;
+		const degree = this.getDegree(nodeId);
+		return degree / (nodeWeight + epsilon);
+	}
+
 	getNodeCount(): number {
 		return this.nodes.size;
 	}

@@ -76,6 +76,12 @@ class InstrumentedExpander implements GraphExpander<TestNode> {
 		// No-op
 	}
 
+	calculatePriority(nodeId: string, options: { nodeWeight?: number; epsilon?: number } = {}): number {
+		const { nodeWeight = 1, epsilon = 1e-10 } = options;
+		const degree = this.getDegree(nodeId);
+		return degree / (nodeWeight + epsilon);
+	}
+
 	// Instrumentation methods
 	getExpandedNodes(): Set<string> {
 		return new Set(this.expandedNodes);
