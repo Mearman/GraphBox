@@ -482,7 +482,10 @@ export const validatePermutation = (graph: TestGraph): PropertyValidationResult 
 	// Check if stored permutation data exists
 	const hasPermutationData = nodes.every(n => n.data?.permutationValue !== undefined);
 	if (hasPermutationData) {
-		const permutation = nodes.map(n => (n.data?.permutationValue as number | undefined) ?? 0);
+		const permutation = nodes.map(n => {
+			const value = n.data?.permutationValue;
+			return typeof value === "number" ? value : 0;
+		});
 
 		// Verify edges match permutation pattern
 		const adjacency = new Map<string, Set<string>>();
@@ -564,7 +567,10 @@ export const validateComparability = (graph: TestGraph): PropertyValidationResul
 	if (hasTopologicalOrder) {
 		// If generated with topological order, verify it's a valid DAG orientation
 		// For now, just check that the stored order is consistent
-		const orders = nodes.map(n => (n.data?.topologicalOrder as number | undefined) ?? 0);
+		const orders = nodes.map(n => {
+			const value = n.data?.topologicalOrder;
+			return typeof value === "number" ? value : 0;
+		});
 		const uniqueOrders = new Set(orders);
 
 		if (uniqueOrders.size !== nodes.length) {
@@ -642,7 +648,10 @@ export const validatePerfect = (graph: TestGraph): PropertyValidationResult => {
 		const perfectClass = nodes[0].data?.perfectClass;
 
 		// Verify all nodes have the same class
-		const consistentClass = nodes.every(n => (n.data?.perfectClass as string | undefined) === perfectClass);
+		const consistentClass = nodes.every(n => {
+			const value = n.data?.perfectClass;
+			return value === perfectClass && typeof value === "string";
+		});
 		if (!consistentClass) {
 			return {
 				property: "perfect",
