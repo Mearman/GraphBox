@@ -55,6 +55,12 @@ class MockExpander implements GraphExpander<{ id: string }> {
 	addEdge(): void {
 		// No-op for tests
 	}
+
+	calculatePriority(nodeId: string, options: { nodeWeight?: number; epsilon?: number } = {}): number {
+		const { nodeWeight = 1, epsilon = 1e-10 } = options;
+		const degree = this.getDegree(nodeId);
+		return degree / (nodeWeight + epsilon);
+	}
 }
 
 describe("StandardBfsExpansion", () => {

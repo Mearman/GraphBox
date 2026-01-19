@@ -18,6 +18,11 @@ const createMockExpander = <T>(
 		Promise.resolve(adjacencyList.get(nodeId) ?? []),
 	),
 	getDegree: vi.fn((nodeId: string) => degreeMap.get(nodeId) ?? 0),
+	calculatePriority: vi.fn((nodeId: string) => {
+		const { nodeWeight = 1, epsilon = 1e-10 } = {};
+		const degree = degreeMap.get(nodeId) ?? 0;
+		return degree / (nodeWeight + epsilon);
+	}),
 	getNode: vi.fn((nodeId: string) =>
 		Promise.resolve(nodeData.get(nodeId) ?? null),
 	),
