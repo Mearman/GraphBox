@@ -7,6 +7,57 @@
  * - Distance hereditary checking
  */
 
+import { hasInducedSubgraph } from "../algorithms/extraction/forbidden-subgraphs.js";
+
+/**
+ * House graph pattern (5 vertices: square with triangle on top)
+ * Vertices 0-1-2-3 form the square, vertex 4 connects to 0 and 2
+ */
+const HOUSE_PATTERN = {
+	name: "house",
+	size: 5,
+	edges: [
+		[0, 1], [1, 2], [2, 3], [3, 0], // Square
+		[0, 2], // Diagonal (roof)
+	] as Array<[number, number]>,
+};
+
+/**
+ * 5-hole pattern (5-cycle)
+ * House without the diagonal edge
+ */
+const HOLE_5_PATTERN = {
+	name: "hole_5",
+	size: 5,
+	edges: [
+		[0, 1], [1, 2], [2, 3], [3, 4], [4, 0],
+	] as Array<[number, number]>,
+};
+
+/**
+ * Domino pattern (6 vertices: two triangles sharing an edge)
+ */
+const DOMINO_PATTERN = {
+	name: "domino",
+	size: 6,
+	edges: [
+		[0, 1], [1, 2], [2, 0], // First triangle
+		[1, 3], [3, 4], [4, 1], // Second triangle sharing edge 1-3
+	] as Array<[number, number]>,
+};
+
+/**
+ * Gem pattern (5 vertices: P4 plus a universal vertex)
+ */
+const GEM_PATTERN = {
+	name: "gem",
+	size: 5,
+	edges: [
+		[0, 1], [1, 2], [2, 3], [3, 0], // P4 (0-1-2-3 with edge 3-0)
+		[0, 2], [1, 4], // Extra edges
+	] as Array<[number, number]>,
+};
+
 /**
  * Check if three vertices form an asteroidal triple.
  * An asteroidal triple is a set of three vertices such that for each pair,
@@ -207,147 +258,23 @@ const getCombinations = <T,>(array: T[], k: number): T[][] => {
  * A graph is distance hereditary if the distance between any two vertices
  * is the same in every connected induced subgraph containing them.
  *
- * This implementation uses the characterization that distance hereditary graphs
- * are exactly the graphs with no isometric cycle of length 5 or more.
+ * This implementation uses the forbidden subgraph characterization:
+ * Distance-hereditary graphs are exactly the graphs with no induced house,
+ * hole (cycle of length >= 5), domino, or gem.
  *
  * @param adjacency - Graph adjacency list
  * @param vertexSet - All vertices in graph
+ * @param _vertexSet
  * @returns true if graph is distance hereditary
  */
 export const isDistanceHereditary = (
 	adjacency: Map<number, Set<number>>,
-	vertexSet: Set<number>
+	_vertexSet: Set<number>
 ): boolean => {
-	// Check for isometric cycles of length >= 5
-	// For each cycle length >= 5, check if it's isometric
-	for (let cycleLength = 5; cycleLength <= vertexSet.size; cycleLength++) {
-		if (hasIsometricCycle(adjacency, vertexSet, cycleLength)) {
-			return false;
-		}
-	}
-
+	// Distance-hereditary = no house, hole, domino, or gem as induced subgraph
+	if (hasInducedSubgraph(adjacency, HOUSE_PATTERN)) return false;
+	if (hasInducedSubgraph(adjacency, HOLE_5_PATTERN)) return false;
+	if (hasInducedSubgraph(adjacency, DOMINO_PATTERN)) return false;
+	if (hasInducedSubgraph(adjacency, GEM_PATTERN)) return false;
 	return true;
-};
-
-/**
- * Check if graph has an isometric cycle of given length.
- * A cycle is isometric if the distance between any two vertices in the cycle
- * along the cycle equals their shortest path distance in the whole graph.
- *
- * @param adjacency - Graph adjacency list
- * @param vertexSet - All vertices in graph
- * @param k - Cycle length
- * @returns true if isometric k-cycle exists
- */
-const hasIsometricCycle = (
-	adjacency: Map<number, Set<number>>,
-	vertexSet: Set<number>,
-	k: number
-): boolean => {
-	if (vertexSet.size < k) {
-		return false;
-	}
-
-	const vertices = [...vertexSet];
-
-	// Try all combinations of k vertices
-	for (const startCombo of getCombinations(vertices, k)) {
-		const combo = new Set(startCombo);
-
-		// First check if these vertices form a cycle
-		if (!hasInducedCycle(adjacency, combo, k)) {
-			continue;
-		}
-
-		// Now check if the cycle is isometric
-		if (isCycleIsometric(adjacency, combo, k)) {
-			return true;
-		}
-	}
-
-	return false;
-};
-
-/**
- * Check if a cycle is isometric.
- *
- * @param adjacency - Graph adjacency list
- * @param cycleVertices - Vertices forming the cycle
- * @param cycleLength - Length of the cycle
- * @returns true if cycle is isometric
- */
-const isCycleIsometric = (
-	adjacency: Map<number, Set<number>>,
-	cycleVertices: Set<number>,
-	cycleLength: number
-): boolean => {
-	const cycleArray = [...cycleVertices];
-
-	// For each pair of vertices in the cycle
-	for (let index = 0; index < cycleArray.length; index++) {
-		for (let index_ = index + 1; index_ < cycleArray.length; index_++) {
-			const v1 = cycleArray[index];
-			const v2 = cycleArray[index_];
-
-			// Get distance along the cycle (min of clockwise or counter-clockwise)
-			const cycleDistribution = Math.min(index_ - index, cycleLength - (index_ - index));
-
-			// Get actual shortest path distance in the graph
-			const actualDistribution = shortestPathDistance(adjacency, v1, v2, cycleVertices);
-
-			if (actualDistribution !== cycleDistribution) {
-				return false;
-			}
-		}
-	}
-
-	return true;
-};
-
-/**
- * Compute shortest path distance between two vertices using BFS.
- *
- * @param adjacency - Graph adjacency list
- * @param source - Start vertex
- * @param target - End vertex
- * @param vertexSet - All vertices (for visited set initialization)
- * @returns Shortest path distance, or Infinity if no path exists
- */
-const shortestPathDistance = (
-	adjacency: Map<number, Set<number>>,
-	source: number,
-	target: number,
-	vertexSet: Set<number>
-): number => {
-	if (source === target) {
-		return 0;
-	}
-
-	const visited = new Set<number>([source]);
-	const queue: [number, number][] = [[source, 0]];
-
-	while (queue.length > 0) {
-		const entry = queue.shift();
-		if (entry === undefined) {
-			break;
-		}
-		const [current, distribution] = entry;
-
-		for (const neighbor of adjacency.get(current) || []) {
-			if (!vertexSet.has(neighbor)) {
-				continue;
-			}
-
-			if (neighbor === target) {
-				return distribution + 1;
-			}
-
-			if (!visited.has(neighbor)) {
-				visited.add(neighbor);
-				queue.push([neighbor, distribution + 1]);
-			}
-		}
-	}
-
-	return Infinity;
 };
