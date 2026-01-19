@@ -9,8 +9,8 @@ import { describe, expect, it } from "vitest";
 
 import { computeQuasiLine } from "../../analyzer/perfect-variants";
 import { generateGraph } from "../../generation/generator";
-import { makeGraphSpec } from "../../generation/spec";
 import type { GraphSpec } from "../../generation/spec";
+import { makeGraphSpec } from "../../generation/spec";
 import { toAnalyzerGraph, toCoreGraph } from "../../utils/graph-adapters";
 import { validateQuasiLine } from "../../validation/perfect-variants";
 

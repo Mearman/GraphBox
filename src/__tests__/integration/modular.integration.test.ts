@@ -9,8 +9,8 @@ import { describe, expect, it } from "vitest";
 
 import { computeModular } from "../../analyzer/perfect-variants";
 import { generateGraph } from "../../generation/generator";
-import { makeGraphSpec } from "../../generation/spec";
 import type { GraphSpec } from "../../generation/spec";
+import { makeGraphSpec } from "../../generation/spec";
 import { toAnalyzerGraph, toCoreGraph } from "../../utils/graph-adapters";
 import { validateModular } from "../../validation/perfect-variants";
 

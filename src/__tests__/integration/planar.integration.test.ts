@@ -9,8 +9,8 @@ import { describe, expect, it } from "vitest";
 
 import { computePlanar } from "../../analyzer/geometric";
 import { generateGraph } from "../../generation/generator";
-import { makeGraphSpec } from "../../generation/spec";
 import type { GraphSpec } from "../../generation/spec";
+import { makeGraphSpec } from "../../generation/spec";
 import { toAnalyzerGraph, toCoreGraph } from "../../utils/graph-adapters";
 
 describe("Planar Graph Integration", () => {
