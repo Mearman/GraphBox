@@ -19,6 +19,10 @@ describe("GraphExpander interface", () => {
 				const degrees: Record<string, number> = { A: 5, B: 2, C: 10 };
 				return degrees[nodeId] ?? 0;
 			},
+			calculatePriority: (nodeId: string) => {
+				const degree = { A: 5, B: 2, C: 10 }[nodeId] ?? 0;
+				return degree / 1.000_000_000_1;
+			},
 			getNode: async (nodeId: string) => {
 				const nodes: Record<string, { id: string; label: string }> = {
 					A: { id: "A", label: "Node A" },
@@ -37,6 +41,8 @@ describe("GraphExpander interface", () => {
 		// eslint-disable-next-line @typescript-eslint/unbound-method
 		expect(mockExpander.getDegree).toBeDefined();
 		// eslint-disable-next-line @typescript-eslint/unbound-method
+		expect(mockExpander.calculatePriority).toBeDefined();
+		// eslint-disable-next-line @typescript-eslint/unbound-method
 		expect(mockExpander.getNode).toBeDefined();
 		// eslint-disable-next-line @typescript-eslint/unbound-method
 		expect(mockExpander.addEdge).toBeDefined();
@@ -48,6 +54,7 @@ describe("GraphExpander interface", () => {
 				{ targetId: "target1", relationshipType: "follows" },
 			],
 			getDegree: () => 1,
+			calculatePriority: () => 1,
 			getNode: async () => "node-data",
 			addEdge: () => {},
 		};
@@ -68,6 +75,10 @@ describe("GraphExpander interface", () => {
 		const expander: GraphExpander<unknown> = {
 			getNeighbors: async () => [],
 			getDegree: (nodeId: string) => degreeMap.get(nodeId) ?? 0,
+			calculatePriority: (nodeId: string) => {
+				const degree = degreeMap.get(nodeId) ?? 0;
+				return degree / 1.000_000_000_1;
+			},
 			getNode: async () => null,
 			addEdge: () => {},
 		};
@@ -81,6 +92,7 @@ describe("GraphExpander interface", () => {
 		const expander: GraphExpander<{ name: string }> = {
 			getNeighbors: async () => [],
 			getDegree: () => 0,
+			calculatePriority: () => 0,
 			getNode: async (nodeId: string) => {
 				if (nodeId === "exists") {
 					return { name: "Existing Node" };
@@ -108,6 +120,7 @@ describe("GraphExpander interface", () => {
 		const expander: GraphExpander<WorkNode> = {
 			getNeighbors: async () => [],
 			getDegree: () => 0,
+			calculatePriority: () => 0,
 			getNode: async (nodeId: string) => ({
 				id: nodeId,
 				title: "Sample Work",
@@ -132,6 +145,7 @@ describe("GraphExpander interface", () => {
 		const expander: GraphExpander<unknown> = {
 			getNeighbors: async () => [],
 			getDegree: () => 0,
+			calculatePriority: () => 0,
 			getNode: async () => null,
 			addEdge: (source: string, target: string, relationshipType: string) => {
 				edges.push({ source, target, type: relationshipType });
@@ -189,6 +203,7 @@ describe("Neighbor interface", () => {
 		const expander: GraphExpander<unknown> = {
 			getNeighbors: async () => mockNeighbors,
 			getDegree: () => mockNeighbors.length,
+			calculatePriority: () => mockNeighbors.length,
 			getNode: async () => null,
 			addEdge: () => {},
 		};
@@ -217,6 +232,10 @@ describe("GraphExpander use cases", () => {
 			getDegree: (nodeId: string) => {
 				// Return cached degree
 				return cache.has(nodeId) ? 2 : 0;
+			},
+			calculatePriority: (nodeId: string) => {
+				const degree = cache.has(nodeId) ? 2 : 0;
+				return degree / 1.000_000_000_1;
 			},
 			getNode: async (nodeId: string) => {
 				if (cache.has(nodeId)) {
@@ -251,6 +270,13 @@ describe("GraphExpander use cases", () => {
 				};
 				return degrees[nodeId] ?? 0;
 			},
+			calculatePriority: (nodeId: string) => {
+				const degrees: Record<string, number> = {
+					specific: 5,
+					generic: 1000,
+				};
+				return (degrees[nodeId] ?? 0) / 1.000_000_000_1;
+			},
 			getNode: async () => null,
 			addEdge: () => {},
 		};
@@ -269,6 +295,7 @@ describe("GraphExpander use cases", () => {
 		const filteringExpander: GraphExpander<unknown> = {
 			getNeighbors: async () => [],
 			getDegree: () => 0,
+			calculatePriority: () => 0,
 			getNode: async () => null,
 			addEdge: (source: string, target: string, relationshipType: string) => {
 				if (allowedTypes.has(relationshipType)) {
