@@ -16,7 +16,9 @@ export type Directionality =
 /** Edge weighting property */
 export type Weighting =
   | { kind: "unweighted" }
-  | { kind: "weighted_numeric" }; // TODO: extend to weighted_vector, valued_symbolic
+  | { kind: "weighted_numeric" }
+  | { kind: "weighted_vector" }  // Each edge has a vector of weights
+  | { kind: "valued_symbolic" };  // Edges have symbolic values (e.g., colors, labels)
 
 /** Cycle presence property */
 export type Cycles =
