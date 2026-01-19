@@ -13,7 +13,7 @@
  */
 const isNode = (): boolean =>
 	typeof process !== "undefined" &&
-	process.versions?.node != undefined;
+	process.versions?.node !== undefined;
 
 /**
  * Check if DecompressionStream is available (modern browsers and Node 18+).
