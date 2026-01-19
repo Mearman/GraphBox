@@ -66,7 +66,9 @@ describe("Completeness Property", () => {
 
 			// Root and a leaf
 			const nodeIds = graph.getAllNodeIds();
-			const expansion = new DegreePrioritisedExpansion(graph, [nodeIds[0], nodeIds.at(-1)]);
+			const lastNode = nodeIds.at(-1);
+			if (!lastNode) throw new Error("Graph has no nodes");
+			const expansion = new DegreePrioritisedExpansion(graph, [nodeIds[0], lastNode]);
 			const result = await expansion.run();
 
 			// Property: V_S = V

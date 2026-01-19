@@ -129,8 +129,8 @@ const kolmogorovSmirnovTest = (
 	degrees: number[],
 	exponent: number
 ): { statistic: number; pValue: number } => {
-	// Sort degrees
-	const sorted = degrees.sort((a, b) => a - b);
+	// Sort degrees (create copy to avoid mutating input)
+	const sorted = [...degrees].sort((a, b) => a - b);
 	const n = sorted.length;
 	const xmin = Math.min(...sorted);
 

@@ -43,7 +43,9 @@ describe("Order Independence Property", () => {
 		it("same vertex set with degree priority vs frontier-balanced", async () => {
 			const graph = createTreeGraph(3, 3);
 			const nodeIds = graph.getAllNodeIds();
-			const seeds: [string, string] = [nodeIds[0], nodeIds.at(-1)];
+			const lastNode = nodeIds.at(-1);
+			if (!lastNode) throw new Error("Graph has no nodes");
+			const seeds: [string, string] = [nodeIds[0], lastNode];
 
 			const degreePrioritised = new DegreePrioritisedExpansion(graph, seeds);
 			const frontierBalanced = new FrontierBalancedExpansion(graph, seeds);
@@ -250,7 +252,9 @@ describe("Order Independence Property", () => {
 		it("repeated runs with same priority produce identical results", async () => {
 			const graph = createTreeGraph(2, 4);
 			const nodeIds = graph.getAllNodeIds();
-			const seeds: [string, string] = [nodeIds[0], nodeIds.at(-1)];
+			const lastNode = nodeIds.at(-1);
+			if (!lastNode) throw new Error("Graph has no nodes");
+			const seeds: [string, string] = [nodeIds[0], lastNode];
 
 			// Run each method twice
 			const dp1 = await new DegreePrioritisedExpansion(graph, seeds).run();

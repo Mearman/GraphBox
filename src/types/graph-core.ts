@@ -175,7 +175,7 @@ export interface DocumentedGraph extends CoreGraph {
  * @param value - Value to check
  * @returns True if value is a CoreGraph
  */
-export const isCoreGraph = (value: unknown): value is CoreGraph => {
+export const isCoreGraph = (value: unknown = undefined): value is CoreGraph => {
 	if (typeof value !== "object" || value === null) {
 		return false;
 	}

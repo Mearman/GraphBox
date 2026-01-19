@@ -42,7 +42,9 @@ describe("Termination Property", () => {
 			const numberSeeds = 2;
 
 			// Use first and last nodes as seeds
-			const seeds: [string, string] = [nodeIds[0], nodeIds.at(-1)];
+			const lastNode = nodeIds.at(-1);
+			if (!lastNode) throw new Error("Graph has no nodes");
+			const seeds: [string, string] = [nodeIds[0], lastNode];
 
 			const expansion = new DegreePrioritisedExpansion(graph, seeds);
 			const result = await expansion.run();
