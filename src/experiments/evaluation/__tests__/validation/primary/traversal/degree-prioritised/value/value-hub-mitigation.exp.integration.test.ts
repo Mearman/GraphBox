@@ -45,6 +45,11 @@ describe("VALUE: Hub Mitigation Effectiveness", () => {
 		console.log(`DP iterations: ${dpResult.stats.iterations}`);
 		console.log(`BFS iterations: ${bfsResult.stats.iterations}`);
 
+		console.log("\n=== Hub Mitigation Analysis ===");
+		console.log("Method & Nodes & Hubs & Paths & Iterations");
+		console.log(`Degree-Prioritised & ${dpResult.sampledNodes.size} & -- & ${dpResult.paths.length} & ${dpResult.stats.iterations}`);
+		console.log(`Standard BFS & ${bfsResult.sampledNodes.size} & -- & ${bfsResult.paths.length} & ${bfsResult.stats.iterations}`);
+
 		expect(dpResult.stats.iterations).toBeGreaterThan(0);
 		expect(bfsResult.stats.iterations).toBeGreaterThan(0);
 	});
