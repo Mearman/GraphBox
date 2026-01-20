@@ -7,8 +7,8 @@ import { describe, expect, it } from "vitest";
 import {
 	computeEgoNetwork,
 	enumerateBetweenGraph,
-} from "../../../ground-truth/between-graph";
-import { createChainGraph, createGridGraph } from "./common/test-graph-expander";
+} from "../../../../../../ground-truth/between-graph";
+import { createChainGraph, createGridGraph } from "./fixtures/test-graph-expander.js";
 
 describe("Between-Graph Ground Truth", () => {
 	it("should enumerate between-graph for chain", () => {

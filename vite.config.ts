@@ -1,5 +1,6 @@
 import { defineConfig } from "vitest/config";
 import dts from "vite-plugin-dts";
+import tsconfigPaths from "vite-tsconfig-paths";
 import pkg from "./package.json";
 
 const isCliBuild = process.env.BUILD_TARGET === "cli";
@@ -67,6 +68,7 @@ export default defineConfig({
 				},
 			},
 	test: {
+		plugins: [tsconfigPaths()],
 		globals: true,
 		environment: "node",
 		testTimeout: 10000, // 10s for integration tests
@@ -76,6 +78,14 @@ export default defineConfig({
 			"src/**/*.component.test.ts",
 		],
 		exclude: ["node_modules", "dist"],
+		resolve: {
+			extensions: [".js", ".json", ".ts", ".jsx", ".tsx", ".mjs"],
+			alias: {
+				"@graph/algorithms": new URL("./src/algorithms", import.meta.url),
+				"@graph/interfaces": new URL("./src/interfaces", import.meta.url),
+				"@graph/evaluation": new URL("./src/experiments/evaluation", import.meta.url),
+			},
+		},
 		coverage: {
 			provider: "v8",
 			reporter: isCI ? ["text", "json", "html"] : ["text"],

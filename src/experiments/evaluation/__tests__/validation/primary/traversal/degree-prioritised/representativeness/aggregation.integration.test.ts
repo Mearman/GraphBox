@@ -4,13 +4,13 @@
 
 import { describe, expect, it } from "vitest";
 
-import { DegreePrioritisedExpansion } from "../../../../graphbox/src/algorithms/traversal/degree-prioritised-expansion";
-import { enumerateBetweenGraph } from "../../../ground-truth/between-graph";
+import { DegreePrioritisedExpansion } from "../../../../../../../../algorithms/traversal/degree-prioritised-expansion";
+import { enumerateBetweenGraph } from "../../../../../../ground-truth/between-graph";
 import {
 	aggregateRepresentativenessResults,
 	computeStructuralRepresentativeness,
-} from "../../../metrics/structural-representativeness";
-import { createGridGraph, GraphExpanderAdapter } from "./common/test-graph-expander";
+} from "../../../../../../metrics/structural-representativeness";
+import { createGridGraph, GraphExpanderAdapter } from "./fixtures/test-graph-expander.js";
 
 describe("Aggregation", () => {
 	it("should aggregate results across multiple seed pairs", async () => {

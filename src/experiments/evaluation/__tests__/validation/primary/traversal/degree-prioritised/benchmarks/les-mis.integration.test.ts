@@ -1,9 +1,9 @@
 import { describe, it, expect } from "vitest";
-import { BenchmarkGraphExpander } from "../common/benchmark-graph-expander";
-import { loadBenchmarkByIdFromUrl } from "../../../fixtures/benchmark-datasets";
-import { DegreePrioritisedExpansion } from "../../../../../algorithms/traversal/degree-prioritised-expansion";
-import { StandardBfsExpansion } from "../../../baselines/standard-bfs";
-import { calculateTopicCoverage } from "../common/statistical-functions";
+import { BenchmarkGraphExpander } from "../../../../common/benchmark-graph-expander";
+import { loadBenchmarkByIdFromUrl } from "../../../../../../fixtures/benchmark-datasets";
+import { DegreePrioritisedExpansion } from "../../../../../../../../algorithms/traversal/degree-prioritised-expansion";
+import { StandardBfsExpansion } from "../../../../../../../baselines/standard-bfs"
+import { calculateTopicCoverage } from "../../../../common/statistical-functions";
 
 describe("Les Misérables Dataset", () => {
 	/**

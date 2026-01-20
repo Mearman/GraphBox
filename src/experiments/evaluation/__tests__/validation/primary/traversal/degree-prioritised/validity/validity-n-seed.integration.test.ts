@@ -7,8 +7,8 @@
 
 import { describe, expect, it } from "vitest";
 
-import { DegreePrioritisedExpansion } from "../../../../../algorithms/traversal/degree-prioritised-expansion";
-import { createChainGraphExpander, createHubGraphExpander } from "../common/graph-generators";
+import { DegreePrioritisedExpansion } from "../../../../../../../../algorithms/traversal/degree-prioritised-expansion";
+import { createChainGraphExpander, createHubGraphExpander } from "../../../../common/graph-generators";
 
 describe("VALIDITY: N-Seed Generalization", () => {
 	/**

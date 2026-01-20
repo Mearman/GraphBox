@@ -8,13 +8,13 @@
 
 import { describe, expect, it } from "vitest";
 
-import { DegreePrioritisedExpansion } from "../../../../algorithms/traversal/degree-prioritised-expansion";
+import { DegreePrioritisedExpansion } from "../../../../../algorithms/traversal/degree-prioritised-expansion";
 
 import { BenchmarkGraphExpander } from "../common/benchmark-graph-expander";
 import { loadBenchmarkByIdFromUrl } from "../../../fixtures/benchmark-datasets";
-import { FrontierBalancedExpansion } from "../../../../baselines/frontier-balanced";
-import { RandomPriorityExpansion } from "../../../../baselines/random-priority";
-import { StandardBfsExpansion } from "../../../../baselines/standard-bfs";
+import { FrontierBalancedExpansion } from "../../../../../experiments/baselines/frontier-balanced"
+import { RandomPriorityExpansion } from "../../../../../experiments/baselines/random-priority"
+import { StandardBfsExpansion } from "../../../../../experiments/baselines/standard-bfs"
 import { cohensD, confidenceInterval, mannWhitneyUTest } from "../common/statistical-functions";
 
 describe("Thesis Validation: Statistical Tests", () => {

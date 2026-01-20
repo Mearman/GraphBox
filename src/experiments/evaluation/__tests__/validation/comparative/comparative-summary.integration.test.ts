@@ -10,7 +10,7 @@
 import { describe, expect, it } from "vitest";
 
 import { DegreePrioritisedExpansion } from "../../../../../algorithms/traversal/degree-prioritised-expansion";
-import { StandardBfsExpansion } from "../../../../baselines/standard-bfs";
+import { StandardBfsExpansion } from "../../../../../experiments/baselines/standard-bfs"
 import { createHubGraphExpander } from "../common/graph-generators";
 import { jaccardSimilarity } from "../common/statistical-functions";
 

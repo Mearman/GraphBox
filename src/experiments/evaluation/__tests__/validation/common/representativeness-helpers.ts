@@ -2,8 +2,8 @@
  * Shared test infrastructure for representativeness tests
  */
 
-import { Graph } from "../../../../../../../../../algorithms/graph/graph";
-import type { Neighbor } from "../../../../../../../../../../interfaces/graph-expander";
+import { Graph } from "../../../../../../../../../../../algorithms/graph/graph";
+import type { Neighbor } from "../../../../../../../../../../../interfaces/graph-expander";
 
 export interface TestNode {
 	id: string;

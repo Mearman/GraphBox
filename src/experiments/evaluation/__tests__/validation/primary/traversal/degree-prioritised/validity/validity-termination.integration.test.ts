@@ -7,8 +7,8 @@
 
 import { describe, expect, it } from "vitest";
 
-import { DegreePrioritisedExpansion } from "../../../../../algorithms/traversal/degree-prioritised-expansion";
-import { createHubGraphExpander } from "../common/graph-generators";
+import { DegreePrioritisedExpansion } from "../../../../../../../../algorithms/traversal/degree-prioritised-expansion";
+import { createHubGraphExpander } from "../../../../common/graph-generators";
 
 describe("VALIDITY: Termination via Frontier Exhaustion", () => {
 	/**

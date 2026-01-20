@@ -8,10 +8,10 @@
  */
 import { describe, expect, it } from "vitest";
 
-import { DegreePrioritisedExpansion } from "../../../../algorithms/traversal/degree-prioritised-expansion";
-import { StandardBfsExpansion } from "../../../../baselines/standard-bfs";
-import { InstrumentedExpander } from "../common/instrumented-expander";
-import { createScaleFreeGraph } from "../common/graph-generators";
+import { DegreePrioritisedExpansion } from "../../../../../../../../algorithms/traversal/degree-prioritised-expansion";
+import { StandardBfsExpansion } from "../../../../../../../baselines/standard-bfs";
+import { InstrumentedExpander } from "../../../../common/instrumented-expander";
+import { createScaleFreeGraph } from "../../../../common/graph-generators";
 
 describe("Scale-Free Graph", () => {
 	it("should handle power-law degree distribution", async () => {

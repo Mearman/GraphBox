@@ -2,7 +2,7 @@
   "compilerOptions": {
     "target": "ES2023",
     "module": "ES2022",
-    "moduleResolution": "bundler",
+    "moduleResolution": "node",
     "lib": ["ES2023", "DOM"],
     "strict": true,
     "esModuleInterop": true,
@@ -13,7 +13,13 @@
     "declarationMap": true,
     "sourceMap": true,
     "outDir": "./dist",
-    "rootDir": "./src"
+    "rootDir": "./src",
+    "paths": {
+      "@graph/algorithms/*": ["./src/algorithms/*"],
+      "@graph/interfaces/*": ["./src/interfaces/*"],
+      "@graph/evaluation/*": ["./src/experiments/evaluation/*"],
+      "@test/fixtures/*": ["./src/experiments/evaluation/__tests__/validation/primary/traversal/degree-prioritised/representativeness/fixtures/*"]
+    }
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]

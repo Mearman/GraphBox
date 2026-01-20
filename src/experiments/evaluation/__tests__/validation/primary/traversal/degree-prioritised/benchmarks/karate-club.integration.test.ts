@@ -1,11 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { BenchmarkGraphExpander } from "../../common/benchmark-graph-expander";
-import { loadBenchmarkByIdFromUrl } from "../../../fixtures/benchmark-datasets";
-import { DegreePrioritisedExpansion } from "../../../../algorithms/traversal/degree-prioritised-expansion";
-import { StandardBfsExpansion } from "../../../../baselines/standard-bfs";
-import { FrontierBalancedExpansion } from "../../../../baselines/frontier-balanced";
-import { RandomPriorityExpansion } from "../../../../baselines/random-priority";
-import { mannWhitneyUTest, cohensD, pathDiversity } from "../../common/statistical-functions";
+import { BenchmarkGraphExpander } from "../../../../common/benchmark-graph-expander";
+import { loadBenchmarkByIdFromUrl } from "../../../../../../fixtures/benchmark-datasets";
+import { DegreePrioritisedExpansion } from "../../../../../../../../algorithms/traversal/degree-prioritised-expansion";
+import { StandardBfsExpansion } from "../../../../../../../baselines/standard-bfs"
+import { FrontierBalancedExpansion } from "../../../../../../../baselines/frontier-balanced"
+import { RandomPriorityExpansion } from "../../../../../../../baselines/random-priority"
+import { mannWhitneyUTest, cohensD, pathDiversity } from "../../../../common/statistical-functions";
 
 describe("Karate Club Dataset", () => {
 	/**

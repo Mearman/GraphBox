@@ -7,7 +7,7 @@
 
 import { describe, expect, it } from "vitest";
 
-import { createStarGraphExpander } from "../common/graph-generators";
+import { createStarGraphExpander } from "../../../../common/graph-generators";
 
 describe("VALIDITY: Thesis Specification Compliance", () => {
 	/**

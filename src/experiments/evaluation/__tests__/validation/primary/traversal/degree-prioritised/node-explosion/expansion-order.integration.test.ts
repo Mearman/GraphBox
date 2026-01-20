@@ -7,10 +7,10 @@
  */
 import { describe, expect, it } from "vitest";
 
-import { DegreePrioritisedExpansion } from "../../../../algorithms/traversal/degree-prioritised-expansion";
-import { StandardBfsExpansion } from "../../../../baselines/standard-bfs";
-import { InstrumentedExpander } from "../common/instrumented-expander";
-import { createStarGraph, createDoubleStarGraph } from "../common/graph-generators";
+import { DegreePrioritisedExpansion } from "../../../../../../../../algorithms/traversal/degree-prioritised-expansion";
+import { StandardBfsExpansion } from "../../../../../../../baselines/standard-bfs";
+import { InstrumentedExpander } from "../../../../common/instrumented-expander";
+import { createStarGraph, createDoubleStarGraph } from "../../../../common/graph-generators";
 
 describe("Expansion Order Analysis", () => {
 	it("should track expansion order for degree-prioritised", async () => {

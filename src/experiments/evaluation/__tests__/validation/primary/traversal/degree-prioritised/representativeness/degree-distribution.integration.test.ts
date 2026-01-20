@@ -4,10 +4,10 @@
 
 import { describe, expect, it } from "vitest";
 
-import { DegreePrioritisedExpansion } from "../../../../graphbox/src/algorithms/traversal/degree-prioritised-expansion";
-import { enumerateBetweenGraph } from "../../../ground-truth/between-graph";
-import { compareDegreeDistributions } from "../../../metrics/degree-distribution";
-import { createGridGraph, GraphExpanderAdapter } from "./common/test-graph-expander";
+import { DegreePrioritisedExpansion } from "../../../../../../../../algorithms/traversal/degree-prioritised-expansion";
+import { enumerateBetweenGraph } from "../../../../../../ground-truth/between-graph";
+import { compareDegreeDistributions } from "../../../../../../metrics/degree-distribution";
+import { createGridGraph, GraphExpanderAdapter } from "./fixtures/test-graph-expander.js";
 
 describe("Degree Distribution Integration", () => {
 	it("should compare degree distributions", async () => {

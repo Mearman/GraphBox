@@ -8,11 +8,11 @@
  */
 import { beforeAll, describe, expect, it } from "vitest";
 
-import { DegreePrioritisedExpansion } from "../../../../algorithms/traversal/degree-prioritised-expansion";
-import { FrontierBalancedExpansion } from "../../../../baselines/frontier-balanced";
-import { StandardBfsExpansion } from "../../../../baselines/standard-bfs";
-import { InstrumentedExpander } from "../common/instrumented-expander";
-import { createMultiHubGraph } from "../common/graph-generators";
+import { DegreePrioritisedExpansion } from "../../../../../../../../algorithms/traversal/degree-prioritised-expansion";
+import { FrontierBalancedExpansion } from "../../../../../../../baselines/frontier-balanced";
+import { StandardBfsExpansion } from "../../../../../../../baselines/standard-bfs";
+import { InstrumentedExpander } from "../../../../common/instrumented-expander";
+import { createMultiHubGraph } from "../../../../common/graph-generators";
 
 describe("Multi-Hub Network", () => {
 	let edges: Array<[string, string]>;

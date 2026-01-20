@@ -1,8 +1,9 @@
-import { BenchmarkGraphExpander } from "../../common/benchmark-graph-expander";
-import { loadBenchmarkByIdFromUrl } from "../../../fixtures/benchmark-datasets";
-import { DegreePrioritisedExpansion } from "../../../../algorithms/traversal/degree-prioritised-expansion";
-import { StandardBfsExpansion } from "../../../../baselines/standard-bfs";
-import { pathDiversity } from "../../common/statistical-functions";
+import { describe, expect, it } from "vitest";
+import { BenchmarkGraphExpander } from "../../../../common/benchmark-graph-expander";
+import { loadBenchmarkByIdFromUrl } from "../../../../../../fixtures/benchmark-datasets";
+import { DegreePrioritisedExpansion } from "../../../../../../../../algorithms/traversal/degree-prioritised-expansion";
+import { StandardBfsExpansion } from "../../../../../../../baselines/standard-bfs"
+import { pathDiversity } from "../../../../common/statistical-functions";
 
 describe("Thesis Validation: CiteSeer Dataset", () => {
 	it("should handle larger citation network (3327 nodes)", async () => {

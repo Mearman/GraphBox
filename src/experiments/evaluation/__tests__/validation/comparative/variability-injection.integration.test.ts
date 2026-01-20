@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { BenchmarkGraphExpander } from "../../common/benchmark-graph-expander";
+import { BenchmarkGraphExpander } from "../common/benchmark-graph-expander";
 import { loadBenchmarkByIdFromUrl } from "../../../fixtures/benchmark-datasets";
-import { DegreePrioritisedExpansion } from "../../../../baselines/degree-prioritised-expansion";
-import { StandardBfsExpansion } from "../../../../baselines/standard-bfs-expansion";
-import { RandomPriorityExpansion } from "../../../../baselines/random-priority-expansion";
-import { mannWhitneyUTest, cohensD, confidenceInterval, pathDiversity } from "../../common/statistical-functions";
+import { DegreePrioritisedExpansion } from "../../../../../algorithms/traversal/degree-prioritised-expansion";
+import { StandardBfsExpansion } from "../../../../../experiments/baselines/standard-bfs"
+import { RandomPriorityExpansion } from "../../../../../experiments/baselines/random-priority"
+import { mannWhitneyUTest, cohensD, confidenceInterval, pathDiversity } from "../common/statistical-functions";
 
 describe("Thesis Validation: Variability Injection", () => {
 	describe("Multiple Seed Pair Analysis", () => {

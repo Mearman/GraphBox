@@ -4,13 +4,13 @@
 
 import { beforeAll, describe, expect, it } from "vitest";
 
-import { DegreePrioritisedExpansion } from "../../../../graphbox/src/algorithms/traversal/degree-prioritised-expansion";
-import { FrontierBalancedExpansion } from "../../../../baselines/frontier-balanced";
-import { RandomPriorityExpansion } from "../../../../baselines/random-priority";
-import { StandardBfsExpansion } from "../../../../baselines/standard-bfs";
-import { enumerateBetweenGraph } from "../../../ground-truth/between-graph";
-import { computeStructuralRepresentativeness } from "../../../metrics/structural-representativeness";
-import { createGridGraph, GraphExpanderAdapter } from "./common/test-graph-expander";
+import { DegreePrioritisedExpansion } from "../../../../../../../../algorithms/traversal/degree-prioritised-expansion";
+import { FrontierBalancedExpansion } from "../../../../../../../baselines/frontier-balanced";
+import { RandomPriorityExpansion } from "../../../../../../../baselines/random-priority";
+import { StandardBfsExpansion } from "../../../../../../../baselines/standard-bfs";
+import { enumerateBetweenGraph } from "../../../../../../ground-truth/between-graph";
+import { computeStructuralRepresentativeness } from "../../../../../../metrics/structural-representativeness";
+import { createGridGraph, GraphExpanderAdapter } from "./fixtures/test-graph-expander.js";
 
 describe("Full Representativeness Pipeline", () => {
 	let graph: ReturnType<typeof createGridGraph>;

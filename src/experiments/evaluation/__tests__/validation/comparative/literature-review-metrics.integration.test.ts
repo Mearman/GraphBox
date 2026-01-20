@@ -12,11 +12,11 @@
 
 import { describe, expect, it } from "vitest";
 
-import { BenchmarkGraphExpander } from "../../common/benchmark-graph-expander";
-import { loadBenchmarkByIdFromUrl } from "../../../../fixtures/benchmark-datasets";
+import { BenchmarkGraphExpander } from "../common/benchmark-graph-expander";
+import { loadBenchmarkByIdFromUrl } from "../../../fixtures/benchmark-datasets";
 import { DegreePrioritisedExpansion } from "../../../../../algorithms/traversal/degree-prioritised-expansion";
-import { StandardBfsExpansion } from "../../../baselines/standard-bfs";
-import { pathDiversity } from "../../common/statistical-functions";
+import { StandardBfsExpansion } from "../../../../../experiments/baselines/standard-bfs"
+import { pathDiversity } from "../common/statistical-functions";
 
 describe("Systematic Literature Review Metrics", () => {
 	/**

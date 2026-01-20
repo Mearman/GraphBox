@@ -4,12 +4,12 @@
 
 import { describe, expect, it } from "vitest";
 
-import { DegreePrioritisedExpansion } from "../../../../../algorithms/traversal/degree-prioritised-expansion";
+import { DegreePrioritisedExpansion } from "../../../../../../../../algorithms/traversal/degree-prioritised-expansion";
 import {
 	computePathDiversityMetrics,
 	identifyHubNodes,
-} from "../../../metrics/path-diversity";
-import { createGridGraph, createHubGraph, GraphExpanderAdapter } from "./common/test-graph-expander";
+} from "../../../../../../metrics/path-diversity";
+import { createGridGraph, createHubGraph, GraphExpanderAdapter } from "./fixtures/test-graph-expander.js";
 
 describe("Path Diversity Integration", () => {
 	it("should compute diversity metrics for expansion results", async () => {

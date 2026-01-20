@@ -15,7 +15,7 @@ import {
 	loadBenchmarkFromContent,
 } from "../../../fixtures/benchmark-datasets";
 import { DegreePrioritisedExpansion } from "../../../../../algorithms/traversal/degree-prioritised-expansion";
-import { StandardBfsExpansion } from "../../../../baselines/standard-bfs";
+import { StandardBfsExpansion } from "../../../../../experiments/baselines/standard-bfs"
 import { pathDiversity } from "../common/statistical-functions";
 
 describe("Thesis Validation: Perturbed Graph Robustness", () => {

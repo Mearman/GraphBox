@@ -7,12 +7,12 @@
  */
 import { beforeAll, describe, expect, it } from "vitest";
 
-import { DegreePrioritisedExpansion } from "../../../../algorithms/traversal/degree-prioritised-expansion";
-import { FrontierBalancedExpansion } from "../../../../baselines/frontier-balanced";
-import { RandomPriorityExpansion } from "../../../../baselines/random-priority";
-import { StandardBfsExpansion } from "../../../../baselines/standard-bfs";
-import { InstrumentedExpander } from "../common/instrumented-expander";
-import { createDoubleStarGraph } from "../common/graph-generators";
+import { DegreePrioritisedExpansion } from "../../../../../../../../algorithms/traversal/degree-prioritised-expansion";
+import { FrontierBalancedExpansion } from "../../../../../../../baselines/frontier-balanced";
+import { RandomPriorityExpansion } from "../../../../../../../baselines/random-priority";
+import { StandardBfsExpansion } from "../../../../../../../baselines/standard-bfs";
+import { InstrumentedExpander } from "../../../../common/instrumented-expander";
+import { createDoubleStarGraph } from "../../../../common/graph-generators";
 
 describe("Double Star Graph (Two Hubs)", () => {
 	let edges: Array<[string, string]>;

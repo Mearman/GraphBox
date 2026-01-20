@@ -7,9 +7,9 @@
 
 import { describe, expect, it } from "vitest";
 
-import { DegreePrioritisedExpansion } from "../../../../../algorithms/traversal/degree-prioritised-expansion";
-import { StandardBfsExpansion } from "../../../../baselines/standard-bfs";
-import { createStarGraphExpander } from "../common/graph-generators";
+import { DegreePrioritisedExpansion } from "../../../../../../../../algorithms/traversal/degree-prioritised-expansion";
+import { StandardBfsExpansion } from "../../../../../../../baselines/standard-bfs";
+import { createStarGraphExpander } from "../../../../common/graph-generators";
 
 describe("VALUE: Hub Mitigation Effectiveness", () => {
 	/**

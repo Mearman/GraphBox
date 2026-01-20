@@ -7,11 +7,11 @@
  */
 import { describe, expect, it } from "vitest";
 
-import { DegreePrioritisedExpansion } from "../../../../algorithms/traversal/degree-prioritised-expansion";
-import { FrontierBalancedExpansion } from "../../../../baselines/frontier-balanced";
-import { StandardBfsExpansion } from "../../../../baselines/standard-bfs";
-import { InstrumentedExpander } from "../common/instrumented-expander";
-import { createMultiHubGraph } from "../common/graph-generators";
+import { DegreePrioritisedExpansion } from "../../../../../../../../algorithms/traversal/degree-prioritised-expansion";
+import { FrontierBalancedExpansion } from "../../../../../../../baselines/frontier-balanced";
+import { StandardBfsExpansion } from "../../../../../../../baselines/standard-bfs";
+import { InstrumentedExpander } from "../../../../common/instrumented-expander";
+import { createMultiHubGraph } from "../../../../common/graph-generators";
 
 describe("Node Explosion Metrics", () => {
 	it("should compute expansion ratio", async () => {
