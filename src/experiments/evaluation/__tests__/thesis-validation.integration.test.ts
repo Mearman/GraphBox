@@ -416,7 +416,7 @@ describe("Thesis Validation: Benchmark Datasets", () => {
 
 			// Use first and last nodes as seeds (likely to be connected in a co-appearance network)
 			const allNodes = expander.getAllNodeIds();
-			const seeds: [string, string] = [allNodes[0], allNodes.at(-1)];
+			const seeds: [string, string] = [allNodes[0], allNodes.at(-1) ?? allNodes[0]];
 
 			const degreePrioritised = new DegreePrioritisedExpansion(expander, seeds);
 			const standardBfs = new StandardBfsExpansion(expander, seeds);
@@ -458,7 +458,7 @@ describe("Thesis Validation: Benchmark Datasets", () => {
 			const expander = new BenchmarkGraphExpander(benchmark.graph, benchmark.meta.directed);
 
 			const allNodes = expander.getAllNodeIds();
-			const seeds: [string, string] = [allNodes[0], allNodes.at(-1)];
+			const seeds: [string, string] = [allNodes[0], allNodes.at(-1) ?? allNodes[0]];
 
 			const expansion = new DegreePrioritisedExpansion(expander, seeds);
 			const result = await expansion.run();
@@ -725,7 +725,7 @@ describe("Thesis Validation: Application Metrics", () => {
 			const expander = new BenchmarkGraphExpander(benchmark.graph, benchmark.meta.directed);
 
 			const allNodes = expander.getAllNodeIds();
-			const seeds: [string, string] = [allNodes[0], allNodes.at(-1)];
+			const seeds: [string, string] = [allNodes[0], allNodes.at(-1) ?? allNodes[0]];
 
 			const degreePrioritised = new DegreePrioritisedExpansion(expander, seeds);
 			const standardBfs = new StandardBfsExpansion(expander, seeds);
@@ -894,7 +894,7 @@ describe("Thesis Validation: Variability Injection", () => {
 				const expander = new BenchmarkGraphExpander(benchmark.graph, benchmark.meta.directed);
 
 				const allNodes = expander.getAllNodeIds();
-				const seeds: [string, string] = [allNodes[0], allNodes.at(-1)];
+				const seeds: [string, string] = [allNodes[0], allNodes.at(-1) ?? allNodes[0]];
 
 				const dp = new DegreePrioritisedExpansion(expander, seeds);
 				const bfs = new StandardBfsExpansion(expander, seeds);
@@ -1055,7 +1055,7 @@ describe("Thesis Validation: Application Metrics", () => {
 			const expander = new BenchmarkGraphExpander(benchmark.graph, benchmark.meta.directed);
 
 			const allNodes = expander.getAllNodeIds();
-			const seeds: [string, string] = [allNodes[0], allNodes.at(-1)];
+			const seeds: [string, string] = [allNodes[0], allNodes.at(-1) ?? allNodes[0]];
 
 			// We need to instrument to track early discovery
 			// For now, use total path diversity as proxy
@@ -1091,7 +1091,7 @@ describe("Thesis Validation: Summary", () => {
 			const expander = new BenchmarkGraphExpander(benchmark.graph, benchmark.meta.directed);
 
 			const allNodes = expander.getAllNodeIds();
-			const seeds: [string, string] = [allNodes[0], allNodes.at(-1)];
+			const seeds: [string, string] = [allNodes[0], allNodes.at(-1) ?? allNodes[0]];
 
 			const dp = new DegreePrioritisedExpansion(expander, seeds);
 			const bfs = new StandardBfsExpansion(expander, seeds);
@@ -1176,7 +1176,7 @@ describe("Thesis Validation: Summary", () => {
 			const expander = new BenchmarkGraphExpander(benchmark.graph, benchmark.meta.directed);
 
 			const allNodes = expander.getAllNodeIds();
-			const seeds: [string, string] = [allNodes[0], allNodes.at(-1)];
+			const seeds: [string, string] = [allNodes[0], allNodes.at(-1) ?? allNodes[0]];
 
 			const degreePrioritised = new DegreePrioritisedExpansion(expander, seeds);
 			const standardBfs = new StandardBfsExpansion(expander, seeds);
@@ -1273,7 +1273,7 @@ describe("Thesis Validation: Summary", () => {
 
 			const expander = new BenchmarkGraphExpander(perturbedBenchmark.graph, perturbedBenchmark.meta.directed);
 			const allNodes = expander.getAllNodeIds();
-			const seeds: [string, string] = [allNodes[0], allNodes.at(-1)];
+			const seeds: [string, string] = [allNodes[0], allNodes.at(-1) ?? allNodes[0]];
 
 			const degreePrioritised = new DegreePrioritisedExpansion(expander, seeds);
 			const result = await degreePrioritised.run();
@@ -1309,7 +1309,7 @@ describe("Thesis Validation: Summary", () => {
 
 			const expander = new BenchmarkGraphExpander(perturbedBenchmark.graph, perturbedBenchmark.meta.directed);
 			const nodeIdList = expander.getAllNodeIds();
-			const seeds: [string, string] = [nodeIdList[0], nodeIdList.at(-1)];
+			const seeds: [string, string] = [nodeIdList[0], nodeIdList.at(-1) ?? nodeIdList[0]];
 
 			const degreePrioritised = new DegreePrioritisedExpansion(expander, seeds);
 			const result = await degreePrioritised.run();
@@ -1350,7 +1350,7 @@ describe("Thesis Validation: Summary", () => {
 
 				const expander = new BenchmarkGraphExpander(perturbedBenchmark.graph, perturbedBenchmark.meta.directed);
 				const allNodeIds = expander.getAllNodeIds();
-				const seeds: [string, string] = [allNodeIds[0], allNodeIds.at(-1)];
+				const seeds: [string, string] = [allNodeIds[0], allNodeIds.at(-1) ?? allNodeIds[0]];
 
 				const dp = new DegreePrioritisedExpansion(expander, seeds);
 				const bfs = new StandardBfsExpansion(expander, seeds);
@@ -1441,7 +1441,7 @@ describe("Thesis Validation: Summary", () => {
 			const expander = new BenchmarkGraphExpander(benchmark.graph, benchmark.meta.directed);
 
 			const allNodes = expander.getAllNodeIds();
-			const seeds: [string, string] = [allNodes[0], allNodes.at(-1)];
+			const seeds: [string, string] = [allNodes[0], allNodes.at(-1) ?? allNodes[0]];
 
 			const degreePrioritised = new DegreePrioritisedExpansion(expander, seeds);
 			const standardBfs = new StandardBfsExpansion(expander, seeds);
@@ -1466,7 +1466,7 @@ describe("Thesis Validation: Summary", () => {
 			const expander = new BenchmarkGraphExpander(benchmark.graph, benchmark.meta.directed);
 
 			const allNodes = expander.getAllNodeIds();
-			const seeds: [string, string] = [allNodes[0], allNodes.at(-1)];
+			const seeds: [string, string] = [allNodes[0], allNodes.at(-1) ?? allNodes[0]];
 
 			const degreePrioritised = new DegreePrioritisedExpansion(expander, seeds);
 			const standardBfs = new StandardBfsExpansion(expander, seeds);
@@ -1520,7 +1520,7 @@ describe("Thesis Validation: Summary", () => {
 			const expander = new BenchmarkGraphExpander(benchmark.graph, benchmark.meta.directed);
 
 			const allNodes = expander.getAllNodeIds();
-			const seeds: [string, string] = [allNodes[0], allNodes.at(-1)];
+			const seeds: [string, string] = [allNodes[0], allNodes.at(-1) ?? allNodes[0]];
 
 			const degreePrioritised = new DegreePrioritisedExpansion(expander, seeds);
 			const standardBfs = new StandardBfsExpansion(expander, seeds);
@@ -1594,7 +1594,7 @@ describe("Thesis Validation: Summary", () => {
 			const expander = new BenchmarkGraphExpander(benchmark.graph, benchmark.meta.directed);
 
 			const allNodes = expander.getAllNodeIds();
-			const seeds: [string, string] = [allNodes[0], allNodes.at(-1)];
+			const seeds: [string, string] = [allNodes[0], allNodes.at(-1) ?? allNodes[0]];
 
 			const results: PerformanceMetrics[] = [];
 
@@ -1656,7 +1656,7 @@ describe("Thesis Validation: Summary", () => {
 			const expander = new BenchmarkGraphExpander(benchmark.graph, benchmark.meta.directed);
 
 			const allNodes = expander.getAllNodeIds();
-			const seeds: [string, string] = [allNodes[0], allNodes.at(-1)];
+			const seeds: [string, string] = [allNodes[0], allNodes.at(-1) ?? allNodes[0]];
 
 			const startTime1 = performance.now();
 			const dp = new DegreePrioritisedExpansion(expander, seeds);
@@ -1693,7 +1693,7 @@ describe("Thesis Validation: Summary", () => {
 				const expander = new BenchmarkGraphExpander(benchmark.graph, benchmark.meta.directed);
 
 				const allNodes = expander.getAllNodeIds();
-				const seeds: [string, string] = [allNodes[0], allNodes.at(-1)];
+				const seeds: [string, string] = [allNodes[0], allNodes.at(-1) ?? allNodes[0]];
 
 				const startTime1 = performance.now();
 				const dp = new DegreePrioritisedExpansion(expander, seeds);
@@ -1735,7 +1735,7 @@ describe("Thesis Validation: Summary", () => {
 			const expander = new BenchmarkGraphExpander(benchmark.graph, benchmark.meta.directed);
 
 			const allNodes = expander.getAllNodeIds();
-			const seeds: [string, string] = [allNodes[0], allNodes.at(-1)];
+			const seeds: [string, string] = [allNodes[0], allNodes.at(-1) ?? allNodes[0]];
 
 			const [dpResult, bfsResult] = await Promise.all([
 				new DegreePrioritisedExpansion(expander, seeds).run(),
@@ -2007,7 +2007,7 @@ describe("Thesis Validation: Summary", () => {
 			const expander = new BenchmarkGraphExpander(benchmark.graph, benchmark.meta.directed);
 
 			const allNodes = expander.getAllNodeIds();
-			const seeds: [string, string] = [allNodes[0], allNodes.at(-1)];
+			const seeds: [string, string] = [allNodes[0], allNodes.at(-1) ?? allNodes[0]];
 
 			const thesis = new DegreePrioritisedExpansion(expander, seeds);
 			const highDegree = new HighDegreeFirstExpansion(expander, seeds);
@@ -2035,7 +2035,7 @@ describe("Thesis Validation: Summary", () => {
 			const expander = new BenchmarkGraphExpander(benchmark.graph, benchmark.meta.directed);
 
 			const allNodes = expander.getAllNodeIds();
-			const seeds: [string, string] = [allNodes[0], allNodes.at(-1)];
+			const seeds: [string, string] = [allNodes[0], allNodes.at(-1) ?? allNodes[0]];
 
 			const thesis = new DegreePrioritisedExpansion(expander, seeds);
 			const lowDegree = new LowDegreeFirstExpansion(expander, seeds);
@@ -2064,7 +2064,7 @@ describe("Thesis Validation: Summary", () => {
 			const expander = new BenchmarkGraphExpander(benchmark.graph, benchmark.meta.directed);
 
 			const allNodes = expander.getAllNodeIds();
-			const seeds: [string, string] = [allNodes[0], allNodes.at(-1)];
+			const seeds: [string, string] = [allNodes[0], allNodes.at(-1) ?? allNodes[0]];
 
 			const methods = [
 				{ name: "Degree-Prioritised (Thesis)", algo: new DegreePrioritisedExpansion(expander, seeds) },
@@ -2105,7 +2105,7 @@ describe("Thesis Validation: Summary", () => {
 			const expander = new BenchmarkGraphExpander(benchmark.graph, benchmark.meta.directed);
 
 			const allNodes = expander.getAllNodeIds();
-			const seeds: [string, string] = [allNodes[0], allNodes.at(-1)];
+			const seeds: [string, string] = [allNodes[0], allNodes.at(-1) ?? allNodes[0]];
 
 			const thesis = new DegreePrioritisedExpansion(expander, seeds);
 			const highDegree = new HighDegreeFirstExpansion(expander, seeds);

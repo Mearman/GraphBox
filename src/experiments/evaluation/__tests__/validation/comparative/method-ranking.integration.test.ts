@@ -23,7 +23,7 @@ describe("Thesis Validation: Additional Baselines", () => {
 		const expander = new BenchmarkGraphExpander(benchmark.graph, benchmark.meta.directed);
 
 		const allNodes = expander.getAllNodeIds();
-		const seeds: [string, string] = [allNodes[0], allNodes.at(-1)];
+		const seeds: [string, string] = [allNodes[0], allNodes.at(-1) ?? allNodes[0]];
 
 		const thesis = new DegreePrioritisedExpansion(expander, seeds);
 		const highDegree = new HighDegreeFirstExpansion(expander, seeds);
@@ -51,7 +51,7 @@ describe("Thesis Validation: Additional Baselines", () => {
 		const expander = new BenchmarkGraphExpander(benchmark.graph, benchmark.meta.directed);
 
 		const allNodes = expander.getAllNodeIds();
-		const seeds: [string, string] = [allNodes[0], allNodes.at(-1)];
+		const seeds: [string, string] = [allNodes[0], allNodes.at(-1) ?? allNodes[0]];
 
 		const thesis = new DegreePrioritisedExpansion(expander, seeds);
 		const lowDegree = new LowDegreeFirstExpansion(expander, seeds);
@@ -80,7 +80,7 @@ describe("Thesis Validation: Additional Baselines", () => {
 		const expander = new BenchmarkGraphExpander(benchmark.graph, benchmark.meta.directed);
 
 		const allNodes = expander.getAllNodeIds();
-		const seeds: [string, string] = [allNodes[0], allNodes.at(-1)];
+		const seeds: [string, string] = [allNodes[0], allNodes.at(-1) ?? allNodes[0]];
 
 		const methods = [
 			{ name: "Degree-Prioritised (Thesis)", algo: new DegreePrioritisedExpansion(expander, seeds) },
@@ -121,7 +121,7 @@ describe("Thesis Validation: Additional Baselines", () => {
 		const expander = new BenchmarkGraphExpander(benchmark.graph, benchmark.meta.directed);
 
 		const allNodes = expander.getAllNodeIds();
-		const seeds: [string, string] = [allNodes[0], allNodes.at(-1)];
+		const seeds: [string, string] = [allNodes[0], allNodes.at(-1) ?? allNodes[0]];
 
 		const thesis = new DegreePrioritisedExpansion(expander, seeds);
 		const highDegree = new HighDegreeFirstExpansion(expander, seeds);

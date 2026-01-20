@@ -58,7 +58,7 @@ describe("Thesis Validation: Runtime Performance", () => {
 		const expander = new BenchmarkGraphExpander(benchmark.graph, benchmark.meta.directed);
 
 		const allNodes = expander.getAllNodeIds();
-		const seeds: [string, string] = [allNodes[0], allNodes.at(-1)];
+		const seeds: [string, string] = [allNodes[0], allNodes.at(-1) ?? allNodes[0]];
 
 		const results: PerformanceMetrics[] = [];
 
@@ -120,7 +120,7 @@ describe("Thesis Validation: Runtime Performance", () => {
 		const expander = new BenchmarkGraphExpander(benchmark.graph, benchmark.meta.directed);
 
 		const allNodes = expander.getAllNodeIds();
-		const seeds: [string, string] = [allNodes[0], allNodes.at(-1)];
+		const seeds: [string, string] = [allNodes[0], allNodes.at(-1) ?? allNodes[0]];
 
 		const startTime1 = performance.now();
 		const dp = new DegreePrioritisedExpansion(expander, seeds);
@@ -157,7 +157,7 @@ describe("Thesis Validation: Runtime Performance", () => {
 			const expander = new BenchmarkGraphExpander(benchmark.graph, benchmark.meta.directed);
 
 			const allNodes = expander.getAllNodeIds();
-			const seeds: [string, string] = [allNodes[0], allNodes.at(-1)];
+			const seeds: [string, string] = [allNodes[0], allNodes.at(-1) ?? allNodes[0]];
 
 			const startTime1 = performance.now();
 			const dp = new DegreePrioritisedExpansion(expander, seeds);
@@ -199,7 +199,7 @@ describe("Thesis Validation: Runtime Performance", () => {
 		const expander = new BenchmarkGraphExpander(benchmark.graph, benchmark.meta.directed);
 
 		const allNodes = expander.getAllNodeIds();
-		const seeds: [string, string] = [allNodes[0], allNodes.at(-1)];
+		const seeds: [string, string] = [allNodes[0], allNodes.at(-1) ?? allNodes[0]];
 
 		const [dpResult, bfsResult] = await Promise.all([
 			new DegreePrioritisedExpansion(expander, seeds).run(),

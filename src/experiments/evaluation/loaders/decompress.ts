@@ -56,7 +56,8 @@ const initNodeCache = async (): Promise<void> => {
 				import("node:os"),
 			]);
 
-		const cacheDir = `${tmpdir()}/graphbox-cache`;
+		// Allow override via environment variable (for CI caching)
+		const cacheDir = process.env.GRAPHBOX_CACHE_DIR ?? `${tmpdir()}/graphbox-cache`;
 
 		// Ensure cache directory exists
 		await mkdir(cacheDir, { recursive: true });

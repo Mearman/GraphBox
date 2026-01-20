@@ -33,7 +33,7 @@ describe("Thesis Validation: Summary", () => {
 			const expander = new BenchmarkGraphExpander(benchmark.graph, benchmark.meta.directed);
 
 			const allNodes = expander.getAllNodeIds();
-			const seeds: [string, string] = [allNodes[0], allNodes.at(-1)];
+			const seeds: [string, string] = [allNodes[0], allNodes.at(-1) ?? allNodes[0]];
 
 			const dp = new DegreePrioritisedExpansion(expander, seeds);
 			const bfs = new StandardBfsExpansion(expander, seeds);
@@ -143,7 +143,7 @@ describe("Thesis Validation: Additional Metrics", () => {
 		const expander = new BenchmarkGraphExpander(benchmark.graph, benchmark.meta.directed);
 
 		const allNodes = expander.getAllNodeIds();
-		const seeds: [string, string] = [allNodes[0], allNodes.at(-1)];
+		const seeds: [string, string] = [allNodes[0], allNodes.at(-1) ?? allNodes[0]];
 
 		const degreePrioritised = new DegreePrioritisedExpansion(expander, seeds);
 		const standardBfs = new StandardBfsExpansion(expander, seeds);
@@ -168,7 +168,7 @@ describe("Thesis Validation: Additional Metrics", () => {
 		const expander = new BenchmarkGraphExpander(benchmark.graph, benchmark.meta.directed);
 
 		const allNodes = expander.getAllNodeIds();
-		const seeds: [string, string] = [allNodes[0], allNodes.at(-1)];
+		const seeds: [string, string] = [allNodes[0], allNodes.at(-1) ?? allNodes[0]];
 
 		const degreePrioritised = new DegreePrioritisedExpansion(expander, seeds);
 		const standardBfs = new StandardBfsExpansion(expander, seeds);
@@ -222,7 +222,7 @@ describe("Thesis Validation: Additional Metrics", () => {
 		const expander = new BenchmarkGraphExpander(benchmark.graph, benchmark.meta.directed);
 
 		const allNodes = expander.getAllNodeIds();
-		const seeds: [string, string] = [allNodes[0], allNodes.at(-1)];
+		const seeds: [string, string] = [allNodes[0], allNodes.at(-1) ?? allNodes[0]];
 
 		const degreePrioritised = new DegreePrioritisedExpansion(expander, seeds);
 		const standardBfs = new StandardBfsExpansion(expander, seeds);

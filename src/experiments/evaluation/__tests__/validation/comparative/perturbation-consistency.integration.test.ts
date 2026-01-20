@@ -89,7 +89,7 @@ describe("Thesis Validation: Perturbed Graph Robustness", () => {
 
 		const expander = new BenchmarkGraphExpander(perturbedBenchmark.graph, perturbedBenchmark.meta.directed);
 		const allNodes = expander.getAllNodeIds();
-		const seeds: [string, string] = [allNodes[0], allNodes.at(-1)];
+		const seeds: [string, string] = [allNodes[0], allNodes.at(-1) ?? allNodes[0]];
 
 		const degreePrioritised = new DegreePrioritisedExpansion(expander, seeds);
 		const result = await degreePrioritised.run();
@@ -125,7 +125,7 @@ describe("Thesis Validation: Perturbed Graph Robustness", () => {
 
 		const expander = new BenchmarkGraphExpander(perturbedBenchmark.graph, perturbedBenchmark.meta.directed);
 		const nodeIdList = expander.getAllNodeIds();
-		const seeds: [string, string] = [nodeIdList[0], nodeIdList.at(-1)];
+		const seeds: [string, string] = [nodeIdList[0], nodeIdList.at(-1) ?? nodeIdList[0]];
 
 		const degreePrioritised = new DegreePrioritisedExpansion(expander, seeds);
 		const result = await degreePrioritised.run();
@@ -166,7 +166,7 @@ describe("Thesis Validation: Perturbed Graph Robustness", () => {
 
 			const expander = new BenchmarkGraphExpander(perturbedBenchmark.graph, perturbedBenchmark.meta.directed);
 			const allNodeIds = expander.getAllNodeIds();
-			const seeds: [string, string] = [allNodeIds[0], allNodeIds.at(-1)];
+			const seeds: [string, string] = [allNodeIds[0], allNodeIds.at(-1) ?? allNodeIds[0]];
 
 			const dp = new DegreePrioritisedExpansion(expander, seeds);
 			const bfs = new StandardBfsExpansion(expander, seeds);

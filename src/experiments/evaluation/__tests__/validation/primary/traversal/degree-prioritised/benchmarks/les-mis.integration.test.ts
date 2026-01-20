@@ -18,7 +18,7 @@ describe("Les Misérables Dataset", () => {
 
 		// Use first and last nodes as seeds (likely to be connected in a co-appearance network)
 		const allNodes = expander.getAllNodeIds();
-		const seeds: [string, string] = [allNodes[0], allNodes.at(-1)];
+		const seeds: [string, string] = [allNodes[0], allNodes.at(-1) ?? allNodes[0]];
 
 		const degreePrioritised = new DegreePrioritisedExpansion(expander, seeds);
 		const standardBfs = new StandardBfsExpansion(expander, seeds);
@@ -60,7 +60,7 @@ describe("Les Misérables Dataset", () => {
 		const expander = new BenchmarkGraphExpander(benchmark.graph, benchmark.meta.directed);
 
 		const allNodes = expander.getAllNodeIds();
-		const seeds: [string, string] = [allNodes[0], allNodes.at(-1)];
+		const seeds: [string, string] = [allNodes[0], allNodes.at(-1) ?? allNodes[0]];
 
 		const expansion = new DegreePrioritisedExpansion(expander, seeds);
 		const result = await expansion.run();

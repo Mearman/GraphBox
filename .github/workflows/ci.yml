@@ -35,6 +35,14 @@ jobs:
           node-version: 22
           cache: pnpm
 
+      - name: Cache dataset downloads
+        uses: actions/cache@v4
+        with:
+          path: /tmp/graphbox-cache
+          key: dataset-cache-${{ hashFiles('src/experiments/evaluation/fixtures/**/*.ts') }}
+          restore-keys: |
+            dataset-cache-
+
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
