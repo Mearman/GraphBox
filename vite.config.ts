@@ -78,12 +78,6 @@ export default defineConfig({
 		exclude: ["node_modules", "dist"],
 		resolve: {
 			extensions: [".js", ".json", ".ts", ".jsx", ".tsx", ".mjs"],
-			alias: {
-				"@graph/algorithms": new URL("./src/algorithms", import.meta.url),
-				"@graph/interfaces": new URL("./src/interfaces", import.meta.url),
-				"@graph/evaluation": new URL("./src/experiments/evaluation", import.meta.url),
-				"@graph/experiments": new URL("./src/experiments", import.meta.url),
-			},
 		},
 		coverage: {
 			provider: "v8",
@@ -93,10 +87,13 @@ export default defineConfig({
 		},
 		projects: [
 			{
-				extends: true,
+				plugins: [tsconfigPaths()],
 				test: {
 					name: "exp",
 					include: ["src/**/*.exp.*.test.ts"],
+					resolve: {
+						extensions: [".js", ".json", ".ts", ".jsx", ".tsx", ".mjs"],
+					},
 				},
 			},
 		],
