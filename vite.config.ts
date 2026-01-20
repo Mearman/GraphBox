@@ -73,13 +73,8 @@ export default defineConfig({
 		plugins: [tsconfigPaths()],
 		globals: true,
 		environment: "node",
-		fileParallelism: false, // Run tests serially to prevent OOM
-		testTimeout: 30000, // 30s for integration tests
-		include: [
-			"src/**/*.unit.test.ts",
-			"src/**/*.integration.test.ts",
-			"src/**/*.component.test.ts",
-		],
+		fileParallelism: false,
+		testTimeout: 30000,
 		exclude: ["node_modules", "dist"],
 		resolve: {
 			extensions: [".js", ".json", ".ts", ".jsx", ".tsx", ".mjs"],
@@ -96,5 +91,14 @@ export default defineConfig({
 			include: ["src/**/*.ts"],
 			exclude: ["src/**/*.test.ts", "src/**/*.spec.ts", "src/**/fixtures/**"],
 		},
+		projects: [
+			{
+				extends: true,
+				test: {
+					name: "exp",
+					include: ["src/**/*.exp.*.test.ts"],
+				},
+			},
+		],
 	},
 });
