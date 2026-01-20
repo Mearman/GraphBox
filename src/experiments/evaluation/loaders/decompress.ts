@@ -22,7 +22,7 @@ import { gunzipSync, strFromU8, unzipSync } from "fflate";
  */
 const isNode = (): boolean => {
 	return typeof process !== "undefined" &&
-		process.versions?.node != undefined;
+		process.versions?.node !== undefined;
 };
 
 // ============================================================================
@@ -197,8 +197,9 @@ export const clearCache = async (): Promise<void> => {
 	if (!isNode() || !nodeCache) return;
 
 	try {
-		const files = await nodeCache.readdir(nodeCache.cacheDir);
-		await Promise.all(files.map((file) => nodeCache!.unlink(`${nodeCache!.cacheDir}/${file}`)));
+		const cache = nodeCache;
+		const files = await cache.readdir(cache.cacheDir);
+		await Promise.all(files.map((file) => cache.unlink(`${cache.cacheDir}/${file}`)));
 	} catch {
 		// Cache directory doesn't exist or other error
 	}

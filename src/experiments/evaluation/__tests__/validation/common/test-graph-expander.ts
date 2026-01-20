@@ -37,16 +37,25 @@ export class TestGraphExpander implements GraphExpander<TestNode> {
 
 		// Build adjacency
 		for (const [source, target] of edges) {
-			this.adjacency.get(source)!.push({ targetId: target, relationshipType: "edge" });
+			const sourceNeighbors = this.adjacency.get(source);
+			if (sourceNeighbors) {
+				sourceNeighbors.push({ targetId: target, relationshipType: "edge" });
+			}
 			if (!directed) {
-				this.adjacency.get(target)!.push({ targetId: source, relationshipType: "edge" });
+				const targetNeighbors = this.adjacency.get(target);
+				if (targetNeighbors) {
+					targetNeighbors.push({ targetId: source, relationshipType: "edge" });
+				}
 			}
 		}
 
 		// Compute degrees
 		for (const [nodeId, neighbors] of this.adjacency) {
 			this.degrees.set(nodeId, neighbors.length);
-			this.nodes.get(nodeId)!.degree = neighbors.length;
+			const node = this.nodes.get(nodeId);
+			if (node) {
+				node.degree = neighbors.length;
+			}
 		}
 	}
 

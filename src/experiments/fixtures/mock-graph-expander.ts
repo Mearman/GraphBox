@@ -67,12 +67,7 @@ export class MockGraphExpander implements GraphExpander<TestNode> {
 	}
 
 	calculatePriority(nodeId: string, options: PriorityOptions = {}): number {
-		const { nodeWeight = 1, epsilon = 1e-10, useSimpleDegree = false } = options;
-
-		// Legacy behavior: simple degree count
-		if (useSimpleDegree) {
-			return this.getDegree(nodeId);
-		}
+		const { nodeWeight = 1, epsilon = 1e-10 } = options;
 
 		// For undirected or simple graphs, we treat all degree as "outgoing"
 		// In a full implementation with direction tracking, we would:

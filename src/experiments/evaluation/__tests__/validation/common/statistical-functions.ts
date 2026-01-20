@@ -31,7 +31,10 @@ export const mannWhitneyUTest = (sampleA: number[], sampleB: number[]): {
 		if (!ranks.has(value)) {
 			ranks.set(value, []);
 		}
-		ranks.get(value)!.push(index + 1);
+		const positions = ranks.get(value);
+		if (positions) {
+			positions.push(index + 1);
+		}
 	}
 
 	// Average rank for tied values
@@ -115,9 +118,9 @@ export const cohensD = (sampleA: number[], sampleB: number[]): number => {
 /**
  * Calculate confidence interval for a mean.
  * @param values
- * @param confidence
+ * @param _confidence
  */
-export const confidenceInterval = (values: number[], confidence = 0.95): { lower: number; upper: number } => {
+export const confidenceInterval = (values: number[], _confidence = 0.95): { lower: number; upper: number } => {
 	const n = values.length;
 	const mean = values.reduce((a, b) => a + b, 0) / n;
 	const std = Math.sqrt(values.reduce((sum, value) => sum + (value - mean) ** 2, 0) / (n - 1));

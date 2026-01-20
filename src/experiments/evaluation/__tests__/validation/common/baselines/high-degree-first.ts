@@ -66,7 +66,7 @@ export class HighDegreeFirstExpansion {
 			edgesTraversed += neighbors.length;
 
 			// Sort neighbors by degree (highest first) - opposite of thesis
-			const sortedNeighbors = neighbors.sort((a, b) => {
+			const sortedNeighbors = neighbors.toSorted((a, b) => {
 				return this.expander.getDegree(b.targetId) - this.expander.getDegree(a.targetId);
 			});
 

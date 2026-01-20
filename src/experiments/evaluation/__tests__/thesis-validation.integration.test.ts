@@ -220,9 +220,9 @@ const cohensD = (sampleA: number[], sampleB: number[]): number => {
 /**
  * Calculate confidence interval for a mean.
  * @param values
- * @param confidence
+ * @param _confidence
  */
-const confidenceInterval = (values: number[], confidence = 0.95): { lower: number; upper: number } => {
+const confidenceInterval = (values: number[], _confidence = 0.95): { lower: number; upper: number } => {
 	const n = values.length;
 	const mean = values.reduce((a, b) => a + b, 0) / n;
 	const std = Math.sqrt(values.reduce((sum, value) => sum + (value - mean) ** 2, 0) / (n - 1));
@@ -1098,7 +1098,7 @@ describe("Thesis Validation: Summary", () => {
 
 			const [dpResult, bfsResult] = await Promise.all([dp.run(), bfs.run()]);
 
-			const nodeSimilarity = jaccardSimilarity(dpResult.sampledNodes, bfsResult.sampledNodes);
+			const _nodeSimilarity = jaccardSimilarity(dpResult.sampledNodes, bfsResult.sampledNodes);
 			const dpDiversity = pathDiversity(dpResult.paths);
 			const bfsDiversity = pathDiversity(bfsResult.paths);
 
@@ -1422,9 +1422,10 @@ describe("Thesis Validation: Summary", () => {
 			percentile: number = 90
 		): { sampledHubs: number; totalHubs: number; ratio: number } => {
 			const degrees = allNodes.map((n) => ({ id: n.id, degree: getDegree(n.id) }));
+			const sortedDegrees = degrees.toSorted((a, b) => b.degree - a.degree);
 			const hubThreshold = percentile === 90
-				? degrees.sort((a, b) => b.degree - a.degree)[Math.floor(degrees.length * 0.1)]?.degree ?? 0
-				: degrees.sort((a, b) => b.degree - a.degree)[Math.floor(degrees.length * (1 - percentile / 100))]?.degree ?? 0;
+				? sortedDegrees[Math.floor(sortedDegrees.length * 0.1)]?.degree ?? 0
+				: sortedDegrees[Math.floor(sortedDegrees.length * (1 - percentile / 100))]?.degree ?? 0;
 
 			const totalHubs = degrees.filter((n) => n.degree >= hubThreshold).length;
 			const sampledHubs = sampledIds.filter((id) => getDegree(id) >= hubThreshold).length;
@@ -1826,7 +1827,7 @@ describe("Thesis Validation: Summary", () => {
 					edgesTraversed += neighbors.length;
 
 					// Sort neighbors by degree (highest first) - opposite of thesis
-					const sortedNeighbors = neighbors.sort((a, b) => {
+					const sortedNeighbors = neighbors.toSorted((a, b) => {
 						return this.expander.getDegree(b.targetId) - this.expander.getDegree(a.targetId);
 					});
 

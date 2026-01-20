@@ -40,7 +40,7 @@ describe("Thesis Validation: Summary", () => {
 
 			const [dpResult, bfsResult] = await Promise.all([dp.run(), bfs.run()]);
 
-			const nodeSimilarity = jaccardSimilarity(dpResult.sampledNodes, bfsResult.sampledNodes);
+			const _nodeSimilarity = jaccardSimilarity(dpResult.sampledNodes, bfsResult.sampledNodes);
 			const dpDiversity = pathDiversity(dpResult.paths);
 			const bfsDiversity = pathDiversity(bfsResult.paths);
 
@@ -124,9 +124,10 @@ describe("Thesis Validation: Additional Metrics", () => {
 		percentile: number = 90
 	): { sampledHubs: number; totalHubs: number; ratio: number } => {
 		const degrees = allNodes.map((n) => ({ id: n.id, degree: getDegree(n.id) }));
+		const sortedDegrees = degrees.toSorted((a, b) => b.degree - a.degree);
 		const hubThreshold = percentile === 90
-			? degrees.sort((a, b) => b.degree - a.degree)[Math.floor(degrees.length * 0.1)]?.degree ?? 0
-			: degrees.sort((a, b) => b.degree - a.degree)[Math.floor(degrees.length * (1 - percentile / 100))]?.degree ?? 0;
+			? sortedDegrees[Math.floor(sortedDegrees.length * 0.1)]?.degree ?? 0
+			: sortedDegrees[Math.floor(sortedDegrees.length * (1 - percentile / 100))]?.degree ?? 0;
 
 		const totalHubs = degrees.filter((n) => n.degree >= hubThreshold).length;
 		const sampledHubs = sampledIds.filter((id) => getDegree(id) >= hubThreshold).length;

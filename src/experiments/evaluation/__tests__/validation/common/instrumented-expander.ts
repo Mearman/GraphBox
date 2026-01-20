@@ -43,8 +43,14 @@ export class InstrumentedExpander implements GraphExpander<TestNode> {
 		}
 
 		for (const [source, target] of edges) {
-			this.adjacency.get(source)!.push({ targetId: target, relationshipType: "edge" });
-			this.adjacency.get(target)!.push({ targetId: source, relationshipType: "edge" });
+			const sourceNeighbors = this.adjacency.get(source);
+			const targetNeighbors = this.adjacency.get(target);
+			if (sourceNeighbors) {
+				sourceNeighbors.push({ targetId: target, relationshipType: "edge" });
+			}
+			if (targetNeighbors) {
+				targetNeighbors.push({ targetId: source, relationshipType: "edge" });
+			}
 		}
 
 		for (const [nodeId, neighbors] of this.adjacency) {

@@ -360,18 +360,12 @@ export const loadBenchmarkFromUrl = async (url: string, meta: BenchmarkDatasetMe
 	const content = await fetchAndExtract(url, [".edges", ".gml", ".txt", ".cites"]);
 
 	// Detect format and use appropriate loader
-	let result: Awaited<ReturnType<typeof loadEdgeList>>;
-
-	if (isGmlContent(content)) {
-		// Use GML parser for GML format
-		result = await loadGml(content, meta.directed);
-	} else {
-		// Use edge list parser for text-based formats
-		result = loadEdgeList(content, {
+	const result = isGmlContent(content)
+		? await loadGml(content, meta.directed)
+		: loadEdgeList(content, {
 			directed: meta.directed,
 			delimiter: meta.delimiter,
 		});
-	}
 
 	const nodeCount = result.graph.getAllNodes().length;
 	const edgeCount = result.graph.getAllEdges().length;

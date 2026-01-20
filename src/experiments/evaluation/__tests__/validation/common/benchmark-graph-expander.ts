@@ -30,11 +30,17 @@ export class BenchmarkGraphExpander implements GraphExpander<{ id: string }> {
 		}
 
 		for (const edge of graph.getAllEdges()) {
-			this.adjacency.get(edge.source)!.push(edge.target);
+			const sourceNeighbors = this.adjacency.get(edge.source);
+			if (sourceNeighbors) {
+				sourceNeighbors.push(edge.target);
+			}
 			this.degrees.set(edge.source, (this.degrees.get(edge.source) ?? 0) + 1);
 
 			if (!directed) {
-				this.adjacency.get(edge.target)!.push(edge.source);
+				const targetNeighbors = this.adjacency.get(edge.target);
+				if (targetNeighbors) {
+					targetNeighbors.push(edge.source);
+				}
 				this.degrees.set(edge.target, (this.degrees.get(edge.target) ?? 0) + 1);
 			}
 		}
