@@ -29,6 +29,9 @@ describe("VALIDITY: N-Seed Generalization", () => {
 
 		// No paths for single seed
 		expect(result.paths.length).toBe(0);
+
+		console.log("\n=== N-Seed Generalisation ===");
+		console.log(`N=1 (ego-graph): ${result.sampledNodes.size} nodes, ${result.paths.length} paths`);
 	});
 
 	/**
@@ -52,6 +55,9 @@ describe("VALIDITY: N-Seed Generalization", () => {
 		const path = result.paths[0];
 		expect(path.nodes[0]).toBe("N0");
 		expect(path.nodes.at(-1)).toBe("N9");
+
+		console.log("\n=== N-Seed Generalisation ===");
+		console.log(`N=2 (between-graph): ${result.sampledNodes.size} nodes, ${result.paths.length} paths, coverage=${((result.sampledNodes.size / 10) * 100).toFixed(1)}%`);
 	});
 
 	/**
@@ -75,5 +81,8 @@ describe("VALIDITY: N-Seed Generalization", () => {
 
 		// Should find paths between seeds
 		expect(result.paths.length).toBeGreaterThan(0);
+
+		console.log("\n=== N-Seed Generalisation ===");
+		console.log(`N=3 (multi-seed): ${result.sampledNodes.size} nodes, ${result.paths.length} paths, coverage=${((result.sampledNodes.size / 16) * 100).toFixed(1)}%`);
 	});
 });
