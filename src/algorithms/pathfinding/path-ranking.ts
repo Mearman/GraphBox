@@ -300,7 +300,7 @@ const findAllShortestPaths = <N extends Node, E extends Edge>(
 			const startNode = graph.getNode(startId);
 			if (startNode.some) {
 				paths.push({
-					nodes: [startNode.value, ...currentNodes],
+					nodes: [startNode.value, ...[...currentNodes].reverse()],
 					edges: [...currentEdges].reverse(),
 					totalWeight: currentEdges.length,
 				});

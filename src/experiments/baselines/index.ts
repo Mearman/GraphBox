@@ -18,3 +18,8 @@ export {
 	type RandomPriorityStats,
 } from "./random-priority";
 export { type BfsExpansionStats,StandardBfsExpansion, type StandardBfsResult } from "./standard-bfs";
+
+// Path ranking baselines for comparison with Path Salience Ranking
+export { type BetweennessConfig,betweennessRanking } from "./betweenness-ranking";
+export { type RandomPathConfig,randomPathRanking } from "./random-path-ranking";
+export { type ShortestPathConfig,shortestPathRanking } from "./shortest-path-ranking";

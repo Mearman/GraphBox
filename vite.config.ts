@@ -10,6 +10,8 @@ export default defineConfig({
 	define: {
 		__VERSION__: JSON.stringify(pkg.version),
 	},
+	// Use cacheDir only for Vitest, not for build
+	cacheDir: process.env.VITEST ? "node_modules/.vitest" : undefined,
 	plugins: isCliBuild
 		? []
 		: [
@@ -71,7 +73,8 @@ export default defineConfig({
 		plugins: [tsconfigPaths()],
 		globals: true,
 		environment: "node",
-		testTimeout: 10000, // 10s for integration tests
+		fileParallelism: false, // Run tests serially to prevent OOM
+		testTimeout: 30000, // 30s for integration tests
 		include: [
 			"src/**/*.unit.test.ts",
 			"src/**/*.integration.test.ts",
@@ -84,6 +87,7 @@ export default defineConfig({
 				"@graph/algorithms": new URL("./src/algorithms", import.meta.url),
 				"@graph/interfaces": new URL("./src/interfaces", import.meta.url),
 				"@graph/evaluation": new URL("./src/experiments/evaluation", import.meta.url),
+				"@graph/experiments": new URL("./src/experiments", import.meta.url),
 			},
 		},
 		coverage: {

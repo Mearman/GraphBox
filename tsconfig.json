@@ -18,6 +18,7 @@
       "@graph/algorithms/*": ["./src/algorithms/*"],
       "@graph/interfaces/*": ["./src/interfaces/*"],
       "@graph/evaluation/*": ["./src/experiments/evaluation/*"],
+      "@graph/experiments/*": ["./src/experiments/*"],
       "@test/fixtures/*": ["./src/experiments/evaluation/__tests__/validation/primary/traversal/degree-prioritised/representativeness/fixtures/*"]
     }
   },
