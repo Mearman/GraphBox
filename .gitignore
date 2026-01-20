@@ -40,3 +40,9 @@ pnpm-debug.log*
 
 # Benchmark data (downloaded separately)
 data/
+
+# Test results
+*.tap
+test-results.tap
+tap-results.json
+tap-metrics.csv
