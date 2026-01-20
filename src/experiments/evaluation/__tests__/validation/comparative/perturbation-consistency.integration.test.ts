@@ -8,19 +8,21 @@
 
 import { describe, expect, it } from "vitest";
 
-import { BenchmarkGraphExpander } from "../common/benchmark-graph-expander";
+import { DegreePrioritisedExpansion } from "../../../../../algorithms/traversal/degree-prioritised-expansion";
+import { StandardBfsExpansion } from "../../../../../experiments/baselines/standard-bfs"
 import {
 	createBenchmarkMeta,
 	loadBenchmarkByIdFromUrl,
 	loadBenchmarkFromContent,
 } from "../../../fixtures/benchmark-datasets";
-import { DegreePrioritisedExpansion } from "../../../../../algorithms/traversal/degree-prioritised-expansion";
-import { StandardBfsExpansion } from "../../../../../experiments/baselines/standard-bfs"
+import { BenchmarkGraphExpander } from "../common/benchmark-graph-expander";
 import { pathDiversity } from "../common/statistical-functions";
 
 describe("Thesis Validation: Perturbed Graph Robustness", () => {
 	/**
 	 * Create a perturbed version of a graph by removing random edges.
+	 * @param edges
+	 * @param removeFraction
 	 */
 	const perturbEdges = (
 		edges: Array<{ source: string; target: string }>,
@@ -33,6 +35,9 @@ describe("Thesis Validation: Perturbed Graph Robustness", () => {
 
 	/**
 	 * Create a perturbed version by adding random edges.
+	 * @param edges
+	 * @param nodeIds
+	 * @param addFraction
 	 */
 	const addRandomEdges = (
 		edges: Array<{ source: string; target: string }>,
@@ -84,7 +89,7 @@ describe("Thesis Validation: Perturbed Graph Robustness", () => {
 
 		const expander = new BenchmarkGraphExpander(perturbedBenchmark.graph, perturbedBenchmark.meta.directed);
 		const allNodes = expander.getAllNodeIds();
-		const seeds: [string, string] = [allNodes[0], allNodes[allNodes.length - 1]];
+		const seeds: [string, string] = [allNodes[0], allNodes.at(-1)];
 
 		const degreePrioritised = new DegreePrioritisedExpansion(expander, seeds);
 		const result = await degreePrioritised.run();
@@ -120,7 +125,7 @@ describe("Thesis Validation: Perturbed Graph Robustness", () => {
 
 		const expander = new BenchmarkGraphExpander(perturbedBenchmark.graph, perturbedBenchmark.meta.directed);
 		const nodeIdList = expander.getAllNodeIds();
-		const seeds: [string, string] = [nodeIdList[0], nodeIdList[nodeIdList.length - 1]];
+		const seeds: [string, string] = [nodeIdList[0], nodeIdList.at(-1)];
 
 		const degreePrioritised = new DegreePrioritisedExpansion(expander, seeds);
 		const result = await degreePrioritised.run();
@@ -149,7 +154,7 @@ describe("Thesis Validation: Perturbed Graph Robustness", () => {
 
 		for (const { name, edges } of perturbations) {
 			const meta = createBenchmarkMeta({
-				id: `lesmis-${name.replace(/\s+/g, "-")}`,
+				id: `lesmis-${name.replaceAll(/\s+/g, "-")}`,
 				name: `Les Mis (${name})`,
 				expectedNodes: 77,
 				expectedEdges: edges.length,
@@ -161,7 +166,7 @@ describe("Thesis Validation: Perturbed Graph Robustness", () => {
 
 			const expander = new BenchmarkGraphExpander(perturbedBenchmark.graph, perturbedBenchmark.meta.directed);
 			const allNodeIds = expander.getAllNodeIds();
-			const seeds: [string, string] = [allNodeIds[0], allNodeIds[allNodeIds.length - 1]];
+			const seeds: [string, string] = [allNodeIds[0], allNodeIds.at(-1)];
 
 			const dp = new DegreePrioritisedExpansion(expander, seeds);
 			const bfs = new StandardBfsExpansion(expander, seeds);
@@ -177,7 +182,7 @@ describe("Thesis Validation: Perturbed Graph Robustness", () => {
 
 		console.log("\n=== Consistent Method Ranking ===");
 		for (const r of results) {
-			const winner = r.dpDiversity > r.bfsDiversity ? "DP" : r.bfsDiversity > r.dpDiversity ? "BFS" : "Tie";
+			const winner = r.dpDiversity > r.bfsDiversity ? "DP" : (r.bfsDiversity > r.dpDiversity ? "BFS" : "Tie");
 			console.log(`${r.perturbation}: DP=${r.dpDiversity.toFixed(3)}, BFS=${r.bfsDiversity.toFixed(3)} (${winner})`);
 		}
 

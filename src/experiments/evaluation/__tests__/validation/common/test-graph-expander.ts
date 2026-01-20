@@ -87,7 +87,6 @@ export class TestGraphExpander implements GraphExpander<TestNode> {
 
 /**
  * Create a test graph from edge list
+ * @param edges
  */
-export function createGraphFromEdges(edges: Array<[string, string]>): TestGraphExpander {
-	return new TestGraphExpander(edges, false);
-}
+export const createGraphFromEdges = (edges: Array<[string, string]>): TestGraphExpander => new TestGraphExpander(edges, false);

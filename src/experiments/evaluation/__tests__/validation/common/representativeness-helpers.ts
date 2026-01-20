@@ -2,8 +2,8 @@
  * Shared test infrastructure for representativeness tests
  */
 
-import { Graph } from "../../../../../../../../../../../algorithms/graph/graph";
-import type { Neighbor } from "../../../../../../../../../../../interfaces/graph-expander";
+import { Graph } from "../../../../../algorithms/graph/graph";
+import type { Neighbor } from "../../../../../interfaces/graph-expander";
 
 export interface TestNode {
 	id: string;
@@ -82,6 +82,7 @@ export class GraphExpanderAdapter {
 
 /**
  * Create a test graph from edge list
+ * @param edges
  */
 export const createGraph = (edges: Array<[string, string]>): Graph<TestNode, TestEdge> => {
 	const graph = new Graph<TestNode, TestEdge>(false);
@@ -107,6 +108,7 @@ export const createGraph = (edges: Array<[string, string]>): Graph<TestNode, Tes
 
 /**
  * Create a chain graph (linear path)
+ * @param length
  */
 export const createChainGraph = (length: number): Graph<TestNode, TestEdge> => {
 	const edges: Array<[string, string]> = [];
@@ -118,6 +120,8 @@ export const createChainGraph = (length: number): Graph<TestNode, TestEdge> => {
 
 /**
  * Create a grid graph (rows x cols)
+ * @param rows
+ * @param cols
  */
 export const createGridGraph = (rows: number, cols: number): Graph<TestNode, TestEdge> => {
 	const edges: Array<[string, string]> = [];
@@ -139,6 +143,8 @@ export const createGridGraph = (rows: number, cols: number): Graph<TestNode, Tes
 
 /**
  * Create a hub graph with central hub nodes and leaf nodes
+ * @param numberHubs
+ * @param leavesPerHub
  */
 export const createHubGraph = (numberHubs: number, leavesPerHub: number): Graph<TestNode, TestEdge> => {
 	const edges: Array<[string, string]> = [];

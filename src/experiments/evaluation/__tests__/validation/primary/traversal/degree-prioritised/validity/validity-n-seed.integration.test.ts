@@ -51,7 +51,7 @@ describe("VALIDITY: N-Seed Generalization", () => {
 		// Path should connect the seeds
 		const path = result.paths[0];
 		expect(path.nodes[0]).toBe("N0");
-		expect(path.nodes[path.nodes.length - 1]).toBe("N9");
+		expect(path.nodes.at(-1)).toBe("N9");
 	});
 
 	/**

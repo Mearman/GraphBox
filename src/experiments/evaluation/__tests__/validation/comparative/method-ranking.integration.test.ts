@@ -8,13 +8,13 @@
 import { describe, expect, it } from "vitest";
 
 import { DegreePrioritisedExpansion } from "../../../../../algorithms/traversal/degree-prioritised-expansion";
-import { BenchmarkGraphExpander } from "../common/benchmark-graph-expander";
-import { loadBenchmarkByIdFromUrl } from "../../../fixtures/benchmark-datasets";
-import { HighDegreeFirstExpansion } from "../common/baselines/high-degree-first";
-import { LowDegreeFirstExpansion } from "../common/baselines/low-degree-first";
 import { FrontierBalancedExpansion } from "../../../../../experiments/baselines/frontier-balanced"
 import { RandomPriorityExpansion } from "../../../../../experiments/baselines/random-priority"
 import { StandardBfsExpansion } from "../../../../../experiments/baselines/standard-bfs"
+import { loadBenchmarkByIdFromUrl } from "../../../fixtures/benchmark-datasets";
+import { HighDegreeFirstExpansion } from "../common/baselines/high-degree-first";
+import { LowDegreeFirstExpansion } from "../common/baselines/low-degree-first";
+import { BenchmarkGraphExpander } from "../common/benchmark-graph-expander";
 import { pathDiversity } from "../common/statistical-functions";
 
 describe("Thesis Validation: Additional Baselines", () => {
@@ -23,7 +23,7 @@ describe("Thesis Validation: Additional Baselines", () => {
 		const expander = new BenchmarkGraphExpander(benchmark.graph, benchmark.meta.directed);
 
 		const allNodes = expander.getAllNodeIds();
-		const seeds: [string, string] = [allNodes[0], allNodes[allNodes.length - 1]];
+		const seeds: [string, string] = [allNodes[0], allNodes.at(-1)];
 
 		const thesis = new DegreePrioritisedExpansion(expander, seeds);
 		const highDegree = new HighDegreeFirstExpansion(expander, seeds);
@@ -51,7 +51,7 @@ describe("Thesis Validation: Additional Baselines", () => {
 		const expander = new BenchmarkGraphExpander(benchmark.graph, benchmark.meta.directed);
 
 		const allNodes = expander.getAllNodeIds();
-		const seeds: [string, string] = [allNodes[0], allNodes[allNodes.length - 1]];
+		const seeds: [string, string] = [allNodes[0], allNodes.at(-1)];
 
 		const thesis = new DegreePrioritisedExpansion(expander, seeds);
 		const lowDegree = new LowDegreeFirstExpansion(expander, seeds);
@@ -80,7 +80,7 @@ describe("Thesis Validation: Additional Baselines", () => {
 		const expander = new BenchmarkGraphExpander(benchmark.graph, benchmark.meta.directed);
 
 		const allNodes = expander.getAllNodeIds();
-		const seeds: [string, string] = [allNodes[0], allNodes[allNodes.length - 1]];
+		const seeds: [string, string] = [allNodes[0], allNodes.at(-1)];
 
 		const methods = [
 			{ name: "Degree-Prioritised (Thesis)", algo: new DegreePrioritisedExpansion(expander, seeds) },
@@ -107,9 +107,8 @@ describe("Thesis Validation: Additional Baselines", () => {
 		results.sort((a, b) => b.diversity - a.diversity);
 
 		console.log("\n=== Method Ranking by Path Diversity ===");
-		for (let i = 0; i < results.length; i++) {
-			const r = results[i];
-			console.log(`${i + 1}. ${r.name}: ${r.diversity.toFixed(3)} (${r.result.paths.length} paths)`);
+		for (const [index, r] of results.entries()) {
+			console.log(`${index + 1}. ${r.name}: ${r.diversity.toFixed(3)} (${r.result.paths.length} paths)`);
 		}
 
 		// Thesis method should be in top 3
@@ -122,7 +121,7 @@ describe("Thesis Validation: Additional Baselines", () => {
 		const expander = new BenchmarkGraphExpander(benchmark.graph, benchmark.meta.directed);
 
 		const allNodes = expander.getAllNodeIds();
-		const seeds: [string, string] = [allNodes[0], allNodes[allNodes.length - 1]];
+		const seeds: [string, string] = [allNodes[0], allNodes.at(-1)];
 
 		const thesis = new DegreePrioritisedExpansion(expander, seeds);
 		const highDegree = new HighDegreeFirstExpansion(expander, seeds);
@@ -132,9 +131,9 @@ describe("Thesis Validation: Additional Baselines", () => {
 		// Count high-degree nodes sampled (degree > 5)
 		const hubThreshold = 5;
 
-		const thesisHubs = Array.from(thesisResult.sampledNodes).filter((id) => expander.getDegree(id) > hubThreshold)
+		const thesisHubs = [...thesisResult.sampledNodes].filter((id) => expander.getDegree(id) > hubThreshold)
 			.length;
-		const hdHubs = Array.from(hdResult.sampledNodes).filter((id) => expander.getDegree(id) > hubThreshold).length;
+		const hdHubs = [...hdResult.sampledNodes].filter((id) => expander.getDegree(id) > hubThreshold).length;
 
 		console.log("\n=== Hub Sampling Comparison ===");
 		console.log(`Thesis (DP): ${thesisHubs} high-degree nodes sampled`);

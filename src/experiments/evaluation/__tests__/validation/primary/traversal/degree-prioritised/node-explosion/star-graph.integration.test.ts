@@ -11,8 +11,8 @@ import { DegreePrioritisedExpansion } from "../../../../../../../../algorithms/t
 import { FrontierBalancedExpansion } from "../../../../../../../baselines/frontier-balanced";
 import { RandomPriorityExpansion } from "../../../../../../../baselines/random-priority";
 import { StandardBfsExpansion } from "../../../../../../../baselines/standard-bfs";
-import { InstrumentedExpander } from "../../../../common/instrumented-expander";
 import { createStarGraph } from "../../../../common/graph-generators";
+import { InstrumentedExpander } from "../../../../common/instrumented-expander";
 
 describe("Star Graph (Single Hub)", () => {
 	it("should compare node expansion across methods", async () => {

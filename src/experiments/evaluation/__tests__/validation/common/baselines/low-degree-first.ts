@@ -5,7 +5,7 @@
  * Always picks lowest degree node without considering N-seed context.
  */
 
-import type { GraphExpander } from "../../../../../interfaces/graph-expander";
+import type { GraphExpander } from "../../../../../../interfaces/graph-expander";
 
 export class LowDegreeFirstExpansion {
 	private expander: GraphExpander<{ id: string }>;
@@ -47,8 +47,8 @@ export class LowDegreeFirstExpansion {
 			let minDegree = Infinity;
 			let selectedNode: string | null = null;
 
-			for (let f = 0; f < frontiers.length; f++) {
-				for (const nodeId of frontiers[f]) {
+			for (const [f, frontier] of frontiers.entries()) {
+				for (const nodeId of frontier) {
 					const degree = this.expander.getDegree(nodeId);
 					if (degree < minDegree) {
 						minDegree = degree;
@@ -111,8 +111,8 @@ export class LowDegreeFirstExpansion {
 
 		if (path[0] === seed0 && path.length > 1) {
 			const edges: string[] = [];
-			for (let i = 0; i < path.length - 1; i++) {
-				edges.push(`${path[i]}->${path[i + 1]}`);
+			for (let index = 0; index < path.length - 1; index++) {
+				edges.push(`${path[index]}->${path[index + 1]}`);
 			}
 			this.paths.push({ nodes: path, edges });
 		}

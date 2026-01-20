@@ -1,8 +1,9 @@
-import { describe, it, expect } from "vitest";
-import { BenchmarkGraphExpander } from "../../../../common/benchmark-graph-expander";
-import { loadBenchmarkByIdFromUrl } from "../../../../../../fixtures/benchmark-datasets";
+import { describe, expect,it } from "vitest";
+
 import { DegreePrioritisedExpansion } from "../../../../../../../../algorithms/traversal/degree-prioritised-expansion";
 import { StandardBfsExpansion } from "../../../../../../../baselines/standard-bfs"
+import { loadBenchmarkByIdFromUrl } from "../../../../../../fixtures/benchmark-datasets";
+import { BenchmarkGraphExpander } from "../../../../common/benchmark-graph-expander";
 import { pathDiversity } from "../../../../common/statistical-functions";
 
 describe("Facebook Dataset", () => {
@@ -58,7 +59,7 @@ describe("Facebook Dataset", () => {
 		const expander = new BenchmarkGraphExpander(benchmark.graph, benchmark.meta.directed);
 
 		const allNodes = expander.getAllNodeIds();
-		const seeds: [string, string] = [allNodes[0], allNodes[allNodes.length - 1]];
+		const seeds: [string, string] = [allNodes[0], allNodes.at(-1)];
 
 		const degreePrioritised = new DegreePrioritisedExpansion(expander, seeds);
 		const standardBfs = new StandardBfsExpansion(expander, seeds);

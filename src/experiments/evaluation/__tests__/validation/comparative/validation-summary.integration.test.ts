@@ -8,14 +8,12 @@
 
 import { describe, expect, it } from "vitest";
 
-import { BenchmarkGraphExpander } from "../common/benchmark-graph-expander";
-import {
-	createBenchmarkMeta,
-	loadBenchmarkByIdFromUrl,
-	loadBenchmarkFromContent,
-} from "../../../fixtures/benchmark-datasets";
 import { DegreePrioritisedExpansion } from "../../../../../algorithms/traversal/degree-prioritised-expansion";
 import { StandardBfsExpansion } from "../../../../../experiments/baselines/standard-bfs"
+import {
+	loadBenchmarkByIdFromUrl,
+} from "../../../fixtures/benchmark-datasets";
+import { BenchmarkGraphExpander } from "../common/benchmark-graph-expander";
 import { jaccardSimilarity, pathDiversity } from "../common/statistical-functions";
 
 // ============================================================================
@@ -35,7 +33,7 @@ describe("Thesis Validation: Summary", () => {
 			const expander = new BenchmarkGraphExpander(benchmark.graph, benchmark.meta.directed);
 
 			const allNodes = expander.getAllNodeIds();
-			const seeds: [string, string] = [allNodes[0], allNodes[allNodes.length - 1]];
+			const seeds: [string, string] = [allNodes[0], allNodes.at(-1)];
 
 			const dp = new DegreePrioritisedExpansion(expander, seeds);
 			const bfs = new StandardBfsExpansion(expander, seeds);
@@ -70,7 +68,7 @@ describe("Thesis Validation: Summary", () => {
 		const summaryKeys = Object.keys(summary);
 		const avgDiversityImprovement = summaryKeys.reduce((sum, key) => {
 			const entry = summary[key] as { diversityImprovement: string };
-			return sum + parseFloat(entry.diversityImprovement);
+			return sum + Number.parseFloat(entry.diversityImprovement);
 		}, 0) / summaryKeys.length;
 
 		console.log(`\nAverage path diversity improvement: ${avgDiversityImprovement.toFixed(2)}%`);
@@ -87,6 +85,7 @@ describe("Thesis Validation: Summary", () => {
 describe("Thesis Validation: Additional Metrics", () => {
 	/**
 	 * Calculate path length statistics.
+	 * @param paths
 	 */
 	const pathLengthStats = (paths: Array<{ nodes: string[] }>) => {
 		const lengths = paths.map((p) => p.nodes.length);
@@ -96,7 +95,7 @@ describe("Thesis Validation: Additional Metrics", () => {
 		const sorted = [...lengths].sort((a, b) => a - b);
 		return {
 			min: sorted[0],
-			max: sorted[sorted.length - 1],
+			max: sorted.at(-1),
 			mean: sorted.reduce((a, b) => a + b, 0) / sorted.length,
 			median: sorted[Math.floor(sorted.length / 2)],
 		};
@@ -104,6 +103,8 @@ describe("Thesis Validation: Additional Metrics", () => {
 
 	/**
 	 * Calculate coverage efficiency (nodes sampled per iteration).
+	 * @param sampledNodes
+	 * @param iterations
 	 */
 	const coverageEfficiency = (sampledNodes: number, iterations: number): number => {
 		return iterations > 0 ? sampledNodes / iterations : 0;
@@ -111,6 +112,10 @@ describe("Thesis Validation: Additional Metrics", () => {
 
 	/**
 	 * Calculate hub participation ratio (high-degree nodes in sampled set).
+	 * @param sampledIds
+	 * @param allNodes
+	 * @param getDegree
+	 * @param percentile
 	 */
 	const hubParticipation = (
 		sampledIds: string[],
@@ -138,7 +143,7 @@ describe("Thesis Validation: Additional Metrics", () => {
 		const expander = new BenchmarkGraphExpander(benchmark.graph, benchmark.meta.directed);
 
 		const allNodes = expander.getAllNodeIds();
-		const seeds: [string, string] = [allNodes[0], allNodes[allNodes.length - 1]];
+		const seeds: [string, string] = [allNodes[0], allNodes.at(-1)];
 
 		const degreePrioritised = new DegreePrioritisedExpansion(expander, seeds);
 		const standardBfs = new StandardBfsExpansion(expander, seeds);
@@ -163,7 +168,7 @@ describe("Thesis Validation: Additional Metrics", () => {
 		const expander = new BenchmarkGraphExpander(benchmark.graph, benchmark.meta.directed);
 
 		const allNodes = expander.getAllNodeIds();
-		const seeds: [string, string] = [allNodes[0], allNodes[allNodes.length - 1]];
+		const seeds: [string, string] = [allNodes[0], allNodes.at(-1)];
 
 		const degreePrioritised = new DegreePrioritisedExpansion(expander, seeds);
 		const standardBfs = new StandardBfsExpansion(expander, seeds);
@@ -196,8 +201,8 @@ describe("Thesis Validation: Additional Metrics", () => {
 
 		const [dpResult, bfsResult] = await Promise.all([degreePrioritised.run(), standardBfs.run()]);
 
-		const dpSampled = Array.from(dpResult.sampledNodes);
-		const bfsSampled = Array.from(bfsResult.sampledNodes);
+		const dpSampled = [...dpResult.sampledNodes];
+		const bfsSampled = [...bfsResult.sampledNodes];
 		const allNodeData = benchmark.graph.getAllNodes();
 
 		const dpHubs = hubParticipation(dpSampled, allNodeData, (id) => expander.getDegree(id), 90);
@@ -217,7 +222,7 @@ describe("Thesis Validation: Additional Metrics", () => {
 		const expander = new BenchmarkGraphExpander(benchmark.graph, benchmark.meta.directed);
 
 		const allNodes = expander.getAllNodeIds();
-		const seeds: [string, string] = [allNodes[0], allNodes[allNodes.length - 1]];
+		const seeds: [string, string] = [allNodes[0], allNodes.at(-1)];
 
 		const degreePrioritised = new DegreePrioritisedExpansion(expander, seeds);
 		const standardBfs = new StandardBfsExpansion(expander, seeds);
@@ -225,8 +230,8 @@ describe("Thesis Validation: Additional Metrics", () => {
 		const [dpResult, bfsResult] = await Promise.all([degreePrioritised.run(), standardBfs.run()]);
 
 		// Calculate degree distribution statistics
-		const dpDegrees = Array.from(dpResult.sampledNodes).map((id) => expander.getDegree(id));
-		const bfsDegrees = Array.from(bfsResult.sampledNodes).map((id) => expander.getDegree(id));
+		const dpDegrees = [...dpResult.sampledNodes].map((id) => expander.getDegree(id));
+		const bfsDegrees = [...bfsResult.sampledNodes].map((id) => expander.getDegree(id));
 
 		const dpMean = dpDegrees.reduce((a, b) => a + b, 0) / dpDegrees.length;
 		const bfsMean = bfsDegrees.reduce((a, b) => a + b, 0) / bfsDegrees.length;

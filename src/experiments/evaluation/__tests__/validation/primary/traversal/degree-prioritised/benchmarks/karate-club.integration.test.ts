@@ -1,11 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { BenchmarkGraphExpander } from "../../../../common/benchmark-graph-expander";
-import { loadBenchmarkByIdFromUrl } from "../../../../../../fixtures/benchmark-datasets";
+
 import { DegreePrioritisedExpansion } from "../../../../../../../../algorithms/traversal/degree-prioritised-expansion";
-import { StandardBfsExpansion } from "../../../../../../../baselines/standard-bfs"
 import { FrontierBalancedExpansion } from "../../../../../../../baselines/frontier-balanced"
 import { RandomPriorityExpansion } from "../../../../../../../baselines/random-priority"
-import { mannWhitneyUTest, cohensD, pathDiversity } from "../../../../common/statistical-functions";
+import { StandardBfsExpansion } from "../../../../../../../baselines/standard-bfs"
+import { loadBenchmarkByIdFromUrl } from "../../../../../../fixtures/benchmark-datasets";
+import { BenchmarkGraphExpander } from "../../../../common/benchmark-graph-expander";
+import { cohensD, mannWhitneyUTest, pathDiversity } from "../../../../common/statistical-functions";
 
 describe("Karate Club Dataset", () => {
 	/**
@@ -65,10 +66,10 @@ describe("Karate Club Dataset", () => {
 		const bfsResults: number[] = [];
 		const rpResults: number[] = [];
 
-		for (let i = 0; i < 10; i++) {
+		for (let index = 0; index < 10; index++) {
 			const dp = new DegreePrioritisedExpansion(expander, seeds);
 			const bfs = new StandardBfsExpansion(expander, seeds);
-			const rp = new RandomPriorityExpansion(expander, seeds, 100 + i);
+			const rp = new RandomPriorityExpansion(expander, seeds, 100 + index);
 
 			const [dpRes, bfsRes, rpRes] = await Promise.all([dp.run(), bfs.run(), rp.run()]);
 

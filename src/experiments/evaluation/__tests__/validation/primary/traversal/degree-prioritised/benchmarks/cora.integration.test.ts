@@ -1,8 +1,9 @@
-import { describe, it, expect } from "vitest";
-import { BenchmarkGraphExpander } from "../../../../common/benchmark-graph-expander";
-import { loadBenchmarkByIdFromUrl } from "../../../../../../fixtures/benchmark-datasets";
+import { describe, expect,it } from "vitest";
+
 import { DegreePrioritisedExpansion } from "../../../../../../../../algorithms/traversal/degree-prioritised-expansion";
 import { StandardBfsExpansion } from "../../../../../../../baselines/standard-bfs"
+import { loadBenchmarkByIdFromUrl } from "../../../../../../fixtures/benchmark-datasets";
+import { BenchmarkGraphExpander } from "../../../../common/benchmark-graph-expander";
 
 describe("Cora Citation Network", () => {
 	/**

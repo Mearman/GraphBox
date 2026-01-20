@@ -118,24 +118,25 @@ class BenchmarkGraphExpander implements GraphExpander<{ id: string }> {
  * H1: Populations have different distributions
  *
  * Returns p-value (smaller = more significant difference)
+ * @param sampleA
+ * @param sampleB
  */
-function mannWhitneyUTest(sampleA: number[], sampleB: number[]): {
+const mannWhitneyUTest = (sampleA: number[], sampleB: number[]): {
 	u: number;
 	pValue: number;
 	significant: boolean;
-} {
+} => {
 	// Rank all values combined
 	const combined = [...sampleA, ...sampleB];
 	const sorted = [...combined].sort((a, b) => a - b);
 
 	// Assign ranks (handle ties)
 	const ranks = new Map<number, number[]>();
-	for (let i = 0; i < sorted.length; i++) {
-		const value = sorted[i];
+	for (const [index, value] of sorted.entries()) {
 		if (!ranks.has(value)) {
 			ranks.set(value, []);
 		}
-		ranks.get(value)!.push(i + 1);
+		ranks.get(value)!.push(index + 1);
 	}
 
 	// Average rank for tied values
@@ -145,8 +146,8 @@ function mannWhitneyUTest(sampleA: number[], sampleB: number[]): {
 	}
 
 	// Sum ranks for each sample
-	const rankSumA = sampleA.reduce((sum, val) => sum + (avgRanks.get(val) ?? 0), 0);
-	const rankSumB = sampleB.reduce((sum, val) => sum + (avgRanks.get(val) ?? 0), 0);
+	const rankSumA = sampleA.reduce((sum, value) => sum + (avgRanks.get(value) ?? 0), 0);
+	const rankSumB = sampleB.reduce((sum, value) => sum + (avgRanks.get(value) ?? 0), 0);
 
 	// Calculate U statistics
 	const n1 = sampleA.length;
@@ -168,12 +169,13 @@ function mannWhitneyUTest(sampleA: number[], sampleB: number[]): {
 		pValue,
 		significant: pValue < 0.05, // 95% confidence level
 	};
-}
+};
 
 /**
  * Standard normal cumulative distribution function.
+ * @param z
  */
-function normalCDF(z: number): number {
+const normalCDF = (z: number): number => {
 	// Abramowitz and Stegun approximation
 	const sign = z < 0 ? -1 : 1;
 	z = Math.abs(z) / Math.sqrt(2);
@@ -187,7 +189,7 @@ function normalCDF(z: number): number {
 	const t = 1 / (1 + p * z);
 	const y = 1 - (((((a5 * t + a4) * t) + a3) * t + a2) * t + a1) * t * Math.exp(-z * z);
 	return 0.5 * (1 + sign * y);
-}
+};
 
 /**
  * Calculate Cohen's d effect size.
@@ -197,29 +199,33 @@ function normalCDF(z: number): number {
  * - 0.2: Small effect
  * - 0.5: Medium effect
  * - 0.8: Large effect
+ * @param sampleA
+ * @param sampleB
  */
-function cohensD(sampleA: number[], sampleB: number[]): number {
+const cohensD = (sampleA: number[], sampleB: number[]): number => {
 	const n1 = sampleA.length;
 	const n2 = sampleB.length;
 
 	const mean1 = sampleA.reduce((a, b) => a + b, 0) / n1;
 	const mean2 = sampleB.reduce((a, b) => a + b, 0) / n2;
 
-	const var1 = sampleA.reduce((sum, val) => sum + (val - mean1) ** 2, 0) / (n1 - 1);
-	const var2 = sampleB.reduce((sum, val) => sum + (val - mean2) ** 2, 0) / (n2 - 1);
+	const variable1 = sampleA.reduce((sum, value) => sum + (value - mean1) ** 2, 0) / (n1 - 1);
+	const variable2 = sampleB.reduce((sum, value) => sum + (value - mean2) ** 2, 0) / (n2 - 1);
 
-	const pooledStd = Math.sqrt(((n1 - 1) * var1 + (n2 - 1) * var2) / (n1 + n2 - 2));
+	const pooledStd = Math.sqrt(((n1 - 1) * variable1 + (n2 - 1) * variable2) / (n1 + n2 - 2));
 
 	return pooledStd > 0 ? Math.abs(mean1 - mean2) / pooledStd : 0;
-}
+};
 
 /**
  * Calculate confidence interval for a mean.
+ * @param values
+ * @param confidence
  */
-function confidenceInterval(values: number[], confidence = 0.95): { lower: number; upper: number } {
+const confidenceInterval = (values: number[], confidence = 0.95): { lower: number; upper: number } => {
 	const n = values.length;
 	const mean = values.reduce((a, b) => a + b, 0) / n;
-	const std = Math.sqrt(values.reduce((sum, val) => sum + (val - mean) ** 2, 0) / (n - 1));
+	const std = Math.sqrt(values.reduce((sum, value) => sum + (value - mean) ** 2, 0) / (n - 1));
 	const se = std / Math.sqrt(n);
 	const t = 1.96; // Approximation for large samples (95% CI)
 
@@ -228,21 +234,24 @@ function confidenceInterval(values: number[], confidence = 0.95): { lower: numbe
 		lower: mean - margin,
 		upper: mean + margin,
 	};
-}
+};
 
 /**
  * Calculate Jaccard similarity between two sets.
+ * @param setA
+ * @param setB
  */
-function jaccardSimilarity<T>(setA: Set<T>, setB: Set<T>): number {
+const jaccardSimilarity = <T>(setA: Set<T>, setB: Set<T>): number => {
 	const intersection = new Set([...setA].filter((x) => setB.has(x)));
 	const union = new Set([...setA, ...setB]);
 	return union.size === 0 ? 1 : intersection.size / union.size;
-}
+};
 
 /**
  * Calculate path diversity (entropy of path lengths).
+ * @param paths
  */
-function pathDiversity(paths: Array<{ nodes: string[] }>): number {
+const pathDiversity = (paths: Array<{ nodes: string[] }>): number => {
 	if (paths.length === 0) return 0;
 
 	const lengths = paths.map((p) => p.nodes.length);
@@ -264,7 +273,7 @@ function pathDiversity(paths: Array<{ nodes: string[] }>): number {
 	// Normalize by max possible entropy
 	const maxEntropy = Math.log2(counts.size);
 	return maxEntropy > 0 ? entropy / maxEntropy : 0;
-}
+};
 
 // ============================================================================
 // Application-Specific Metrics (Literature Review)
@@ -273,15 +282,14 @@ function pathDiversity(paths: Array<{ nodes: string[] }>): number {
 /**
  * Coverage metric for systematic literature review.
  * Measures how well the sampled subgraph covers different topical regions.
+ * @param sampledNodes
+ * @param graph
  */
-function calculateTopicCoverage(
-	sampledNodes: Set<string>,
-	graph: BenchmarkGraphExpander
-): {
+const calculateTopicCoverage = (sampledNodes: Set<string>, graph: BenchmarkGraphExpander): {
 	coverage: number;
 	avgDegree: number;
 	hubRatio: number;
-} {
+} => {
 	let totalDegree = 0;
 	let hubCount = 0;
 
@@ -302,7 +310,7 @@ function calculateTopicCoverage(
 	const coverage = allHubs.length > 0 ? sampledHubs.length / allHubs.length : 0;
 
 	return { coverage, avgDegree, hubRatio };
-}
+};
 
 // ============================================================================
 // Test Suite
@@ -367,10 +375,10 @@ describe("Thesis Validation: Benchmark Datasets", () => {
 			const bfsResults: number[] = [];
 			const rpResults: number[] = [];
 
-			for (let i = 0; i < 10; i++) {
+			for (let index = 0; index < 10; index++) {
 				const dp = new DegreePrioritisedExpansion(expander, seeds);
 				const bfs = new StandardBfsExpansion(expander, seeds);
-				const rp = new RandomPriorityExpansion(expander, seeds, 100 + i);
+				const rp = new RandomPriorityExpansion(expander, seeds, 100 + index);
 
 				const [dpRes, bfsRes, rpRes] = await Promise.all([dp.run(), bfs.run(), rp.run()]);
 
@@ -408,7 +416,7 @@ describe("Thesis Validation: Benchmark Datasets", () => {
 
 			// Use first and last nodes as seeds (likely to be connected in a co-appearance network)
 			const allNodes = expander.getAllNodeIds();
-			const seeds: [string, string] = [allNodes[0], allNodes[allNodes.length - 1]];
+			const seeds: [string, string] = [allNodes[0], allNodes.at(-1)];
 
 			const degreePrioritised = new DegreePrioritisedExpansion(expander, seeds);
 			const standardBfs = new StandardBfsExpansion(expander, seeds);
@@ -450,7 +458,7 @@ describe("Thesis Validation: Benchmark Datasets", () => {
 			const expander = new BenchmarkGraphExpander(benchmark.graph, benchmark.meta.directed);
 
 			const allNodes = expander.getAllNodeIds();
-			const seeds: [string, string] = [allNodes[0], allNodes[allNodes.length - 1]];
+			const seeds: [string, string] = [allNodes[0], allNodes.at(-1)];
 
 			const expansion = new DegreePrioritisedExpansion(expander, seeds);
 			const result = await expansion.run();
@@ -523,11 +531,11 @@ describe("Thesis Validation: Statistical Tests", () => {
 				randomPriority: [] as number[],
 			};
 
-			for (let i = 0; i < trials; i++) {
+			for (let index = 0; index < trials; index++) {
 				const dp = new DegreePrioritisedExpansion(expander, seeds);
 				const bfs = new StandardBfsExpansion(expander, seeds);
 				const fb = new FrontierBalancedExpansion(expander, seeds);
-				const rp = new RandomPriorityExpansion(expander, seeds, 1000 + i);
+				const rp = new RandomPriorityExpansion(expander, seeds, 1000 + index);
 
 				const [dpRes, bfsRes, fbRes, rpRes] = await Promise.all([
 					dp.run(),
@@ -644,7 +652,7 @@ describe("Thesis Validation: Application Metrics", () => {
 			const degreeBuckets = new Map<string, Set<string>>();
 			for (const nodeId of result.sampledNodes) {
 				const degree = expander.getDegree(nodeId);
-				const bucket = degree <= 5 ? "low" : degree <= 20 ? "medium" : "high";
+				const bucket = degree <= 5 ? "low" : (degree <= 20 ? "medium" : "high");
 				if (!degreeBuckets.has(bucket)) {
 					degreeBuckets.set(bucket, new Set());
 				}
@@ -717,7 +725,7 @@ describe("Thesis Validation: Application Metrics", () => {
 			const expander = new BenchmarkGraphExpander(benchmark.graph, benchmark.meta.directed);
 
 			const allNodes = expander.getAllNodeIds();
-			const seeds: [string, string] = [allNodes[0], allNodes[allNodes.length - 1]];
+			const seeds: [string, string] = [allNodes[0], allNodes.at(-1)];
 
 			const degreePrioritised = new DegreePrioritisedExpansion(expander, seeds);
 			const standardBfs = new StandardBfsExpansion(expander, seeds);
@@ -752,7 +760,7 @@ describe("Thesis Validation: Variability Injection", () => {
 			const expander = new BenchmarkGraphExpander(benchmark.graph, benchmark.meta.directed);
 
 			const allNodes = expander.getAllNodeIds();
-			const numSeedPairs = 10;
+			const numberSeedPairs = 10;
 
 			const results: Array<{
 				seeds: [string, string];
@@ -762,15 +770,15 @@ describe("Thesis Validation: Variability Injection", () => {
 				bfsDiversity: number;
 			}> = [];
 
-			for (let i = 0; i < numSeedPairs; i++) {
+			for (let index = 0; index < numberSeedPairs; index++) {
 				// Select random seed pair
-				const idx1 = Math.floor(Math.random() * allNodes.length);
-				let idx2 = Math.floor(Math.random() * allNodes.length);
-				while (idx2 === idx1) {
-					idx2 = Math.floor(Math.random() * allNodes.length);
+				const index1 = Math.floor(Math.random() * allNodes.length);
+				let index2 = Math.floor(Math.random() * allNodes.length);
+				while (index2 === index1) {
+					index2 = Math.floor(Math.random() * allNodes.length);
 				}
 
-				const seeds: [string, string] = [allNodes[idx1], allNodes[idx2]];
+				const seeds: [string, string] = [allNodes[index1], allNodes[index2]];
 
 				const dp = new DegreePrioritisedExpansion(expander, seeds);
 				const bfs = new StandardBfsExpansion(expander, seeds);
@@ -801,7 +809,7 @@ describe("Thesis Validation: Variability Injection", () => {
 			const effectSize = cohensD(dpDiversities, bfsDiversities);
 
 			console.log("\n=== Multi-Seed-Pair Analysis (Les Misérables) ===");
-			console.log(`Trials: ${numSeedPairs}`);
+			console.log(`Trials: ${numberSeedPairs}`);
 			console.log(`Degree-Prioritised diversity: ${dpMean.toFixed(3)} [${dpCI.lower.toFixed(3)}, ${dpCI.upper.toFixed(3)}]`);
 			console.log(`BFS diversity: ${bfsMean.toFixed(3)} [${bfsCI.lower.toFixed(3)}, ${bfsCI.upper.toFixed(3)}]`);
 			console.log(`Mann-Whitney U: ${diversityTest.u.toFixed(2)}, p-value: ${diversityTest.pValue.toFixed(4)}`);
@@ -835,11 +843,11 @@ describe("Thesis Validation: Variability Injection", () => {
 			const dpDiversities: number[] = [];
 			const bfsDiversities: number[] = [];
 
-			for (let i = 0; i < trials; i++) {
+			for (let index = 0; index < trials; index++) {
 				// Add different random seed for Random Priority to create variability
 				const dp = new DegreePrioritisedExpansion(expander, seeds);
 				const bfs = new StandardBfsExpansion(expander, seeds);
-				const rp = new RandomPriorityExpansion(expander, seeds, 1000 + i);
+				const rp = new RandomPriorityExpansion(expander, seeds, 1000 + index);
 
 				const [dpResult, bfsResult] = await Promise.all([dp.run(), bfs.run(), rp.run()]);
 
@@ -886,7 +894,7 @@ describe("Thesis Validation: Variability Injection", () => {
 				const expander = new BenchmarkGraphExpander(benchmark.graph, benchmark.meta.directed);
 
 				const allNodes = expander.getAllNodeIds();
-				const seeds: [string, string] = [allNodes[0], allNodes[allNodes.length - 1]];
+				const seeds: [string, string] = [allNodes[0], allNodes.at(-1)];
 
 				const dp = new DegreePrioritisedExpansion(expander, seeds);
 				const bfs = new StandardBfsExpansion(expander, seeds);
@@ -1047,7 +1055,7 @@ describe("Thesis Validation: Application Metrics", () => {
 			const expander = new BenchmarkGraphExpander(benchmark.graph, benchmark.meta.directed);
 
 			const allNodes = expander.getAllNodeIds();
-			const seeds: [string, string] = [allNodes[0], allNodes[allNodes.length - 1]];
+			const seeds: [string, string] = [allNodes[0], allNodes.at(-1)];
 
 			// We need to instrument to track early discovery
 			// For now, use total path diversity as proxy
@@ -1083,7 +1091,7 @@ describe("Thesis Validation: Summary", () => {
 			const expander = new BenchmarkGraphExpander(benchmark.graph, benchmark.meta.directed);
 
 			const allNodes = expander.getAllNodeIds();
-			const seeds: [string, string] = [allNodes[0], allNodes[allNodes.length - 1]];
+			const seeds: [string, string] = [allNodes[0], allNodes.at(-1)];
 
 			const dp = new DegreePrioritisedExpansion(expander, seeds);
 			const bfs = new StandardBfsExpansion(expander, seeds);
@@ -1118,7 +1126,7 @@ describe("Thesis Validation: Summary", () => {
 		const summaryKeys = Object.keys(summary);
 		const avgDiversityImprovement = summaryKeys.reduce((sum, key) => {
 			const entry = summary[key] as { diversityImprovement: string };
-			return sum + parseFloat(entry.diversityImprovement);
+			return sum + Number.parseFloat(entry.diversityImprovement);
 		}, 0) / summaryKeys.length;
 
 		console.log(`\nAverage path diversity improvement: ${avgDiversityImprovement.toFixed(2)}%`);
@@ -1168,7 +1176,7 @@ describe("Thesis Validation: Summary", () => {
 			const expander = new BenchmarkGraphExpander(benchmark.graph, benchmark.meta.directed);
 
 			const allNodes = expander.getAllNodeIds();
-			const seeds: [string, string] = [allNodes[0], allNodes[allNodes.length - 1]];
+			const seeds: [string, string] = [allNodes[0], allNodes.at(-1)];
 
 			const degreePrioritised = new DegreePrioritisedExpansion(expander, seeds);
 			const standardBfs = new StandardBfsExpansion(expander, seeds);
@@ -1197,6 +1205,8 @@ describe("Thesis Validation: Summary", () => {
 	describe("Thesis Validation: Perturbed Graph Robustness", () => {
 		/**
 		 * Create a perturbed version of a graph by removing random edges.
+		 * @param edges
+		 * @param removeFraction
 		 */
 		const perturbEdges = (
 			edges: Array<{ source: string; target: string }>,
@@ -1209,6 +1219,9 @@ describe("Thesis Validation: Summary", () => {
 
 		/**
 		 * Create a perturbed version by adding random edges.
+		 * @param edges
+		 * @param nodeIds
+		 * @param addFraction
 		 */
 		const addRandomEdges = (
 			edges: Array<{ source: string; target: string }>,
@@ -1260,7 +1273,7 @@ describe("Thesis Validation: Summary", () => {
 
 			const expander = new BenchmarkGraphExpander(perturbedBenchmark.graph, perturbedBenchmark.meta.directed);
 			const allNodes = expander.getAllNodeIds();
-			const seeds: [string, string] = [allNodes[0], allNodes[allNodes.length - 1]];
+			const seeds: [string, string] = [allNodes[0], allNodes.at(-1)];
 
 			const degreePrioritised = new DegreePrioritisedExpansion(expander, seeds);
 			const result = await degreePrioritised.run();
@@ -1296,7 +1309,7 @@ describe("Thesis Validation: Summary", () => {
 
 			const expander = new BenchmarkGraphExpander(perturbedBenchmark.graph, perturbedBenchmark.meta.directed);
 			const nodeIdList = expander.getAllNodeIds();
-			const seeds: [string, string] = [nodeIdList[0], nodeIdList[nodeIdList.length - 1]];
+			const seeds: [string, string] = [nodeIdList[0], nodeIdList.at(-1)];
 
 			const degreePrioritised = new DegreePrioritisedExpansion(expander, seeds);
 			const result = await degreePrioritised.run();
@@ -1325,7 +1338,7 @@ describe("Thesis Validation: Summary", () => {
 
 			for (const { name, edges } of perturbations) {
 				const meta = createBenchmarkMeta({
-					id: `lesmis-${name.replace(/\s+/g, "-")}`,
+					id: `lesmis-${name.replaceAll(/\s+/g, "-")}`,
 					name: `Les Mis (${name})`,
 					expectedNodes: 77,
 					expectedEdges: edges.length,
@@ -1337,7 +1350,7 @@ describe("Thesis Validation: Summary", () => {
 
 				const expander = new BenchmarkGraphExpander(perturbedBenchmark.graph, perturbedBenchmark.meta.directed);
 				const allNodeIds = expander.getAllNodeIds();
-				const seeds: [string, string] = [allNodeIds[0], allNodeIds[allNodeIds.length - 1]];
+				const seeds: [string, string] = [allNodeIds[0], allNodeIds.at(-1)];
 
 				const dp = new DegreePrioritisedExpansion(expander, seeds);
 				const bfs = new StandardBfsExpansion(expander, seeds);
@@ -1353,7 +1366,7 @@ describe("Thesis Validation: Summary", () => {
 
 			console.log("\n=== Consistent Method Ranking ===");
 			for (const r of results) {
-				const winner = r.dpDiversity > r.bfsDiversity ? "DP" : r.bfsDiversity > r.dpDiversity ? "BFS" : "Tie";
+				const winner = r.dpDiversity > r.bfsDiversity ? "DP" : (r.bfsDiversity > r.dpDiversity ? "BFS" : "Tie");
 				console.log(`${r.perturbation}: DP=${r.dpDiversity.toFixed(3)}, BFS=${r.bfsDiversity.toFixed(3)} (${winner})`);
 			}
 
@@ -1370,6 +1383,7 @@ describe("Thesis Validation: Summary", () => {
 	describe("Thesis Validation: Additional Metrics", () => {
 		/**
 		 * Calculate path length statistics.
+		 * @param paths
 		 */
 		const pathLengthStats = (paths: Array<{ nodes: string[] }>) => {
 			const lengths = paths.map((p) => p.nodes.length);
@@ -1379,7 +1393,7 @@ describe("Thesis Validation: Summary", () => {
 			const sorted = [...lengths].sort((a, b) => a - b);
 			return {
 				min: sorted[0],
-				max: sorted[sorted.length - 1],
+				max: sorted.at(-1),
 				mean: sorted.reduce((a, b) => a + b, 0) / sorted.length,
 				median: sorted[Math.floor(sorted.length / 2)],
 			};
@@ -1387,6 +1401,8 @@ describe("Thesis Validation: Summary", () => {
 
 		/**
 		 * Calculate coverage efficiency (nodes sampled per iteration).
+		 * @param sampledNodes
+		 * @param iterations
 		 */
 		const coverageEfficiency = (sampledNodes: number, iterations: number): number => {
 			return iterations > 0 ? sampledNodes / iterations : 0;
@@ -1394,6 +1410,10 @@ describe("Thesis Validation: Summary", () => {
 
 		/**
 		 * Calculate hub participation ratio (high-degree nodes in sampled set).
+		 * @param sampledIds
+		 * @param allNodes
+		 * @param getDegree
+		 * @param percentile
 		 */
 		const hubParticipation = (
 			sampledIds: string[],
@@ -1421,7 +1441,7 @@ describe("Thesis Validation: Summary", () => {
 			const expander = new BenchmarkGraphExpander(benchmark.graph, benchmark.meta.directed);
 
 			const allNodes = expander.getAllNodeIds();
-			const seeds: [string, string] = [allNodes[0], allNodes[allNodes.length - 1]];
+			const seeds: [string, string] = [allNodes[0], allNodes.at(-1)];
 
 			const degreePrioritised = new DegreePrioritisedExpansion(expander, seeds);
 			const standardBfs = new StandardBfsExpansion(expander, seeds);
@@ -1446,7 +1466,7 @@ describe("Thesis Validation: Summary", () => {
 			const expander = new BenchmarkGraphExpander(benchmark.graph, benchmark.meta.directed);
 
 			const allNodes = expander.getAllNodeIds();
-			const seeds: [string, string] = [allNodes[0], allNodes[allNodes.length - 1]];
+			const seeds: [string, string] = [allNodes[0], allNodes.at(-1)];
 
 			const degreePrioritised = new DegreePrioritisedExpansion(expander, seeds);
 			const standardBfs = new StandardBfsExpansion(expander, seeds);
@@ -1479,8 +1499,8 @@ describe("Thesis Validation: Summary", () => {
 
 			const [dpResult, bfsResult] = await Promise.all([degreePrioritised.run(), standardBfs.run()]);
 
-			const dpSampled = Array.from(dpResult.sampledNodes);
-			const bfsSampled = Array.from(bfsResult.sampledNodes);
+			const dpSampled = [...dpResult.sampledNodes];
+			const bfsSampled = [...bfsResult.sampledNodes];
 			const allNodeData = benchmark.graph.getAllNodes();
 
 			const dpHubs = hubParticipation(dpSampled, allNodeData, (id) => expander.getDegree(id), 90);
@@ -1500,7 +1520,7 @@ describe("Thesis Validation: Summary", () => {
 			const expander = new BenchmarkGraphExpander(benchmark.graph, benchmark.meta.directed);
 
 			const allNodes = expander.getAllNodeIds();
-			const seeds: [string, string] = [allNodes[0], allNodes[allNodes.length - 1]];
+			const seeds: [string, string] = [allNodes[0], allNodes.at(-1)];
 
 			const degreePrioritised = new DegreePrioritisedExpansion(expander, seeds);
 			const standardBfs = new StandardBfsExpansion(expander, seeds);
@@ -1508,8 +1528,8 @@ describe("Thesis Validation: Summary", () => {
 			const [dpResult, bfsResult] = await Promise.all([degreePrioritised.run(), standardBfs.run()]);
 
 			// Calculate degree distribution statistics
-			const dpDegrees = Array.from(dpResult.sampledNodes).map((id) => expander.getDegree(id));
-			const bfsDegrees = Array.from(bfsResult.sampledNodes).map((id) => expander.getDegree(id));
+			const dpDegrees = [...dpResult.sampledNodes].map((id) => expander.getDegree(id));
+			const bfsDegrees = [...bfsResult.sampledNodes].map((id) => expander.getDegree(id));
 
 			const dpMean = dpDegrees.reduce((a, b) => a + b, 0) / dpDegrees.length;
 			const bfsMean = bfsDegrees.reduce((a, b) => a + b, 0) / bfsDegrees.length;
@@ -1574,7 +1594,7 @@ describe("Thesis Validation: Summary", () => {
 			const expander = new BenchmarkGraphExpander(benchmark.graph, benchmark.meta.directed);
 
 			const allNodes = expander.getAllNodeIds();
-			const seeds: [string, string] = [allNodes[0], allNodes[allNodes.length - 1]];
+			const seeds: [string, string] = [allNodes[0], allNodes.at(-1)];
 
 			const results: PerformanceMetrics[] = [];
 
@@ -1636,7 +1656,7 @@ describe("Thesis Validation: Summary", () => {
 			const expander = new BenchmarkGraphExpander(benchmark.graph, benchmark.meta.directed);
 
 			const allNodes = expander.getAllNodeIds();
-			const seeds: [string, string] = [allNodes[0], allNodes[allNodes.length - 1]];
+			const seeds: [string, string] = [allNodes[0], allNodes.at(-1)];
 
 			const startTime1 = performance.now();
 			const dp = new DegreePrioritisedExpansion(expander, seeds);
@@ -1673,7 +1693,7 @@ describe("Thesis Validation: Summary", () => {
 				const expander = new BenchmarkGraphExpander(benchmark.graph, benchmark.meta.directed);
 
 				const allNodes = expander.getAllNodeIds();
-				const seeds: [string, string] = [allNodes[0], allNodes[allNodes.length - 1]];
+				const seeds: [string, string] = [allNodes[0], allNodes.at(-1)];
 
 				const startTime1 = performance.now();
 				const dp = new DegreePrioritisedExpansion(expander, seeds);
@@ -1715,7 +1735,7 @@ describe("Thesis Validation: Summary", () => {
 			const expander = new BenchmarkGraphExpander(benchmark.graph, benchmark.meta.directed);
 
 			const allNodes = expander.getAllNodeIds();
-			const seeds: [string, string] = [allNodes[0], allNodes[allNodes.length - 1]];
+			const seeds: [string, string] = [allNodes[0], allNodes.at(-1)];
 
 			const [dpResult, bfsResult] = await Promise.all([
 				new DegreePrioritisedExpansion(expander, seeds).run(),
@@ -1787,8 +1807,8 @@ describe("Thesis Validation: Summary", () => {
 					let maxDegree = -1;
 					let selectedNode: string | null = null;
 
-					for (let f = 0; f < frontiers.length; f++) {
-						for (const nodeId of frontiers[f]) {
+					for (const [f, frontier] of frontiers.entries()) {
+						for (const nodeId of frontier) {
 							const degree = this.expander.getDegree(nodeId);
 							if (degree > maxDegree) {
 								maxDegree = degree;
@@ -1858,8 +1878,8 @@ describe("Thesis Validation: Summary", () => {
 
 				if (path[0] === seed0 && path.length > 1) {
 					const edges: string[] = [];
-					for (let i = 0; i < path.length - 1; i++) {
-						edges.push(`${path[i]}->${path[i + 1]}`);
+					for (let index = 0; index < path.length - 1; index++) {
+						edges.push(`${path[index]}->${path[index + 1]}`);
 					}
 					this.paths.push({ nodes: path, edges });
 				}
@@ -1910,8 +1930,8 @@ describe("Thesis Validation: Summary", () => {
 					let minDegree = Infinity;
 					let selectedNode: string | null = null;
 
-					for (let f = 0; f < frontiers.length; f++) {
-						for (const nodeId of frontiers[f]) {
+					for (const [f, frontier] of frontiers.entries()) {
+						for (const nodeId of frontier) {
 							const degree = this.expander.getDegree(nodeId);
 							if (degree < minDegree) {
 								minDegree = degree;
@@ -1974,8 +1994,8 @@ describe("Thesis Validation: Summary", () => {
 
 				if (path[0] === seed0 && path.length > 1) {
 					const edges: string[] = [];
-					for (let i = 0; i < path.length - 1; i++) {
-						edges.push(`${path[i]}->${path[i + 1]}`);
+					for (let index = 0; index < path.length - 1; index++) {
+						edges.push(`${path[index]}->${path[index + 1]}`);
 					}
 					this.paths.push({ nodes: path, edges });
 				}
@@ -1987,7 +2007,7 @@ describe("Thesis Validation: Summary", () => {
 			const expander = new BenchmarkGraphExpander(benchmark.graph, benchmark.meta.directed);
 
 			const allNodes = expander.getAllNodeIds();
-			const seeds: [string, string] = [allNodes[0], allNodes[allNodes.length - 1]];
+			const seeds: [string, string] = [allNodes[0], allNodes.at(-1)];
 
 			const thesis = new DegreePrioritisedExpansion(expander, seeds);
 			const highDegree = new HighDegreeFirstExpansion(expander, seeds);
@@ -2015,7 +2035,7 @@ describe("Thesis Validation: Summary", () => {
 			const expander = new BenchmarkGraphExpander(benchmark.graph, benchmark.meta.directed);
 
 			const allNodes = expander.getAllNodeIds();
-			const seeds: [string, string] = [allNodes[0], allNodes[allNodes.length - 1]];
+			const seeds: [string, string] = [allNodes[0], allNodes.at(-1)];
 
 			const thesis = new DegreePrioritisedExpansion(expander, seeds);
 			const lowDegree = new LowDegreeFirstExpansion(expander, seeds);
@@ -2044,7 +2064,7 @@ describe("Thesis Validation: Summary", () => {
 			const expander = new BenchmarkGraphExpander(benchmark.graph, benchmark.meta.directed);
 
 			const allNodes = expander.getAllNodeIds();
-			const seeds: [string, string] = [allNodes[0], allNodes[allNodes.length - 1]];
+			const seeds: [string, string] = [allNodes[0], allNodes.at(-1)];
 
 			const methods = [
 				{ name: "Degree-Prioritised (Thesis)", algo: new DegreePrioritisedExpansion(expander, seeds) },
@@ -2071,9 +2091,8 @@ describe("Thesis Validation: Summary", () => {
 			results.sort((a, b) => b.diversity - a.diversity);
 
 			console.log("\n=== Method Ranking by Path Diversity ===");
-			for (let i = 0; i < results.length; i++) {
-				const r = results[i];
-				console.log(`${i + 1}. ${r.name}: ${r.diversity.toFixed(3)} (${r.result.paths.length} paths)`);
+			for (const [index, r] of results.entries()) {
+				console.log(`${index + 1}. ${r.name}: ${r.diversity.toFixed(3)} (${r.result.paths.length} paths)`);
 			}
 
 			// Thesis method should be in top 3
@@ -2086,7 +2105,7 @@ describe("Thesis Validation: Summary", () => {
 			const expander = new BenchmarkGraphExpander(benchmark.graph, benchmark.meta.directed);
 
 			const allNodes = expander.getAllNodeIds();
-			const seeds: [string, string] = [allNodes[0], allNodes[allNodes.length - 1]];
+			const seeds: [string, string] = [allNodes[0], allNodes.at(-1)];
 
 			const thesis = new DegreePrioritisedExpansion(expander, seeds);
 			const highDegree = new HighDegreeFirstExpansion(expander, seeds);
@@ -2096,9 +2115,9 @@ describe("Thesis Validation: Summary", () => {
 			// Count high-degree nodes sampled (degree > 5)
 			const hubThreshold = 5;
 
-			const thesisHubs = Array.from(thesisResult.sampledNodes).filter((id) => expander.getDegree(id) > hubThreshold)
+			const thesisHubs = [...thesisResult.sampledNodes].filter((id) => expander.getDegree(id) > hubThreshold)
 				.length;
-			const hdHubs = Array.from(hdResult.sampledNodes).filter((id) => expander.getDegree(id) > hubThreshold).length;
+			const hdHubs = [...hdResult.sampledNodes].filter((id) => expander.getDegree(id) > hubThreshold).length;
 
 			console.log("\n=== Hub Sampling Comparison ===");
 			console.log(`Thesis (DP): ${thesisHubs} high-degree nodes sampled`);

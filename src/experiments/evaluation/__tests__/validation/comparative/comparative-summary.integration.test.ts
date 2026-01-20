@@ -36,9 +36,9 @@ describe("Comparative Summary", () => {
 		console.log("Novelty (difference from BFS):");
 		console.log(`  - Node set dissimilarity: ${nodeDissimilarity}%`);
 		console.log("Validity (thesis compliance):");
-		console.log(`  - Terminates without depth limit: true`);
+		console.log("  - Terminates without depth limit: true");
 		console.log(`  - Explores all reachable: ${dpResult.sampledNodes.size === graph.getNodeCount()}`);
-		console.log(`  - Supports N>1 seeds: true`);
+		console.log("  - Supports N>1 seeds: true");
 		console.log("Value (practical benefits):");
 		console.log(`  - Nodes sampled: ${dpResult.sampledNodes.size}`);
 		console.log(`  - Paths found: ${dpResult.paths.length}`);

@@ -12,10 +12,10 @@
 
 import { describe, expect, it } from "vitest";
 
-import { BenchmarkGraphExpander } from "../common/benchmark-graph-expander";
-import { loadBenchmarkByIdFromUrl } from "../../../fixtures/benchmark-datasets";
 import { DegreePrioritisedExpansion } from "../../../../../algorithms/traversal/degree-prioritised-expansion";
 import { StandardBfsExpansion } from "../../../../../experiments/baselines/standard-bfs"
+import { loadBenchmarkByIdFromUrl } from "../../../fixtures/benchmark-datasets";
+import { BenchmarkGraphExpander } from "../common/benchmark-graph-expander";
 import { pathDiversity } from "../common/statistical-functions";
 
 describe("Systematic Literature Review Metrics", () => {
@@ -145,7 +145,7 @@ describe("Systematic Literature Review Metrics", () => {
 		const expander = new BenchmarkGraphExpander(benchmark.graph, benchmark.meta.directed);
 
 		const allNodes = expander.getAllNodeIds();
-		const seeds: [string, string] = [allNodes[0], allNodes[allNodes.length - 1]];
+		const seeds: [string, string] = [allNodes[0], allNodes.at(-1)];
 
 		// We need to instrument to track early discovery
 		// For now, use total path diversity as proxy

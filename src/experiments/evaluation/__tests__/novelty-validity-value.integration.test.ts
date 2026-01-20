@@ -114,10 +114,12 @@ class TestGraphExpander implements GraphExpander<TestNode> {
 
 /**
  * Creates a star graph with a central hub connected to all other nodes.
+ * @param numSpokes
+ * @param numberSpokes
  */
-const createStarGraph = (numSpokes: number): TestGraphExpander => {
+const createStarGraph = (numberSpokes: number): TestGraphExpander => {
 	const edges: Array<[string, string]> = [];
-	for (let index = 0; index < numSpokes; index++) {
+	for (let index = 0; index < numberSpokes; index++) {
 		edges.push(["HUB", `S${index}`]);
 	}
 	return new TestGraphExpander(edges);
@@ -125,19 +127,22 @@ const createStarGraph = (numSpokes: number): TestGraphExpander => {
 
 /**
  * Creates a hub graph with multiple hubs connected to each other and to leaf nodes.
+ * @param numHubs
+ * @param numberHubs
+ * @param leavesPerHub
  */
-const createHubGraph = (numHubs: number, leavesPerHub: number): TestGraphExpander => {
+const createHubGraph = (numberHubs: number, leavesPerHub: number): TestGraphExpander => {
 	const edges: Array<[string, string]> = [];
 
 	// Connect hubs to each other (fully connected)
-	for (let index = 0; index < numHubs; index++) {
-		for (let index_ = index + 1; index_ < numHubs; index_++) {
+	for (let index = 0; index < numberHubs; index++) {
+		for (let index_ = index + 1; index_ < numberHubs; index_++) {
 			edges.push([`H${index}`, `H${index_}`]);
 		}
 	}
 
 	// Connect leaves to hubs
-	for (let h = 0; h < numHubs; h++) {
+	for (let h = 0; h < numberHubs; h++) {
 		for (let l = 0; l < leavesPerHub; l++) {
 			edges.push([`H${h}`, `L${h}_${l}`]);
 		}
@@ -148,6 +153,8 @@ const createHubGraph = (numHubs: number, leavesPerHub: number): TestGraphExpande
 
 /**
  * Creates a grid graph (lattice) with uniform degree distribution.
+ * @param rows
+ * @param cols
  */
 const createGridGraph = (rows: number, cols: number): TestGraphExpander => {
 	const edges: Array<[string, string]> = [];
@@ -171,6 +178,7 @@ const createGridGraph = (rows: number, cols: number): TestGraphExpander => {
 
 /**
  * Creates a chain graph: A -- B -- C -- D -- ...
+ * @param length
  */
 const createChainGraph = (length: number): TestGraphExpander => {
 	const edges: Array<[string, string]> = [];
@@ -186,12 +194,14 @@ const createChainGraph = (length: number): TestGraphExpander => {
 
 /**
  * Calculate Jaccard similarity between two sets.
+ * @param setA
+ * @param setB
  */
-function jaccardSimilarity<T>(setA: Set<T>, setB: Set<T>): number {
+const jaccardSimilarity = <T>(setA: Set<T>, setB: Set<T>): number => {
 	const intersection = new Set([...setA].filter((x) => setB.has(x)));
 	const union = new Set([...setA, ...setB]);
 	return union.size === 0 ? 1 : intersection.size / union.size;
-}
+};
 
 // ============================================================================
 // Test Suite
@@ -388,7 +398,7 @@ describe("Novelty, Validity, and Value Validation", () => {
 			// Path should connect the seeds
 			const path = result.paths[0];
 			expect(path.nodes[0]).toBe("N0");
-			expect(path.nodes[path.nodes.length - 1]).toBe("N9");
+			expect(path.nodes.at(-1)).toBe("N9");
 		});
 
 		/**
@@ -523,7 +533,7 @@ describe("Novelty, Validity, and Value Validation", () => {
 			const degreeBuckets = new Map<string, number>();
 			for (const nodeId of result.sampledNodes) {
 				const degree = graph.getDegree(nodeId);
-				const bucket = degree === 1 ? "leaf" : degree <= 5 ? "hub" : "mega-hub";
+				const bucket = degree === 1 ? "leaf" : (degree <= 5 ? "hub" : "mega-hub");
 				degreeBuckets.set(bucket, (degreeBuckets.get(bucket) ?? 0) + 1);
 			}
 
@@ -562,9 +572,9 @@ describe("Novelty, Validity, and Value Validation", () => {
 			console.log("Novelty (difference from BFS):");
 			console.log(`  - Node set dissimilarity: ${nodeDissimilarity}%`);
 			console.log("Validity (thesis compliance):");
-			console.log(`  - Terminates without depth limit: true`);
+			console.log("  - Terminates without depth limit: true");
 			console.log(`  - Explores all reachable: ${dpResult.sampledNodes.size === graph.getNodeCount()}`);
-			console.log(`  - Supports N>1 seeds: true`);
+			console.log("  - Supports N>1 seeds: true");
 			console.log("Value (practical benefits):");
 			console.log(`  - Nodes sampled: ${dpResult.sampledNodes.size}`);
 			console.log(`  - Paths found: ${dpResult.paths.length}`);

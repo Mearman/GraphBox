@@ -27,7 +27,7 @@ describe("VALUE: Structural Representativeness", () => {
 		const degreeBuckets = new Map<string, number>();
 		for (const nodeId of result.sampledNodes) {
 			const degree = graph.getDegree(nodeId);
-			const bucket = degree === 1 ? "leaf" : degree <= 5 ? "hub" : "mega-hub";
+			const bucket = degree === 1 ? "leaf" : (degree <= 5 ? "hub" : "mega-hub");
 			degreeBuckets.set(bucket, (degreeBuckets.get(bucket) ?? 0) + 1);
 		}
 

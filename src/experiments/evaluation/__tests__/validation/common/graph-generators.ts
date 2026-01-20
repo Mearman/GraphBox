@@ -17,46 +17,46 @@ import { TestGraphExpander } from "./test-graph-expander";
  * Expanding the hub immediately exposes all nodes.
  * @param numberSpokes - Number of spokes connected to the hub
  */
-export function createStarGraph(numberSpokes: number): Array<[string, string]> {
+export const createStarGraph = (numberSpokes: number): Array<[string, string]> => {
 	const edges: Array<[string, string]> = [];
-	for (let i = 0; i < numberSpokes; i++) {
-		edges.push(["HUB", `S${i}`]);
+	for (let index = 0; index < numberSpokes; index++) {
+		edges.push(["HUB", `S${index}`]);
 	}
 	return edges;
-}
+};
 
 /**
  * Creates a double-star graph with two hubs connected.
  * Tests behavior when path goes through hubs.
  * @param spokesPerHub - Number of spokes per hub
  */
-export function createDoubleStarGraph(spokesPerHub: number): Array<[string, string]> {
+export const createDoubleStarGraph = (spokesPerHub: number): Array<[string, string]> => {
 	const edges: Array<[string, string]> = [["HUB_A", "HUB_B"]]; // Hub connection
 
 	// Spokes for HUB_A
-	for (let i = 0; i < spokesPerHub; i++) {
-		edges.push(["HUB_A", `SA${i}`]);
+	for (let index = 0; index < spokesPerHub; index++) {
+		edges.push(["HUB_A", `SA${index}`]);
 	}
 
 	// Spokes for HUB_B
-	for (let i = 0; i < spokesPerHub; i++) {
-		edges.push(["HUB_B", `SB${i}`]);
+	for (let index = 0; index < spokesPerHub; index++) {
+		edges.push(["HUB_B", `SB${index}`]);
 	}
 
 	return edges;
-}
+};
 
 /**
  * Creates a hub-and-spoke network with multiple interconnected hubs.
  * @param numberHubs - Number of hubs
  * @param spokesPerHub - Number of spokes per hub
  */
-export function createMultiHubGraph(numberHubs: number, spokesPerHub: number): Array<[string, string]> {
+export const createMultiHubGraph = (numberHubs: number, spokesPerHub: number): Array<[string, string]> => {
 	const edges: Array<[string, string]> = [];
 
 	// Connect all hubs in a ring
-	for (let i = 0; i < numberHubs; i++) {
-		edges.push([`H${i}`, `H${(i + 1) % numberHubs}`]);
+	for (let index = 0; index < numberHubs; index++) {
+		edges.push([`H${index}`, `H${(index + 1) % numberHubs}`]);
 	}
 
 	// Add spokes to each hub
@@ -67,14 +67,14 @@ export function createMultiHubGraph(numberHubs: number, spokesPerHub: number): A
 	}
 
 	return edges;
-}
+};
 
 /**
  * Creates a scale-free-like graph with power-law degree distribution.
  * @param numberNodes - Number of nodes in the graph
  * @param seed - Random seed for reproducibility
  */
-export function createScaleFreeGraph(numberNodes: number, seed = 42): Array<[string, string]> {
+export const createScaleFreeGraph = (numberNodes: number, seed = 42): Array<[string, string]> => {
 	const edges: Array<[string, string]> = [];
 	const degrees = new Map<string, number>();
 
@@ -92,13 +92,13 @@ export function createScaleFreeGraph(numberNodes: number, seed = 42): Array<[str
 	degrees.set("N2", 2);
 
 	// Add nodes with preferential attachment
-	for (let i = 3; i < numberNodes; i++) {
-		const newNode = `N${i}`;
+	for (let index = 3; index < numberNodes; index++) {
+		const newNode = `N${index}`;
 		degrees.set(newNode, 0);
 
 		// Connect to 2 existing nodes based on degree
 		const totalDegree = [...degrees.values()].reduce((a, b) => a + b, 0);
-		const numberConnections = Math.min(2, i);
+		const numberConnections = Math.min(2, index);
 
 		const connected = new Set<string>();
 		while (connected.size < numberConnections) {
@@ -118,7 +118,7 @@ export function createScaleFreeGraph(numberNodes: number, seed = 42): Array<[str
 	}
 
 	return edges;
-}
+};
 
 // ============================================================================
 // TestGraphExpander Generators (for TestGraphExpander-based tests)
@@ -126,42 +126,49 @@ export function createScaleFreeGraph(numberNodes: number, seed = 42): Array<[str
 
 /**
  * Creates a star graph with a central hub connected to all other nodes.
+ * @param numSpokes
+ * @param numberSpokes
  */
-export function createStarGraphExpander(numSpokes: number): TestGraphExpander {
+export const createStarGraphExpander = (numberSpokes: number): TestGraphExpander => {
 	const edges: Array<[string, string]> = [];
-	for (let i = 0; i < numSpokes; i++) {
-		edges.push(["HUB", `S${i}`]);
+	for (let index = 0; index < numberSpokes; index++) {
+		edges.push(["HUB", `S${index}`]);
 	}
 	return new TestGraphExpander(edges);
-}
+};
 
 /**
  * Creates a hub graph with multiple hubs connected to each other and to leaf nodes.
+ * @param numHubs
+ * @param numberHubs
+ * @param leavesPerHub
  */
-export function createHubGraphExpander(numHubs: number, leavesPerHub: number): TestGraphExpander {
+export const createHubGraphExpander = (numberHubs: number, leavesPerHub: number): TestGraphExpander => {
 	const edges: Array<[string, string]> = [];
 
 	// Connect hubs to each other (fully connected)
-	for (let i = 0; i < numHubs; i++) {
-		for (let j = i + 1; j < numHubs; j++) {
-			edges.push([`H${i}`, `H${j}`]);
+	for (let index = 0; index < numberHubs; index++) {
+		for (let index_ = index + 1; index_ < numberHubs; index_++) {
+			edges.push([`H${index}`, `H${index_}`]);
 		}
 	}
 
 	// Connect leaves to hubs
-	for (let h = 0; h < numHubs; h++) {
+	for (let h = 0; h < numberHubs; h++) {
 		for (let l = 0; l < leavesPerHub; l++) {
 			edges.push([`H${h}`, `L${h}_${l}`]);
 		}
 	}
 
 	return new TestGraphExpander(edges);
-}
+};
 
 /**
  * Creates a grid graph (lattice) with uniform degree distribution.
+ * @param rows
+ * @param cols
  */
-export function createGridGraphExpander(rows: number, cols: number): TestGraphExpander {
+export const createGridGraphExpander = (rows: number, cols: number): TestGraphExpander => {
 	const edges: Array<[string, string]> = [];
 
 	for (let r = 0; r < rows; r++) {
@@ -179,18 +186,19 @@ export function createGridGraphExpander(rows: number, cols: number): TestGraphEx
 	}
 
 	return new TestGraphExpander(edges);
-}
+};
 
 /**
  * Creates a chain graph: A -- B -- C -- D -- ...
+ * @param length
  */
-export function createChainGraphExpander(length: number): TestGraphExpander {
+export const createChainGraphExpander = (length: number): TestGraphExpander => {
 	const edges: Array<[string, string]> = [];
-	for (let i = 0; i < length - 1; i++) {
-		edges.push([`N${i}`, `N${i + 1}`]);
+	for (let index = 0; index < length - 1; index++) {
+		edges.push([`N${index}`, `N${index + 1}`]);
 	}
 	return new TestGraphExpander(edges);
-}
+};
 
 // Re-export the functions from test-graph-expander for consistency
 export { TestGraphExpander } from "./test-graph-expander";

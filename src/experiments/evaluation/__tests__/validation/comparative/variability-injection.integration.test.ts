@@ -1,10 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { BenchmarkGraphExpander } from "../common/benchmark-graph-expander";
-import { loadBenchmarkByIdFromUrl } from "../../../fixtures/benchmark-datasets";
+
 import { DegreePrioritisedExpansion } from "../../../../../algorithms/traversal/degree-prioritised-expansion";
-import { StandardBfsExpansion } from "../../../../../experiments/baselines/standard-bfs"
 import { RandomPriorityExpansion } from "../../../../../experiments/baselines/random-priority"
-import { mannWhitneyUTest, cohensD, confidenceInterval, pathDiversity } from "../common/statistical-functions";
+import { StandardBfsExpansion } from "../../../../../experiments/baselines/standard-bfs"
+import { loadBenchmarkByIdFromUrl } from "../../../fixtures/benchmark-datasets";
+import { BenchmarkGraphExpander } from "../common/benchmark-graph-expander";
+import { cohensD, confidenceInterval, mannWhitneyUTest, pathDiversity } from "../common/statistical-functions";
 
 describe("Thesis Validation: Variability Injection", () => {
 	describe("Multiple Seed Pair Analysis", () => {
@@ -17,7 +18,7 @@ describe("Thesis Validation: Variability Injection", () => {
 			const expander = new BenchmarkGraphExpander(benchmark.graph, benchmark.meta.directed);
 
 			const allNodes = expander.getAllNodeIds();
-			const numSeedPairs = 10;
+			const numberSeedPairs = 10;
 
 			const results: Array<{
 				seeds: [string, string];
@@ -27,15 +28,15 @@ describe("Thesis Validation: Variability Injection", () => {
 				bfsDiversity: number;
 			}> = [];
 
-			for (let i = 0; i < numSeedPairs; i++) {
+			for (let index = 0; index < numberSeedPairs; index++) {
 				// Select random seed pair
-				const idx1 = Math.floor(Math.random() * allNodes.length);
-				let idx2 = Math.floor(Math.random() * allNodes.length);
-				while (idx2 === idx1) {
-					idx2 = Math.floor(Math.random() * allNodes.length);
+				const index1 = Math.floor(Math.random() * allNodes.length);
+				let index2 = Math.floor(Math.random() * allNodes.length);
+				while (index2 === index1) {
+					index2 = Math.floor(Math.random() * allNodes.length);
 				}
 
-				const seeds: [string, string] = [allNodes[idx1], allNodes[idx2]];
+				const seeds: [string, string] = [allNodes[index1], allNodes[index2]];
 
 				const dp = new DegreePrioritisedExpansion(expander, seeds);
 				const bfs = new StandardBfsExpansion(expander, seeds);
@@ -66,7 +67,7 @@ describe("Thesis Validation: Variability Injection", () => {
 			const effectSize = cohensD(dpDiversities, bfsDiversities);
 
 			console.log("\n=== Multi-Seed-Pair Analysis (Les Misérables) ===");
-			console.log(`Trials: ${numSeedPairs}`);
+			console.log(`Trials: ${numberSeedPairs}`);
 			console.log(`Degree-Prioritised diversity: ${dpMean.toFixed(3)} [${dpCI.lower.toFixed(3)}, ${dpCI.upper.toFixed(3)}]`);
 			console.log(`BFS diversity: ${bfsMean.toFixed(3)} [${bfsCI.lower.toFixed(3)}, ${bfsCI.upper.toFixed(3)}]`);
 			console.log(`Mann-Whitney U: ${diversityTest.u.toFixed(2)}, p-value: ${diversityTest.pValue.toFixed(4)}`);
@@ -100,11 +101,11 @@ describe("Thesis Validation: Variability Injection", () => {
 			const dpDiversities: number[] = [];
 			const bfsDiversities: number[] = [];
 
-			for (let i = 0; i < trials; i++) {
+			for (let index = 0; index < trials; index++) {
 				// Add different random seed for Random Priority to create variability
 				const dp = new DegreePrioritisedExpansion(expander, seeds);
 				const bfs = new StandardBfsExpansion(expander, seeds);
-				const rp = new RandomPriorityExpansion(expander, seeds, 1000 + i);
+				const rp = new RandomPriorityExpansion(expander, seeds, 1000 + index);
 
 				const [dpResult, bfsResult] = await Promise.all([dp.run(), bfs.run(), rp.run()]);
 
@@ -151,7 +152,7 @@ describe("Thesis Validation: Variability Injection", () => {
 				const expander = new BenchmarkGraphExpander(benchmark.graph, benchmark.meta.directed);
 
 				const allNodes = expander.getAllNodeIds();
-				const seeds: [string, string] = [allNodes[0], allNodes[allNodes.length - 1]];
+				const seeds: [string, string] = [allNodes[0], allNodes.at(-1)];
 
 				const dp = new DegreePrioritisedExpansion(expander, seeds);
 				const bfs = new StandardBfsExpansion(expander, seeds);

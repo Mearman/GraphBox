@@ -14,7 +14,7 @@ import { describe, expect, it } from "vitest";
 
 import { DegreePrioritisedExpansion } from "../../../../../../../../algorithms/traversal/degree-prioritised-expansion";
 import { StandardBfsExpansion } from "../../../../../../../baselines/standard-bfs";
-import { createStarGraphExpander, createHubGraphExpander, createGridGraphExpander } from "../../../../common/graph-generators";
+import { createGridGraphExpander,createHubGraphExpander, createStarGraphExpander } from "../../../../common/graph-generators";
 import { jaccardSimilarity } from "../../../../common/statistical-functions";
 
 describe("NOVELTY: Structural Difference Tests", () => {

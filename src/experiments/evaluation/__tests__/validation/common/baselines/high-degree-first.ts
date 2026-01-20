@@ -5,7 +5,7 @@
  * Tests whether the thesis innovation (deferring high-degree nodes) matters.
  */
 
-import type { GraphExpander } from "../../../../../interfaces/graph-expander";
+import type { GraphExpander } from "../../../../../../interfaces/graph-expander";
 
 export class HighDegreeFirstExpansion {
 	private expander: GraphExpander<{ id: string }>;
@@ -47,8 +47,8 @@ export class HighDegreeFirstExpansion {
 			let maxDegree = -1;
 			let selectedNode: string | null = null;
 
-			for (let f = 0; f < frontiers.length; f++) {
-				for (const nodeId of frontiers[f]) {
+			for (const [f, frontier] of frontiers.entries()) {
+				for (const nodeId of frontier) {
 					const degree = this.expander.getDegree(nodeId);
 					if (degree > maxDegree) {
 						maxDegree = degree;
@@ -118,8 +118,8 @@ export class HighDegreeFirstExpansion {
 
 		if (path[0] === seed0 && path.length > 1) {
 			const edges: string[] = [];
-			for (let i = 0; i < path.length - 1; i++) {
-				edges.push(`${path[i]}->${path[i + 1]}`);
+			for (let index = 0; index < path.length - 1; index++) {
+				edges.push(`${path[index]}->${path[index + 1]}`);
 			}
 			this.paths.push({ nodes: path, edges });
 		}

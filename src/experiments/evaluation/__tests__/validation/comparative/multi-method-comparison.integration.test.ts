@@ -9,12 +9,11 @@
 import { describe, expect, it } from "vitest";
 
 import { DegreePrioritisedExpansion } from "../../../../../algorithms/traversal/degree-prioritised-expansion";
-
-import { BenchmarkGraphExpander } from "../common/benchmark-graph-expander";
-import { loadBenchmarkByIdFromUrl } from "../../../fixtures/benchmark-datasets";
 import { FrontierBalancedExpansion } from "../../../../../experiments/baselines/frontier-balanced"
 import { RandomPriorityExpansion } from "../../../../../experiments/baselines/random-priority"
 import { StandardBfsExpansion } from "../../../../../experiments/baselines/standard-bfs"
+import { loadBenchmarkByIdFromUrl } from "../../../fixtures/benchmark-datasets";
+import { BenchmarkGraphExpander } from "../common/benchmark-graph-expander";
 import { cohensD, confidenceInterval, mannWhitneyUTest } from "../common/statistical-functions";
 
 describe("Thesis Validation: Statistical Tests", () => {
@@ -37,11 +36,11 @@ describe("Thesis Validation: Statistical Tests", () => {
 				randomPriority: [] as number[],
 			};
 
-			for (let i = 0; i < trials; i++) {
+			for (let index = 0; index < trials; index++) {
 				const dp = new DegreePrioritisedExpansion(expander, seeds);
 				const bfs = new StandardBfsExpansion(expander, seeds);
 				const fb = new FrontierBalancedExpansion(expander, seeds);
-				const rp = new RandomPriorityExpansion(expander, seeds, 1000 + i);
+				const rp = new RandomPriorityExpansion(expander, seeds, 1000 + index);
 
 				const [dpRes, bfsRes, fbRes, rpRes] = await Promise.all([
 					dp.run(),
