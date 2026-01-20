@@ -911,7 +911,7 @@ describe("Thesis Validation: Variability Injection", () => {
 				};
 			}
 
-			console.log("\n=== Cross-Dataset Performance Summary ===");
+			console.log("\n=== Cross-Dataset Path Diversity ===");
 			console.log(JSON.stringify(summary, null, 2));
 
 			// Analyze trend: does DP advantage increase with graph size/complexity?
@@ -1507,7 +1507,7 @@ describe("Thesis Validation: Summary", () => {
 			const dpHubs = hubParticipation(dpSampled, allNodeData, (id) => expander.getDegree(id), 90);
 			const bfsHubs = hubParticipation(bfsSampled, allNodeData, (id) => expander.getDegree(id), 90);
 
-			console.log("\n=== Hub Participation (top 10% degree) ===");
+			console.log("\n=== Hub Traversal Efficiency ===");
 			console.log(`Degree-Prioritised: ${dpHubs.sampledHubs}/${dpHubs.totalHubs} hubs (${(dpHubs.ratio * 100).toFixed(1)}%)`);
 			console.log(`Standard BFS: ${bfsHubs.sampledHubs}/${bfsHubs.totalHubs} hubs (${(bfsHubs.ratio * 100).toFixed(1)}%)`);
 
