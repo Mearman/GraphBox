@@ -39,6 +39,11 @@
     "typecheck": "tsc --noEmit",
     "lint": "eslint src --fix",
     "test": "vitest run --coverage",
+    "test:exp": "NODE_OPTIONS=\"--max-old-space-size=8192\" npx tsx scripts/run-tap.ts",
+    "test:tap": "NODE_OPTIONS=\"--max-old-space-size=8192\" npx tsx scripts/run-tap.ts",
+    "parse-tap": "tsx scripts/parse-tap-results.ts test-results.tap",
+    "parse-tap:json": "tsx scripts/parse-tap-results.ts test-results.tap --format json --output tap-results.json",
+    "parse-tap:csv": "tsx scripts/parse-tap-results.ts test-results.tap --format csv --output tap-metrics.csv",
     "build": "vite build && BUILD_TARGET=cli vite build",
     "validate": "turbo run build",
     "prepare": "husky"
