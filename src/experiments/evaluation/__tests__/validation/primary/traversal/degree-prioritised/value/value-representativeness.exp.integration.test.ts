@@ -36,6 +36,18 @@ describe("VALUE: Structural Representativeness", () => {
 			console.log(`  ${bucket}: ${count} nodes`);
 		}
 
+		// Calculate coverage and diversity metrics
+		const _leafCount = degreeBuckets.get("leaf") || 0;
+		const hubCount = degreeBuckets.get("hub") || 0;
+		const megaHubCount = degreeBuckets.get("mega-hub") || 0;
+		const totalNodes = result.sampledNodes.size;
+		const hubRatio = ((hubCount + megaHubCount) / totalNodes * 100).toFixed(1);
+
+		console.log("\n=== Structural Representativeness Metrics ===");
+		console.log(`Total Sampled: ${totalNodes} nodes`);
+		console.log(`Hub Coverage: ${hubRatio}%`);
+		console.log(`Buckets Covered: ${degreeBuckets.size}/3`);
+
 		// Should sample from multiple degree buckets
 		expect(degreeBuckets.size).toBeGreaterThan(1);
 
