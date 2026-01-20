@@ -74,6 +74,13 @@ describe("Multi-Hub Network", () => {
 			expect(Number.isFinite(m.nodesExpanded)).toBe(true);
 			expect(Number.isFinite(m.hubsExpanded)).toBe(true);
 		}
+
+		console.log("\n=== Multi-Hub Expansion Efficiency ===");
+		console.log("Method & Nodes Expanded & Hubs Expanded & Paths Found");
+		for (const m of metrics) {
+			const hubRatio = m.hubsExpanded > 0 ? (m.hubsExpanded / m.nodesExpanded * 100).toFixed(1) : "0";
+			console.log(`${m.method} & ${m.nodesExpanded} & ${m.hubsExpanded} (${hubRatio}%) & ${m.pathsFound}`);
+		}
 	});
 
 	it("should track hub nodes correctly", async () => {
