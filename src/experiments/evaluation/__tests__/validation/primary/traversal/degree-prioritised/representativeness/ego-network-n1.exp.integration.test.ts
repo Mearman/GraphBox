@@ -36,6 +36,12 @@ describe("Ego Network Representativeness (N=1)", () => {
 			groundTruth.degrees
 		);
 
+		console.log("\n=== Structural Representativeness (Ego Network) ===");
+		console.log(`Coverage: ${metrics.coverage.toFixed(3)}`);
+		console.log(`Precision: ${(metrics.intersectionSize / result.sampledNodes.size).toFixed(3)}`);
+		console.log(`F1 Score: ${(2 * metrics.coverage * (metrics.intersectionSize / result.sampledNodes.size) / (metrics.coverage + (metrics.intersectionSize / result.sampledNodes.size))).toFixed(3)}`);
+		console.log(`Intersection: ${metrics.intersectionSize}/${groundTruth.nodes.size}`);
+
 		// Should have some coverage
 		expect(metrics.coverage).toBeGreaterThan(0);
 		expect(metrics.intersectionSize).toBeGreaterThan(0);
