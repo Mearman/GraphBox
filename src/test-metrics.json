@@ -1,0 +1,387 @@
+{
+  "version": "1.0.0",
+  "timestamp": "2026-01-21T02:44:54.573Z",
+  "metrics": {
+    "hub-traversal-comparison": [
+      {
+        "graph": "karate",
+        "method": "Degree-Prioritised",
+        "hubTraversal": 100
+      },
+      {
+        "graph": "karate",
+        "method": "Standard BFS",
+        "hubTraversal": 100
+      },
+      {
+        "graph": "karate",
+        "method": "Frontier-Balanced",
+        "hubTraversal": 100
+      },
+      {
+        "graph": "karate",
+        "method": "Random Priority",
+        "hubTraversal": 100
+      },
+      {
+        "graph": "lesmis",
+        "method": "Degree-Prioritised",
+        "hubTraversal": 100
+      },
+      {
+        "graph": "lesmis",
+        "method": "Standard BFS",
+        "hubTraversal": 100
+      },
+      {
+        "graph": "lesmis",
+        "method": "Frontier-Balanced",
+        "hubTraversal": 100
+      },
+      {
+        "graph": "lesmis",
+        "method": "Random Priority",
+        "hubTraversal": 100
+      }
+    ],
+    "runtime-performance": [
+      {
+        "dataset": "Karate Club",
+        "nodes": 34,
+        "dpTime": 0.24,
+        "bfsTime": 0.1,
+        "dpNodesPerSec": 143083,
+        "bfsNodesPerSec": 342138
+      },
+      {
+        "dataset": "Les Misérables",
+        "nodes": 77,
+        "dpTime": 0.94,
+        "bfsTime": 0.35,
+        "dpNodesPerSec": 82294,
+        "bfsNodesPerSec": 221397
+      },
+      {
+        "dataset": "Facebook",
+        "nodes": 4039,
+        "dpTime": 98.77,
+        "bfsTime": 166.39,
+        "dpNodesPerSec": 40891,
+        "bfsNodesPerSec": 24275
+      }
+    ],
+    "scalability": [
+      {
+        "dataset": "karate",
+        "nodes": 34,
+        "dpTime": 0.2,
+        "bfsTime": 0.1,
+        "ratio": 0.42
+      },
+      {
+        "dataset": "lesmis",
+        "nodes": 77,
+        "dpTime": 0.9,
+        "bfsTime": 0.3,
+        "ratio": 0.37
+      },
+      {
+        "dataset": "facebook",
+        "nodes": 4039,
+        "dpTime": 98.8,
+        "bfsTime": 166.4,
+        "ratio": 1.68
+      }
+    ],
+    "path-lengths": [
+      {
+        "dataset": "Les Misérables",
+        "method": "Degree-Prioritised",
+        "min": 4,
+        "max": 15,
+        "mean": 9.65,
+        "median": 10
+      },
+      {
+        "dataset": "Les Misérables",
+        "method": "Standard BFS",
+        "min": 4,
+        "max": 8,
+        "mean": 6.18,
+        "median": 6
+      }
+    ],
+    "method-ranking": [
+      {
+        "method": "Standard BFS",
+        "diversity": 0.246,
+        "paths": 74
+      },
+      {
+        "method": "Frontier-Balanced",
+        "diversity": 0.246,
+        "paths": 74
+      },
+      {
+        "method": "Random Priority",
+        "diversity": 0.236,
+        "paths": 74
+      },
+      {
+        "method": "Degree-Prioritised (Thesis)",
+        "diversity": 0.144,
+        "paths": 69
+      }
+    ],
+    "cross-dataset": [
+      {
+        "dataset": "Karate Club",
+        "nodes": 34,
+        "dpDiversity": 0.402,
+        "bfsDiversity": 0.415,
+        "improvement": -2.9
+      },
+      {
+        "dataset": "Les Misérables",
+        "nodes": 77,
+        "dpDiversity": 0.144,
+        "bfsDiversity": 0.246,
+        "improvement": -41.5
+      }
+    ],
+    "n-seed-comparison": [
+      {
+        "method": "Degree-Prioritised",
+        "n": 1,
+        "nodes": 34,
+        "paths": 33,
+        "iterations": 68,
+        "coverage": 100
+      },
+      {
+        "method": "Standard BFS",
+        "n": 1,
+        "nodes": 34,
+        "paths": 0,
+        "iterations": 34,
+        "coverage": 100
+      },
+      {
+        "method": "Frontier-Balanced",
+        "n": 1,
+        "nodes": 34,
+        "paths": 0,
+        "iterations": 34,
+        "coverage": 100
+      },
+      {
+        "method": "Random Priority",
+        "n": 1,
+        "nodes": 34,
+        "paths": 0,
+        "iterations": 34,
+        "coverage": 100
+      },
+      {
+        "method": "Degree-Prioritised",
+        "n": 2,
+        "nodes": 34,
+        "paths": 30,
+        "iterations": 68,
+        "coverage": 100
+      },
+      {
+        "method": "Standard BFS",
+        "n": 2,
+        "nodes": 34,
+        "paths": 32,
+        "iterations": 68,
+        "coverage": 100
+      },
+      {
+        "method": "Frontier-Balanced",
+        "n": 2,
+        "nodes": 34,
+        "paths": 32,
+        "iterations": 68,
+        "coverage": 100
+      },
+      {
+        "method": "Random Priority",
+        "n": 2,
+        "nodes": 34,
+        "paths": 31,
+        "iterations": 68,
+        "coverage": 100
+      },
+      {
+        "method": "Degree-Prioritised",
+        "n": 3,
+        "nodes": 34,
+        "paths": 30,
+        "iterations": 68,
+        "coverage": 112.5
+      },
+      {
+        "method": "Standard BFS",
+        "n": 3,
+        "nodes": 34,
+        "paths": 96,
+        "iterations": 102,
+        "coverage": 112.5
+      },
+      {
+        "method": "Frontier-Balanced",
+        "n": 3,
+        "nodes": 34,
+        "paths": 96,
+        "iterations": 102,
+        "coverage": 112.5
+      },
+      {
+        "method": "Random Priority",
+        "n": 3,
+        "nodes": 34,
+        "paths": 94,
+        "iterations": 102,
+        "coverage": 112.5
+      }
+    ],
+    "n-seed-hub-traversal": [
+      {
+        "graph": "karate-100",
+        "method": "Degree-Prioritised",
+        "paths": 30,
+        "hubTraversal": 21
+      },
+      {
+        "graph": "karate-100",
+        "method": "Standard BFS",
+        "paths": 32,
+        "hubTraversal": 21
+      },
+      {
+        "graph": "karate-100",
+        "method": "Frontier-Balanced",
+        "paths": 32,
+        "hubTraversal": 21
+      },
+      {
+        "graph": "karate-100",
+        "method": "Random Priority",
+        "paths": 31,
+        "hubTraversal": 21
+      }
+    ],
+    "n-seed-path-diversity": [
+      {
+        "graph": "scale-free-100",
+        "method": "Degree-Prioritised",
+        "paths": 30,
+        "uniqueNodes": 34,
+        "diversity": 0.402
+      },
+      {
+        "graph": "scale-free-100",
+        "method": "Standard BFS",
+        "paths": 32,
+        "uniqueNodes": 34,
+        "diversity": 0.415
+      },
+      {
+        "graph": "scale-free-100",
+        "method": "Frontier-Balanced",
+        "paths": 32,
+        "uniqueNodes": 34,
+        "diversity": 0.415
+      },
+      {
+        "graph": "scale-free-100",
+        "method": "Random Priority",
+        "paths": 31,
+        "uniqueNodes": 34,
+        "diversity": 0.333
+      }
+    ],
+    "n-seed-generalization": [
+      {
+        "n": 1,
+        "variant": "ego-graph",
+        "nodes": 34,
+        "paths": 33
+      },
+      {
+        "n": 2,
+        "variant": "between-graph",
+        "nodes": 34,
+        "paths": 30
+      },
+      {
+        "n": 3,
+        "variant": "multi-seed",
+        "nodes": 34,
+        "paths": 30
+      }
+    ],
+    "structural-representativeness": [
+      {
+        "coverage": 1,
+        "precision": 0.706,
+        "f1Score": 0.828,
+        "intersectionSize": 24,
+        "totalNodes": 24
+      }
+    ],
+    "structural-representativeness-metrics": [
+      {
+        "totalSampled": 34,
+        "hubCoverage": 20.6,
+        "bucketsCovered": 2,
+        "totalBuckets": 3
+      }
+    ],
+    "mi-ranking-quality": [
+      {
+        "dataset": "Karate Club",
+        "meanMI": 0.02,
+        "nodeCoverage": 0.18,
+        "pathDiversity": 0,
+        "paths": 4
+      }
+    ],
+    "statistical-significance": [
+      {
+        "comparison": "Path Salience vs Random",
+        "method1Mean": null,
+        "method2Mean": null,
+        "statistic": "Mann-Whitney U",
+        "u": 0,
+        "pValue": 1,
+        "cohensD": 0
+      }
+    ],
+    "ranking-benchmarks": [
+      {
+        "dataset": "Karate Club",
+        "method": "Path Salience",
+        "meanMI": 0.02,
+        "nodeCoverage": 0.18,
+        "pathDiversity": 0
+      },
+      {
+        "dataset": "Karate Club",
+        "method": "Shortest Path",
+        "meanMI": 0,
+        "nodeCoverage": 0.18,
+        "pathDiversity": 0
+      },
+      {
+        "dataset": "Karate Club",
+        "method": "Random",
+        "meanMI": 0,
+        "nodeCoverage": 0.18,
+        "pathDiversity": 0
+      }
+    ]
+  }
+}
