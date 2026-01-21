@@ -93,26 +93,56 @@ describe("computeSummaryStats", () => {
 
 describe("computeComparison", () => {
 	it("should compute delta and ratio", () => {
-		const primary = [10, 12, 14];
-		const baseline = [20, 22, 24];
-		const comparison = computeComparison(primary, baseline);
+		const primary = [
+			createMockResult({ run: { runId: "a", sut: "sut-a", sutRole: "primary", caseId: "case-1" }, metrics: { numeric: { "test-metric": 10 } } }),
+			createMockResult({ run: { runId: "b", sut: "sut-a", sutRole: "primary", caseId: "case-2" }, metrics: { numeric: { "test-metric": 12 } } }),
+			createMockResult({ run: { runId: "c", sut: "sut-a", sutRole: "primary", caseId: "case-3" }, metrics: { numeric: { "test-metric": 14 } } }),
+		];
+		const baseline = [
+			createMockResult({ run: { runId: "d", sut: "sut-b", sutRole: "baseline", caseId: "case-1" }, metrics: { numeric: { "test-metric": 20 } } }),
+			createMockResult({ run: { runId: "e", sut: "sut-b", sutRole: "baseline", caseId: "case-2" }, metrics: { numeric: { "test-metric": 22 } } }),
+			createMockResult({ run: { runId: "f", sut: "sut-b", sutRole: "baseline", caseId: "case-3" }, metrics: { numeric: { "test-metric": 24 } } }),
+		];
+		const comparison = computeComparison(primary, baseline, "test-metric");
 
 		expect(comparison.deltas.default).toBeCloseTo(-10); // primary - baseline
 		expect(comparison.ratios.default).toBeCloseTo(0.545, 2); // primary / baseline
 	});
 
 	it("should compute Cohen's d effect size", () => {
-		const primary = [80, 85, 82, 88, 90];
-		const baseline = [120, 125, 122, 128, 130];
-		const comparison = computeComparison(primary, baseline);
+		const primary = [
+			createMockResult({ run: { runId: "a", sut: "sut-a", sutRole: "primary", caseId: "case-1" }, metrics: { numeric: { "test-metric": 80 } } }),
+			createMockResult({ run: { runId: "b", sut: "sut-a", sutRole: "primary", caseId: "case-2" }, metrics: { numeric: { "test-metric": 85 } } }),
+			createMockResult({ run: { runId: "c", sut: "sut-a", sutRole: "primary", caseId: "case-3" }, metrics: { numeric: { "test-metric": 82 } } }),
+			createMockResult({ run: { runId: "d", sut: "sut-a", sutRole: "primary", caseId: "case-4" }, metrics: { numeric: { "test-metric": 88 } } }),
+			createMockResult({ run: { runId: "e", sut: "sut-a", sutRole: "primary", caseId: "case-5" }, metrics: { numeric: { "test-metric": 90 } } }),
+		];
+		const baseline = [
+			createMockResult({ run: { runId: "f", sut: "sut-b", sutRole: "baseline", caseId: "case-1" }, metrics: { numeric: { "test-metric": 120 } } }),
+			createMockResult({ run: { runId: "g", sut: "sut-b", sutRole: "baseline", caseId: "case-2" }, metrics: { numeric: { "test-metric": 125 } } }),
+			createMockResult({ run: { runId: "h", sut: "sut-b", sutRole: "baseline", caseId: "case-3" }, metrics: { numeric: { "test-metric": 122 } } }),
+			createMockResult({ run: { runId: "i", sut: "sut-b", sutRole: "baseline", caseId: "case-4" }, metrics: { numeric: { "test-metric": 128 } } }),
+			createMockResult({ run: { runId: "j", sut: "sut-b", sutRole: "baseline", caseId: "case-5" }, metrics: { numeric: { "test-metric": 130 } } }),
+		];
+		const comparison = computeComparison(primary, baseline, "test-metric");
 
 		expect(comparison.effectSize).toBeDefined();
-		expect(comparison.effectSize).toBeLessThan(0); // primary < baseline
+		// effectSize is now absolute value, so should be positive
+		expect(comparison.effectSize).toBeGreaterThan(0);
 	});
 
 	it("should handle equal arrays (d=0)", () => {
-		const values = [10, 20, 30, 40, 50];
-		const comparison = computeComparison(values, values);
+		const primary = [
+			createMockResult({ run: { runId: "a", sut: "sut-a", sutRole: "primary", caseId: "case-1" }, metrics: { numeric: { "test-metric": 10 } } }),
+			createMockResult({ run: { runId: "b", sut: "sut-a", sutRole: "primary", caseId: "case-2" }, metrics: { numeric: { "test-metric": 20 } } }),
+			createMockResult({ run: { runId: "c", sut: "sut-a", sutRole: "primary", caseId: "case-3" }, metrics: { numeric: { "test-metric": 30 } } }),
+		];
+		const baseline = [
+			createMockResult({ run: { runId: "d", sut: "sut-b", sutRole: "baseline", caseId: "case-1" }, metrics: { numeric: { "test-metric": 10 } } }),
+			createMockResult({ run: { runId: "e", sut: "sut-b", sutRole: "baseline", caseId: "case-2" }, metrics: { numeric: { "test-metric": 20 } } }),
+			createMockResult({ run: { runId: "f", sut: "sut-b", sutRole: "baseline", caseId: "case-3" }, metrics: { numeric: { "test-metric": 30 } } }),
+		];
+		const comparison = computeComparison(primary, baseline, "test-metric");
 
 		expect(comparison.deltas.default).toBeCloseTo(0);
 		expect(comparison.ratios.default).toBeCloseTo(1);
@@ -120,38 +150,73 @@ describe("computeComparison", () => {
 	});
 
 	it("should handle zero variance baseline", () => {
-		const primary = [10, 12, 14];
-		const baseline = [20, 20, 20];
-		const comparison = computeComparison(primary, baseline);
+		const primary = [
+			createMockResult({ run: { runId: "a", sut: "sut-a", sutRole: "primary", caseId: "case-1" }, metrics: { numeric: { "test-metric": 10 } } }),
+			createMockResult({ run: { runId: "b", sut: "sut-a", sutRole: "primary", caseId: "case-2" }, metrics: { numeric: { "test-metric": 12 } } }),
+			createMockResult({ run: { runId: "c", sut: "sut-a", sutRole: "primary", caseId: "case-3" }, metrics: { numeric: { "test-metric": 14 } } }),
+		];
+		const baseline = [
+			createMockResult({ run: { runId: "d", sut: "sut-b", sutRole: "baseline", caseId: "case-1" }, metrics: { numeric: { "test-metric": 20 } } }),
+			createMockResult({ run: { runId: "e", sut: "sut-b", sutRole: "baseline", caseId: "case-2" }, metrics: { numeric: { "test-metric": 20 } } }),
+			createMockResult({ run: { runId: "f", sut: "sut-b", sutRole: "baseline", caseId: "case-3" }, metrics: { numeric: { "test-metric": 20 } } }),
+		];
+		const comparison = computeComparison(primary, baseline, "test-metric");
 
 		expect(comparison.deltas.default).toBeDefined();
 		expect(comparison.ratios.default).toBeDefined();
 	});
 
-	it("should compute win rate", () => {
-		const primary = [10, 30, 50]; // wins 2 out of 3
-		const baseline = [20, 20, 20];
-		const comparison = computeComparison(primary, baseline);
+	it("should compute win rate (paired by case ID)", () => {
+		const primary = [
+			createMockResult({ run: { runId: "a", sut: "sut-a", sutRole: "primary", caseId: "case-1" }, metrics: { numeric: { "test-metric": 10 } } }),
+			createMockResult({ run: { runId: "b", sut: "sut-a", sutRole: "primary", caseId: "case-2" }, metrics: { numeric: { "test-metric": 30 } } }),
+			createMockResult({ run: { runId: "c", sut: "sut-a", sutRole: "primary", caseId: "case-3" }, metrics: { numeric: { "test-metric": 50 } } }),
+		];
+		const baseline = [
+			createMockResult({ run: { runId: "d", sut: "sut-b", sutRole: "baseline", caseId: "case-1" }, metrics: { numeric: { "test-metric": 20 } } }),
+			createMockResult({ run: { runId: "e", sut: "sut-b", sutRole: "baseline", caseId: "case-2" }, metrics: { numeric: { "test-metric": 20 } } }),
+			createMockResult({ run: { runId: "f", sut: "sut-b", sutRole: "baseline", caseId: "case-3" }, metrics: { numeric: { "test-metric": 20 } } }),
+		];
+		const comparison = computeComparison(primary, baseline, "test-metric");
 
 		expect(comparison.betterRate).toBeDefined();
+		// primary wins 2 out of 3 (case-2 and case-3)
 		expect(comparison.betterRate).toBeCloseTo(2 / 3, 2);
 	});
 
 	it("should handle zero baseline mean", () => {
-		const primary = [10, 20, 30];
-		const baseline = [0, 0, 0];
-		const comparison = computeComparison(primary, baseline);
+		const primary = [
+			createMockResult({ run: { runId: "a", sut: "sut-a", sutRole: "primary", caseId: "case-1" }, metrics: { numeric: { "test-metric": 10 } } }),
+			createMockResult({ run: { runId: "b", sut: "sut-a", sutRole: "primary", caseId: "case-2" }, metrics: { numeric: { "test-metric": 20 } } }),
+			createMockResult({ run: { runId: "c", sut: "sut-a", sutRole: "primary", caseId: "case-3" }, metrics: { numeric: { "test-metric": 30 } } }),
+		];
+		const baseline = [
+			createMockResult({ run: { runId: "d", sut: "sut-b", sutRole: "baseline", caseId: "case-1" }, metrics: { numeric: { "test-metric": 0 } } }),
+			createMockResult({ run: { runId: "e", sut: "sut-b", sutRole: "baseline", caseId: "case-2" }, metrics: { numeric: { "test-metric": 0 } } }),
+			createMockResult({ run: { runId: "f", sut: "sut-b", sutRole: "baseline", caseId: "case-3" }, metrics: { numeric: { "test-metric": 0 } } }),
+		];
+		const comparison = computeComparison(primary, baseline, "test-metric");
 
 		expect(comparison.ratios.default).toBe(Infinity);
 	});
 
-	it("should handle mismatched array lengths for win rate", () => {
-		const primary = [10, 20, 30, 40, 50];
-		const baseline = [15, 25, 35];
-		const comparison = computeComparison(primary, baseline);
+	it("should compute Mann-Whitney U and p-value", () => {
+		const primary = [
+			createMockResult({ run: { runId: "a", sut: "sut-a", sutRole: "primary", caseId: "case-1" }, metrics: { numeric: { "test-metric": 10 } } }),
+			createMockResult({ run: { runId: "b", sut: "sut-a", sutRole: "primary", caseId: "case-2" }, metrics: { numeric: { "test-metric": 12 } } }),
+			createMockResult({ run: { runId: "c", sut: "sut-a", sutRole: "primary", caseId: "case-3" }, metrics: { numeric: { "test-metric": 14 } } }),
+		];
+		const baseline = [
+			createMockResult({ run: { runId: "d", sut: "sut-b", sutRole: "baseline", caseId: "case-1" }, metrics: { numeric: { "test-metric": 20 } } }),
+			createMockResult({ run: { runId: "e", sut: "sut-b", sutRole: "baseline", caseId: "case-2" }, metrics: { numeric: { "test-metric": 22 } } }),
+			createMockResult({ run: { runId: "f", sut: "sut-b", sutRole: "baseline", caseId: "case-3" }, metrics: { numeric: { "test-metric": 24 } } }),
+		];
+		const comparison = computeComparison(primary, baseline, "test-metric");
 
-		// Win rate uses min length
-		expect(comparison.betterRate).toBeDefined();
+		expect(comparison.uStatistic).toBeDefined();
+		expect(comparison.pValue).toBeDefined();
+		// With distinct distributions, U should be > 0
+		expect(comparison.uStatistic).toBeGreaterThan(0);
 	});
 });
 
