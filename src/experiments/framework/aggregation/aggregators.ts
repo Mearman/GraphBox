@@ -6,6 +6,7 @@
  * separation of concerns.
  */
 
+import { mannWhitneyUTest } from "../../evaluation/__tests__/validation/common/statistical-functions.js";
 import type { ComparisonMetrics,SummaryStats } from "../types/aggregate.js";
 import type { EvaluationResult } from "../types/result.js";
 
@@ -100,26 +101,69 @@ export const computeMaxSpeedup = (pairs: Array<[number, number]>): number => {
 /**
  * Compute comparison metrics between primary and baseline results.
  *
- * @param primaryValues - Values from primary SUT
- * @param baselineValues - Values from baseline SUT
+ * @param primaryResults - Full result objects from primary SUT
+ * @param baselineResults - Full result objects from baseline SUT
+ * @param metricName - Metric to compare
  * @returns Comparison metrics
  */
-export const computeComparison = (primaryValues: number[], baselineValues: number[]): ComparisonMetrics => {
+export const computeComparison = (
+	primaryResults: EvaluationResult[],
+	baselineResults: EvaluationResult[],
+	metricName: string
+): ComparisonMetrics => {
+	// Extract values and match by case ID
+	const primaryByCase = new Map<string, number>();
+	const baselineByCase = new Map<string, number>();
+
+	for (const result of primaryResults) {
+		const value = result.metrics.numeric[metricName];
+		if (value !== undefined) {
+			primaryByCase.set(result.run.caseId, value);
+		}
+	}
+
+	for (const result of baselineResults) {
+		const value = result.metrics.numeric[metricName];
+		if (value !== undefined) {
+			baselineByCase.set(result.run.caseId, value);
+		}
+	}
+
+	// Get matching case IDs
+	const commonCaseIds = [...primaryByCase.keys()].filter((id) => baselineByCase.has(id));
+
+	if (commonCaseIds.length === 0) {
+		return {
+			deltas: { default: 0 },
+			ratios: { default: 1 },
+		};
+	}
+
+	// Extract paired values
+	const primaryValues: number[] = [];
+	const baselineValues: number[] = [];
+	for (const caseId of commonCaseIds) {
+		primaryValues.push(primaryByCase.get(caseId)!);
+		baselineValues.push(baselineByCase.get(caseId)!);
+	}
+
 	const primaryStats = computeSummaryStats(primaryValues);
 	const baselineStats = computeSummaryStats(baselineValues);
 
 	const delta = primaryStats.mean - baselineStats.mean;
 	const ratio = baselineStats.mean === 0 ? Infinity : primaryStats.mean / baselineStats.mean;
 
-	// Win rate: percentage of cases where primary > baseline
+	// Win rate: percentage of cases where primary > baseline (paired by case ID)
 	let wins = 0;
-	const minLength = Math.min(primaryValues.length, baselineValues.length);
-	for (let index = 0; index < minLength; index++) {
-		if (primaryValues[index] > baselineValues[index]) {
+	for (const [index, primaryValue] of primaryValues.entries()) {
+		if (primaryValue > baselineValues[index]) {
 			wins++;
 		}
 	}
-	const betterRate = minLength > 0 ? wins / minLength : undefined;
+	const betterRate = wins / primaryValues.length;
+
+	// Mann-Whitney U test for statistical significance
+	const mwuResult = mannWhitneyUTest(primaryValues, baselineValues);
 
 	// Effect size (Cohen's d)
 	let effectSize: number | undefined;
@@ -134,13 +178,15 @@ export const computeComparison = (primaryValues: number[], baselineValues: numbe
 				(baselineStats.n - 1) * baselineStats.std ** 2) /
 			(primaryStats.n + baselineStats.n - 2)
 		);
-		effectSize = pooledStd === 0 ? 0 : delta / pooledStd;
+		effectSize = pooledStd === 0 ? 0 : Math.abs(delta) / pooledStd;
 	}
 
 	return {
 		deltas: { default: delta },
 		ratios: { default: ratio },
 		betterRate,
+		uStatistic: mwuResult.u,
+		pValue: mwuResult.pValue,
 		effectSize,
 	};
 };
