@@ -37,6 +37,10 @@ const generateCaseId = (name: string, inputs: CaseInputs): string => {
 
 /**
  * Benchmark case definitions.
+ *
+ * Small graphs (for quick testing): karate, lesmis
+ * Medium graphs (with hubs): facebook, cora, citeseer, ca-astroph, ca-condmat, ca-hepph
+ * Large graphs (significant hubs): cit-hepph, cit-hepth, dblp
  */
 export const BENCHMARK_CASES: Array<{
 	id: string;
@@ -45,9 +49,28 @@ export const BENCHMARK_CASES: Array<{
 	expectedNodes: number;
 	tags: string[];
 }> = [
+	// Small social networks
 	{ id: "karate", name: "Karate Club", caseClass: "social", expectedNodes: 34, tags: ["small", "social", "undirected"] },
 	{ id: "lesmis", name: "Les Misérables", caseClass: "social", expectedNodes: 77, tags: ["small", "social", "undirected"] },
+
+	// Medium social graphs
 	{ id: "facebook", name: "Facebook", caseClass: "social", expectedNodes: 4039, tags: ["medium", "social", "undirected"] },
+
+	// Citation networks
+	{ id: "cora", name: "Cora", caseClass: "citation", expectedNodes: 2708, tags: ["medium", "citation", "directed"] },
+	{ id: "citeseer", name: "CiteSeer", caseClass: "citation", expectedNodes: 3327, tags: ["medium", "citation", "directed"] },
+
+	// SNAP Collaboration networks (scale-free, hub-heavy)
+	{ id: "ca-astroph", name: "CA-Astroph", caseClass: "collaboration", expectedNodes: 18_772, tags: ["medium", "collaboration", "undirected"] },
+	{ id: "ca-condmat", name: "CA-CondMat", caseClass: "collaboration", expectedNodes: 23_133, tags: ["medium", "collaboration", "undirected"] },
+	{ id: "ca-hepph", name: "CA-HepPh", caseClass: "collaboration", expectedNodes: 9877, tags: ["medium", "collaboration", "undirected"] },
+
+	// SNAP Citation networks (heavy-tailed)
+	{ id: "cit-hepph", name: "Cit-HepPH", caseClass: "citation", expectedNodes: 27_400, tags: ["large", "citation", "directed"] },
+	{ id: "cit-hepth", name: "Cit-HepTH", caseClass: "citation", expectedNodes: 27_770, tags: ["large", "citation", "directed"] },
+
+	// Large co-authorship network
+	{ id: "dblp", name: "DBLP", caseClass: "coauthorship", expectedNodes: 317_080, tags: ["large", "coauthorship", "undirected"] },
 ];
 
 /**
