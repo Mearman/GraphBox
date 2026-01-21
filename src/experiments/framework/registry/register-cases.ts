@@ -51,62 +51,101 @@ export const BENCHMARK_CASES: Array<{
 ];
 
 /**
- * Create case definitions for benchmark graphs.
- * Pre-loads benchmark data to determine seed nodes.
+ * Seed count variants for testing.
+ * N=1: ego-graph (single source)
+ * N=2: bidirectional (first + last node)
+ * N=3: multi-seed (distributed)
+ */
+export const SEED_VARIANTS = [1, 2, 3] as const;
+export type SeedVariant = typeof SEED_VARIANTS[number];
+
+/**
+ * Get variant display name.
+ * @param n - Number of seeds
+ */
+const getVariantDisplayName = (n: number): string => {
+	switch (n) {
+		case 1: {
+			return "ego-graph";
+		}
+		case 2: {
+			return "bidirectional";
+		}
+		default: {
+			return `multi-seed-${n}`;
+		}
+	}
+};
+
+/**
+ * Create case definitions for benchmark graphs with multiple seed variants.
+ * Pre-loads benchmark data to determine seed nodes for each variant.
  */
 const createBenchmarkCaseDefinitions = async (): Promise<CaseDefinition<BenchmarkGraphExpander>[]> => {
 	const cases: CaseDefinition<BenchmarkGraphExpander>[] = [];
 
 	for (const benchmark of BENCHMARK_CASES) {
-		// Load benchmark data to get node IDs
+		// Load benchmark data once to get node IDs
 		const benchmarkData = await loadBenchmarkByIdFromUrl(benchmark.id);
 		const nodes = benchmarkData.graph.getAllNodes();
 
-		// Determine seed nodes (first and last)
-		let seeds: string[];
-		if (nodes.length >= 2) {
-			const lastNode = nodes.at(-1);
-			seeds = lastNode ? [nodes[0].id, lastNode.id] : [nodes[0].id];
-		} else if (nodes.length === 1) {
-			seeds = [nodes[0].id];
-		} else {
-			seeds = [];
-		}
+		// Create a case for each seed variant
+		for (const seedCount of SEED_VARIANTS) {
+			// Determine seed nodes based on variant
+			let seeds: string[];
+			if (seedCount === 1) {
+				seeds = [nodes[0].id];
+			} else if (seedCount === 2) {
+				const lastNode = nodes.at(-1);
+				seeds = lastNode ? [nodes[0].id, lastNode.id] : [nodes[0].id];
+			} else {
+				// For N > 2, distribute seeds evenly across the node list
+				const step = Math.floor(nodes.length / seedCount);
+				seeds = [];
+				for (let index_ = 0; index_ < seedCount; index_++) {
+					const index = Math.min(index_ * step, nodes.length - 1);
+					seeds.push(nodes[index].id);
+				}
+			}
 
-		const inputs: CaseInputs = {
-			summary: {
-				datasetId: benchmark.id,
-				expectedNodes: benchmark.expectedNodes,
-				seeds, // Store seeds in inputs
-			},
-			artefacts: [
-				{
-					type: "graph",
-					uri: `benchmark://${benchmark.id}`,
+			const variantName = getVariantDisplayName(seedCount);
+			const inputs: CaseInputs = {
+				summary: {
+					datasetId: benchmark.id,
+					variant: variantName,
+					seedCount,
+					expectedNodes: benchmark.expectedNodes,
+					seeds, // Store seeds in inputs
 				},
-			],
-		};
+				artefacts: [
+					{
+						type: "graph",
+						uri: `benchmark://${benchmark.id}`,
+					},
+				],
+			};
 
-		const caseSpec: EvaluationCase = {
-			caseId: generateCaseId(benchmark.name, inputs),
-			name: benchmark.name,
-			caseClass: benchmark.caseClass,
-			inputs,
-			version: "1.0.0",
-			tags: benchmark.tags,
-		};
+			const caseSpec: EvaluationCase = {
+				caseId: generateCaseId(`${benchmark.name}-${variantName}`, inputs),
+				name: `${benchmark.name} (${variantName})`,
+				caseClass: `${benchmark.caseClass}-${variantName}`, // Include variant in caseClass for separate aggregation
+				inputs,
+				version: "1.0.0",
+				tags: [...benchmark.tags, variantName, `n-${seedCount}`],
+			};
 
-		cases.push({
-			case: caseSpec,
-			createExpander: async (_inputsForExpander: CaseInputs) => {
-				// Use the pre-loaded data
-				return new BenchmarkGraphExpander(benchmarkData.graph, benchmarkData.meta.directed);
-			},
-			getSeeds: (_inputsForSeeds: CaseInputs) => {
-				// Return the pre-computed seeds
-				return seeds;
-			},
-		});
+			cases.push({
+				case: caseSpec,
+				createExpander: async (_inputsForExpander: CaseInputs) => {
+					// Use the pre-loaded data
+					return new BenchmarkGraphExpander(benchmarkData.graph, benchmarkData.meta.directed);
+				},
+				getSeeds: (_inputsForSeeds: CaseInputs) => {
+					// Return the pre-computed seeds for this variant
+					return seeds;
+				},
+			});
+		}
 	}
 
 	return cases;
