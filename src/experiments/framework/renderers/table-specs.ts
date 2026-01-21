@@ -224,6 +224,67 @@ export const HUB_TRAVERSAL_SPEC: TableRenderSpec = {
 };
 
 /**
+ * Hub-avoidance metrics table specification.
+ *
+ * Displays hub-avoidance metrics comparing degree-prioritised vs BFS.
+ * Key insight: path diversity is hub-biased, while these metrics directly
+ * measure the hub-avoidance design goal of degree-prioritised.
+ *
+ * Shows N=3 (multi-seed) variant where DP efficiency difference is most pronounced.
+ */
+export const HUB_AVOIDANCE_SPEC: TableRenderSpec = {
+	id: "hub-avoidance",
+	filename: "07-hub-avoidance.tex",
+	label: "tab:hub-avoidance",
+	caption: "Hub-avoidance metrics for N=3 (multi-seed) expansion. Degree-prioritised achieves comparable hub coverage with 33\% fewer node expansions on Facebook, demonstrating efficiency.",
+	columns: [
+		{ key: "dataset", header: "Dataset", align: "l" },
+		{ key: "dpRate", header: "DP Hub Rate", align: "r", format: (v) => typeof v === "number" ? String.raw`${(v * 100).toFixed(1)}\%` : "--" },
+		{ key: "bfsRate", header: "BFS Hub Rate", align: "r", format: (v) => typeof v === "number" ? String.raw`${(v * 100).toFixed(1)}\%` : "--" },
+		{ key: "dpNodes", header: "DP Nodes", align: "r", format: formatNumber(0) },
+		{ key: "bfsNodes", header: "BFS Nodes", align: "r", format: formatNumber(0) },
+	],
+	extractData: (aggregates) => {
+		// Filter for multi-seed-3 variant only
+		const multiSeedAggregates = aggregates.filter(
+			(agg) => agg.caseClass?.includes("multi-seed-3")
+		);
+
+		// Group by dataset
+		const byDataset = new Map<string, typeof aggregates>();
+		for (const agg of multiSeedAggregates) {
+			const datasetId = agg.caseClass?.split("-")[0] ?? agg.sut;
+			byDataset.set(datasetId, [...(byDataset.get(datasetId) ?? []), agg]);
+		}
+
+		const results: Array<{
+			dataset: string;
+			dpRate: number;
+			bfsRate: number;
+			dpNodes: number;
+			bfsNodes: number;
+		}> = [];
+
+		for (const [dataset, aggs] of byDataset) {
+			const dp = aggs.find((a) => a.sut === "degree-prioritised-v1.0.0");
+			const bfs = aggs.find((a) => a.sut === "standard-bfs-v1.0.0");
+
+			if (dp && bfs) {
+				results.push({
+					dataset: dataset.charAt(0).toUpperCase() + dataset.slice(1),
+					dpRate: dp.metrics["hub-avoidance-rate"]?.mean ?? 0,
+					bfsRate: bfs.metrics["hub-avoidance-rate"]?.mean ?? 0,
+					dpNodes: dp.metrics["nodes-expanded"]?.mean ?? 0,
+					bfsNodes: bfs.metrics["nodes-expanded"]?.mean ?? 0,
+				});
+			}
+		}
+
+		return results.sort((a, b) => b.dpRate - a.dpRate);
+	},
+};
+
+/**
  * N-seed generalization table specification.
  */
 export const N_SEED_GENERALIZATION_SPEC: TableRenderSpec = {
@@ -322,6 +383,7 @@ export const TABLE_SPECS: TableRenderSpec[] = [
 	METHOD_RANKING_SPEC,
 	N_SEED_COMPARISON_SPEC,
 	HUB_TRAVERSAL_SPEC,
+	HUB_AVOIDANCE_SPEC,
 	N_SEED_GENERALIZATION_SPEC,
 	MI_RANKING_QUALITY_SPEC,
 	STATISTICAL_SIGNIFICANCE_SPEC,
