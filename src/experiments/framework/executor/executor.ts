@@ -35,8 +35,8 @@ export interface ExecutorConfig {
 	/** Progress callback */
 	onProgress?: (progress: ExecutionProgress) => void;
 
-	/** Per-run callback */
-	onResult?: (result: EvaluationResult) => void;
+	/** Per-run callback (can be async) */
+	onResult?: (result: EvaluationResult) => void | Promise<void>;
 }
 
 /**
@@ -264,8 +264,12 @@ export class Executor<TExpander, TResult> {
 				);
 				results.push(result);
 
+				// Call onResult callback and await if it returns a promise
 				if (this.config.onResult) {
-					this.config.onResult(result);
+					const callbackResult = this.config.onResult(result);
+					if (callbackResult instanceof Promise) {
+						await callbackResult;
+					}
 				}
 
 				completed++;

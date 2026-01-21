@@ -5,6 +5,23 @@
  */
 
 export {
+	type CheckpointData,
+	CheckpointManager,
+	type CheckpointManagerOptions,
+	type CheckpointMode,
+	createCheckpointManager,
+	createFileCheckpointManager,
+	createGitCheckpointManager,
+	getGitCommit,
+} from "./checkpoint-manager.js";
+export {
+	type CheckpointStorage,
+	createCheckpointStorage,
+	FileStorage,
+	getGitNamespace,
+	GitStorage,
+} from "./checkpoint-storage.js";
+export {
 	createExecutor,
 	DEFAULT_EXECUTOR_CONFIG,
 	type ExecutionProgress,
