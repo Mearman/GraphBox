@@ -57,6 +57,9 @@ export interface ComparisonMetrics {
 	/** Win rate (% of cases where primary beats baseline) */
 	betterRate?: number;
 
+	/** Mann-Whitney U statistic */
+	uStatistic?: number;
+
 	/** Statistical significance (p-value) */
 	pValue?: number;
 
