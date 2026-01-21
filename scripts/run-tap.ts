@@ -41,6 +41,8 @@ interface TestMetrics {
 	nSeedComparison?: MetricSection;
 	nSeedHubTraversal?: MetricSection;
 	nSeedPathDiversity?: MetricSection;
+	algorithmComparison?: MetricSection;
+	hubTraversalComparison?: MetricSection;
 }
 
 // Helper to collect all tests from test results
@@ -245,16 +247,16 @@ function parseConsoleMetrics(stdout: string): TestMetrics {
 				return rows.length > 0 ? { title: "Path Length Distribution", rows } : null;
 			},
 		},
-		// Statistical Significance
+		// Statistical Significance (Path Salience vs Random)
 		{
-			header: /=== Statistical Test: Path Diversity ===/,
+			header: /=== Statistical Test: Path Salience vs Random ===/,
 			parse: (lines, startIdx) => {
 				const data: Record<string, string | number> = {};
 				for (let i = startIdx; i < Math.min(startIdx + 10, lines.length); i++) {
 					const line = lines[i];
-					const salienceMean = line.match(/Path Salience mean diversity:\s+([\d.]+)/);
+					const salienceMean = line.match(/Path Salience mean MI:\s+([\d.]+)/);
 					if (salienceMean) data.salienceMean = parseFloat(salienceMean[1]);
-					const randomMean = line.match(/Random mean diversity:\s+([\d.]+)/);
+					const randomMean = line.match(/Random mean MI:\s+([\d.]+)/);
 					if (randomMean) data.randomMean = parseFloat(randomMean[1]);
 					const uMatch = line.match(/Mann-Whitney U:\s+([\d.]+)/);
 					if (uMatch) data.u = parseFloat(uMatch[1]);
@@ -555,6 +557,114 @@ function parseConsoleMetrics(stdout: string): TestMetrics {
 				return rows.length > 0 ? { title: "N=2 Path Diversity Comparison", rows } : null;
 			},
 		},
+		// Algorithm Comparison (from evaluation harness)
+		{
+			header: /=== Algorithm Comparison ===/,
+			parse: (lines, startIdx) => {
+				const rows: Record<string, string | number>[] = [];
+				// Skip the table header and separator
+				for (let i = startIdx + 3; i < Math.min(startIdx + 100, lines.length); i++) {
+					const line = lines[i];
+					if (line.trim() === "" || line.startsWith("===")) break;
+
+					// Parse table row format by splitting on |
+					const parts = line.split("|").map((p) => p.trim());
+					if (parts.length >= 6) {
+						const graph = parts[0];
+						const seeds = parts[1];
+						const method = parts[2];
+						const nodes = parts[3];
+						const paths = parts[4];
+						const diversity = parts[5];
+
+						// Extract N value from seeds (e.g., "N2" -> 2)
+						const nMatch = seeds.match(/N(\d+)/);
+						if (!nMatch) continue;
+						const n = parseInt(nMatch[1]);
+
+						// Only include N=2 results for n-seed tables
+						if (n === 2) {
+							const nodeVal = nodes === "N/A" ? 0 : parseInt(nodes);
+							const pathVal = paths === "N/A" ? 0 : parseInt(paths);
+							const divVal = diversity === "N/A" || diversity === "N/A" ? 0 : parseFloat(diversity);
+							rows.push({
+								graph,
+								n,
+								method,
+								nodes: nodeVal,
+								paths: pathVal,
+								diversity: divVal,
+							});
+						}
+					}
+				}
+				return rows.length > 0 ? { title: "Algorithm Comparison", rows } : null;
+			},
+		},
+		// Hub Traversal Comparison (from evaluation harness)
+		{
+			header: /=== Hub Traversal Comparison ===/,
+			parse: (lines, startIdx) => {
+				const rows: Record<string, string | number>[] = [];
+				// Skip the table header and separator
+				for (let i = startIdx + 3; i < Math.min(startIdx + 100, lines.length); i++) {
+					const line = lines[i];
+					if (line.trim() === "" || line.startsWith("===") || line.includes("Average hub")) break;
+
+					// Parse table row format: "scale-free-100 | Degree-Prioritised | 18.5%"
+					const match = line.match(/^([\w-]+)\s*\|\s*([\w\s-]+?)\s*\|\s*([\d.]+)%/);
+					if (match) {
+						rows.push({
+							graph: match[1],
+							method: match[2].trim(),
+							hubTraversal: parseFloat(match[3]),
+						});
+					}
+				}
+				return rows.length > 0 ? { title: "Hub Traversal Comparison", rows } : null;
+			},
+		},
+		// MI Ranking Quality (from benchmark tests)
+		{
+			header: /=== (Karate Club|Les Misérables|Facebook) (Path Ranking|Character Path) Analysis ===/,
+			parse: (lines, startIdx) => {
+				const data: Record<string, string | number> = {};
+				let datasetName = "";
+
+				// Extract dataset name from header
+				const headerMatch = lines[startIdx].match(/=== (Karate Club|Les Misérables|Facebook) /);
+				if (headerMatch) {
+					datasetName = headerMatch[1];
+				}
+
+				for (let i = startIdx; i < Math.min(startIdx + 15, lines.length); i++) {
+					const line = lines[i];
+
+					// Parse "Path Salience: X paths"
+					const pathsMatch = line.match(/Path Salience:\s+(\d+)\s+paths/);
+					if (pathsMatch) data.paths = parseInt(pathsMatch[1]);
+
+					// Parse "  Mean MI: X.XXX"
+					const meanMIMatch = line.match(/Mean MI:\s+([\d.]+)/);
+					if (meanMIMatch) data.meanMI = parseFloat(meanMIMatch[1]);
+
+					// Parse "  Node Coverage: X.XX"
+					const coverageMatch = line.match(/Node Coverage:\s+([\d.]+)/);
+					if (coverageMatch) data.nodeCoverage = parseFloat(coverageMatch[1]);
+
+					// Parse "  Path Diversity: X.XXX"
+					const diversityMatch = line.match(/Path Diversity:\s+([\d.]+)/);
+					if (diversityMatch) data.pathDiversity = parseFloat(diversityMatch[1]);
+
+					if (line.trim() === "" && i > startIdx + 3) break;
+				}
+
+				if (Object.keys(data).length >= 3) {
+					return { title: "MI Ranking Quality", rows: [{ dataset: datasetName, ...data }] };
+				}
+				return null;
+			},
+		},
 	];
 
 	// Find and parse all metric sections
@@ -584,14 +694,42 @@ function parseConsoleMetrics(stdout: string): TestMetrics {
 						"N-Seed Comparison Across Methods": "nSeedComparison",
 						"N=2 Hub Traversal Comparison": "nSeedHubTraversal",
 						"N=2 Path Diversity Comparison": "nSeedPathDiversity",
+						"Algorithm Comparison": "algorithmComparison",
+						"Hub Traversal Comparison": "hubTraversalComparison",
+						"MI Ranking Quality": "miRankingQuality",
 					};
 					const key = keyMap[section.title];
 					if (key) {
-						if (!metrics[key]) {
-							metrics[key] = section;
+						// For sections that can have multiple valid entries, deduplicate by key
+						// Otherwise, replace with latest data to avoid accumulation
+						const deduplicateSections: (keyof TestMetrics)[] = [
+							"runtimePerformance", "scalability", "crossDataset",
+							"hubTraversalComparison", "algorithmComparison", "miRankingQuality"
+						];
+						if (deduplicateSections.includes(key)) {
+							// These sections can have multiple rows - merge with deduplication
+							if (!metrics[key]) {
+								metrics[key] = section;
+							} else {
+								// Deduplicate existing rows by creating a unique key
+								const existingRows = metrics[key]!.rows;
+								const newRows = section.rows;
+								const seen = new Set<string>();
+
+								// Create combined array with deduplication
+								const combinedRows: Array<Record<string, string | number>> = [];
+								for (const row of [...existingRows, ...newRows]) {
+									const dedupeKey = JSON.stringify(row);
+									if (!seen.has(dedupeKey)) {
+										seen.add(dedupeKey);
+										combinedRows.push(row);
+									}
+								}
+								metrics[key]!.rows = combinedRows;
+							}
 						} else {
-							// Merge rows if section already exists
-							metrics[key]!.rows.push(...section.rows);
+							// For single-value sections, replace with latest
+							metrics[key] = section;
 						}
 					}
 				}
