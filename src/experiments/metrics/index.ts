@@ -5,5 +5,6 @@
  */
 
 export * from "./collector.js";
+export * from "./hub-avoidance-calculator.js";
 export * from "./storage.js";
 export * from "./types.js";

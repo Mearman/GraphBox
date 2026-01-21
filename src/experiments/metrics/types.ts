@@ -223,6 +223,42 @@ export interface MultiHubEfficiencyMetric {
 }
 
 /**
+ * Hub-avoidance metrics for evaluating degree-prioritised expansion.
+ *
+ * Measures how effectively an algorithm avoids expanding through high-degree
+ * hub nodes during traversal. Complements path diversity by directly measuring
+ * the design goal of hub avoidance.
+ */
+export interface HubAvoidanceMetric {
+	/** Dataset identifier */
+	dataset: string;
+
+	/** Algorithm method name */
+	method: string;
+
+	/** Number of seeds (N) */
+	n: number;
+
+	/** Proportion of expanded nodes that are hubs (0-1, lower is better) */
+	hubTraversalRate: number;
+
+	/** Ratio of peripheral nodes expanded to hub nodes expanded (higher is better) */
+	peripheralCoverageRatio: number;
+
+	/** Total nodes expanded */
+	totalExpanded: number;
+
+	/** Number of hub nodes expanded (degree >= threshold) */
+	hubCount: number;
+
+	/** Number of peripheral nodes expanded (degree <= threshold) */
+	peripheralCount: number;
+
+	/** Optional: degree distribution as JSON string */
+	degreeDistribution?: string;
+}
+
+/**
  * Union of all metric types for internal handling
  */
 export type Metric =
@@ -245,7 +281,8 @@ export type Metric =
 	| MIRankingQualityMetric
 	| RankingBenchmarksMetric
 	| HubMitigationMetric
-	| MultiHubEfficiencyMetric;
+	| MultiHubEfficiencyMetric
+	| HubAvoidanceMetric;
 
 /**
  * Metric category - groups related metrics for table generation
@@ -253,6 +290,7 @@ export type Metric =
 export type MetricCategory =
 	| "statistical-significance"
 	| "hub-traversal"
+	| "hub-avoidance"
 	| "path-lengths"
 	| "runtime-performance"
 	| "scalability"
