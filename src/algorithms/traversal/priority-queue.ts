@@ -76,6 +76,15 @@ export class PriorityQueue<T> {
 	}
 
 	/**
+	 * Peek at the priority of the minimum item without removing it.
+	 *
+	 * @returns Priority of the item with minimum priority, or Infinity if queue is empty
+	 */
+	peekPriority(): number {
+		return this.heap[0]?.priority ?? Infinity;
+	}
+
+	/**
 	 * Check if an item is in the queue.
 	 *
 	 * @param item - Item to check
