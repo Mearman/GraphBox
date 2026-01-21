@@ -19,7 +19,7 @@ import { fileURLToPath } from "node:url";
 
 import { getCoreClaims } from "../claims/registry.js";
 import { CaseRegistry } from "../registry/case-registry.js";
-import { registerCases } from "../registry/register-cases.js";
+import { registerCasesSync } from "../registry/register-cases.js";
 import { registerExpansionSuts } from "../registry/register-suts.js";
 import { SUTRegistry } from "../registry/sut-registry.js";
 import { TABLE_SPECS } from "../renderers/table-specs.js";
@@ -50,7 +50,7 @@ const main = async (): Promise<void> => {
 	// Initialize registries
 	console.log("1. Initializing registries...");
 	const sutRegistry = registerExpansionSuts(new SUTRegistry());
-	const caseRegistry = registerCases(new CaseRegistry());
+	const caseRegistry = registerCasesSync(new CaseRegistry());
 
 	console.log(`   - ${sutRegistry.size} SUTs registered`);
 	console.log(`   - ${caseRegistry.size} cases registered`);

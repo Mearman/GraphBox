@@ -34,12 +34,7 @@ export default defineConfig({
 				target: "node18",
 				modulePreload: false,
 				rollupOptions: {
-					external: [
-						"node:fs",
-						"node:path",
-						"node:process",
-						"node:module",
-					],
+					external: (id: string) => id.startsWith("node:"),
 				},
 			}
 		: {

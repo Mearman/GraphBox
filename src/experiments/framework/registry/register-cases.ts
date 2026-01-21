@@ -52,44 +52,65 @@ export const BENCHMARK_CASES: Array<{
 
 /**
  * Create case definitions for benchmark graphs.
+ * Pre-loads benchmark data to determine seed nodes.
  */
-const createBenchmarkCaseDefinitions = (): CaseDefinition<BenchmarkGraphExpander>[] => BENCHMARK_CASES.map((benchmark) => {
-	const inputs: CaseInputs = {
-		summary: {
-			datasetId: benchmark.id,
-			expectedNodes: benchmark.expectedNodes,
-		},
-		artefacts: [
-			{
-				type: "graph",
-				uri: `benchmark://${benchmark.id}`,
+const createBenchmarkCaseDefinitions = async (): Promise<CaseDefinition<BenchmarkGraphExpander>[]> => {
+	const cases: CaseDefinition<BenchmarkGraphExpander>[] = [];
+
+	for (const benchmark of BENCHMARK_CASES) {
+		// Load benchmark data to get node IDs
+		const benchmarkData = await loadBenchmarkByIdFromUrl(benchmark.id);
+		const nodes = benchmarkData.graph.getAllNodes();
+
+		// Determine seed nodes (first and last)
+		let seeds: string[];
+		if (nodes.length >= 2) {
+			const lastNode = nodes.at(-1);
+			seeds = lastNode ? [nodes[0].id, lastNode.id] : [nodes[0].id];
+		} else if (nodes.length === 1) {
+			seeds = [nodes[0].id];
+		} else {
+			seeds = [];
+		}
+
+		const inputs: CaseInputs = {
+			summary: {
+				datasetId: benchmark.id,
+				expectedNodes: benchmark.expectedNodes,
+				seeds, // Store seeds in inputs
 			},
-		],
-	};
+			artefacts: [
+				{
+					type: "graph",
+					uri: `benchmark://${benchmark.id}`,
+				},
+			],
+		};
 
-	const caseSpec: EvaluationCase = {
-		caseId: generateCaseId(benchmark.name, inputs),
-		name: benchmark.name,
-		caseClass: benchmark.caseClass,
-		inputs,
-		version: "1.0.0",
-		tags: benchmark.tags,
-	};
+		const caseSpec: EvaluationCase = {
+			caseId: generateCaseId(benchmark.name, inputs),
+			name: benchmark.name,
+			caseClass: benchmark.caseClass,
+			inputs,
+			version: "1.0.0",
+			tags: benchmark.tags,
+		};
 
-	return {
-		case: caseSpec,
-		createExpander: async (inputsForExpander: CaseInputs) => {
-			const datasetId = inputsForExpander.summary?.datasetId as string;
-			const benchmarkData = await loadBenchmarkByIdFromUrl(datasetId);
-			return new BenchmarkGraphExpander(benchmarkData.graph, benchmarkData.meta.directed);
-		},
-		getSeeds: (_inputsForSeeds: CaseInputs) => {
-			// Default: return first and last nodes (will be populated after loading)
-			// In practice, seeds are determined after the expander is created
-			return [];
-		},
-	};
-});
+		cases.push({
+			case: caseSpec,
+			createExpander: async (_inputsForExpander: CaseInputs) => {
+				// Use the pre-loaded data
+				return new BenchmarkGraphExpander(benchmarkData.graph, benchmarkData.meta.directed);
+			},
+			getSeeds: (_inputsForSeeds: CaseInputs) => {
+				// Return the pre-computed seeds
+				return seeds;
+			},
+		});
+	}
+
+	return cases;
+};
 
 /**
  * Synthetic graph case class types.
@@ -132,23 +153,76 @@ export const createSyntheticCaseDefinition = (type: SyntheticGraphType, nodes: n
 };
 
 /**
- * Register all cases with a registry.
+ * Register all cases with a registry (sync version, doesn't pre-load seeds).
+ * Use this for backward compatibility when seeds aren't needed upfront.
  *
  * @param registry - Registry to populate (defaults to new instance)
  * @returns The populated registry
  */
-export const registerCases = (registry: GraphCaseRegistry = new CaseRegistry()): GraphCaseRegistry => {
-	// Register benchmark cases
-	const benchmarkCases = createBenchmarkCaseDefinitions();
+export const registerCasesSync = (registry: GraphCaseRegistry = new CaseRegistry()): GraphCaseRegistry => {
+	// Register benchmark cases (without seed pre-loading)
+	const cases: CaseDefinition<BenchmarkGraphExpander>[] = BENCHMARK_CASES.map((benchmark) => {
+		const inputs: CaseInputs = {
+			summary: {
+				datasetId: benchmark.id,
+				expectedNodes: benchmark.expectedNodes,
+			},
+			artefacts: [
+				{
+					type: "graph",
+					uri: `benchmark://${benchmark.id}`,
+				},
+			],
+		};
+
+		const caseSpec: EvaluationCase = {
+			caseId: generateCaseId(benchmark.name, inputs),
+			name: benchmark.name,
+			caseClass: benchmark.caseClass,
+			inputs,
+			version: "1.0.0",
+			tags: benchmark.tags,
+		};
+
+		return {
+			case: caseSpec,
+			createExpander: async (inputsForExpander: CaseInputs) => {
+				const datasetId = inputsForExpander.summary?.datasetId as string;
+				const benchmarkData = await loadBenchmarkByIdFromUrl(datasetId);
+				return new BenchmarkGraphExpander(benchmarkData.graph, benchmarkData.meta.directed);
+			},
+			getSeeds: (_inputsForSeeds: CaseInputs) => {
+				// Seeds will be determined from the expander after creation
+				// The SUT factory should handle empty seeds
+				return [];
+			},
+		};
+	});
+
+	registry.registerAll(cases);
+	return registry;
+};
+
+/**
+ * Register all cases with a registry (async version, pre-loads seeds).
+ * This version loads benchmark data during registration to determine seed nodes.
+ *
+ * @param registry - Registry to populate (defaults to new instance)
+ * @returns The populated registry
+ */
+export const registerCases = async (registry: GraphCaseRegistry = new CaseRegistry()): Promise<GraphCaseRegistry> => {
+	// Register benchmark cases (async now, pre-loads seeds)
+	const benchmarkCases = await createBenchmarkCaseDefinitions();
 	registry.registerAll(benchmarkCases);
 
 	return registry;
 };
 
 /**
- * Global case registry with all cases registered.
+ * Global case registry with all cases registered (sync version).
+ * For async version with pre-loaded seeds, use `await registerCases()` instead.
  */
-export const graphCaseRegistry = registerCases(new CaseRegistry());
+export const graphCaseRegistry = registerCasesSync(new CaseRegistry());
 
 /**
  * Get seeds for a benchmark graph.

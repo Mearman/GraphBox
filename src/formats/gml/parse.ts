@@ -405,8 +405,8 @@ const main = async (): Promise<void> => {
 	}
 };
 
-// Run CLI if executed directly
-if (import.meta.url === `file://${process.argv[1]}`) {
+// Run CLI if executed directly (not when bundled)
+if (import.meta.url === `file://${process.argv[1]}` && process.argv[1].endsWith("parse.ts")) {
 	main().catch((error: unknown) => {
 		console.error("Error:", error);
 		process.exit(1);
