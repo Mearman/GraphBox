@@ -2,7 +2,7 @@
 /**
  * GraphBox CLI
  *
- * Command-line interface for graph generation, analysis, and validation.
+ * Command-line interface for graph generation, analysis, validation, and evaluation.
  *
  * Usage:
  *   npx graphbox <command> [options]
@@ -11,12 +11,14 @@
  *   generate  Generate a graph from a specification
  *   analyze   Analyze graph properties
  *   validate  Validate a graph against constraints
+ *   evaluate  Run PPEF-compliant evaluation experiments
  *   version   Show version information
  */
 
 import * as process from "node:process";
 
 import { runAnalyze } from "./cli-commands/analyze";
+import { runEvaluate } from "./cli-commands/evaluate";
 import { runGenerate } from "./cli-commands/generate";
 import { runValidate } from "./cli-commands/validate";
 import { parseArgs as parseArguments } from "./cli-utils/arg-parser";
@@ -73,6 +75,14 @@ const commands: Record<string, Command> = {
 		run: (arguments_: string[]) => {
 			const arguments__ = parseArguments(arguments_);
 			runValidate(arguments__);
+		},
+	},
+	evaluate: {
+		name: "evaluate",
+		description: "Run PPEF-compliant evaluation experiments",
+		run: (arguments_: string[]) => {
+			const arguments__ = parseArguments(arguments_);
+			runEvaluate(arguments__);
 		},
 	},
 };
