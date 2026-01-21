@@ -165,14 +165,37 @@ export const N_SEED_COMPARISON_SPEC: TableRenderSpec = {
 	columns: [
 		{ key: "method", header: "Method", align: "l" },
 		{ key: "n", header: "Seeds", align: "c" },
-		{ key: "nodes", header: "Nodes", align: "r" },
-		{ key: "paths", header: "Paths", align: "r" },
-		{ key: "iterations", header: "Iters", align: "r" },
-		{ key: "coverage", header: "Cov", align: "r", format: formatPercentage },
+		{ key: "pathDiversity", header: "Path Diversity", align: "r", format: formatNumber(2) },
+		{ key: "paths", header: "Paths", align: "r", format: formatNumber(0) },
 	],
-	extractData: (_aggregates) => {
-		// Placeholder - would extract N-seed specific data
-		return [];
+	extractData: (aggregates) => {
+		// Map caseClass to seed count
+		const getSeedCount = (caseClass: string | undefined): number => {
+			if (!caseClass) return 2;
+			if (caseClass.includes("ego-graph")) return 1;
+			if (caseClass.includes("multi-seed-3")) return 3;
+			return 2; // bidirectional
+		};
+
+		// Create comparison rows
+		const data: Array<Record<string, unknown>> = [];
+
+		for (const agg of aggregates) {
+			data.push({
+				method: getMethodAbbreviation(agg.sut),
+				n: getSeedCount(agg.caseClass),
+				pathDiversity: agg.metrics["path-diversity"]?.mean ?? 0,
+				paths: agg.metrics["unique-paths"]?.mean ?? 0,
+			});
+		}
+
+		// Sort by seed count, then by method
+		return data.sort((a, b) => {
+			const nA = a.n as number;
+			const nB = b.n as number;
+			if (nA !== nB) return nA - nB;
+			return String(a.method).localeCompare(String(b.method));
+		});
 	},
 };
 
@@ -276,9 +299,9 @@ export const STATISTICAL_SIGNIFICANCE_SPEC: TableRenderSpec = {
 			metric: "Path Diversity",
 			dpMean: dpAgg.metrics["path-diversity"]?.mean ?? 0,
 			bfsMean: bfsAgg.metrics["path-diversity"]?.mean ?? 0,
-			u: 0, // Would come from statistical test
-			pValue: comparison?.pValue ?? 0,
-			cohensD: comparison?.effectSize ?? 0,
+			u: comparison?.uStatistic,
+			pValue: comparison?.pValue,
+			cohensD: comparison?.effectSize,
 		}];
 	},
 	captionPlaceholders: {
