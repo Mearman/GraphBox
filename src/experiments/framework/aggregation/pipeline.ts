@@ -5,7 +5,7 @@
  * This is the core of the Execute → Aggregate → Render pipeline.
  */
 
-import type { AggregatedResult, AggregationOutput, SummaryStats } from "../types/aggregate.js";
+import type { AggregatedResult, AggregationOutput, ComparisonMetrics, SummaryStats } from "../types/aggregate.js";
 import type { EvaluationResult } from "../types/result.js";
 import { computeComparison,computeSummaryStats } from "./aggregators.js";
 
@@ -211,7 +211,7 @@ const computeAllComparisons = (aggregates: AggregatedResult[], results: Evaluati
 				}
 			}
 
-			// Get raw values for detailed comparison
+			// Get raw results for detailed comparison (matched by case ID)
 			const primaryResults = results.filter(
 				(r) => r.run.sut === primarySut && r.run.caseClass === primaryAgg.caseClass
 			);
@@ -219,24 +219,25 @@ const computeAllComparisons = (aggregates: AggregatedResult[], results: Evaluati
 				(r) => r.run.sut === baselineSut && r.run.caseClass === primaryAgg.caseClass
 			);
 
-			// Compute win rate using first shared metric
+			// Compute statistical comparison using first shared metric
 			const sharedMetrics = Object.keys(primaryAgg.metrics).filter(
 				(m) => m in baselineAgg.metrics
 			);
 
-			let betterRate: number | undefined;
+			let comparisonMetrics: ComparisonMetrics | undefined;
 			if (sharedMetrics.length > 0) {
 				const metricName = sharedMetrics[0];
-				const primaryValues = primaryResults.map((r) => r.metrics.numeric[metricName]).filter((v) => v !== undefined);
-				const baselineValues = baselineResults.map((r) => r.metrics.numeric[metricName]).filter((v) => v !== undefined);
-				const comparison = computeComparison(primaryValues, baselineValues);
-				betterRate = comparison.betterRate;
+				comparisonMetrics = computeComparison(primaryResults, baselineResults, metricName);
 			}
 
+			// Merge per-metric deltas with statistical metrics
 			primaryAgg.comparisons[baselineSut] = {
 				deltas: comparisonDeltas,
 				ratios: comparisonRatios,
-				betterRate,
+				betterRate: comparisonMetrics?.betterRate,
+				uStatistic: comparisonMetrics?.uStatistic,
+				pValue: comparisonMetrics?.pValue,
+				effectSize: comparisonMetrics?.effectSize,
 			};
 		}
 	}
