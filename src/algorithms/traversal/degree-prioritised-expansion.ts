@@ -119,6 +119,12 @@ export class DegreePrioritisedExpansion<T> {
 	private readonly sampledEdges = new Set<string>();
 	private stats: ExpansionStats;
 
+	/** Track which frontier owns each node for O(1) intersection checking */
+	private readonly nodeToFrontierIndex = new Map<string, number>();
+
+	/** Track path signatures for O(1) deduplication */
+	private readonly pathSignatures = new Set<string>();
+
 	/**
 	 * Create a new degree-prioritised expansion.
 	 *
@@ -146,6 +152,9 @@ export class DegreePrioritisedExpansion<T> {
 				visited: new Set([seed]),
 				parents: new Map(),
 			});
+
+			// Track which frontier owns this seed
+			this.nodeToFrontierIndex.set(seed, index);
 		}
 
 		this.stats = {
@@ -198,22 +207,26 @@ export class DegreePrioritisedExpansion<T> {
 				activeState.visited.add(targetId);
 				activeState.parents.set(targetId, { parent: node, edge: relationshipType });
 
+				// Track which frontier owns this node (for O(1) intersection checking)
+				this.nodeToFrontierIndex.set(targetId, activeIndex);
+
 				// Add to frontier with thesis priority as priority
 				const priority = this.expander.calculatePriority(targetId);
 				activeState.frontier.push(targetId, priority);
 
-				// Check intersection with ALL other frontiers (N ≥ 2 only)
-				// This loop naturally handles all N without branching:
-				// - N=1: Loop iterates zero times (no other frontiers exist) → no paths
-				// - N=2: Loop checks the one other frontier → bidirectional path detection
-				// - N≥3: Loop checks all other frontiers → multi-seed path detection
-				for (let other = 0; other < this.frontiers.length; other++) {
-					if (other !== activeIndex && this.frontiers[other].visited.has(targetId)) {
-						const path = this.reconstructPath(activeState, this.frontiers[other], targetId);
-						if (path && !this.pathExists(activeIndex, other, path)) {
+				// Check for intersection using O(1) lookup
+				// If another frontier already visited this node, we have a path
+				const otherFrontierIndex = this.nodeToFrontierIndex.get(targetId);
+				if (otherFrontierIndex !== undefined && otherFrontierIndex !== activeIndex) {
+					const path = this.reconstructPath(activeState, this.frontiers[otherFrontierIndex], targetId);
+					if (path) {
+						// Use path signature for O(1) deduplication
+						const signature = this.createPathSignature(activeIndex, otherFrontierIndex, path);
+						if (!this.pathSignatures.has(signature)) {
+							this.pathSignatures.add(signature);
 							this.paths.push({
 								fromSeed: activeIndex,
-								toSeed: other,
+								toSeed: otherFrontierIndex,
 								nodes: path,
 							});
 						}
@@ -279,12 +292,8 @@ export class DegreePrioritisedExpansion<T> {
 	 * @internal
 	 */
 	private peekPriority(queue: PriorityQueue<string>): number {
-		// The priority queue is a min-heap, so the front item has minimum priority.
-		// We use calculatePriority to ensure consistent prioritization across the algorithm.
-		for (const item of queue) {
-			return this.expander.calculatePriority(item);
-		}
-		return Infinity;
+		// O(1) peek at the minimum priority in the min-heap
+		return queue.peekPriority();
 	}
 
 	/**
@@ -330,21 +339,17 @@ export class DegreePrioritisedExpansion<T> {
 	}
 
 	/**
-	 * Check if an equivalent path already exists.
+	 * Create a unique signature for a path to enable O(1) deduplication.
+	 * Signature is bidirectional (A-B same as B-A).
 	 * @param fromSeed
 	 * @param toSeed
 	 * @param nodes
 	 * @internal
 	 */
-	private pathExists(fromSeed: number, toSeed: number, nodes: string[]): boolean {
-		return this.paths.some(
-			(p) =>
-				((p.fromSeed === fromSeed && p.toSeed === toSeed) ||
-          (p.fromSeed === toSeed && p.toSeed === fromSeed)) &&
-        p.nodes.length === nodes.length &&
-        (p.nodes.every((n, index) => n === nodes[index]) ||
-          p.nodes.every((n, index) => n === nodes[nodes.length - 1 - index]))
-		);
+	private createPathSignature(fromSeed: number, toSeed: number, nodes: string[]): string {
+		// Sort seed indices to make signature bidirectional
+		const [a, b] = fromSeed < toSeed ? [fromSeed, toSeed] : [toSeed, fromSeed];
+		return `${a}-${b}-${nodes.length}`;
 	}
 
 	/**
