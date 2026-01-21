@@ -96,6 +96,16 @@ export default defineConfig({
 					},
 				},
 			},
+			{
+				plugins: [tsconfigPaths()],
+				test: {
+					name: "unit",
+					include: ["src/**/*.unit.test.ts", "src/**/*.integration.test.ts"],
+					resolve: {
+						extensions: [".js", ".json", ".ts", ".jsx", ".tsx", ".mjs"],
+					},
+				},
+			},
 		],
 	},
 });
