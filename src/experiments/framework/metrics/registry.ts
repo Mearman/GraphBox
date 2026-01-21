@@ -133,6 +133,28 @@ export const METRIC_REGISTRY: Record<string, MetricDefinition> = {
 		isRatio: true,
 	},
 
+	// Hub-Avoidance Metrics (for degree-prioritised evaluation)
+	"hub-avoidance-rate": {
+		name: "hub-avoidance-rate",
+		displayName: "Hub Traversal Rate",
+		unit: "percentage",
+		higherIsBetter: false,
+		category: "quality",
+		description: "Proportion of expanded nodes that are hubs (lower is better for hub avoidance)",
+		formatString: "%.1f%%",
+		isPercentage: true,
+	},
+	"peripheral-coverage-ratio": {
+		name: "peripheral-coverage-ratio",
+		displayName: "Peripheral Coverage Ratio",
+		unit: "ratio",
+		higherIsBetter: true,
+		category: "quality",
+		description: "Ratio of peripheral nodes expanded to hub nodes expanded (higher is better)",
+		formatString: "%.2f",
+		isRatio: true,
+	},
+
 	// Efficiency Metrics
 	"execution-time": {
 		name: "execution-time",
