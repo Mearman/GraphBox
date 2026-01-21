@@ -9,7 +9,7 @@
  * - Provenance information
  */
 
-import type { ArtefactRef as ArtefactReference,Primitive } from "./case.js";
+import type { ArtefactReference,Primitive } from "./case.js";
 import type { SutRole } from "./sut.js";
 
 /**

@@ -9,7 +9,7 @@ export type { SutDefinition,SutFactory, SutInstance, SutRegistration, SutRole } 
 
 // Case types
 export type {
-	ArtefactRef,
+	ArtefactReference,
 	CaseDefinition,
 	CaseExpanderFactory,
 	CaseInputs,

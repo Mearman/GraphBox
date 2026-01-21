@@ -7,7 +7,7 @@
 
 import { createHash } from "node:crypto";
 
-import type { ArtefactRef as ArtefactReference,EvaluationCase } from "../types/case.js";
+import type { ArtefactReference,EvaluationCase } from "../types/case.js";
 import type { Perturbation, PerturbationConfig } from "../types/perturbation.js";
 
 /**
