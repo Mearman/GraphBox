@@ -222,7 +222,7 @@ ${rows.join("\n")}
 		if (!Number.isFinite(n)) {
 			return "--";
 		}
-		return n.toFixed(decimals ?? this.options.defaultDecimals);
+		return n.toFixed(decimals ?? this.options.defaultDecimals ?? 2);
 	}
 
 	/**
