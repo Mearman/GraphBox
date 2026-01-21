@@ -25,7 +25,7 @@ import { aggregateResults, type AggregationPipelineOptions, createAggregationOut
 import { createClaimSummary, evaluateClaims } from "../experiments/framework/claims/index.js";
 import { getClaimsByTag, getCoreClaims, THESIS_CLAIMS } from "../experiments/framework/claims/registry.js";
 // Framework imports
-import { createExecutor, type ExecutorConfig } from "../experiments/framework/executor/index.js";
+import { createCheckpointManager, createExecutor, type ExecutorConfig,getGitCommit } from "../experiments/framework/executor/index.js";
 import { CaseRegistry } from "../experiments/framework/registry/case-registry.js";
 import { type GraphCaseRegistry,registerCases } from "../experiments/framework/registry/register-cases.js";
 import { type ExpansionSutRegistry,registerExpansionSuts } from "../experiments/framework/registry/register-suts.js";
@@ -65,6 +65,9 @@ export interface EvaluateOptions {
 	/** Collect provenance information */
 	collectProvenance: boolean;
 
+	/** Checkpoint mode: "file", "git", or "auto" */
+	checkpointMode: string;
+
 	/** Filter claims by tag */
 	tags?: string[];
 
@@ -90,6 +93,7 @@ export const parseEvaluateArgs = (arguments_: ParsedArguments): EvaluateOptions 
 	const continueOnError = getBoolean(arguments_, "continue-on-error", true);
 	const timeoutMs = getNumber(arguments_, "timeout", 0);
 	const collectProvenance = getBoolean(arguments_, "provenance", true);
+	const checkpointMode = getOptional<string>(arguments_, "checkpoint-mode", "auto");
 
 	// Claim filtering
 	const tagsArgument = getOptional<string>(arguments_, "tags");
@@ -112,6 +116,7 @@ export const parseEvaluateArgs = (arguments_: ParsedArguments): EvaluateOptions 
 		continueOnError,
 		timeoutMs,
 		collectProvenance,
+		checkpointMode,
 		tags,
 		claim,
 		table,
@@ -178,13 +183,36 @@ const extractMetrics = (result: DegreePrioritisedExpansionResult): Record<string
 		metrics["max-path-length"] = Math.max(...pathLengths);
 	}
 
-	// Hub traversal: percentage of nodes expanded that are high-degree
+	// Hub traversal: percentage of nodes expanded that are high-degree (51+)
 	const highDegreeCount = (stats.degreeDistribution.get("51-100") ?? 0)
 		+ (stats.degreeDistribution.get("101-500") ?? 0)
 		+ (stats.degreeDistribution.get("501-1000") ?? 0)
 		+ (stats.degreeDistribution.get("1000+") ?? 0);
 	const hubTraversal = stats.nodesExpanded > 0 ? highDegreeCount / stats.nodesExpanded : 0;
 	metrics["hub-traversal"] = hubTraversal;
+
+	// Hub-Avoidance Metrics
+	// Hub avoidance rate: proportion of expanded nodes that are hubs (50+)
+	// Using 50+ threshold to capture hubs in academic networks (Cora, CiteSeer)
+	const hubCount = (stats.degreeDistribution.get("51-100") ?? 0)
+		+ (stats.degreeDistribution.get("101-500") ?? 0)
+		+ (stats.degreeDistribution.get("501-1000") ?? 0)
+		+ (stats.degreeDistribution.get("1000+") ?? 0);
+	const hubAvoidanceRate = stats.nodesExpanded > 0 ? hubCount / stats.nodesExpanded : 0;
+	metrics["hub-avoidance-rate"] = hubAvoidanceRate;
+
+	// Also track 100+ hub rate separately for large graphs
+	const hub100Count = (stats.degreeDistribution.get("101-500") ?? 0)
+		+ (stats.degreeDistribution.get("501-1000") ?? 0)
+		+ (stats.degreeDistribution.get("1000+") ?? 0);
+	const hub100AvoidanceRate = stats.nodesExpanded > 0 ? hub100Count / stats.nodesExpanded : 0;
+	metrics["hub-avoidance-rate-100"] = hub100AvoidanceRate;
+
+	// Peripheral coverage ratio: ratio of peripheral nodes (1-10) to hub nodes (50+)
+	const peripheralCount = (stats.degreeDistribution.get("1-5") ?? 0)
+		+ (stats.degreeDistribution.get("6-10") ?? 0);
+	const peripheralCoverageRatio = hubCount > 0 ? peripheralCount / hubCount : peripheralCount;
+	metrics["peripheral-coverage-ratio"] = peripheralCoverageRatio;
 
 	// Node coverage: ratio of sampled nodes to total possible
 	// (This is a placeholder - actual total would come from graph metadata)
@@ -227,13 +255,63 @@ const runExecutePhase = async (options: EvaluateOptions, sutRegistry: ExpansionS
 		console.log(`  - ${case_.case.name} (${case_.case.caseClass})`);
 	}
 
-	// Configure executor
+	// Create checkpoint manager for resumable execution
+	const executeDir = resolve(options.outputDir, "execute");
+	if (!existsSync(executeDir)) {
+		mkdirSync(executeDir, { recursive: true });
+	}
+
+	// Create checkpoint based on mode
+	// For file mode, use full path to checkpoint.json
+	// For git mode, use namespace string
+	const checkpointMode = options.checkpointMode as "file" | "git" | "auto";
+	const checkpoint = createCheckpointManager(
+		checkpointMode === "git" || checkpointMode === "auto"
+			? { mode: checkpointMode, pathOrNamespace: "results-execute" }
+			: { mode: "file", pathOrNamespace: resolve(executeDir, "checkpoint.json") }
+	);
+	await checkpoint.load();
+
+	// Get git commit for reproducibility
+	const gitCommit = await getGitCommit();
+
+	// Calculate total planned runs
+	const totalPlanned = suts.length * cases.length * options.repetitions;
+
+	// Check if checkpoint is stale (configuration changed)
 	const executorConfig: Partial<ExecutorConfig> = {
 		repetitions: options.repetitions,
 		seedBase: options.seedBase,
 		continueOnError: options.continueOnError,
 		timeoutMs: options.timeoutMs,
 		collectProvenance: options.collectProvenance,
+	};
+
+	const isStale = checkpoint.isStale(suts, cases, executorConfig, totalPlanned);
+
+	if (checkpoint.exists()) {
+		if (isStale) {
+			console.log("\n⚠ Checkpoint exists but configuration has changed.");
+			console.log("  Invalidating checkpoint and starting fresh.");
+			checkpoint.invalidate();
+		} else {
+			const progress = checkpoint.getProgress();
+			console.log(`\n✓ Checkpoint found: ${progress.completed}/${progress.total} runs completed (${progress.percent}%)`);
+			console.log("  Resuming from checkpoint...");
+		}
+	} else {
+		// Initialize new checkpoint
+		checkpoint.initializeEmpty(suts, cases, executorConfig, totalPlanned, gitCommit);
+		await checkpoint.save();
+		console.log("\n  Created new checkpoint (will save incrementally)");
+	}
+
+	// Collect completed results from checkpoint
+	const completedResults = checkpoint.getResults();
+
+	// Configure executor with checkpoint callback
+	const executorConfigWithCallbacks: Partial<ExecutorConfig> = {
+		...executorConfig,
 		onProgress: (progress) => {
 			if (options.verbose) {
 				console.log(
@@ -243,38 +321,46 @@ const runExecutePhase = async (options: EvaluateOptions, sutRegistry: ExpansionS
 				process.stdout.write(`\r  [${progress.completed}/${progress.total}] Complete...`);
 			}
 		},
+		onResult: async (result) => {
+			// Save checkpoint incrementally after each result
+			await checkpoint.saveIncremental(result);
+		},
 	};
 
-	const executor = createExecutor<BenchmarkGraphExpander, DegreePrioritisedExpansionResult>(executorConfig);
+	const executor = createExecutor<BenchmarkGraphExpander, DegreePrioritisedExpansionResult>(executorConfigWithCallbacks);
 
-	// Execute experiments
-	console.log("\nRunning experiments...");
-	const summary = await executor.execute(suts, cases, extractMetrics);
+	// Plan all runs and filter out completed ones
+	const allPlanned = executor.plan(suts, cases);
+	const remainingRuns = checkpoint.filterRemaining(allPlanned);
+
+	if (remainingRuns.length === 0) {
+		console.log("\n\nAll runs already completed. Skipping execution.");
+	} else {
+		console.log(`\nRunning experiments... (${remainingRuns.length} remaining, ${completedResults.length} cached)`);
+
+		// Execute all runs - checkpoint will track which are already done
+		await executor.execute(suts, cases, extractMetrics);
+	}
+
+	// Merge all results (completed from checkpoint + new)
+	const allResults = [...checkpoint.getResults()];
 
 	// Write results to file
-	const executeDir = resolve(options.outputDir, "execute");
-	if (!existsSync(executeDir)) {
-		mkdirSync(executeDir, { recursive: true });
-	}
-
 	const resultsFile = resolve(executeDir, "evaluation-results.json");
-	writeFileSync(resultsFile, JSON.stringify(summary, null, 2), "utf-8");
+	const finalSummary = {
+		totalRuns: allResults.length,
+		successfulRuns: allResults.length,
+		failedRuns: 0,
+		elapsedMs: 0, // Would need to track across runs
+		results: allResults,
+	};
+	writeFileSync(resultsFile, JSON.stringify(finalSummary, null, 2), "utf-8");
 
 	console.log(`\n\nResults written to: ${resultsFile}`);
-	console.log(`  Total runs: ${summary.totalRuns}`);
-	console.log(`  Successful: ${summary.successfulRuns}`);
-	console.log(`  Failed: ${summary.failedRuns}`);
-	console.log(`  Elapsed: ${(summary.elapsedMs / 1000).toFixed(2)}s`);
-
-	if (summary.errors.length > 0) {
-		console.log("\nErrors encountered:");
-		for (const error of summary.errors.slice(0, 5)) {
-			console.log(`  - ${error.runId}: ${error.error}`);
-		}
-		if (summary.errors.length > 5) {
-			console.log(`  ... and ${summary.errors.length - 5} more`);
-		}
-	}
+	console.log(`  Total runs: ${allResults.length}`);
+	console.log(`  From checkpoint: ${completedResults.length}`);
+	console.log(`  New this run: ${allResults.length - completedResults.length}`);
+	console.log(`\n${checkpoint.getSummary()}`);
 };
 
 /**
