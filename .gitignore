@@ -46,3 +46,7 @@ data/
 test-results.tap
 tap-results.json
 tap-metrics.csv
+
+# Evaluation results and checkpoints
+results/
+checkpoint.json
