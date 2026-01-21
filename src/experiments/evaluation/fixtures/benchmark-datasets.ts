@@ -216,7 +216,81 @@ export const DBLP: BenchmarkDatasetMeta = {
 /**
  * All available benchmark datasets.
  */
-export const BENCHMARK_DATASETS: BenchmarkDatasetMeta[] = [CORA, CITESEER, FACEBOOK, KARATE, LESMIS, DBLP];
+export const BENCHMARK_DATASETS: BenchmarkDatasetMeta[] = [
+	CORA,
+	CITESEER,
+	FACEBOOK,
+	KARATE,
+	LESMIS,
+	DBLP,
+	// SNAP Collaboration Networks
+	{
+		name: "CA-Astroph",
+		id: "ca-astroph",
+		description: "Arxiv Astro Physics collaboration network",
+		directed: false,
+		expectedNodes: 18_772,
+		expectedEdges: 198_050,
+		expectedContentSize: 1_200_000,
+		relativePath: "snap/ca-AstroPh.txt",
+		delimiter: /\t/,
+		source: "Leskovec et al., Graph Evolution: Densification and Shrinking Diameters, 2007",
+		remoteUrl: "https://snap.stanford.edu/data/ca-AstroPh.txt.gz",
+	},
+	{
+		name: "CA-CondMat",
+		id: "ca-condmat",
+		description: "Arxiv Condensed Matter collaboration network",
+		directed: false,
+		expectedNodes: 23_133,
+		expectedEdges: 93_439,
+		expectedContentSize: 2_400_000,
+		relativePath: "snap/ca-CondMat.txt",
+		delimiter: /\t/,
+		source: "Leskovec et al., Graph Evolution: Densification and Shrinking Diameters, 2007",
+		remoteUrl: "https://snap.stanford.edu/data/ca-CondMat.txt.gz",
+	},
+	{
+		name: "CA-HepPh",
+		id: "ca-hepph",
+		description: "Arxiv High Energy Physics collaboration network",
+		directed: false,
+		expectedNodes: 9877,
+		expectedEdges: 25_998,
+		expectedContentSize: 600_000,
+		relativePath: "snap/ca-HepPh.txt",
+		delimiter: /\t/,
+		source: "Leskovec et al., Graph Evolution: Densification and Shrinking Diameters, 2007",
+		remoteUrl: "https://snap.stanford.edu/data/ca-HepPh.txt.gz",
+	},
+	// SNAP Citation Networks
+	{
+		name: "Cit-HepPH",
+		id: "cit-hepph",
+		description: "Arxiv High Energy Physics Phenomenology citation network",
+		directed: true,
+		expectedNodes: 27_400,
+		expectedEdges: 352_807,
+		expectedContentSize: 6_700_000,
+		relativePath: "snap/cit-HepPh.txt",
+		delimiter: /\t/,
+		source: "Leskovec et al., Graph Evolution: Densification and Shrinking Diameters, 2007",
+		remoteUrl: "https://snap.stanford.edu/data/cit-HepPh.txt.gz",
+	},
+	{
+		name: "Cit-HepTH",
+		id: "cit-hepth",
+		description: "Arxiv High Energy Physics Theory citation network",
+		directed: true,
+		expectedNodes: 27_770,
+		expectedEdges: 352_807,
+		expectedContentSize: 6_700_000,
+		relativePath: "snap/cit-HepTh.txt",
+		delimiter: /\t/,
+		source: "Leskovec et al., Graph Evolution: Densification and Shrinking Diameters, 2007",
+		remoteUrl: "https://snap.stanford.edu/data/cit-HepTh.txt.gz",
+	},
+];
 
 /**
  * Map of dataset IDs to metadata.
