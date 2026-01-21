@@ -79,18 +79,30 @@ export const registerExpansionSuts = (registry: ExpansionSutRegistry = new SUTRe
 
 	// Standard BFS (Baseline)
 	registry.register(SUT_REGISTRATIONS["standard-bfs-v1.0.0"], (expander, seeds) => {
-		return new StandardBfsExpansion(expander, seeds as string[]);
+		// Handle N=1 by duplicating seed (consistent with degree-prioritised)
+		const seedArray = seeds.length >= 2
+			? seeds as string[]
+			: [seeds[0], seeds[0]] as [string, string];
+		return new StandardBfsExpansion(expander, seedArray);
 	});
 
 	// Frontier-Balanced (Baseline)
 	registry.register(SUT_REGISTRATIONS["frontier-balanced-v1.0.0"], (expander, seeds) => {
-		return new FrontierBalancedExpansion(expander, seeds as string[]);
+		// Handle N=1 by duplicating seed (consistent with degree-prioritised)
+		const seedArray = seeds.length >= 2
+			? seeds as string[]
+			: [seeds[0], seeds[0]] as [string, string];
+		return new FrontierBalancedExpansion(expander, seedArray);
 	});
 
 	// Random Priority (Baseline / Null Hypothesis)
 	registry.register(SUT_REGISTRATIONS["random-priority-v1.0.0"], (expander, seeds, config) => {
+		// Handle N=1 by duplicating seed (consistent with degree-prioritised)
 		const seed = typeof config?.seed === "number" ? config.seed : 42;
-		return new RandomPriorityExpansion(expander, seeds as string[], seed);
+		const seedArray = seeds.length >= 2
+			? seeds as string[]
+			: [seeds[0], seeds[0]] as [string, string];
+		return new RandomPriorityExpansion(expander, seedArray, seed);
 	});
 
 	return registry;
