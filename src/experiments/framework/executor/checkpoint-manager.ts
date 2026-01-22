@@ -240,8 +240,10 @@ export class CheckpointManager {
 				totalWorkers: this.totalWorkers,
 			};
 
-			// Record the result
-			data.completedRunIds.push(result.run.runId);
+			// Record the result (only if not already present)
+			if (!data.completedRunIds.includes(result.run.runId)) {
+				data.completedRunIds.push(result.run.runId);
+			}
 			data.results[result.run.runId] = result;
 			data.updatedAt = new Date().toISOString();
 
