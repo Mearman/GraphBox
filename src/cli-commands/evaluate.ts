@@ -90,13 +90,13 @@ const parseRunFilter = (filter: string, totalRuns: number): Set<number> => {
  * Parse parallel workers count from argument.
  * Supports:
  *   - "80%" - percentage of CPU cores (e.g., 80% of 12 = 10 workers)
- *   - "8" - exact number of workers
+ *   - "8" or 8 - exact number of workers
  *   - undefined - defaults to 75% of cores (3/4 of available cores)
- * @param arg - Argument value
+ * @param arg - Argument value (string or number)
  * @param argument
  * @returns Number of workers
  */
-const parseParallelWorkers = (argument: string | undefined): number => {
+const parseParallelWorkers = (argument: string | number | undefined): number => {
 	const totalCores = cpus().length;
 
 	if (argument === undefined) {
@@ -104,19 +104,22 @@ const parseParallelWorkers = (argument: string | undefined): number => {
 		return Math.max(1, Math.floor((totalCores * 3) / 4));
 	}
 
+	// Convert to string if it's a number
+	const argumentString = typeof argument === "number" ? argument.toString() : argument;
+
 	// Check for percentage format (e.g., "80%")
-	if (argument.endsWith("%")) {
-		const percentage = Number.parseFloat(argument.slice(0, -1));
+	if (argumentString.endsWith("%")) {
+		const percentage = Number.parseFloat(argumentString.slice(0, -1));
 		if (isNaN(percentage) || percentage <= 0 || percentage > 100) {
-			throw new Error(`Invalid worker percentage: ${argument}. Must be 1-100%`);
+			throw new Error(`Invalid worker percentage: ${argumentString}. Must be 1-100%`);
 		}
 		return Math.max(1, Math.floor((percentage / 100) * totalCores));
 	}
 
 	// Exact number
-	const count = Number.parseInt(argument, 10);
+	const count = Number.parseInt(argumentString, 10);
 	if (isNaN(count) || count <= 0) {
-		throw new Error(`Invalid worker count: ${argument}. Must be a positive number`);
+		throw new Error(`Invalid worker count: ${argumentString}. Must be a positive number`);
 	}
 	return Math.min(count, totalCores);
 };
@@ -528,9 +531,13 @@ const runExecutePhase = async (options: EvaluateOptions, sutRegistry: ExpansionS
 
 	// Apply run filter if specified
 	if (options.runFilter) {
+		// DEBUG: Log the raw run filter
+		console.log(`\nDEBUG: Received run filter (length ${options.runFilter.length}): ${options.runFilter.slice(0, 100)}...`);
+
 		// Try to parse as JSON array of run IDs first (for parallel workers)
 		try {
 			const runIdSet = parseRunIdFilter(options.runFilter);
+			console.log(`DEBUG: Parsed ${runIdSet.size} run IDs from filter`);
 			remainingRuns = remainingRuns.filter((run) => runIdSet.has(run.runId));
 			console.log(`\nRun filter applied: ${remainingRuns.length} runs selected (by run ID)`);
 		} catch {
