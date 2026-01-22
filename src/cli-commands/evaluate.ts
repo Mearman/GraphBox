@@ -545,36 +545,55 @@ const runExecutePhase = async (options: EvaluateOptions, sutRegistry: ExpansionS
 	// Default to true unless explicitly disabled
 	const sortBySize = options.sortBySize ?? true;
 	if (sortBySize && remainingRuns.length > 1) {
-		// Build a map of caseId to node count
-		const caseSizeMap = new Map<string, number>();
+		// Build a map of caseId to { nodes, edges } for sorting
+		const caseSizeMap = new Map<string, { nodes: number; edges: number }>();
 		for (const caseDef of cases) {
 			const nodeCount = caseDef.case.inputs.summary?.nodes as number | undefined;
+			const edgeCount = caseDef.case.inputs.summary?.edges as number | undefined;
 			if (typeof nodeCount === "number") {
-				caseSizeMap.set(caseDef.case.caseId, nodeCount);
+				caseSizeMap.set(caseDef.case.caseId, {
+					nodes: nodeCount,
+					edges: typeof edgeCount === "number" ? edgeCount : 0,
+				});
 			}
 		}
 
-		// Sort by node count (smallest first), then by caseId for determinism
+		// Sort by nodes first, then edges, then caseId for determinism
 		remainingRuns = remainingRuns.sort((a, b) => {
-			const aSize = caseSizeMap.get(a.caseId) ?? Number.MAX_SAFE_INTEGER;
-			const bSize = caseSizeMap.get(b.caseId) ?? Number.MAX_SAFE_INTEGER;
-			if (aSize !== bSize) {
-				return aSize - bSize;
+			const aSize = caseSizeMap.get(a.caseId) ?? { nodes: Number.MAX_SAFE_INTEGER, edges: 0 };
+			const bSize = caseSizeMap.get(b.caseId) ?? { nodes: Number.MAX_SAFE_INTEGER, edges: 0 };
+
+			// Primary sort by node count
+			if (aSize.nodes !== bSize.nodes) {
+				return aSize.nodes - bSize.nodes;
 			}
-			// Secondary sort by caseId for determinism
+			// Secondary sort by edge count
+			if (aSize.edges !== bSize.edges) {
+				return aSize.edges - bSize.edges;
+			}
+			// Tertiary sort by caseId for determinism
 			return a.caseId.localeCompare(b.caseId);
 		});
 
 		// Show size distribution
-		const sizeGroups = new Map<number, number>();
+		const sizeGroups = new Map<string, number>();
 		for (const run of remainingRuns) {
-			const size = caseSizeMap.get(run.caseId) ?? 0;
-			sizeGroups.set(size, (sizeGroups.get(size) ?? 0) + 1);
+			const size = caseSizeMap.get(run.caseId);
+			if (size) {
+				const key = `${size.nodes}n/${size.edges}e`;
+				sizeGroups.set(key, (sizeGroups.get(key) ?? 0) + 1);
+			}
 		}
-		const sortedSizes = [...sizeGroups.entries()].sort((a, b) => a[0] - b[0]);
-		console.log("\nRuns sorted by graph size (smallest first):");
+		// Sort by node count then edge count for display
+		const sortedSizes = [...sizeGroups.entries()].sort((a, b) => {
+			const [aNodes, aEdges] = a[0].split("/").map((s) => Number.parseInt(s, 10));
+			const [bNodes, bEdges] = b[0].split("/").map((s) => Number.parseInt(s, 10));
+			if (aNodes !== bNodes) return aNodes - bNodes;
+			return aEdges - bEdges;
+		});
+		console.log("\nRuns sorted by graph size (nodes then edges, ascending):");
 		for (const [size, count] of sortedSizes) {
-			console.log(`  ${size} nodes: ${count} runs`);
+			console.log(`  ${size}: ${count} runs`);
 		}
 	}
 
