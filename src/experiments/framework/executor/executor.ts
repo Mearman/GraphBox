@@ -168,9 +168,11 @@ const getProvenance = (collectProvenance: boolean): Provenance => {
  */
 export class Executor<TExpander, TResult> {
 	private readonly config: ExecutorConfig;
+	private readonly expanderCache: Map<string, TExpander>;
 
 	constructor(config: Partial<ExecutorConfig> = {}) {
 		this.config = { ...DEFAULT_EXECUTOR_CONFIG, ...config };
+		this.expanderCache = new Map();
 	}
 
 	/**
@@ -469,8 +471,23 @@ export class Executor<TExpander, TResult> {
 	): Promise<EvaluationResult> {
 		const runStartTime = performance.now();
 
-		// Create expander for this case
-		const expander = await caseDef.createExpander(caseDef.case.inputs);
+		// Create or reuse expander for this case (cached to avoid rebuilding adjacency lists)
+		const cacheKey = caseDef.case.caseId;
+		let expander = this.expanderCache.get(cacheKey);
+		if (!expander) {
+			// Apply timeout to graph loading as well (large graphs can hang during adjacency construction)
+			if (this.config.timeoutMs > 0) {
+				expander = await Promise.race([
+					caseDef.createExpander(caseDef.case.inputs),
+					new Promise<never>((_, reject) =>
+						setTimeout(() => reject(new Error(`Graph loading timeout after ${this.config.timeoutMs}ms`)), this.config.timeoutMs)
+					),
+				]);
+			} else {
+				expander = await caseDef.createExpander(caseDef.case.inputs);
+			}
+			this.expanderCache.set(cacheKey, expander);
+		}
 
 		// Get seeds
 		const seeds = caseDef.getSeeds(caseDef.case.inputs);
