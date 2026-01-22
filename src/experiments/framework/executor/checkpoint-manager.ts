@@ -153,6 +153,35 @@ const parseCheckpointLocation = (location: string | CheckpointManagerOptions): C
 };
 
 /**
+ * Module-level lock for sequential checkpoint saves.
+ * Prevents corruption when multiple workers try to save concurrently.
+ */
+const saveLock = {
+	locked: false,
+	queue: [] as Array<() => void>,
+
+	async acquire(): Promise<void> {
+		return new Promise<void>((resolve) => {
+			if (!this.locked) {
+				this.locked = true;
+				resolve();
+			} else {
+				this.queue.push(resolve);
+			}
+		});
+	},
+
+	release(): void {
+		const next = this.queue.shift();
+		if (next) {
+			next();
+		} else {
+			this.locked = false;
+		}
+	},
+};
+
+/**
  * Checkpoint manager for resumable execution.
  */
 export class CheckpointManager {
@@ -227,22 +256,28 @@ export class CheckpointManager {
 	 * @param result
 	 */
 	async saveIncremental(result: EvaluationResult): Promise<void> {
-		if (!this.data) {
-			this.initializeEmpty();
+		// Acquire lock to prevent concurrent writes
+		await saveLock.acquire();
+		try {
+			if (!this.data) {
+				this.initializeEmpty();
+			}
+
+			// Guard against null after initialization
+			if (!this.data) {
+				return;
+			}
+
+			// Record the result
+			this.data.completedRunIds.push(result.run.runId);
+			this.data.results[result.run.runId] = result;
+			this.dirty = true;
+
+			// Save immediately
+			await this.save();
+		} finally {
+			saveLock.release();
 		}
-
-		// Guard against null after initialization
-		if (!this.data) {
-			return;
-		}
-
-		// Record the result
-		this.data.completedRunIds.push(result.run.runId);
-		this.data.results[result.run.runId] = result;
-		this.dirty = true;
-
-		// Save immediately
-		await this.save();
 	}
 
 	/**

@@ -32,6 +32,9 @@ export interface ExecutorConfig {
 	/** Whether to collect provenance information */
 	collectProvenance: boolean;
 
+	/** Number of concurrent runs (1 = sequential) */
+	concurrency?: number;
+
 	/** Progress callback */
 	onProgress?: (progress: ExecutionProgress) => void;
 
@@ -222,13 +225,49 @@ export class Executor<TExpander, TResult> {
 		metricsExtractor: (result: TResult) => Record<string, number>
 	): Promise<ExecutionSummary> {
 		const startTime = performance.now();
-		const results: EvaluationResult[] = [];
-		const errors: Array<{ runId: string; error: string }> = [];
 
 		const plannedRuns = this.plan(suts, cases);
 		const sutMap = new Map(suts.map((s) => [s.registration.id, s]));
 		const caseMap = new Map(cases.map((c) => [c.case.caseId, c]));
 
+		// Use concurrency limit if specified, otherwise sequential
+		const concurrency = this.config.concurrency ?? 1;
+
+		if (concurrency <= 1) {
+			// Sequential execution (original behavior)
+			return this.executeSequential(
+				plannedRuns,
+				sutMap,
+				caseMap,
+				metricsExtractor,
+				startTime
+			);
+		}
+
+		// Parallel execution with concurrency limit
+		return this.executeParallel(
+			plannedRuns,
+			sutMap,
+			caseMap,
+			metricsExtractor,
+			startTime,
+			concurrency
+		);
+	}
+
+	/**
+	 * Execute runs sequentially (original behavior).
+	 * @internal
+	 */
+	private async executeSequential(
+		plannedRuns: PlannedRun[],
+		sutMap: Map<string, SutDefinition<TExpander, TResult>>,
+		caseMap: Map<string, CaseDefinition<TExpander>>,
+		metricsExtractor: (result: TResult) => Record<string, number>,
+		startTime: number
+	): Promise<ExecutionSummary> {
+		const results: EvaluationResult[] = [];
+		const errors: Array<{ runId: string; error: string }> = [];
 		let completed = 0;
 		let failed = 0;
 
@@ -282,6 +321,114 @@ export class Executor<TExpander, TResult> {
 					throw error;
 				}
 			}
+		}
+
+		return {
+			totalRuns: plannedRuns.length,
+			successfulRuns: completed,
+			failedRuns: failed,
+			elapsedMs: performance.now() - startTime,
+			results,
+			errors,
+		};
+	}
+
+	/**
+	 * Execute runs in parallel with a concurrency limit.
+	 * @internal
+	 */
+	private async executeParallel(
+		plannedRuns: PlannedRun[],
+		sutMap: Map<string, SutDefinition<TExpander, TResult>>,
+		caseMap: Map<string, CaseDefinition<TExpander>>,
+		metricsExtractor: (result: TResult) => Record<string, number>,
+		startTime: number,
+		concurrency: number
+	): Promise<ExecutionSummary> {
+		const results: EvaluationResult[] = [];
+		const errors: Array<{ runId: string; error: string }> = [];
+
+		// Thread-safe counters
+		let completed = 0;
+		let failed = 0;
+		const mutex = { locked: false };
+		const lockQueue: Array<() => void> = [];
+
+		const acquireLock = () => {
+			return new Promise<void>((resolve) => {
+				if (!mutex.locked) {
+					mutex.locked = true;
+					resolve();
+				} else {
+					lockQueue.push(resolve);
+				}
+			});
+		};
+
+		const releaseLock = () => {
+			const next = lockQueue.shift();
+			if (next) {
+				next();
+			} else {
+				mutex.locked = false;
+			}
+		};
+
+		// Process a single run
+		const processRun = async (run: PlannedRun): Promise<void> => {
+			const sutDef = sutMap.get(run.sutId);
+			const caseDef = caseMap.get(run.caseId);
+
+			if (!sutDef || !caseDef) {
+				await acquireLock();
+				errors.push({ runId: run.runId, error: "SUT or case not found" });
+				failed++;
+				releaseLock();
+				return;
+			}
+
+			try {
+				const result = await this.executeRun(run, sutDef, caseDef, metricsExtractor);
+
+				await acquireLock();
+				results.push(result);
+				completed++;
+
+				// Call onResult callback (checkpoint save)
+				if (this.config.onResult) {
+					await this.config.onResult(result);
+				}
+
+				// Report progress
+				if (this.config.onProgress) {
+					this.config.onProgress({
+						total: plannedRuns.length,
+						completed,
+						failed,
+						currentSut: run.sutId,
+						currentCase: run.caseId,
+						currentRepetition: run.repetition,
+						elapsedMs: performance.now() - startTime,
+					});
+				}
+				releaseLock();
+			} catch (error) {
+				await acquireLock();
+				const errorMessage = error instanceof Error ? error.message : String(error);
+				errors.push({ runId: run.runId, error: errorMessage });
+				failed++;
+				releaseLock();
+
+				if (!this.config.continueOnError) {
+					throw error;
+				}
+			}
+		};
+
+		// Worker pool: process runs in batches
+		for (let i = 0; i < plannedRuns.length; i += concurrency) {
+			const batch = plannedRuns.slice(i, i + concurrency);
+			await Promise.all(batch.map(processRun));
 		}
 
 		return {

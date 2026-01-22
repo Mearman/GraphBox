@@ -14,6 +14,7 @@
  */
 
 import { existsSync, mkdirSync, writeFileSync } from "node:fs";
+import { cpus } from "node:os";
 import { resolve } from "node:path";
 
 import type { DegreePrioritisedExpansionResult } from "../algorithms/traversal/degree-prioritised-expansion.js";
@@ -68,6 +69,9 @@ export interface EvaluateOptions {
 	/** Checkpoint mode: "file", "git", or "auto" */
 	checkpointMode: string;
 
+	/** Number of concurrent runs (1 = sequential) */
+	concurrency: number;
+
 	/** Filter claims by tag */
 	tags?: string[];
 
@@ -94,6 +98,9 @@ export const parseEvaluateArgs = (arguments_: ParsedArguments): EvaluateOptions 
 	const timeoutMs = getNumber(arguments_, "timeout", 0);
 	const collectProvenance = getBoolean(arguments_, "provenance", true);
 	const checkpointMode = getOptional<string>(arguments_, "checkpoint-mode", "auto");
+	// Default to number of CPU cores for parallel execution
+	const defaultConcurrency = cpus().length;
+	const concurrency = getNumber(arguments_, "concurrency", defaultConcurrency);
 
 	// Claim filtering
 	const tagsArgument = getOptional<string>(arguments_, "tags");
@@ -117,6 +124,7 @@ export const parseEvaluateArgs = (arguments_: ParsedArguments): EvaluateOptions 
 		timeoutMs,
 		collectProvenance,
 		checkpointMode,
+		concurrency,
 		tags,
 		claim,
 		table,
@@ -241,6 +249,13 @@ const runExecutePhase = async (options: EvaluateOptions, sutRegistry: ExpansionS
 	console.log("║  Phase 1: Execute                                         ║");
 	console.log("╚════════════════════════════════════════════════════════════╝\n");
 
+	// Show concurrency setting
+	if (options.concurrency > 1) {
+		console.log(`Concurrency: ${options.concurrency} (parallel execution)\n`);
+	} else {
+		console.log(`Concurrency: ${options.concurrency} (sequential)\n`);
+	}
+
 	// Get SUT and case definitions
 	const suts = getSutDefinitions(sutRegistry);
 	const cases = getCaseDefinitions(caseRegistry);
@@ -285,6 +300,7 @@ const runExecutePhase = async (options: EvaluateOptions, sutRegistry: ExpansionS
 		continueOnError: options.continueOnError,
 		timeoutMs: options.timeoutMs,
 		collectProvenance: options.collectProvenance,
+		concurrency: options.concurrency,
 	};
 
 	const isStale = checkpoint.isStale(suts, cases, executorConfig, totalPlanned);
