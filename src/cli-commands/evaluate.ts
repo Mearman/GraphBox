@@ -26,7 +26,7 @@ import { aggregateResults, type AggregationPipelineOptions, createAggregationOut
 import { createClaimSummary, evaluateClaims } from "../experiments/framework/claims/index.js";
 import { getClaimsByTag, getCoreClaims, THESIS_CLAIMS } from "../experiments/framework/claims/registry.js";
 // Framework imports
-import { createCheckpointManager, createExecutor, type ExecutorConfig,getGitCommit } from "../experiments/framework/executor/index.js";
+import { CheckpointManager, createExecutor, executeParallel, type ExecutorConfig, FileStorage, getGitCommit, InMemoryLock } from "../experiments/framework/executor/index.js";
 import { CaseRegistry } from "../experiments/framework/registry/case-registry.js";
 import { type GraphCaseRegistry,registerCases } from "../experiments/framework/registry/register-cases.js";
 import { type ExpansionSutRegistry,registerExpansionSuts } from "../experiments/framework/registry/register-suts.js";
@@ -34,12 +34,110 @@ import { SUTRegistry } from "../experiments/framework/registry/sut-registry.js";
 import { createLatexRenderer } from "../experiments/framework/renderers/latex-renderer.js";
 import { TABLE_SPECS } from "../experiments/framework/renderers/table-specs.js";
 import type { CaseDefinition } from "../experiments/framework/types/case.js";
+import type { EvaluationResult } from "../experiments/framework/types/result.js";
 import type { SutDefinition } from "../experiments/framework/types/sut.js";
 
 /**
  * Phases of the evaluation pipeline.
  */
-export type EvaluationPhase = "execute" | "aggregate" | "render" | "all";
+export type EvaluationPhase = "execute" | "aggregate" | "render" | "progress" | "all";
+
+/**
+ * Evaluation command options.
+ */
+/**
+ * Parse run filter string into a set of run indices.
+ * Supports:
+ *   - "0-40" - range (runs 0-40)
+ *   - "0,10,20,30" - specific runs
+ *   - "0-20,60-80" - multiple ranges
+ * @param filter - Filter string
+ * @param totalRuns - Total number of runs
+ * @returns Set of run indices to execute
+ */
+const parseRunFilter = (filter: string, totalRuns: number): Set<number> => {
+	const selected = new Set<number>();
+
+	for (const part of filter.split(",")) {
+		const trimmed = part.trim();
+		if (trimmed.includes("-")) {
+			// Range: "0-40"
+			const [start, end] = trimmed.split("-").map((s) => Number.parseInt(s, 10));
+			if (isNaN(start) || isNaN(end)) {
+				throw new TypeError(`Invalid range in run-filter: ${trimmed}`);
+			}
+			for (let index = start; index <= end; index++) {
+				if (index >= 0 && index < totalRuns) {
+					selected.add(index);
+				}
+			}
+		} else {
+			// Single index: "0" or "42"
+			const index = Number.parseInt(trimmed, 10);
+			if (isNaN(index)) {
+				throw new TypeError(`Invalid run index in run-filter: ${trimmed}`);
+			}
+			if (index >= 0 && index < totalRuns) {
+				selected.add(index);
+			}
+		}
+	}
+
+	return selected;
+};
+
+/**
+ * Parse parallel workers count from argument.
+ * Supports:
+ *   - "80%" - percentage of CPU cores (e.g., 80% of 12 = 10 workers)
+ *   - "8" - exact number of workers
+ *   - undefined - defaults to 75% of cores (3/4 of available cores)
+ * @param arg - Argument value
+ * @param argument
+ * @returns Number of workers
+ */
+const parseParallelWorkers = (argument: string | undefined): number => {
+	const totalCores = cpus().length;
+
+	if (argument === undefined) {
+		// Default: 75% of cores (3/4), leaving headroom for system
+		return Math.max(1, Math.floor((totalCores * 3) / 4));
+	}
+
+	// Check for percentage format (e.g., "80%")
+	if (argument.endsWith("%")) {
+		const percentage = Number.parseFloat(argument.slice(0, -1));
+		if (isNaN(percentage) || percentage <= 0 || percentage > 100) {
+			throw new Error(`Invalid worker percentage: ${argument}. Must be 1-100%`);
+		}
+		return Math.max(1, Math.floor((percentage / 100) * totalCores));
+	}
+
+	// Exact number
+	const count = Number.parseInt(argument, 10);
+	if (isNaN(count) || count <= 0) {
+		throw new Error(`Invalid worker count: ${argument}. Must be a positive number`);
+	}
+	return Math.min(count, totalCores);
+};
+
+/**
+ * Parse run ID filter from JSON array string.
+ * Used by parallel workers to receive their assigned run IDs.
+ * @param filter - JSON array string of run IDs
+ * @returns Set of run IDs to execute
+ */
+const parseRunIdFilter = (filter: string): Set<string> => {
+	try {
+		const runIds = JSON.parse(filter) as string[];
+		if (!Array.isArray(runIds)) {
+			throw new TypeError("Run filter must be a JSON array");
+		}
+		return new Set(runIds);
+	} catch {
+		throw new Error(`Invalid run ID filter format: ${filter}`);
+	}
+};
 
 /**
  * Evaluation command options.
@@ -72,6 +170,15 @@ export interface EvaluateOptions {
 	/** Number of concurrent runs (1 = sequential) */
 	concurrency: number;
 
+	/** Use multi-process parallel execution (spawns child processes) */
+	parallel: boolean;
+
+	/** Number of parallel workers (default: CPU count) */
+	parallelWorkers?: number;
+
+	/** Filter specific runs (for manual multi-core execution) */
+	runFilter?: string;
+
 	/** Filter claims by tag */
 	tags?: string[];
 
@@ -102,6 +209,15 @@ export const parseEvaluateArgs = (arguments_: ParsedArguments): EvaluateOptions 
 	const defaultConcurrency = cpus().length;
 	const concurrency = getNumber(arguments_, "concurrency", defaultConcurrency);
 
+	// Multi-process parallel execution (spawns child processes, true multi-core)
+	const parallel = getBoolean(arguments_, "parallel", false);
+	const parallelWorkersArgument = getOptional<string>(arguments_, "parallel-workers");
+	const parallelWorkers = parseParallelWorkers(parallelWorkersArgument);
+
+	// Run filtering for manual multi-core execution
+	// Format: JSON array of run IDs or comma-separated run IDs
+	const runFilter = getOptional<string>(arguments_, "run-filter");
+
 	// Claim filtering
 	const tagsArgument = getOptional<string>(arguments_, "tags");
 	const tags = tagsArgument?.split(",").map((t) => t.trim());
@@ -111,8 +227,8 @@ export const parseEvaluateArgs = (arguments_: ParsedArguments): EvaluateOptions 
 	const verbose = getBoolean(arguments_, "verbose", false);
 
 	// Validate phase
-	if (!["execute", "aggregate", "render", "all"].includes(phase)) {
-		throw new Error(`Invalid phase: ${phase}. Must be one of: execute, aggregate, render, all`);
+	if (!["execute", "aggregate", "render", "progress", "all"].includes(phase)) {
+		throw new Error(`Invalid phase: ${phase}. Must be one of: execute, aggregate, render, progress, all`);
 	}
 
 	return {
@@ -125,6 +241,9 @@ export const parseEvaluateArgs = (arguments_: ParsedArguments): EvaluateOptions 
 		collectProvenance,
 		checkpointMode,
 		concurrency,
+		parallel,
+		parallelWorkers,
+		runFilter,
 		tags,
 		claim,
 		table,
@@ -276,15 +395,34 @@ const runExecutePhase = async (options: EvaluateOptions, sutRegistry: ExpansionS
 		mkdirSync(executeDir, { recursive: true });
 	}
 
-	// Create checkpoint based on mode
-	// For file mode, use full path to checkpoint.json
-	// For git mode, use namespace string
+	// Get worker identity for sharded checkpoint mode
+	const workerName = process.env.GRAPHBOX_WORKER_NAME ?? "main";
+	const workerIndexString = process.env.GRAPHBOX_WORKER_INDEX;
+	const isWorker = workerName !== "main";
+	const workerIndex = workerIndexString === undefined ? undefined : Number.parseInt(workerIndexString, 10);
+
+	// Determine checkpoint path based on worker identity
 	const checkpointMode = options.checkpointMode as "file" | "git" | "auto";
-	const checkpoint = createCheckpointManager(
-		checkpointMode === "git" || checkpointMode === "auto"
-			? { mode: checkpointMode, pathOrNamespace: "results-execute" }
-			: { mode: "file", pathOrNamespace: resolve(executeDir, "checkpoint.json") }
-	);
+	let checkpointPath: string;
+	if (isWorker && workerIndex !== undefined) {
+		// Worker mode: use sharded checkpoint path
+		checkpointPath = resolve(executeDir, `checkpoint-worker-${String(workerIndex).padStart(2, "0")}.json`);
+	} else {
+		// Main process: use main checkpoint path
+		checkpointPath = resolve(executeDir, "checkpoint.json");
+	}
+
+	// Create checkpoint storage
+	const storage = new FileStorage(checkpointPath);
+	const lock = new InMemoryLock();
+
+	// Create checkpoint manager
+	const checkpoint = new CheckpointManager({
+		storage,
+		lock,
+		workerIndex,
+		basePath: executeDir,
+	});
 	await checkpoint.load();
 
 	// Get git commit for reproducibility
@@ -325,29 +463,76 @@ const runExecutePhase = async (options: EvaluateOptions, sutRegistry: ExpansionS
 	// Collect completed results from checkpoint
 	const completedResults = checkpoint.getResults();
 
+	// Track run timing per worker
+	const runStartTimes = new Map<string, number>();
+	const workerRunCount = { current: 0, total: 0 };
+
+	// Format duration as human-readable string
+	const formatDuration = (ms: number): string => {
+		if (ms < 1000) return `${ms.toFixed(0)}ms`;
+		if (ms < 60_000) return `${(ms / 1000).toFixed(1)}s`;
+		return `${(ms / 60_000).toFixed(1)}m`;
+	};
+
 	// Configure executor with checkpoint callback
-	const executorConfigWithCallbacks: Partial<ExecutorConfig> = {
+	const executorConfigWithCallbacks = {
 		...executorConfig,
 		onProgress: (progress) => {
-			if (options.verbose) {
-				console.log(
-					`  [${progress.completed}/${progress.total}] ${progress.currentSut} @ ${progress.currentCase} (rep ${progress.currentRepetition})`
-				);
-			} else {
-				process.stdout.write(`\r  [${progress.completed}/${progress.total}] Complete...`);
+			// Track run start time
+			const runKey = `${progress.currentSut}-${progress.currentCase}-${progress.currentRepetition}`;
+			if (!runStartTimes.has(runKey)) {
+				runStartTimes.set(runKey, Date.now());
+				workerRunCount.total = progress.total;
+
+				const timestamp = new Date().toISOString().slice(11, 19);
+				if (isWorker) {
+					console.log(`\n[${timestamp}] ${workerName}: START ${progress.currentSut} @ ${progress.currentCase} (rep ${progress.currentRepetition})`);
+				} else if (options.verbose) {
+					console.log(`[${timestamp}] START ${progress.currentSut} @ ${progress.currentCase} (rep ${progress.currentRepetition})`);
+				}
 			}
 		},
 		onResult: async (result) => {
+			// Calculate and display run duration
+			const runKey = `${result.run.sut}-${result.run.caseId}-${result.run.repetition}`;
+			const startTime = runStartTimes.get(runKey) ?? Date.now();
+			const duration = Date.now() - startTime;
+			workerRunCount.current++;
+
+			const timestamp = new Date().toISOString().slice(11, 19);
+			if (isWorker) {
+				console.log(`[${timestamp}] ${workerName}: DONE ${result.run.sut} @ ${result.run.caseId} (${formatDuration(duration)})`);
+			} else if (options.verbose) {
+				console.log(`[${timestamp}] DONE ${result.run.sut} @ ${result.run.caseId} (${formatDuration(duration)})`);
+			} else {
+				process.stdout.write(`\r  [${workerRunCount.current}/${workerRunCount.total}] Complete...`);
+			}
+
 			// Save checkpoint incrementally after each result
 			await checkpoint.saveIncremental(result);
 		},
-	};
+	} as ExecutorConfig & { onResult?: (result: EvaluationResult) => void | Promise<void> };
 
 	const executor = createExecutor<BenchmarkGraphExpander, DegreePrioritisedExpansionResult>(executorConfigWithCallbacks);
 
 	// Plan all runs and filter out completed ones
 	const allPlanned = executor.plan(suts, cases);
-	const remainingRuns = checkpoint.filterRemaining(allPlanned);
+	let remainingRuns = checkpoint.filterRemaining(allPlanned);
+
+	// Apply run filter if specified
+	if (options.runFilter) {
+		// Try to parse as JSON array of run IDs first (for parallel workers)
+		try {
+			const runIdSet = parseRunIdFilter(options.runFilter);
+			remainingRuns = remainingRuns.filter((run) => runIdSet.has(run.runId));
+			console.log(`\nRun filter applied: ${remainingRuns.length} runs selected (by run ID)`);
+		} catch {
+			// Fall back to index-based filtering for backward compatibility
+			const filterSet = parseRunFilter(options.runFilter, allPlanned.length);
+			remainingRuns = remainingRuns.filter((_run, index) => filterSet.has(index));
+			console.log(`\nRun filter applied: ${remainingRuns.length} runs selected (${options.runFilter})`);
+		}
+	}
 
 	if (remainingRuns.length === 0) {
 		console.log("\n\nAll runs already completed. Skipping execution.");
@@ -355,7 +540,39 @@ const runExecutePhase = async (options: EvaluateOptions, sutRegistry: ExpansionS
 		console.log(`\nRunning experiments... (${remainingRuns.length} remaining, ${completedResults.length} cached)`);
 
 		// Execute all runs - checkpoint will track which are already done
-		await executor.execute(suts, cases, extractMetrics);
+		if (options.parallel) {
+			// Multi-process parallel execution for true multi-core utilization
+			console.log(`Using multi-process parallel execution (${options.parallelWorkers ?? cpus().length} workers)`);
+			await executeParallel(remainingRuns, suts, cases, executorConfigWithCallbacks, {
+				workers: options.parallelWorkers,
+				checkpointDir: executeDir,
+			});
+
+			// Merge worker checkpoints after parallel execution (main process only)
+			if (!isWorker) {
+				console.log("\nMerging worker checkpoints...");
+
+				// Find all worker shard files
+				const shardFiles = await FileStorage.findShards(executeDir);
+
+				if (shardFiles.length > 0) {
+					console.log(`Found ${shardFiles.length} worker checkpoint shards`);
+					for (const shard of shardFiles) {
+						console.log(`  - ${shard}`);
+					}
+
+					// Merge shards into main checkpoint
+					await checkpoint.mergeShards(shardFiles);
+					console.log("Merged worker checkpoints into main checkpoint");
+
+					// Optionally clean up shard files after merge
+					// (Keep them for now for debugging)
+				}
+			}
+		} else {
+			// Single-process async execution (concurrent but single-threaded)
+			await executor.execute(suts, cases, extractMetrics);
+		}
 	}
 
 	// Merge all results (completed from checkpoint + new)
@@ -546,8 +763,109 @@ const runRenderPhase = async (options: EvaluateOptions): Promise<void> => {
  * Execute the evaluate command.
  * @param options
  */
+/**
+ * Show current evaluation progress from checkpoint.
+ * @param options
+ */
+const showProgress = async (options: EvaluateOptions): Promise<void> => {
+	const checkpointPath = resolve(options.outputDir, "execute/checkpoint.json");
+
+	// Check if checkpoint exists
+	try {
+		const { readFile } = await import("node:fs/promises");
+		const content = await readFile(checkpointPath, "utf-8");
+		const checkpoint = JSON.parse(content);
+
+		const completedRunIds = checkpoint.completedRunIds ?? [];
+		const uniqueCompleted = [...new Set(completedRunIds)];
+		const totalRuns = checkpoint.config?.totalRuns ?? 132;
+		const percent = ((uniqueCompleted.length / totalRuns) * 100).toFixed(1);
+
+		console.log("╔════════════════════════════════════════════════════════════╗");
+		console.log("║   Evaluation Progress                                         ║");
+		console.log("╚════════════════════════════════════════════════════════════╝");
+
+		console.log(`\n  Completed: ${uniqueCompleted.length}/${totalRuns} runs (${percent}%)`);
+		console.log(`  Remaining: ${totalRuns - uniqueCompleted.length} runs`);
+		console.log(`  Checkpoint: ${checkpointPath}`);
+
+		// Show active workers
+		const { execSync } = await import("node:child_process");
+		try {
+			const workerCount = execSync("ps aux | grep 'cli.js evaluate' | grep -v grep | wc -l", { encoding: "utf-8" }).trim();
+			const workers = Number.parseInt(workerCount, 10);
+			if (workers > 0) {
+				console.log(`  Active workers: ${workers}`);
+			}
+		} catch {
+			// Worker count check failed, continue
+		}
+
+		// Group results by SUT and case
+		const results = checkpoint.results ?? {};
+		const bySut: Record<string, number> = {};
+		const byCase: Record<string, number> = {};
+
+		for (const runId of uniqueCompleted) {
+			const result = results[String(runId)] as EvaluationResult | undefined;
+			if (result) {
+				const sut = result.run?.sut ?? "unknown";
+				const caseId = result.run?.caseId ?? "unknown";
+				bySut[sut] = (bySut[sut] ?? 0) + 1;
+				byCase[caseId] = (byCase[caseId] ?? 0) + 1;
+			}
+		}
+
+		if (Object.keys(bySut).length > 0) {
+			console.log("\n  By SUT:");
+			for (const [sut, count] of Object.entries(bySut).sort((a, b) => b[1] - a[1])) {
+				console.log(`    ${sut}: ${count}`);
+			}
+		}
+
+		if (Object.keys(byCase).length > 0 && Object.keys(byCase).length < 20) {
+			console.log("\n  By Case:");
+			for (const [caseId, count] of Object.entries(byCase).sort((a, b) => b[1] - a[1])) {
+				console.log(`    ${caseId}: ${count}`);
+			}
+		}
+
+		// Show timestamps
+		if (checkpoint.createdAt) {
+			const started = new Date(checkpoint.createdAt);
+			const updated = new Date(checkpoint.updatedAt);
+			const elapsed = Date.now() - started.getTime();
+			const elapsedMin = (elapsed / 60_000).toFixed(1);
+
+			console.log(`\n  Started: ${started.toLocaleString()}`);
+			console.log(`  Last update: ${updated.toLocaleString()}`);
+			console.log(`  Elapsed: ${elapsedMin}m`);
+
+			// Estimate remaining time
+			if (uniqueCompleted.length > 0) {
+				const avgTimePerRun = elapsed / uniqueCompleted.length;
+				const remainingRuns = totalRuns - uniqueCompleted.length;
+				const estimatedRemaining = (avgTimePerRun * remainingRuns / 60_000).toFixed(0);
+				console.log(`  Est. remaining: ~${estimatedRemaining}m`);
+			}
+		}
+	} catch {
+		console.log("╔════════════════════════════════════════════════════════════╗");
+		console.log("║   Evaluation Progress                                         ║");
+		console.log("╚════════════════════════════════════════════════════════════╝");
+		console.log(`\n  No checkpoint found at: ${checkpointPath}`);
+		console.log("  Run --phase=execute to start evaluation");
+	}
+};
+
 export const executeEvaluate = async (options: EvaluateOptions): Promise<void> => {
 	try {
+		// Handle progress phase separately (no registry initialization needed)
+		if (options.phase === "progress") {
+			await showProgress(options);
+			return;
+		}
+
 		// Initialize registries
 		const sutRegistry = registerExpansionSuts(new SUTRegistry());
 		const caseRegistry: GraphCaseRegistry = await registerCases(new CaseRegistry());
