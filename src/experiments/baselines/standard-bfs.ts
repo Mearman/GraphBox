@@ -120,6 +120,10 @@ export class StandardBfsExpansion<T> {
 	 * @returns Expansion results including paths and sampled subgraph
 	 */
 	async run(): Promise<StandardBfsResult> {
+		// OPTIMISATION: Only check for path intersections when N >= 2 seeds
+		// For single-seed (ego-graph) experiments, there are no paths to reconstruct
+		const shouldCheckPaths = this.frontiers.length >= 2;
+
 		// Core loop: round-robin across frontiers, FIFO within each
 		while (this.hasNonEmptyFrontier()) {
 			this.stats.iterations++;
@@ -156,16 +160,19 @@ export class StandardBfsExpansion<T> {
 				// Add to queue (FIFO - end of queue)
 				activeState.queue.push(targetId);
 
-				// Check intersection with ALL other frontiers
-				for (let other = 0; other < this.frontiers.length; other++) {
-					if (other !== activeIndex && this.frontiers[other].visited.has(targetId)) {
-						const path = this.reconstructPath(activeState, this.frontiers[other], targetId);
-						if (path && !this.pathExists(activeIndex, other, path)) {
-							this.paths.push({
-								fromSeed: activeIndex,
-								toSeed: other,
-								nodes: path,
-							});
+				// OPTIMISATION: Skip expensive intersection checks for single-seed experiments
+				if (shouldCheckPaths) {
+					// Check intersection with ALL other frontiers
+					for (let other = 0; other < this.frontiers.length; other++) {
+						if (other !== activeIndex && this.frontiers[other].visited.has(targetId)) {
+							const path = this.reconstructPath(activeState, this.frontiers[other], targetId);
+							if (path && !this.pathExists(activeIndex, other, path)) {
+								this.paths.push({
+									fromSeed: activeIndex,
+									toSeed: other,
+									nodes: path,
+								});
+							}
 						}
 					}
 				}

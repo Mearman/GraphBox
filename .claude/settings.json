@@ -16,6 +16,8 @@
       "Bash(*&& git commit --all*)",
       "Bash(git commit * --no-verify*)",
       "Bash(git commit --no-verify *)",
+      "Bash(git commit -n*)",
+      "Bash(git commit * -n*)",
       "Bash(*--no-verify*)"
     ]
   }
