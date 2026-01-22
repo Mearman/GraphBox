@@ -11,6 +11,11 @@ export class BenchmarkGraphExpander implements GraphExpander<{ id: string }> {
 	private adjacency: Map<string, string[]>;
 	private degrees: Map<string, number>;
 	private nodeIds: string[];
+	private nodeIndex: Map<string, number>; // nodeId -> position index
+	private edgesBySource: Array<{source: string; target: string}>; // Flat edge array
+	private edgesByTarget?: Array<{source: string; target: string}>; // For undirected reverse lookups
+	private adjacencyBuilt: Set<string>;
+	private directed: boolean;
 
 	constructor(
 		private graph: {
@@ -21,38 +26,96 @@ export class BenchmarkGraphExpander implements GraphExpander<{ id: string }> {
 	) {
 		this.adjacency = new Map();
 		this.degrees = new Map();
+		this.adjacencyBuilt = new Set();
+		this.directed = directed;
 		this.nodeIds = graph.getAllNodes().map((n) => n.id);
 
-		// Build adjacency list and compute degrees
-		for (const nodeId of this.nodeIds) {
-			this.adjacency.set(nodeId, []);
-			this.degrees.set(nodeId, 0);
+		// Build node index for O(1) existence checks
+		this.nodeIndex = new Map();
+		for (const [index, id] of this.nodeIds.entries()) {
+			this.nodeIndex.set(id, index);
 		}
 
-		for (const edge of graph.getAllEdges()) {
-			const sourceNeighbors = this.adjacency.get(edge.source);
-			if (sourceNeighbors) {
-				sourceNeighbors.push(edge.target);
-			}
-			this.degrees.set(edge.source, (this.degrees.get(edge.source) ?? 0) + 1);
+		// Store edges as sorted flat arrays for binary search
+		// This is O(E log E) for sorting, done once in constructor
+		const allEdges = graph.getAllEdges();
+		this.edgesBySource = [...allEdges].sort((a, b) => a.source.localeCompare(b.source));
+		if (!directed) {
+			this.edgesByTarget = [...allEdges].sort((a, b) => a.target.localeCompare(b.target));
+		}
 
+		// Compute degrees in O(E) by counting edges
+		// This is much faster than building full adjacency
+		for (const edge of allEdges) {
+			this.degrees.set(edge.source, (this.degrees.get(edge.source) ?? 0) + 1);
 			if (!directed) {
-				const targetNeighbors = this.adjacency.get(edge.target);
-				if (targetNeighbors) {
-					targetNeighbors.push(edge.source);
-				}
 				this.degrees.set(edge.target, (this.degrees.get(edge.target) ?? 0) + 1);
 			}
 		}
 	}
 
 	async getNeighbors(nodeId: string): Promise<Neighbor[]> {
+		// Build adjacency incrementally on first access
+		if (!this.adjacencyBuilt.has(nodeId)) {
+			this.buildAdjacencyForNode(nodeId);
+		}
+
 		const neighbors = this.adjacency.get(nodeId) ?? [];
 		return neighbors.map((targetId) => ({ targetId, relationshipType: "edge" }));
 	}
 
 	getDegree(nodeId: string): number {
+		// Degree is pre-computed in constructor O(E)
 		return this.degrees.get(nodeId) ?? 0;
+	}
+
+	/**
+	 * Build adjacency for a specific node on-demand using binary search.
+	 * Only processes the subset of edges relevant to this node.
+	 * @param nodeId
+	 */
+	private buildAdjacencyForNode(nodeId: string): void {
+		if (this.adjacency.has(nodeId)) {
+			return; // Already built
+		}
+
+		const neighbors: string[] = [];
+
+		// Binary search to find range of edges where source === nodeId
+		// This is O(log E) instead of O(E)
+		let start = 0;
+		let end = this.edgesBySource.length;
+		while (start < end) {
+			const mid = Math.floor((start + end) / 2);
+			const edge = this.edgesBySource[mid];
+			if (edge.source === nodeId) {
+				// Found the range - expand to find all matching edges
+				neighbors.push(edge.target);
+
+				// Search forward
+				let index = mid + 1;
+				while (index < end && this.edgesBySource[index].source === nodeId) {
+					neighbors.push(this.edgesBySource[index].target);
+					index++;
+				}
+
+				// Search backward
+				let index_ = mid - 1;
+				while (index_ >= 0 && this.edgesBySource[index_].source === nodeId) {
+					neighbors.push(this.edgesBySource[index_].target);
+					index_--;
+				}
+
+				break;
+			} else if (edge.source < nodeId) {
+				start = mid + 1;
+			} else {
+				end = mid;
+			}
+		}
+
+		this.adjacency.set(nodeId, neighbors);
+		this.adjacencyBuilt.add(nodeId);
 	}
 
 	async getNode(nodeId: string): Promise<{ id: string } | null> {
