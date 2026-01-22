@@ -276,6 +276,39 @@ describe("CheckpointManager", () => {
 			expect(saved?.completedRunIds).toContain("run1");
 			expect(saved?.completedRunIds).toContain("run2");
 		});
+
+		it("should not add duplicate runIds when same result is saved twice", async () => {
+			const result = createTestResult("duplicate-run");
+
+			// Save the same result twice (simulating retry or race condition)
+			await checkpoint.saveIncremental(result);
+			await checkpoint.saveIncremental(result);
+
+			const saved = storage.getData();
+
+			// Should only have one entry in completedRunIds
+			expect(saved?.completedRunIds).toEqual(["duplicate-run"]);
+			expect(saved?.completedRunIds).toHaveLength(1);
+
+			// Result should still be stored
+			expect(saved?.results["duplicate-run"]).toEqual(result);
+		});
+
+		it("should not add duplicate runIds when saving same runId with different results", async () => {
+			const result1 = createTestResult("conflict-run");
+			const result2 = createTestResult("conflict-run");
+			// Modify result2 to be different
+			result2.run.sut = "different-sut";
+
+			// Save both results with same runId
+			await checkpoint.saveIncremental(result1);
+			await checkpoint.saveIncremental(result2);
+
+			const saved = storage.getData();
+
+			// Should only have one entry in completedRunIds
+			expect(saved?.completedRunIds.filter((id) => id === "conflict-run")).toHaveLength(1);
+		});
 	});
 
 	describe("isCompleted", () => {
