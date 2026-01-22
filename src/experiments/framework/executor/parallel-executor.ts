@@ -13,10 +13,34 @@
 import { spawn } from "node:child_process";
 import { randomBytes } from "node:crypto";
 import { cpus } from "node:os";
-import { resolve } from "node:path";
+import { dirname, resolve } from "node:path";
 
 import type { EvaluationResult } from "../types/result.js";
 import type { ExecutorConfig, PlannedRun } from "./executor.js";
+
+/**
+ * Get the package root directory by resolving from the entry point script.
+ * The CLI entry point is dist/cli.js, so we go up one level from there.
+ */
+const getPackageRoot = (): string => {
+	// Get the directory containing the entry point script
+	// process.argv[1] is the path to the executed script (e.g., /path/to/graphbox/dist/cli.js)
+	const entryPoint = process.argv[1];
+
+	// Resolve to absolute path first (handles relative paths like "dist/cli.js")
+	const absoluteEntry = resolve(entryPoint);
+	const entryDir = dirname(absoluteEntry);
+
+	// If entry point is in dist/, go up one level to get package root
+	if (entryDir.endsWith("/dist") || entryDir.endsWith(String.raw`\dist`)) {
+		return entryDir.slice(0, -5); // Remove "/dist"
+	}
+
+	// Fallback: use current directory
+	return process.cwd();
+};
+
+const PACKAGE_ROOT = getPackageRoot();
 
 export interface ParallelExecutorOptions {
 	/** Number of parallel processes (default: CPU count) */
@@ -27,6 +51,9 @@ export interface ParallelExecutorOptions {
 
 	/** Checkpoint directory (defaults to "results/execute") */
 	checkpointDir?: string;
+
+	/** Per-run timeout in milliseconds (0 = no timeout) */
+	timeoutMs?: number;
 }
 
 /**
@@ -89,10 +116,14 @@ export const shardPath = (checkpointDir: string, workerIndex: number): string =>
 export const executeParallel = async (runs: PlannedRun[], suts: unknown, cases: unknown[], config: ExecutorConfig & { onResult?: (result: EvaluationResult) => void }, options: ParallelExecutorOptions = {}): Promise<{ results: EvaluationResult[]; errors: Array<{ runId: string; error: string }> }> => {
 	const numberWorkers = options.workers ?? cpus().length;
 	const nodePath = options.nodePath ?? process.execPath;
-	const checkpointDir = options.checkpointDir ?? resolve(process.cwd(), "results/execute");
+	const checkpointDir = options.checkpointDir ?? resolve(PACKAGE_ROOT, "results/execute");
+	const timeoutMs = options.timeoutMs ?? config.timeoutMs ?? 0;
 
 	console.log(`ParallelExecutor: Spawning ${numberWorkers} processes for ${runs.length} runs`);
 	console.log(`Checkpoint directory: ${checkpointDir}`);
+	if (timeoutMs > 0) {
+		console.log(`Per-run timeout: ${timeoutMs}ms (${Math.round(timeoutMs / 1000)}s)`);
+	}
 
 	// Generate unique names for each worker
 	const workerNames = generateWorkerNames(numberWorkers);
@@ -122,15 +153,21 @@ export const executeParallel = async (runs: PlannedRun[], suts: unknown, cases: 
 		const workerCheckpointPath = shardPath(checkpointDir, index);
 
 		const arguments_ = [
-			resolve(process.cwd(), "dist/cli.js"),
+			resolve(PACKAGE_ROOT, "dist/cli.js"),
 			"evaluate",
 			"--phase=execute",
 			"--checkpoint-mode=file",
 			`--run-filter=${runFilter}`, // JSON array - needs to be quoted in shell but spawn() handles this
 		];
 
+		// Add timeout if specified
+		if (timeoutMs > 0) {
+			arguments_.push(`--timeout=${timeoutMs}`);
+		}
+
 		return spawn(nodePath, arguments_, {
 			stdio: "inherit",
+			cwd: PACKAGE_ROOT, // Ensure workers use the package root as working directory
 			env: {
 				...process.env,
 				NODE_OPTIONS: "--max-old-space-size=4096",

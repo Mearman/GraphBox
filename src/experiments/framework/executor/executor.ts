@@ -217,16 +217,18 @@ export class Executor<TExpander, TResult> {
 	 * @param suts - SUTs to execute
 	 * @param cases - Cases to run against
 	 * @param metricsExtractor - Function to extract metrics from result
+	 * @param plannedRuns - Optional pre-filtered planned runs (for parallel workers)
 	 * @returns Execution summary with all results
 	 */
 	async execute(
 		suts: SutDefinition<TExpander, TResult>[],
 		cases: CaseDefinition<TExpander>[],
-		metricsExtractor: (result: TResult) => Record<string, number>
+		metricsExtractor: (result: TResult) => Record<string, number>,
+		plannedRuns?: PlannedRun[]
 	): Promise<ExecutionSummary> {
 		const startTime = performance.now();
 
-		const plannedRuns = this.plan(suts, cases);
+		const effectivePlannedRuns = plannedRuns ?? this.plan(suts, cases);
 		const sutMap = new Map(suts.map((s) => [s.registration.id, s]));
 		const caseMap = new Map(cases.map((c) => [c.case.caseId, c]));
 
@@ -236,7 +238,7 @@ export class Executor<TExpander, TResult> {
 		if (concurrency <= 1) {
 			// Sequential execution (original behavior)
 			return this.executeSequential(
-				plannedRuns,
+				effectivePlannedRuns,
 				sutMap,
 				caseMap,
 				metricsExtractor,
@@ -246,7 +248,7 @@ export class Executor<TExpander, TResult> {
 
 		// Parallel execution with concurrency limit
 		return this.executeParallel(
-			plannedRuns,
+			effectivePlannedRuns,
 			sutMap,
 			caseMap,
 			metricsExtractor,
@@ -476,8 +478,14 @@ export class Executor<TExpander, TResult> {
 		// Create SUT instance
 		const sutInstance = sutDef.factory(expander, seeds, run.config);
 
-		// Execute
-		const sutResult = await sutInstance.run();
+		// Execute with timeout if configured
+		let sutResult: TResult;
+		sutResult = await (this.config.timeoutMs > 0 ? Promise.race([
+			sutInstance.run(),
+			new Promise<never>((_, reject) =>
+				setTimeout(() => reject(new Error(`Timeout after ${this.config.timeoutMs}ms`)), this.config.timeoutMs)
+			),
+		]) : sutInstance.run());
 
 		const executionTimeMs = performance.now() - runStartTime;
 

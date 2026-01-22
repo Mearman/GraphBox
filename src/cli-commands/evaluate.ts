@@ -616,6 +616,7 @@ const runExecutePhase = async (options: EvaluateOptions, sutRegistry: ExpansionS
 			await executeParallel(remainingRuns, suts, cases, executorConfigWithCallbacks, {
 				workers: options.parallelWorkers,
 				checkpointDir: executeDir,
+				timeoutMs: options.timeoutMs,
 			});
 
 			// Merge worker checkpoints after parallel execution (main process only)
@@ -641,7 +642,8 @@ const runExecutePhase = async (options: EvaluateOptions, sutRegistry: ExpansionS
 			}
 		} else {
 			// Single-process async execution (concurrent but single-threaded)
-			await executor.execute(suts, cases, extractMetrics);
+			// Pass remainingRuns to avoid re-executing completed runs
+			await executor.execute(suts, cases, extractMetrics, remainingRuns);
 		}
 	}
 
