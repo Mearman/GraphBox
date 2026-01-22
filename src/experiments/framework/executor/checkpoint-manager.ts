@@ -437,13 +437,16 @@ export class CheckpointManager {
 	 * @returns The merged checkpoint data
 	 */
 	async mergeShards(shardPaths: string[]): Promise<CheckpointData> {
+		// Start with main checkpoint data, or empty if no checkpoint exists yet
+		const mainData = this.data;
 		const merged: CheckpointData = {
-			configHash: "",
-			createdAt: new Date().toISOString(),
+			configHash: mainData?.configHash ?? "",
+			createdAt: mainData?.createdAt ?? new Date().toISOString(),
 			updatedAt: new Date().toISOString(),
-			completedRunIds: [],
-			results: {},
-			totalPlanned: 0,
+			completedRunIds: [...(mainData?.completedRunIds ?? [])],
+			results: { ...(mainData?.results ?? {}) },
+			totalPlanned: mainData?.totalPlanned ?? 0,
+			gitCommit: mainData?.gitCommit,
 		};
 
 		// Load and merge each shard
