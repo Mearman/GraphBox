@@ -257,6 +257,11 @@ export class Executor<TExpander, TResult> {
 
 	/**
 	 * Execute runs sequentially (original behavior).
+	 * @param plannedRuns
+	 * @param sutMap
+	 * @param caseMap
+	 * @param metricsExtractor
+	 * @param startTime
 	 * @internal
 	 */
 	private async executeSequential(
@@ -335,6 +340,12 @@ export class Executor<TExpander, TResult> {
 
 	/**
 	 * Execute runs in parallel with a concurrency limit.
+	 * @param plannedRuns
+	 * @param sutMap
+	 * @param caseMap
+	 * @param metricsExtractor
+	 * @param startTime
+	 * @param concurrency
 	 * @internal
 	 */
 	private async executeParallel(
@@ -356,11 +367,11 @@ export class Executor<TExpander, TResult> {
 
 		const acquireLock = () => {
 			return new Promise<void>((resolve) => {
-				if (!mutex.locked) {
+				if (mutex.locked) {
+					lockQueue.push(resolve);
+				} else {
 					mutex.locked = true;
 					resolve();
-				} else {
-					lockQueue.push(resolve);
 				}
 			});
 		};
@@ -426,8 +437,8 @@ export class Executor<TExpander, TResult> {
 		};
 
 		// Worker pool: process runs in batches
-		for (let i = 0; i < plannedRuns.length; i += concurrency) {
-			const batch = plannedRuns.slice(i, i + concurrency);
+		for (let index = 0; index < plannedRuns.length; index += concurrency) {
+			const batch = plannedRuns.slice(index, index + concurrency);
 			await Promise.all(batch.map(processRun));
 		}
 

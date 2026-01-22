@@ -5,11 +5,10 @@
  * Separated from implementation files for clarity and testability.
  */
 
-import type { CheckpointStorage } from "./checkpoint-storage.js";
-import type { Lock } from "./checkpoint-storage.js";
+import type { CheckpointStorage , Lock } from "./checkpoint-storage.js";
 
 // Re-export Lock for convenience
-export type { Lock };
+
 
 /**
  * Checkpoint manager configuration options.
@@ -61,3 +60,5 @@ export interface CheckpointShard {
 	/** Whether this shard exists and is valid */
 	valid: boolean;
 }
+
+export {type Lock} from "./checkpoint-storage.js";
