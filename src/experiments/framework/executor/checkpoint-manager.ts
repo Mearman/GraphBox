@@ -5,23 +5,31 @@
  * 1. Writing incremental checkpoints after each completed run
  * 2. Detecting configuration changes to invalidate stale checkpoints
  * 3. Skipping completed runs when resuming
+ * 4. Supporting sharded checkpoints for parallel workers
  *
  * Supports pluggable storage backends:
  * - FileStorage: JSON files (fast, local)
  * - GitStorage: Git notes (version controlled, shareable)
  *
+ * Dependency Injection:
+ * - Storage backend can be injected for testing
+ * - Lock implementation can be injected for custom concurrency control
+ *
  * Usage:
  * ```typescript
- * // File-based (default)
- * const checkpoint = new CheckpointManager("results/execute/checkpoint.json");
+ * // Direct instantiation with injected storage
+ * const storage = new FileStorage("results/execute/checkpoint.json");
+ * const lock = new InMemoryLock();
+ * const checkpoint = new CheckpointManager({ storage, lock });
  *
- * // Git-based
- * const gitCheckpoint = new CheckpointManager("git:results-execute");
- *
- * // Explicit mode
+ * // Sharded mode for parallel workers
+ * const shardStorage = new FileStorage("results/execute/checkpoint-worker-0.json");
  * const checkpoint = new CheckpointManager({
- *   mode: "git",
- *   namespace: "results-execute"
+ *   storage: shardStorage,
+ *   lock,
+ *   workerIndex: 0,
+ *   totalWorkers: 4,
+ *   basePath: "results/execute"
  * });
  *
  * await checkpoint.load();
@@ -35,10 +43,15 @@
  * );
  *
  * executor.execute({...}, {
- *   onResult: (result) => checkpoint.recordResult(result)
+ *   onResult: (result) => checkpoint.saveIncremental(result)
  * });
  *
- * await checkpoint.save();
+ * // After all workers complete, merge shards
+ * await checkpoint.mergeShards([
+ *   "results/execute/checkpoint-worker-0.json",
+ *   "results/execute/checkpoint-worker-1.json",
+ *   ...
+ * ]);
  * ```
  */
 
@@ -47,12 +60,14 @@ import { createHash } from "node:crypto";
 import type { CaseDefinition } from "../types/case.js";
 import type { EvaluationResult } from "../types/result.js";
 import type { SutDefinition } from "../types/sut.js";
-import type { CheckpointMode,CheckpointStorage  } from "./checkpoint-storage.js";
-import { createCheckpointStorage, getGitNamespace } from "./checkpoint-storage.js";
+import type { CheckpointStorage, Lock } from "./checkpoint-storage.js";
+import { FileStorage, InMemoryLock } from "./checkpoint-storage.js";
 import type { ExecutorConfig, PlannedRun } from "./executor.js";
 
 // Re-export types for convenience
 export type { CheckpointMode } from "./checkpoint-storage.js";
+export type { Lock } from "./checkpoint-storage.js";
+export { InMemoryLock } from "./checkpoint-storage.js";
 
 /**
  * Checkpoint file format.
@@ -78,6 +93,12 @@ export interface CheckpointData {
 
 	/** Git commit at checkpoint time (for reproducibility) */
 	gitCommit?: string;
+
+	/** Worker index (for sharded checkpoints) */
+	workerIndex?: number;
+
+	/** Total workers (for sharded checkpoints) */
+	totalWorkers?: number;
 }
 
 /**
@@ -102,107 +123,51 @@ interface ConfigSignature {
 }
 
 /**
- * Checkpoint manager options.
+ * Checkpoint manager constructor options.
  */
 export interface CheckpointManagerOptions {
-	/** Storage mode: "file", "git", or "auto" */
-	mode?: CheckpointMode;
+	/** Storage backend for checkpoint data */
+	storage: CheckpointStorage;
 
-	/** File path (for file mode) or namespace (for git mode) */
-	pathOrNamespace?: string;
+	/** Concurrency lock for checkpoint saves */
+	lock?: Lock;
 
-	/** Git repository root (for git mode) */
-	repoRoot?: string;
+	/** Worker identity for sharded mode */
+	workerIndex?: number;
+
+	/** Total number of workers in sharded mode */
+	totalWorkers?: number;
+
+	/** Base checkpoint path (for sharding) */
+	basePath?: string;
 }
 
 /**
- * Parse checkpoint location string.
- * Supports formats:
- * - "path/to/file.json" -> file mode
- * - "git:namespace" -> git mode
- * - "file:path" -> explicit file mode
- * - { mode: "git", namespace: "results-execute" } -> options object
- * @param location
- */
-const parseCheckpointLocation = (location: string | CheckpointManagerOptions): CheckpointManagerOptions => {
-	if (typeof location !== "string") {
-		return location;
-	}
-
-	// Check for git:namespace format
-	if (location.startsWith("git:")) {
-		return {
-			mode: "git",
-			pathOrNamespace: location.slice(4),
-		};
-	}
-
-	// Check for file:path format
-	if (location.startsWith("file:")) {
-		return {
-			mode: "file",
-			pathOrNamespace: location.slice(5),
-		};
-	}
-
-	// Default to file mode with path
-	return {
-		mode: "file",
-		pathOrNamespace: location,
-	};
-};
-
-/**
- * Module-level lock for sequential checkpoint saves.
- * Prevents corruption when multiple workers try to save concurrently.
- */
-const saveLock = {
-	locked: false,
-	queue: [] as Array<() => void>,
-
-	async acquire(): Promise<void> {
-		return new Promise<void>((resolve) => {
-			if (!this.locked) {
-				this.locked = true;
-				resolve();
-			} else {
-				this.queue.push(resolve);
-			}
-		});
-	},
-
-	release(): void {
-		const next = this.queue.shift();
-		if (next) {
-			next();
-		} else {
-			this.locked = false;
-		}
-	},
-};
-
-/**
  * Checkpoint manager for resumable execution.
+ *
+ * Uses dependency injection for storage and lock.
+ * Enables sharded checkpoints for parallel worker execution.
  */
 export class CheckpointManager {
 	private readonly storage: CheckpointStorage;
+	private readonly lock: Lock;
+	private readonly workerIndex?: number;
+	private readonly totalWorkers?: number;
+	private readonly basePath?: string;
 	private data: CheckpointData | null = null;
 	private dirty = false;
 
-	constructor(location: string | CheckpointManagerOptions = "results/execute/checkpoint.json") {
-		const options = parseCheckpointLocation(location);
-
-		// Auto-detect path/namespace if not provided
-		let pathOrNamespace = options.pathOrNamespace;
-		if (!pathOrNamespace) {
-			pathOrNamespace = options.mode === "git" || options.mode === "auto" ? getGitNamespace("results/execute") : "results/execute/checkpoint.json";
-		}
-
-		this.storage = createCheckpointStorage(
-			options.mode ?? "auto",
-			pathOrNamespace,
-			options.repoRoot
-		);
+	/**
+	 * Create a new CheckpointManager.
+	 *
+	 * @param options - CheckpointManagerOptions with injected storage
+	 */
+	constructor(options: CheckpointManagerOptions) {
+		this.storage = options.storage;
+		this.lock = options.lock ?? new InMemoryLock();
+		this.workerIndex = options.workerIndex;
+		this.totalWorkers = options.totalWorkers;
+		this.basePath = options.basePath;
 	}
 
 	/**
@@ -252,31 +217,38 @@ export class CheckpointManager {
 
 	/**
 	 * Save checkpoint incrementally (after each result).
-	 * Uses storage backend's save mechanism.
+	 * Uses the injected lock to prevent concurrent writes.
 	 * @param result
 	 */
 	async saveIncremental(result: EvaluationResult): Promise<void> {
 		// Acquire lock to prevent concurrent writes
-		await saveLock.acquire();
+		await this.lock.acquire();
 		try {
-			if (!this.data) {
-				this.initializeEmpty();
-			}
+			// Always reload from file to get latest state (prevents stale memory corruption)
+			const currentData = await this.storage.load();
 
-			// Guard against null after initialization
-			if (!this.data) {
-				return;
-			}
+			// Use loaded data or initialize if empty
+			let data: CheckpointData;
+			data = currentData ? currentData : {
+				configHash: "pending",
+				createdAt: new Date().toISOString(),
+				updatedAt: new Date().toISOString(),
+				completedRunIds: [],
+				results: {},
+				totalPlanned: 0,
+				workerIndex: this.workerIndex,
+				totalWorkers: this.totalWorkers,
+			};
 
 			// Record the result
-			this.data.completedRunIds.push(result.run.runId);
-			this.data.results[result.run.runId] = result;
-			this.dirty = true;
+			data.completedRunIds.push(result.run.runId);
+			data.results[result.run.runId] = result;
+			data.updatedAt = new Date().toISOString();
 
 			// Save immediately
-			await this.save();
+			await this.storage.save(data);
 		} finally {
-			saveLock.release();
+			this.lock.release();
 		}
 	}
 
@@ -375,6 +347,8 @@ export class CheckpointManager {
 			results: {},
 			totalPlanned: totalRuns ?? 0,
 			gitCommit,
+			workerIndex: this.workerIndex,
+			totalWorkers: this.totalWorkers,
 		};
 		this.dirty = true;
 	}
@@ -452,6 +426,73 @@ export class CheckpointManager {
 	}
 
 	/**
+	 * Merge multiple worker checkpoint shards into a single aggregated checkpoint.
+	 *
+	 * This is called after all parallel workers complete to aggregate their results.
+	 * Each worker writes to its own shard file to avoid race conditions.
+	 *
+	 * @param shardPaths - Array of checkpoint shard file paths
+	 * @returns The merged checkpoint data
+	 */
+	async mergeShards(shardPaths: string[]): Promise<CheckpointData> {
+		const merged: CheckpointData = {
+			configHash: "",
+			createdAt: new Date().toISOString(),
+			updatedAt: new Date().toISOString(),
+			completedRunIds: [],
+			results: {},
+			totalPlanned: 0,
+		};
+
+		// Load and merge each shard
+		for (const shardPath of shardPaths) {
+			const shardStorage = new FileStorage(shardPath);
+			const shardData = await shardStorage.load();
+
+			if (shardData) {
+				// Merge completed run IDs
+				merged.completedRunIds.push(...shardData.completedRunIds);
+
+				// Merge results
+				Object.assign(merged.results, shardData.results);
+
+				// Keep the maximum totalPlanned
+				if (shardData.totalPlanned > merged.totalPlanned) {
+					merged.totalPlanned = shardData.totalPlanned;
+				}
+
+				// Keep the earliest createdAt
+				if (shardData.createdAt < merged.createdAt) {
+					merged.createdAt = shardData.createdAt;
+				}
+
+				// Preserve config hash from first valid shard
+				if (merged.configHash === "" && shardData.configHash !== "pending") {
+					merged.configHash = shardData.configHash;
+				}
+
+				// Preserve git commit if available
+				if (shardData.gitCommit && !merged.gitCommit) {
+					merged.gitCommit = shardData.gitCommit;
+				}
+			}
+		}
+
+		// Deduplicate completedRunIds (in case of any overlap)
+		merged.completedRunIds = [...new Set(merged.completedRunIds)];
+		merged.updatedAt = new Date().toISOString();
+
+		// Save merged checkpoint
+		await this.storage.save(merged);
+
+		// Update internal state
+		this.data = merged;
+		this.dirty = false;
+
+		return merged;
+	}
+
+	/**
 	 * Get checkpoint summary for logging.
 	 */
 	getSummary(): string {
@@ -477,20 +518,17 @@ export const getGitCommit = async (): Promise<string | undefined> => {
 };
 
 /**
- * Create a checkpoint manager with default path.
- * @param location - Checkpoint location (path, git:namespace, or options)
- */
-export const createCheckpointManager = (location: string | CheckpointManagerOptions = "results/execute/checkpoint.json"): CheckpointManager => new CheckpointManager(location);
-
-/**
- * Create a file-based checkpoint manager.
+ * Create a checkpoint manager with default file storage.
+ *
+ * Convenience factory for simple cases.
+ *
  * @param path - Checkpoint file path
+ * @param lock - Optional lock implementation
  */
-export const createFileCheckpointManager = (path = "results/execute/checkpoint.json"): CheckpointManager => new CheckpointManager({ mode: "file", pathOrNamespace: path });
-
-/**
- * Create a git-based checkpoint manager.
- * @param namespace - Git notes namespace (defaults to "results-execute")
- * @param repoRoot - Git repository root (defaults to process.cwd())
- */
-export const createGitCheckpointManager = (namespace = "results-execute", repoRoot?: string): CheckpointManager => new CheckpointManager({ mode: "git", pathOrNamespace: namespace, repoRoot });
+export const createFileCheckpointManager = (
+	path = "results/execute/checkpoint.json",
+	lock?: Lock
+): CheckpointManager => {
+	const storage = new FileStorage(path);
+	return new CheckpointManager({ storage, lock });
+};
