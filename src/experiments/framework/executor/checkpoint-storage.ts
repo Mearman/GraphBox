@@ -5,6 +5,10 @@
  * - FileStorage: JSON files in local filesystem (fast, no git required)
  * - GitStorage: Git notes attached to commits (version controlled, shareable)
  *
+ * Dependency Injection:
+ * - FileSystem interface enables mocking for tests
+ * - Lock interface enables pluggable concurrency control
+ *
  * Usage:
  * ```typescript
  * // File-based (default)
@@ -13,6 +17,10 @@
  * // Git-based (stores as git notes)
  * const gitStorage = new GitStorage("results-execute");
  *
+ * // With mock file system for testing
+ * const mockFs = new MockFileSystem();
+ * const fileStorage = new FileStorage("checkpoint.json", mockFs);
+ *
  * // Auto-detect based on mode
  * const storage = createCheckpointStorage("file", "results/execute/checkpoint.json");
  * const storage = createCheckpointStorage("git", "results-execute");
@@ -20,10 +28,132 @@
  */
 
 import { execSync } from "node:child_process";
-import { mkdir, readFile, unlink, writeFile } from "node:fs/promises";
+import { mkdir, readdir, readFile, unlink, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 
 import type { CheckpointData } from "./checkpoint-manager.js";
+
+/**
+ * Interface for file system operations.
+ * Enables mocking for testing and alternative storage backends.
+ */
+export interface FileSystem {
+	/**
+	 * Read file contents as UTF-8 string.
+	 * @param path - Absolute file path
+	 * @returns File contents or throws if not found
+	 */
+	readFile(path: string): Promise<string>;
+
+	/**
+	 * Write string content to a file.
+	 * @param path - Absolute file path
+	 * @param content - Content to write
+	 */
+	writeFile(path: string, content: string): Promise<void>;
+
+	/**
+	 * Create directory recursively if it doesn't exist.
+	 * @param path - Directory path
+	 * @param options - Options including recursive flag
+	 */
+	mkdir(path: string, options: { recursive: boolean }): Promise<void>;
+
+	/**
+	 * Delete a file if it exists.
+	 * @param path - File path to delete
+	 */
+	unlink(path: string): Promise<void>;
+
+	/**
+	 * Check if file/directory exists.
+	 * @param path - Path to check
+	 */
+	access(path: string): Promise<void>;
+
+	/**
+	 * List directory contents.
+	 * @param path - Directory path
+	 * @returns Array of entry names
+	 */
+	readdir(path: string): Promise<string[]>;
+}
+
+/**
+ * Production file system implementation using node:fs/promises.
+ */
+export class NodeFileSystem implements FileSystem {
+	async readFile(path: string): Promise<string> {
+		return readFile(path, "utf-8");
+	}
+
+	async writeFile(path: string, content: string): Promise<void> {
+		await writeFile(path, content, "utf-8");
+	}
+
+	async mkdir(path: string, options: { recursive: boolean }): Promise<void> {
+		await mkdir(path, options);
+	}
+
+	async unlink(path: string): Promise<void> {
+		await unlink(path);
+	}
+
+	async access(path: string): Promise<void> {
+		const { constants } = await import("node:fs/promises");
+		const { access } = await import("node:fs/promises");
+		await access(path, constants.F_OK);
+	}
+
+	async readdir(path: string): Promise<string[]> {
+		return readdir(path);
+	}
+}
+
+/**
+ * Interface for concurrency control.
+ * Enables pluggable locking mechanisms for checkpoint saves.
+ */
+export interface Lock {
+	/**
+	 * Acquire the lock, waiting if necessary.
+	 */
+	acquire(): Promise<void>;
+
+	/**
+	 * Release the lock.
+	 */
+	release(): void;
+}
+
+/**
+ * In-memory lock for single-process use.
+ * Provides queue-based locking for concurrent saves within a process.
+ */
+export class InMemoryLock implements Lock {
+	private locked = false;
+	private queue: Array<() => void> = [];
+
+	async acquire(): Promise<void> {
+		return new Promise<void>((resolve) => {
+			if (this.locked) {
+				this.queue.push(resolve);
+			} else {
+				this.locked = true;
+				resolve();
+			}
+		});
+	}
+
+	release(): void {
+		const next = this.queue.shift();
+		if (next) {
+			next();
+		} else {
+			this.locked = false;
+		}
+	}
+}
 
 /**
  * Checkpoint storage mode.
@@ -65,18 +195,22 @@ export interface CheckpointStorage {
 /**
  * File-based checkpoint storage.
  * Stores checkpoints as JSON files in the local filesystem.
+ *
+ * Supports dependency injection of FileSystem for testing.
  */
 export class FileStorage implements CheckpointStorage {
 	readonly type = "file";
 	private readonly path: string;
+	private readonly fs: FileSystem;
 
-	constructor(path: string) {
+	constructor(path: string, fs?: FileSystem) {
 		this.path = resolve(path);
+		this.fs = fs ?? new NodeFileSystem();
 	}
 
 	async load(): Promise<CheckpointData | null> {
 		try {
-			const content = await readFile(this.path, "utf-8");
+			const content = await this.fs.readFile(this.path);
 			return JSON.parse(content) as CheckpointData;
 		} catch {
 			return null;
@@ -85,9 +219,10 @@ export class FileStorage implements CheckpointStorage {
 
 	async save(data: CheckpointData): Promise<void> {
 		try {
-			await mkdir(dirname(this.path), { recursive: true });
+			await this.fs.mkdir(dirname(this.path), { recursive: true });
 			data.updatedAt = new Date().toISOString();
-			await writeFile(this.path, JSON.stringify(data, null, 2), "utf-8");
+			const content = JSON.stringify(data, null, 2);
+			await this.fs.writeFile(this.path, content);
 		} catch (error) {
 			console.warn(`Failed to save checkpoint to ${this.path}: ${error}`);
 			throw error;
@@ -96,7 +231,7 @@ export class FileStorage implements CheckpointStorage {
 
 	async delete(): Promise<void> {
 		try {
-			await unlink(this.path);
+			await this.fs.unlink(this.path);
 		} catch {
 			// Ignore if file doesn't exist
 		}
@@ -104,7 +239,7 @@ export class FileStorage implements CheckpointStorage {
 
 	async exists(): Promise<boolean> {
 		try {
-			const content = await readFile(this.path, "utf-8");
+			const content = await this.fs.readFile(this.path);
 			const data = JSON.parse(content);
 			return data !== null && typeof data === "object";
 		} catch {
@@ -114,6 +249,51 @@ export class FileStorage implements CheckpointStorage {
 
 	getPath(): string {
 		return this.path;
+	}
+
+	/**
+	 * Find all worker checkpoint shard files in a directory.
+	 * Looks for files matching the pattern "checkpoint-worker-*.json".
+	 *
+	 * @param baseDir - Directory to search for shard files
+	 * @param fs - FileSystem implementation (defaults to NodeFileSystem)
+	 * @returns Sorted array of shard file paths
+	 */
+	static async findShards(baseDir: string, fs?: FileSystem): Promise<string[]> {
+		const fileSystem = fs ?? new NodeFileSystem();
+		const shardFiles: string[] = [];
+
+		try {
+			const entries = await fileSystem.readdir(baseDir);
+			for (const entry of entries) {
+				if (entry.startsWith("checkpoint-worker-") && entry.endsWith(".json")) {
+					shardFiles.push(resolve(baseDir, entry));
+				}
+			}
+		} catch {
+			// Directory doesn't exist or is not readable
+			return [];
+		}
+
+		// Sort by worker index (extract numeric part for proper ordering)
+		return shardFiles.sort((a, b) => {
+			const aMatch = a.match(/checkpoint-worker-(\d+)\.json/);
+			const bMatch = b.match(/checkpoint-worker-(\d+)\.json/);
+			const aIndex = aMatch ? Number.parseInt(aMatch[1], 10) : -1;
+			const bIndex = bMatch ? Number.parseInt(bMatch[1], 10) : -1;
+			return aIndex - bIndex;
+		});
+	}
+
+	/**
+	 * Generate a shard file path for a specific worker.
+	 *
+	 * @param baseDir - Base directory for checkpoints
+	 * @param workerIndex - Worker index (0-based)
+	 * @returns Path to the shard checkpoint file
+	 */
+	static shardPath(baseDir: string, workerIndex: number): string {
+		return resolve(baseDir, `checkpoint-worker-${String(workerIndex).padStart(2, "0")}.json`);
 	}
 }
 
