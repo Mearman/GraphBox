@@ -179,6 +179,9 @@ export interface EvaluateOptions {
 	/** Filter specific runs (for manual multi-core execution) */
 	runFilter?: string;
 
+	/** Sort runs by graph size (smallest first) - default true */
+	sortBySize?: boolean;
+
 	/** Filter claims by tag */
 	tags?: string[];
 
@@ -218,6 +221,9 @@ export const parseEvaluateArgs = (arguments_: ParsedArguments): EvaluateOptions 
 	// Format: JSON array of run IDs or comma-separated run IDs
 	const runFilter = getOptional<string>(arguments_, "run-filter");
 
+	// Sort runs by graph size (smallest first) - default true
+	const sortBySize = getOptional<boolean>(arguments_, "sort-by-size", true);
+
 	// Claim filtering
 	const tagsArgument = getOptional<string>(arguments_, "tags");
 	const tags = tagsArgument?.split(",").map((t) => t.trim());
@@ -244,6 +250,7 @@ export const parseEvaluateArgs = (arguments_: ParsedArguments): EvaluateOptions 
 		parallel,
 		parallelWorkers,
 		runFilter,
+		sortBySize,
 		tags,
 		claim,
 		table,
@@ -531,6 +538,43 @@ const runExecutePhase = async (options: EvaluateOptions, sutRegistry: ExpansionS
 			const filterSet = parseRunFilter(options.runFilter, allPlanned.length);
 			remainingRuns = remainingRuns.filter((_run, index) => filterSet.has(index));
 			console.log(`\nRun filter applied: ${remainingRuns.length} runs selected (${options.runFilter})`);
+		}
+	}
+
+	// Sort runs by graph size (smallest first) for better progress visibility
+	// Default to true unless explicitly disabled
+	const sortBySize = options.sortBySize ?? true;
+	if (sortBySize && remainingRuns.length > 1) {
+		// Build a map of caseId to node count
+		const caseSizeMap = new Map<string, number>();
+		for (const caseDef of cases) {
+			const nodeCount = caseDef.case.inputs.summary?.nodes as number | undefined;
+			if (typeof nodeCount === "number") {
+				caseSizeMap.set(caseDef.case.caseId, nodeCount);
+			}
+		}
+
+		// Sort by node count (smallest first), then by caseId for determinism
+		remainingRuns = remainingRuns.sort((a, b) => {
+			const aSize = caseSizeMap.get(a.caseId) ?? Number.MAX_SAFE_INTEGER;
+			const bSize = caseSizeMap.get(b.caseId) ?? Number.MAX_SAFE_INTEGER;
+			if (aSize !== bSize) {
+				return aSize - bSize;
+			}
+			// Secondary sort by caseId for determinism
+			return a.caseId.localeCompare(b.caseId);
+		});
+
+		// Show size distribution
+		const sizeGroups = new Map<number, number>();
+		for (const run of remainingRuns) {
+			const size = caseSizeMap.get(run.caseId) ?? 0;
+			sizeGroups.set(size, (sizeGroups.get(size) ?? 0) + 1);
+		}
+		const sortedSizes = [...sizeGroups.entries()].sort((a, b) => a[0] - b[0]);
+		console.log("\nRuns sorted by graph size (smallest first):");
+		for (const [size, count] of sortedSizes) {
+			console.log(`  ${size} nodes: ${count} runs`);
 		}
 	}
 
