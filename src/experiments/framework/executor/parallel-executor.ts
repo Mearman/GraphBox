@@ -108,7 +108,12 @@ export const executeParallel = async (runs: PlannedRun[], suts: unknown, cases: 
 	// Create a run filter function for each batch
 	const runFilters = batches.map((batch, _index) => {
 		const runIds = new Set(batch.map((r) => r.runId));
-		return JSON.stringify([...runIds]);
+		const filter = JSON.stringify([...runIds]);
+		const firstRunId = batch[0]?.runId ?? "none";
+		const lastRunId = batch.at(-1)?.runId ?? "none";
+		console.log(`DEBUG: Batch ${_index} has ${batch.length} runs, filter length: ${filter.length}`);
+		console.log(`DEBUG:   First run: ${firstRunId}, Last run: ${lastRunId}`);
+		return filter;
 	});
 
 	// Spawn worker processes
@@ -121,7 +126,7 @@ export const executeParallel = async (runs: PlannedRun[], suts: unknown, cases: 
 			"evaluate",
 			"--phase=execute",
 			"--checkpoint-mode=file",
-			`--run-filter=${runFilter}`,
+			`--run-filter=${runFilter}`, // JSON array - needs to be quoted in shell but spawn() handles this
 		];
 
 		return spawn(nodePath, arguments_, {
