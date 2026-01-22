@@ -12,6 +12,7 @@ import type { CaseDefinition, Primitive } from "../types/case.js";
 import type { CorrectnessResult,EvaluationResult, Provenance } from "../types/result.js";
 import type { SutDefinition } from "../types/sut.js";
 import {generateRunId } from "./run-id.js";
+import { MemoryMonitor } from "./memory-monitor.js";
 
 /**
  * Configuration for experiment execution.
@@ -40,6 +41,18 @@ export interface ExecutorConfig {
 
 	/** Per-run callback (can be async) */
 	onResult?: (result: EvaluationResult) => void | Promise<void>;
+
+	/** Enable memory monitoring (default: true) */
+	monitorMemory?: boolean;
+
+	/** Memory warning threshold in MB (default: 1024) */
+	memoryWarningThresholdMb?: number;
+
+	/** Memory critical threshold in MB (default: 2048) */
+	memoryCriticalThresholdMb?: number;
+
+	/** Abort execution at critical memory level (default: false) */
+	abortOnMemoryCritical?: boolean;
 }
 
 /**
@@ -169,10 +182,31 @@ const getProvenance = (collectProvenance: boolean): Provenance => {
 export class Executor<TExpander, TResult> {
 	private readonly config: ExecutorConfig;
 	private readonly expanderCache: Map<string, TExpander>;
+	private readonly memoryMonitor?: MemoryMonitor;
 
 	constructor(config: Partial<ExecutorConfig> = {}) {
-		this.config = { ...DEFAULT_EXECUTOR_CONFIG, ...config };
+		this.config = {
+			...DEFAULT_EXECUTOR_CONFIG,
+			monitorMemory: true,
+			...config,
+		};
 		this.expanderCache = new Map();
+
+		// Initialize memory monitor if enabled
+		if (this.config.monitorMemory) {
+			this.memoryMonitor = new MemoryMonitor({
+				warningThresholdMb: this.config.memoryWarningThresholdMb,
+				criticalThresholdMb: this.config.memoryCriticalThresholdMb,
+				verbose: true,
+				onWarningLevelChange: (level, stats) => {
+					if (level === "critical" && this.config.abortOnMemoryCritical) {
+						throw new Error(
+							`Memory critical threshold exceeded (${stats.rssMb.toFixed(1)}MB). Aborting execution.`
+						);
+					}
+				},
+			});
+		}
 	}
 
 	/**
@@ -470,23 +504,34 @@ export class Executor<TExpander, TResult> {
 		metricsExtractor: (result: TResult) => Record<string, number>
 	): Promise<EvaluationResult> {
 		const runStartTime = performance.now();
+		let peakMemoryBytes = 0;
+
+		// Check memory before execution
+		if (this.memoryMonitor) {
+			const initialLevel = this.memoryMonitor.check();
+			if (initialLevel === "emergency") {
+				throw new Error("Memory at emergency level before execution. Aborting.");
+			}
+		}
 
 		// Create or reuse expander for this case (cached to avoid rebuilding adjacency lists)
 		const cacheKey = caseDef.case.caseId;
 		let expander = this.expanderCache.get(cacheKey);
 		if (!expander) {
 			// Apply timeout to graph loading as well (large graphs can hang during adjacency construction)
-			if (this.config.timeoutMs > 0) {
-				expander = await Promise.race([
-					caseDef.createExpander(caseDef.case.inputs),
-					new Promise<never>((_, reject) =>
-						setTimeout(() => reject(new Error(`Graph loading timeout after ${this.config.timeoutMs}ms`)), this.config.timeoutMs)
-					),
-				]);
-			} else {
-				expander = await caseDef.createExpander(caseDef.case.inputs);
-			}
+			expander = await (this.config.timeoutMs > 0 ? Promise.race([
+				caseDef.createExpander(caseDef.case.inputs),
+				new Promise<never>((_, reject) =>
+					setTimeout(() => reject(new Error(`Graph loading timeout after ${this.config.timeoutMs}ms`)), this.config.timeoutMs)
+				),
+			]) : caseDef.createExpander(caseDef.case.inputs));
 			this.expanderCache.set(cacheKey, expander);
+
+			// Check memory after graph loading
+			if (this.memoryMonitor) {
+				const stats = this.memoryMonitor.getStats();
+				peakMemoryBytes = Math.max(peakMemoryBytes, stats.rssBytes);
+			}
 		}
 
 		// Get seeds
@@ -506,6 +551,14 @@ export class Executor<TExpander, TResult> {
 
 		const executionTimeMs = performance.now() - runStartTime;
 
+		// Check memory after execution
+		let finalMemoryBytes = 0;
+		if (this.memoryMonitor) {
+			const stats = this.memoryMonitor.getStats();
+			peakMemoryBytes = Math.max(peakMemoryBytes, stats.rssBytes);
+			finalMemoryBytes = stats.rssBytes;
+		}
+
 		// Extract metrics
 		const metrics = metricsExtractor(sutResult);
 
@@ -520,6 +573,12 @@ export class Executor<TExpander, TResult> {
 		// Build provenance
 		const provenance = getProvenance(this.config.collectProvenance);
 		provenance.executionTimeMs = executionTimeMs;
+
+		// Add memory stats if monitoring is enabled
+		if (this.memoryMonitor && this.config.collectProvenance) {
+			provenance.peakMemoryBytes = peakMemoryBytes;
+			provenance.finalMemoryBytes = finalMemoryBytes;
+		}
 
 		return {
 			run: {
