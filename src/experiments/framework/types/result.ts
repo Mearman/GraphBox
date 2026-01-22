@@ -151,6 +151,12 @@ export interface Provenance {
 
 	/** Wall-clock execution time in milliseconds */
 	executionTimeMs?: number;
+
+	/** Peak memory usage during execution (bytes) */
+	peakMemoryBytes?: number;
+
+	/** Memory usage at completion (bytes) */
+	finalMemoryBytes?: number;
 }
 
 /**
