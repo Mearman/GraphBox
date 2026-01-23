@@ -82,7 +82,7 @@ export interface MemoryMonitorConfig {
 export const DEFAULT_MEMORY_CONFIG: MemoryMonitorConfig = {
 	warningThresholdMb: 1024, // 1GB
 	criticalThresholdMb: 2048, // 2GB
-	emergencyThresholdMb: Math.floor((Number(process.env.MEMORY_LIMIT_MB) || 16384) * 0.8), // 80% of limit or 13GB
+	emergencyThresholdMb: Math.floor((Number(process.env.MEMORY_LIMIT_MB) || 16_384) * 0.8), // 80% of limit or 13GB
 	verbose: false,
 };
 
@@ -130,6 +130,7 @@ export class MemoryMonitor {
 
 	/**
 	 * Get current warning level based on memory usage.
+	 * @param stats
 	 */
 	getWarningLevel(stats?: MemoryStats): MemoryWarningLevel {
 		const current = stats ?? this.getStats();
@@ -173,15 +174,17 @@ export class MemoryMonitor {
 
 	/**
 	 * Log memory warning with details.
+	 * @param level
+	 * @param stats
 	 */
 	private logWarning(level: MemoryWarningLevel, stats: MemoryStats): void {
-	 const levelColors = {
-			[MemoryWarningLevel.WARNING]: "\x1b[33m", // Yellow
-			[MemoryWarningLevel.CRITICAL]: "\x1b[31m", // Red
-			[MemoryWarningLevel.EMERGENCY]: "\x1b[35m", // Magenta
-			[MemoryWarningLevel.NORMAL]: "\x1b[32m", // Green
+		const levelColors = {
+			[MemoryWarningLevel.WARNING]: "\u001B[33m", // Yellow
+			[MemoryWarningLevel.CRITICAL]: "\u001B[31m", // Red
+			[MemoryWarningLevel.EMERGENCY]: "\u001B[35m", // Magenta
+			[MemoryWarningLevel.NORMAL]: "\u001B[32m", // Green
 		};
-		const reset = "\x1b[0m";
+		const reset = "\u001B[0m";
 		const color = levelColors[level];
 
 		console.warn(
@@ -201,6 +204,7 @@ export class MemoryMonitor {
 
 	/**
 	 * Format memory stats for logging.
+	 * @param stats
 	 */
 	format(stats?: MemoryStats): string {
 		const current = stats ?? this.getStats();
@@ -215,26 +219,27 @@ let globalMonitor: MemoryMonitor | null = null;
 
 /**
  * Get or create the global memory monitor.
+ * @param config
  */
-export function getGlobalMemoryMonitor(config?: Partial<MemoryMonitorConfig>): MemoryMonitor {
+export const getGlobalMemoryMonitor = (config?: Partial<MemoryMonitorConfig>): MemoryMonitor => {
 	if (!globalMonitor) {
 		globalMonitor = new MemoryMonitor(config);
 	}
 	return globalMonitor;
-}
+};
 
 /**
  * Check memory usage using the global monitor.
  */
-export function checkMemoryUsage(): MemoryWarningLevel {
+export const checkMemoryUsage = (): MemoryWarningLevel => {
 	const monitor = getGlobalMemoryMonitor();
 	return monitor.check();
-}
+};
 
 /**
  * Get current memory stats using the global monitor.
  */
-export function getMemoryStats(): MemoryStats {
+export const getMemoryStats = (): MemoryStats => {
 	const monitor = getGlobalMemoryMonitor();
 	return monitor.getStats();
-}
+};
