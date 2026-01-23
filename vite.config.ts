@@ -17,7 +17,7 @@ export default defineConfig({
 		: [
 				dts({
 					include: ["src/**/*"],
-					exclude: ["src/cli.ts"],
+					exclude: ["src/cli.ts", "**/*.diagnostic.test.ts"],
 					outDir: "dist",
 				}),
 			],
