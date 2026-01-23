@@ -102,6 +102,9 @@ importers:
       turbo:
         specifier: ^2.7.5
         version: 2.7.5
+      typecheck-files:
+        specifier: 1.0.3
+        version: 1.0.3(typescript@5.9.3)
       typescript:
         specifier: 5.9.3
         version: 5.9.3
@@ -3437,6 +3440,13 @@ packages:
   type-fest@5.4.1:
     resolution: {integrity: sha512-xygQcmneDyzsEuKZrFbRMne5HDqMs++aFzefrJTgEIKjQ3rekM+RPfFCVq2Gp1VIDqddoYeppCj4Pcb+RZW0GQ==}
     engines: {node: '>=20'}
+
+  typecheck-files@1.0.3:
+    resolution: {integrity: sha512-1GlGKE2ZaeCMItetOyMJGlebiAcEpI72tESx1MHwgrZWjUESsZZ2rN2FM/32TjFN1uEXcqrrU1dvKkgAfB/2zA==}
+    engines: {node: '>=20.0.0'}
+    hasBin: true
+    peerDependencies:
+      typescript: '>=5.0.0'
 
   typed-array-buffer@1.0.3:
     resolution: {integrity: sha512-nAYYwfY3qnzX30IkA6AQZjVbtK6duGontcQm1WSG1MD94YLqK0515GNApXkoxKOWMusVssAHWLh9SeaoefYFGw==}
@@ -7165,6 +7175,10 @@ snapshots:
   type-fest@5.4.1:
     dependencies:
       tagged-tag: 1.0.0
+
+  typecheck-files@1.0.3(typescript@5.9.3):
+    dependencies:
+      typescript: 5.9.3
 
   typed-array-buffer@1.0.3:
     dependencies:
