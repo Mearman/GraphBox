@@ -444,7 +444,7 @@ export class CheckpointManager {
 			createdAt: mainData?.createdAt ?? new Date().toISOString(),
 			updatedAt: new Date().toISOString(),
 			completedRunIds: [...(mainData?.completedRunIds ?? [])],
-			results: { ...(mainData?.results ?? {}) },
+			results: { ...mainData?.results },
 			totalPlanned: mainData?.totalPlanned ?? 0,
 			gitCommit: mainData?.gitCommit,
 		};
