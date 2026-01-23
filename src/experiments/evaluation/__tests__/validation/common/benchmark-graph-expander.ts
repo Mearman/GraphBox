@@ -5,6 +5,8 @@
  * The benchmark graphs use the core Graph class with LoadedNode/LoadedEdge types.
  */
 
+import { Graph } from "../../../../../algorithms/graph/graph.js";
+import type { Edge,Node } from "../../../../../algorithms/types/graph.js";
 import type { GraphExpander, Neighbor } from "../../../../../interfaces/graph-expander";
 
 export class BenchmarkGraphExpander implements GraphExpander<{ id: string }> {
@@ -153,5 +155,52 @@ export class BenchmarkGraphExpander implements GraphExpander<{ id: string }> {
 
 	getAllDegrees(): Map<string, number> {
 		return this.degrees;
+	}
+
+	/**
+	 * Convert this expander to a Graph instance for use with algorithms.
+	 *
+	 * Creates a new Graph populated with nodes and edges from this expander.
+	 * This allows using the expander with algorithms that expect Graph interface.
+	 *
+	 * @returns A Graph instance compatible with path ranking algorithms
+	 */
+	async toGraph(): Promise<Graph<Node, Edge>> {
+		// Create a new undirected graph with explicit type parameters
+		const graph = new Graph<Node, Edge>(false);
+
+		// Add all nodes with required Node type
+		for (const id of this.nodeIds) {
+			const result = graph.addNode({ id, type: "node" });
+			if (!result.ok) {
+				// Node already exists, skip
+			}
+		}
+
+		// Add all edges with required Edge type
+		// Generate edge IDs from source-target pairs
+		const edgesAdded = new Set<string>();
+		for (const edge of this.edgesBySource) {
+			const edgeId = `${edge.source}-${edge.target}`;
+			const reverseEdgeId = `${edge.target}-${edge.source}`;
+
+			// For undirected graphs, avoid adding duplicate edges
+			if (edgesAdded.has(edgeId) || edgesAdded.has(reverseEdgeId)) {
+				continue;
+			}
+
+			edgesAdded.add(edgeId);
+			const result = graph.addEdge({
+				id: edgeId,
+				source: edge.source,
+				target: edge.target,
+				type: "edge",
+			});
+			if (!result.ok) {
+				// Edge already exists, skip
+			}
+		}
+
+		return graph;
 	}
 }
