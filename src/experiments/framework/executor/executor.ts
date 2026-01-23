@@ -11,8 +11,8 @@ import { arch, platform, version as nodeVersion } from "node:process";
 import type { CaseDefinition, Primitive } from "../types/case.js";
 import type { CorrectnessResult,EvaluationResult, Provenance } from "../types/result.js";
 import type { SutDefinition } from "../types/sut.js";
-import {generateRunId } from "./run-id.js";
 import { MemoryMonitor } from "./memory-monitor.js";
+import {generateRunId } from "./run-id.js";
 
 /**
  * Configuration for experiment execution.
@@ -547,11 +547,11 @@ export class Executor<TInput = unknown, TInputs = unknown, TResult = unknown> {
 		// Execute with timeout if configured
 		let sutResult: TResult;
 		sutResult = await (this.config.timeoutMs > 0 ? Promise.race([
-			sut.run({ input, ...inputs }),
+			sut.run({ ...inputs, input }),
 			new Promise<never>((_, reject) =>
 				setTimeout(() => reject(new Error(`Timeout after ${this.config.timeoutMs}ms`)), this.config.timeoutMs)
 			),
-		]) : sut.run({ input, ...inputs }));
+		]) : sut.run({ ...inputs, input }));
 
 		const executionTimeMs = performance.now() - runStartTime;
 
