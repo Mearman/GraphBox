@@ -22,22 +22,22 @@ import type { ParsedArguments } from "../cli-utils/arg-parser";
 import { getBoolean, getNumber, getOptional } from "../cli-utils/arg-parser";
 import { formatError } from "../cli-utils/error-formatter";
 import type { BenchmarkGraphExpander } from "../experiments/evaluation/__tests__/validation/common/benchmark-graph-expander.js";
-import { aggregateResults, type AggregationPipelineOptions, createAggregationOutput } from "../experiments/framework/aggregation/index.js";
-import { createClaimSummary, evaluateClaims } from "../experiments/framework/claims/index.js";
-import { getClaimsByTag, getCoreClaims, THESIS_CLAIMS } from "../experiments/framework/claims/registry.js";
+import { aggregateResults, type AggregationPipelineOptions, createAggregationOutput } from "ppef/aggregation";
+import { createClaimSummary, evaluateClaims } from "ppef/claims";
+import { getClaimsByTag, getCoreClaims, THESIS_CLAIMS } from "../domain/claims.js";
 // Framework imports
-import { CheckpointManager, createExecutor, executeParallel, type ExecutorConfig, FileStorage, getGitCommit, InMemoryLock } from "../experiments/framework/executor/index.js";
-import { CaseRegistry } from "../experiments/framework/registry/case-registry.js";
-import { type GraphCaseRegistry, registerCases } from "../experiments/framework/registry/register-cases.js";
-import { type RankingCaseRegistry,registerRankingCases } from "../experiments/framework/registry/register-ranking-cases.js";
-import { type RankingInputs, RankingResult, RankingSutRegistry,registerRankingSuts } from "../experiments/framework/registry/register-ranking-suts.js";
-import { type ExpansionInputs, ExpansionResult, ExpansionSutRegistry,registerExpansionSuts } from "../experiments/framework/registry/register-suts.js";
-import { SUTRegistry } from "../experiments/framework/registry/sut-registry.js";
-import { createLatexRenderer } from "../experiments/framework/renderers/latex-renderer.js";
-import { TABLE_SPECS } from "../experiments/framework/renderers/table-specs.js";
-import type { CaseDefinition } from "../experiments/framework/types/case.js";
-import type { EvaluationResult } from "../experiments/framework/types/result.js";
-import type { SutDefinition } from "../experiments/framework/types/sut.js";
+import { CheckpointManager, createExecutor, executeParallel, type ExecutorConfig, FileStorage, getGitCommit, InMemoryLock } from "ppef/executor";
+import { CaseRegistry } from "ppef/registry/case-registry";
+import { type GraphCaseRegistry, registerCases } from "../registries/register-cases.js";
+import { type RankingCaseRegistry,registerRankingCases } from "../registries/register-ranking-cases.js";
+import { type RankingInputs, RankingResult, RankingSutRegistry,registerRankingSuts } from "../registries/register-ranking-suts.js";
+import { type ExpansionInputs, ExpansionResult, ExpansionSutRegistry,registerExpansionSuts } from "../registries/register-suts.js";
+import { SUTRegistry } from "ppef/registry/sut-registry";
+import { createLatexRenderer } from "ppef/renderers/latex-renderer";
+import { TABLE_SPECS } from "../domain/tables.js";
+import type { CaseDefinition } from "ppef/types/case";
+import type { EvaluationResult } from "ppef/types/result";
+import type { SutDefinition } from "ppef/types/sut";
 
 /**
  * Phases of the evaluation pipeline.
