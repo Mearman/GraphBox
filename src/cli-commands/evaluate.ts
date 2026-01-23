@@ -29,10 +29,10 @@ import { getClaimsByTag, getCoreClaims, THESIS_CLAIMS } from "../experiments/fra
 import { CheckpointManager, createExecutor, executeParallel, type ExecutorConfig, FileStorage, getGitCommit, InMemoryLock } from "../experiments/framework/executor/index.js";
 import { CaseRegistry } from "../experiments/framework/registry/case-registry.js";
 import { type GraphCaseRegistry, registerCases } from "../experiments/framework/registry/register-cases.js";
-import { registerExpansionSuts, type ExpansionInputs, ExpansionResult, ExpansionSutRegistry } from "../experiments/framework/registry/register-suts.js";
+import { type RankingCaseRegistry,registerRankingCases } from "../experiments/framework/registry/register-ranking-cases.js";
+import { type RankingInputs, RankingResult, RankingSutRegistry,registerRankingSuts } from "../experiments/framework/registry/register-ranking-suts.js";
+import { type ExpansionInputs, ExpansionResult, ExpansionSutRegistry,registerExpansionSuts } from "../experiments/framework/registry/register-suts.js";
 import { SUTRegistry } from "../experiments/framework/registry/sut-registry.js";
-import { registerRankingCases, type RankingCaseRegistry } from "../experiments/framework/registry/register-ranking-cases.js";
-import { registerRankingSuts, type RankingInputs, RankingResult, RankingSutRegistry } from "../experiments/framework/registry/register-ranking-suts.js";
 import { createLatexRenderer } from "../experiments/framework/renderers/latex-renderer.js";
 import { TABLE_SPECS } from "../experiments/framework/renderers/table-specs.js";
 import type { CaseDefinition } from "../experiments/framework/types/case.js";
@@ -736,6 +736,9 @@ const runExecutePhase = async (options: EvaluateOptions, sutRegistry: SUTRegistr
 			}
 		}
 	}
+
+	// Reload checkpoint from disk to get all results (including those saved incrementally)
+	await checkpoint.load();
 
 	// Merge all results (completed from checkpoint + new)
 	const allResults = [...checkpoint.getResults()];
