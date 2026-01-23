@@ -55,9 +55,9 @@ const generateCaseId = (name: string, inputs: CaseInputs): string => {
  */
 export const RANKING_CASES: RankingCaseSpec[] = [
 	{ id: "karate", name: "Karate Club", source: "1", target: "34", maxPaths: 15 },
-	{ id: "lesmis", name: "Les Misérables", source: "11", target: "27", maxPaths: 18 },
-	{ id: "cora", name: "Cora", source: "0", target: "100", maxPaths: 10 },
-	{ id: "citeseer", name: "CiteSeer", source: "0", target: "100", maxPaths: 10 },
+	{ id: "lesmis", name: "Les Misérables", source: "Myriel", target: "Marius", maxPaths: 18 },
+	{ id: "cora", name: "Cora", source: "35", target: "1033", maxPaths: 10 },
+	{ id: "citeseer", name: "CiteSeer", source: "100157", target: "364207", maxPaths: 10 },
 	{ id: "facebook", name: "Facebook", source: "0", target: "4000", maxPaths: 15 },
 ];
 
@@ -73,12 +73,30 @@ const createRankingCaseDefinitions = async (): Promise<CaseDefinition<BenchmarkG
 		// Load benchmark data
 		const benchmarkData = await loadBenchmarkByIdFromUrl(caseSpec.id);
 
+		// Get graph size from expander
+		const expander = new BenchmarkGraphExpander(benchmarkData.graph, benchmarkData.meta.directed);
+		const nodes = expander.getNodeCount();
+		const edges = benchmarkData.graph.getAllEdges().length;
+
+		// Adaptive maxPaths based on graph size
+		// Large graphs need fewer paths to avoid computational explosion
+		let adaptiveMaxPaths = caseSpec.maxPaths ?? 10;
+		if (edges > 100_000) {
+			// Very large graphs (Facebook, etc.): limit to 3 paths
+			adaptiveMaxPaths = Math.min(adaptiveMaxPaths, 3);
+		} else if (edges > 10_000) {
+			// Large graphs (CiteSeer, Cora): limit to 5 paths
+			adaptiveMaxPaths = Math.min(adaptiveMaxPaths, 5);
+		}
+
 		const inputs: CaseInputs = {
 			summary: {
 				datasetId: caseSpec.id,
 				source: caseSpec.source,
 				target: caseSpec.target,
-				maxPaths: caseSpec.maxPaths ?? 10,
+				maxPaths: adaptiveMaxPaths,
+				nodes,
+				edges,
 			},
 			artefacts: [
 				{
@@ -97,9 +115,6 @@ const createRankingCaseDefinitions = async (): Promise<CaseDefinition<BenchmarkG
 			tags: ["ranking", caseSpec.id],
 		};
 
-		// Pre-create the graph expander (cached for this case)
-		const expander = new BenchmarkGraphExpander(benchmarkData.graph, benchmarkData.meta.directed);
-
 		cases.push({
 			case: caseSpec_,
 			getInput: async (): Promise<BenchmarkGraphExpander> => {
@@ -107,9 +122,10 @@ const createRankingCaseDefinitions = async (): Promise<CaseDefinition<BenchmarkG
 				return expander;
 			},
 			getInputs: (): RankingInputs => {
-				// Return ranking inputs with source, target, and maxPaths
+				// Return ranking inputs
+				// input/expander will be added by executor as { input, ...inputs }
 				return {
-					expander: null as unknown as BenchmarkGraphExpander, // Will be replaced by executor
+					input: null as unknown as BenchmarkGraphExpander, // Will be replaced by executor
 					source: caseSpec.source,
 					target: caseSpec.target,
 				};
