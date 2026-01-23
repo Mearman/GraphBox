@@ -11,7 +11,6 @@ export type { SutDefinition,SutFactory, SutInstance, SutRegistration, SutRole } 
 export type {
 	ArtefactReference,
 	CaseDefinition,
-	CaseExpanderFactory,
 	CaseInputs,
 	EvaluationCase,
 	Primitive,

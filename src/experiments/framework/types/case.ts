@@ -79,23 +79,42 @@ export interface EvaluationCase {
 }
 
 /**
- * Factory function for creating graph expanders from cases.
- * This allows cases to be portable across different graph implementations.
+ * Complete case definition with universal input factories.
+ *
+ * The framework doesn't need to know what "expander" or "seeds" mean.
+ * It only needs:
+ * 1. getInput() - Load whatever resource the algorithm needs (graph, dataset, API client, etc.)
+ * 2. getInputs() - Get algorithm-specific inputs from the case
+ *
+ * @template TInput - The resource type (e.g., Graph, Dataset, API client)
+ * @template TInputs - The algorithm inputs type
  */
-export type CaseExpanderFactory<TExpander> = (
-	caseInputs: CaseInputs
-) => Promise<TExpander>;
-
-/**
- * Complete case definition with factory.
- */
-export interface CaseDefinition<TExpander = unknown> {
+export interface CaseDefinition<TInput = unknown, TInputs = unknown> {
 	/** The case specification */
 	case: EvaluationCase;
 
-	/** Factory for creating the graph expander */
-	createExpander: CaseExpanderFactory<TExpander>;
+	/**
+	 * Load the primary resource needed by the algorithm.
+	 * This is called once per case and cached.
+	 *
+	 * Examples:
+	 * - Expansion: Load a benchmark graph
+	 * - Ranking: Load a graph with source/target metadata
+	 * - ML: Load training dataset
+	 *
+	 * @returns Promise resolving to the resource
+	 */
+	getInput(): Promise<TInput>;
 
-	/** Factory for getting seed nodes */
-	getSeeds: (caseInputs: CaseInputs) => string[];
+	/**
+	 * Get algorithm-specific inputs for this case.
+	 *
+	 * Examples:
+	 * - Expansion: { seeds: ["node1", "node2"] }
+	 * - Ranking: { source: "node1", target: "node2", maxPaths: 10 }
+	 * - Classification: { labels: ["cat", "dog"], threshold: 0.5 }
+	 *
+	 * @returns Algorithm inputs
+	 */
+	getInputs(): TInputs;
 }
