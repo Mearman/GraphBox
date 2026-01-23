@@ -30,7 +30,7 @@ interface MockResult {
  * Create a mock SUT definition.
  * @param id
  */
-const createMockSut = (id: string): SutDefinition<MockExpander, MockResult> => ({
+const createMockSut = (id: string): SutDefinition<unknown, MockResult> => ({
 	registration: {
 		id,
 		name: `Mock SUT ${id}`,
@@ -41,6 +41,8 @@ const createMockSut = (id: string): SutDefinition<MockExpander, MockResult> => (
 	},
 	factory: () =>
 		({
+			id,
+			config: {},
 			run: async () => ({ value: id }),
 		}) as never,
 });
@@ -49,7 +51,7 @@ const createMockSut = (id: string): SutDefinition<MockExpander, MockResult> => (
  * Create a mock case definition.
  * @param id
  */
-const createMockCase = (id: string): CaseDefinition<MockExpander> => ({
+const createMockCase = (id: string): CaseDefinition<MockExpander, unknown> => ({
 	case: {
 		caseId: id,
 		caseClass: "test",
@@ -57,12 +59,12 @@ const createMockCase = (id: string): CaseDefinition<MockExpander> => ({
 		version: "1.0.0",
 		inputs: {},
 	},
-	createExpander: async () => new MockExpander(),
-	getSeeds: () => [],
+	getInput: async () => new MockExpander(),
+	getInputs: () => ({}),
 });
 
 describe("Executor", () => {
-	let executor: Executor<MockExpander, MockResult>;
+	let executor: Executor<MockExpander, unknown, MockResult>;
 
 	beforeEach(() => {
 		executor = new Executor();

@@ -15,16 +15,19 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 
 import type { EvaluationResult } from "../../types/result.js";
-import { FileStorage, CheckpointManager } from "../checkpoint-manager.js";
+import { CheckpointManager } from "../checkpoint-manager.js";
+import { FileStorage } from "../checkpoint-storage.js";
+import type { CaseDefinition, SutDefinition } from "../../types/index.js";
 
 describe("Checkpoint Integration Bug Diagnostics", () => {
 	let testDir: string;
 	let checkpoint: CheckpointManager;
+	let checkpointPath: string;
 
 	beforeEach(() => {
 		testDir = join(tmpdir(), `checkpoint-test-${randomBytes(8).toString("hex")}`);
-		const checkpointPath = join(testDir, "checkpoint.json");
-		checkpoint = new CheckpointManager(new FileStorage(testDir, checkpointPath));
+		checkpointPath = join(testDir, "checkpoint.json");
+		checkpoint = new CheckpointManager({ storage: new FileStorage(checkpointPath) });
 	});
 
 	afterEach(() => {
@@ -35,6 +38,7 @@ describe("Checkpoint Integration Bug Diagnostics", () => {
 		const sut = createMockSut();
 		const testCase = createMockCase("case-001");
 
+		const { Executor } = await import("../executor.js");
 		const executor = new Executor({
 			repetitions: 1,
 			seedBase: 42,
@@ -46,24 +50,26 @@ describe("Checkpoint Integration Bug Diagnostics", () => {
 		});
 
 		// Execute
-		const summary = await executor.execute([sut], [testCase], (r) => ({ metrics: r.metrics }));
+		const summary = await executor.execute([sut], [testCase], () => ({}));
 
 		// Verify
-		expect(summary.successfulRuns).toBe(4); // 4 SUTs
-		expect(checkpoint.getCompletedRunIds().length).toBe(4);
+		expect(summary.successfulRuns).toBe(1);
+		const results = checkpoint.getResults();
+		expect(results.length).toBe(1);
 
 		// Load fresh checkpoint
-		const fresh = new CheckpointManager(new FileStorage(testDir, "checkpoint.json"));
-		expect(fresh.getCompletedRunIds().length).toBe(4);
+		const fresh = new CheckpointManager({ storage: new FileStorage(checkpointPath) });
+		await fresh.load();
+		expect(fresh.getResults().length).toBe(1);
 	});
 
 	it("diagnostic-2: should detect config hash mismatch", async () => {
 		// Save with one config
-		const result = {
+		const result: EvaluationResult = {
 			run: {
 				runId: "test-run-001",
 				sut: "test-sut",
-				sutRole: "primary" as const,
+				sutRole: "primary",
 				sutVersion: "1.0.0",
 				caseId: "case-001",
 				caseClass: "test-class",
@@ -72,7 +78,7 @@ describe("Checkpoint Integration Bug Diagnostics", () => {
 			},
 			correctness: {
 				expectedExists: false,
-				producededOutput: true,
+				producedOutput: true,
 				valid: true,
 				matchesExpected: null,
 			},
@@ -86,15 +92,18 @@ describe("Checkpoint Integration Bug Diagnostics", () => {
 		await checkpoint.saveIncremental(result);
 
 		// Try to load with different config
-		const fresh = new CheckpointManager(new FileStorage(testDir, "checkpoint.json"));
-		const isValid = fresh.isConfigurationValid({
+		const fresh = new CheckpointManager({ storage: new FileStorage(checkpointPath) });
+		await fresh.load();
+
+		// Check if stale with different config
+		const isStale = fresh.isStale([createMockSut()], [createMockCase("case-001")], {
 			repetitions: 2, // Different from original (1)
 			seedBase: 42,
 			timeoutMs: 5000,
 			collectProvenance: false,
-		});
+		}, 1);
 
-		expect(isValid).toBe(false);
+		expect(isStale).toBe(true);
 	});
 
 	it("diagnostic-3: should find worker shards", async () => {
@@ -102,8 +111,8 @@ describe("Checkpoint Integration Bug Diagnostics", () => {
 		const shard1 = join(testDir, "checkpoint-worker-00.json");
 		const shard2 = join(testDir, "checkpoint-worker-01.json");
 
-		const storage1 = new FileStorage(testDir, "checkpoint-worker-00.json");
-		const storage2 = new FileStorage(testDir, "checkpoint-worker-01.json");
+		const storage1 = new FileStorage(shard1);
+		const storage2 = new FileStorage(shard2);
 
 		await storage1.save({
 			configHash: "test-hash",
@@ -111,6 +120,7 @@ describe("Checkpoint Integration Bug Diagnostics", () => {
 			updatedAt: new Date().toISOString(),
 			completedRunIds: ["run-001", "run-002"],
 			results: {},
+			totalPlanned: 0,
 		});
 
 		await storage2.save({
@@ -119,6 +129,7 @@ describe("Checkpoint Integration Bug Diagnostics", () => {
 			updatedAt: new Date().toISOString(),
 			completedRunIds: ["run-003", "run-004"],
 			results: {},
+			totalPlanned: 0,
 		});
 
 		// Find shards
@@ -130,11 +141,11 @@ describe("Checkpoint Integration Bug Diagnostics", () => {
 
 	it("diagnostic-4: should merge shards without duplicates", async () => {
 		// Create main checkpoint
-		const result1 = {
+		const result1: EvaluationResult = {
 			run: {
 				runId: "run-001",
 				sut: "sut-1",
-				sutRole: "primary" as const,
+				sutRole: "primary",
 				sutVersion: "1.0.0",
 				caseId: "case-001",
 				caseClass: "test-class",
@@ -143,7 +154,7 @@ describe("Checkpoint Integration Bug Diagnostics", () => {
 			},
 			correctness: {
 				expectedExists: false,
-				producededOutput: true,
+				producedOutput: true,
 				valid: true,
 				matchesExpected: null,
 			},
@@ -157,8 +168,7 @@ describe("Checkpoint Integration Bug Diagnostics", () => {
 		await checkpoint.saveIncremental(result1);
 
 		// Create worker shard with overlapping run
-		const shardPath = join(testDir, "checkpoint-worker-00.json");
-		const workerStorage = new FileStorage(testDir, "checkpoint-worker-00.json");
+		const workerStorage = new FileStorage(join(testDir, "checkpoint-worker-00.json"));
 
 		await workerStorage.save({
 			configHash: "test-hash",
@@ -166,16 +176,17 @@ describe("Checkpoint Integration Bug Diagnostics", () => {
 			updatedAt: new Date().toISOString(),
 			completedRunIds: ["run-001", "run-002"], // run-001 overlaps with main
 			results: {},
+			totalPlanned: 0,
 		});
 
 		// Merge
 		const shards = await FileStorage.findShards(testDir);
-		await checkpoint.mergeShards(shards);
+		const merged = await checkpoint.mergeShards(shards);
 
 		// Verify no duplicates
-		const uniqueIds = new Set(checkpoint.getCompletedRunIds());
+		const uniqueIds = new Set(merged.completedRunIds);
 		expect(uniqueIds.size).toBe(2); // run-001, run-002 (no duplicates)
-		expect(checkpoint.getCompletedRunIds()).toHaveLength(2);
+		expect(merged.completedRunIds).toHaveLength(2);
 	});
 
 	it("diagnostic-5: config hash should include all executor config properties", async () => {
@@ -211,3 +222,42 @@ describe("Checkpoint Integration Bug Diagnostics", () => {
 		expect(hash1).not.toBe(hash2);
 	});
 });
+
+/**
+ * Create a mock SUT for testing.
+ */
+function createMockSut(): SutDefinition<unknown, unknown> {
+	return {
+		registration: {
+			id: "mock-sut-v1.0.0",
+			name: "Mock SUT",
+			version: "1.0.0",
+			role: "primary",
+			config: {},
+			tags: ["test"],
+		},
+		factory: () => ({
+			id: "mock-sut-v1.0.0",
+			config: {},
+			run: async () => ({ mockResult: true }),
+		}),
+	};
+}
+
+/**
+ * Create a mock case for testing.
+ */
+function createMockCase(id: string): CaseDefinition<unknown, unknown> {
+	return {
+		case: {
+			caseId: id,
+			name: `Mock Case ${id}`,
+			caseClass: "test",
+			inputs: { summary: { test: id } },
+			tags: ["test"],
+			version: "1.0.0",
+		},
+		getInput: async () => ({ mockInput: true }),
+		getInputs: () => ({ mockInputs: true }),
+	};
+}

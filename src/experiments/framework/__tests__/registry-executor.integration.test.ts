@@ -28,6 +28,8 @@ describe("Registry + Executor Integration", () => {
 			};
 
 			const factory = () => ({
+				id: "test-sut-v1.0.0",
+				config: {},
 				run: async () => ({ result: "success" }),
 			});
 
@@ -51,7 +53,11 @@ describe("Registry + Executor Integration", () => {
 				tags: [],
 			};
 
-			const factory = () => ({ run: async () => ({ result: "ok" }) });
+			const factory = () => ({
+				id: "duplicate-sut",
+				config: {},
+				run: async () => ({ result: "ok" }),
+			});
 
 			sutRegistry.register(registration, factory);
 
@@ -62,15 +68,15 @@ describe("Registry + Executor Integration", () => {
 			sutRegistry
 				.register(
 					{ id: "primary-1", name: "P1", version: "1.0.0", role: "primary", config: {}, tags: [] },
-					() => ({ run: async () => ({ result: "p1" }) })
+					() => ({ id: "primary-1", config: {}, run: async () => ({ result: "p1" }) })
 				)
 				.register(
 					{ id: "primary-2", name: "P2", version: "1.0.0", role: "primary", config: {}, tags: [] },
-					() => ({ run: async () => ({ result: "p2" }) })
+					() => ({ id: "primary-2", config: {}, run: async () => ({ result: "p2" }) })
 				)
 				.register(
 					{ id: "baseline-1", name: "B1", version: "1.0.0", role: "baseline", config: {}, tags: [] },
-					() => ({ run: async () => ({ result: "b1" }) })
+					() => ({ id: "baseline-1", config: {}, run: async () => ({ result: "b1" }) })
 				);
 
 			const primarySuts = sutRegistry.getByRole("primary");
@@ -84,15 +90,15 @@ describe("Registry + Executor Integration", () => {
 			sutRegistry
 				.register(
 					{ id: "sut-1", name: "S1", version: "1.0.0", role: "primary", config: {}, tags: ["expansion", "bidirectional"] },
-					() => ({ run: async () => ({ result: "s1" }) })
+					() => ({ id: "sut-1", config: {}, run: async () => ({ result: "s1" }) })
 				)
 				.register(
 					{ id: "sut-2", name: "S2", version: "1.0.0", role: "primary", config: {}, tags: ["expansion"] },
-					() => ({ run: async () => ({ result: "s2" }) })
+					() => ({ id: "sut-2", config: {}, run: async () => ({ result: "s2" }) })
 				)
 				.register(
 					{ id: "sut-3", name: "S3", version: "1.0.0", role: "baseline", config: {}, tags: ["ranking"] },
-					() => ({ run: async () => ({ result: "s3" }) })
+					() => ({ id: "sut-3", config: {}, run: async () => ({ result: "s3" }) })
 				);
 
 			const expansionSuts = sutRegistry.getByTag("expansion");
@@ -111,18 +117,17 @@ describe("Registry + Executor Integration", () => {
 
 			sutRegistry.register(
 				{ id: "configurable-sut", name: "Config", version: "1.0.0", role: "primary", config: {}, tags: [] },
-				(_expander, _seeds, config) => {
+				(config?: Record<string, unknown>) => {
 					capturedConfig = config;
-					return { run: async () => ({ result: "configured" }) };
+					return {
+						id: "configurable-sut",
+						config: { ...config },
+						run: async () => ({ result: "configured" }),
+					};
 				}
 			);
 
-			const instance = sutRegistry.createInstance(
-				"configurable-sut",
-				{}, // expander
-				["seed-a", "seed-b"], // seeds
-				{ maxDepth: 5 } // config
-			);
+			const instance = sutRegistry.create("configurable-sut", { maxDepth: 5 });
 
 			expect(instance).toBeDefined();
 			expect(capturedConfig).toEqual({ maxDepth: 5 });
@@ -132,11 +137,11 @@ describe("Registry + Executor Integration", () => {
 			sutRegistry
 				.register(
 					{ id: "sut-a", name: "A", version: "1.0.0", role: "primary", config: {}, tags: [] },
-					() => ({ run: async () => ({ result: "a" }) })
+					() => ({ id: "sut-a", config: {}, run: async () => ({ result: "a" }) })
 				)
 				.register(
 					{ id: "sut-b", name: "B", version: "1.0.0", role: "baseline", config: {}, tags: [] },
-					() => ({ run: async () => ({ result: "b" }) })
+					() => ({ id: "sut-b", config: {}, run: async () => ({ result: "b" }) })
 				);
 
 			const ids = sutRegistry.list();
@@ -151,7 +156,7 @@ describe("Registry + Executor Integration", () => {
 		it("should clear all registrations", () => {
 			sutRegistry.register(
 				{ id: "sut", name: "S", version: "1.0.0", role: "primary", config: {}, tags: [] },
-				() => ({ run: async () => ({ result: "s" }) })
+				() => ({ id: "sut", config: {}, run: async () => ({ result: "s" }) })
 			);
 
 			expect(sutRegistry.size).toBe(1);
@@ -164,13 +169,13 @@ describe("Registry + Executor Integration", () => {
 	});
 
 	describe("CaseRegistry", () => {
-		let caseRegistry: CaseRegistry<{ nodes: string[] }>;
+		let caseRegistry: CaseRegistry<{ nodes: string[] }, string[]>;
 
 		beforeEach(() => {
 			caseRegistry = new CaseRegistry();
 		});
 
-		const createTestCase = (id: string, caseClass?: string, tags?: string[]): CaseDefinition<{ nodes: string[] }> => ({
+		const createTestCase = (id: string, caseClass?: string, tags?: string[]): CaseDefinition<{ nodes: string[] }, string[]> => ({
 			case: {
 				caseId: id,
 				name: `Test Case ${id}`,
@@ -178,8 +183,8 @@ describe("Registry + Executor Integration", () => {
 				inputs: { summary: { graphName: id } },
 				tags,
 			},
-			createExpander: async () => ({ nodes: ["a", "b", "c"] }),
-			getSeeds: () => ["a", "b"],
+			getInput: async () => ({ nodes: ["a", "b", "c"] }),
+			getInputs: () => ["a", "b"],
 		});
 
 		it("should register and retrieve cases", () => {
@@ -259,20 +264,20 @@ describe("Registry + Executor Integration", () => {
 			expect(classes).toContain("small-world");
 		});
 
-		it("should create expander from case", async () => {
+		it("should create input from case", async () => {
 			caseRegistry.register(createTestCase("expandable-case"));
 
-			const expander = await caseRegistry.createExpander("expandable-case");
+			const input = await caseRegistry.getInput("expandable-case");
 
-			expect(expander.nodes).toEqual(["a", "b", "c"]);
+			expect(input.nodes).toEqual(["a", "b", "c"]);
 		});
 
-		it("should get seeds from case", () => {
+		it("should get inputs from case", () => {
 			caseRegistry.register(createTestCase("seeded-case"));
 
-			const seeds = caseRegistry.getSeeds("seeded-case");
+			const inputs = caseRegistry.getInputs("seeded-case");
 
-			expect(seeds).toEqual(["a", "b"]);
+			expect(inputs).toEqual(["a", "b"]);
 		});
 
 		it("should throw for unknown case in getOrThrow", () => {
@@ -306,9 +311,10 @@ describe("Registry + Executor Integration", () => {
 
 	describe("Combined Registry Usage", () => {
 		it("should support typical experiment setup pattern", async () => {
-			// Create registries
-			const sutRegistry = new SUTRegistry<{ nodes: string[] }, { paths: string[][] }>();
-			const caseRegistry = new CaseRegistry<{ nodes: string[] }>();
+			// Create registries with proper input types
+			type TestInputs = { expander: { nodes: string[] }; seeds: string[] };
+			const sutRegistry = new SUTRegistry<TestInputs, { paths: string[][] }>();
+			const caseRegistry = new CaseRegistry<{ nodes: string[] }, TestInputs>();
 
 			// Register SUTs
 			sutRegistry
@@ -321,8 +327,10 @@ describe("Registry + Executor Integration", () => {
 						config: { hubThreshold: 0.9 },
 						tags: ["expansion", "bidirectional"],
 					},
-					(expander, seeds) => ({
-						run: async () => ({
+					() => ({
+						id: "degree-prioritised-v1.0.0",
+						config: {},
+						run: async ({ expander, seeds }) => ({
 							paths: seeds.map((s) => [s, ...expander.nodes.slice(0, 2)]),
 						}),
 					})
@@ -336,8 +344,10 @@ describe("Registry + Executor Integration", () => {
 						config: {},
 						tags: ["expansion"],
 					},
-					(expander, seeds) => ({
-						run: async () => ({
+					() => ({
+						id: "standard-bfs-v1.0.0",
+						config: {},
+						run: async ({ expander, seeds }) => ({
 							paths: seeds.map((s) => [s, ...expander.nodes]),
 						}),
 					})
@@ -352,8 +362,8 @@ describe("Registry + Executor Integration", () => {
 						caseClass: "social-network",
 						inputs: { summary: { nodes: 34, edges: 78 } },
 					},
-					createExpander: async () => ({ nodes: ["1", "2", "3", "34"] }),
-					getSeeds: () => ["1", "34"],
+					getInput: async () => ({ nodes: ["1", "2", "3", "34"] }),
+					getInputs: () => ({ expander: null as unknown as { nodes: string[] }, seeds: ["1", "34"] }),
 				},
 				{
 					case: {
@@ -362,8 +372,8 @@ describe("Registry + Executor Integration", () => {
 						caseClass: "social-network",
 						inputs: { summary: { nodes: 62, edges: 159 } },
 					},
-					createExpander: async () => ({ nodes: ["beak", "fin", "tail"] }),
-					getSeeds: () => ["beak", "tail"],
+					getInput: async () => ({ nodes: ["beak", "fin", "tail"] }),
+					getInputs: () => ({ expander: null as unknown as { nodes: string[] }, seeds: ["beak", "tail"] }),
 				},
 			]);
 
@@ -380,17 +390,12 @@ describe("Registry + Executor Integration", () => {
 			expect(baselineSuts).toHaveLength(1);
 
 			// Execute for one case
-			const _testCase = caseRegistry.getOrThrow("karate-v1");
-			const expander = await caseRegistry.createExpander("karate-v1");
-			const seeds = caseRegistry.getSeeds("karate-v1");
+			const expander = await caseRegistry.getInput("karate-v1");
+			const inputs = caseRegistry.getInputs("karate-v1");
 
-			const instance = sutRegistry.createInstance(
-				"degree-prioritised-v1.0.0",
-				expander,
-				seeds
-			);
+			const instance = sutRegistry.create("degree-prioritised-v1.0.0");
 
-			const result = await instance.run();
+			const result = await instance.run({ expander, seeds: inputs.seeds });
 
 			expect(result.paths).toHaveLength(2); // One path per seed
 			expect(result.paths[0][0]).toBe("1"); // First seed
@@ -409,7 +414,11 @@ describe("Registry + Executor Integration", () => {
 					tags: ["bidirectional"],
 					description: "Hub-avoiding expansion algorithm",
 				},
-				() => ({ run: async () => ({}) })
+				() => ({
+					id: "dp-v1.0.0",
+					config: {},
+					run: async () => ({}),
+				})
 			);
 
 			const dp = sutRegistry.get("dp-v1.0.0");
