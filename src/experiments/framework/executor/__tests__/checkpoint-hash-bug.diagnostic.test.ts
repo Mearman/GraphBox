@@ -7,8 +7,9 @@
  * This test diagnoses and will help fix the hash matching issue.
  */
 
-import { describe, it, expect } from "vitest";
 import { createHash } from "node:crypto";
+
+import { describe, expect,it } from "vitest";
 
 describe("Checkpoint Config Hash Bug Diagnostics", () => {
 	it("diagnostic-1: identifies which properties cause hash mismatch", () => {
@@ -17,7 +18,7 @@ describe("Checkpoint Config Hash Bug Diagnostics", () => {
 			continueOnError: true,
 			repetitions: 1,
 			seedBase: 42,
-			timeoutMs: 300000,
+			timeoutMs: 300_000,
 			collectProvenance: true,
 			concurrency: 12, // This varies!
 			onProgress: undefined,
@@ -29,7 +30,7 @@ describe("Checkpoint Config Hash Bug Diagnostics", () => {
 			continueOnError: true,
 			repetitions: 1,
 			seedBase: 42,
-			timeoutMs: 300000,
+			timeoutMs: 300_000,
 			collectProvenance: true,
 		};
 
@@ -62,7 +63,7 @@ describe("Checkpoint Config Hash Bug Diagnostics", () => {
 			continueOnError: true,
 			repetitions: 1,
 			seedBase: 42,
-			timeoutMs: 300000,
+			timeoutMs: 300_000,
 			collectProvenance: true,
 			concurrency: 12,
 			onProgress: () => {},
@@ -73,7 +74,7 @@ describe("Checkpoint Config Hash Bug Diagnostics", () => {
 			continueOnError: true,
 			repetitions: 1,
 			seedBase: 42,
-			timeoutMs: 300000,
+			timeoutMs: 300_000,
 			collectProvenance: true,
 			concurrency: 4, // Different!
 			onProgress: undefined,
@@ -105,7 +106,7 @@ describe("Checkpoint Config Hash Bug Diagnostics", () => {
 			continueOnError: true,
 			repetitions: 1,
 			seedBase: 42,
-			timeoutMs: 300000,
+			timeoutMs: 300_000,
 			collectProvenance: true,
 			concurrency: 12,
 		};
@@ -115,7 +116,7 @@ describe("Checkpoint Config Hash Bug Diagnostics", () => {
 			continueOnError: true,
 			repetitions: 1,
 			seedBase: 42,
-			timeoutMs: 300000,
+			timeoutMs: 300_000,
 			collectProvenance: true,
 		};
 

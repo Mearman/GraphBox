@@ -8,16 +8,17 @@
  * - Main checkpoint has 123/132 runs but workers start fresh
  */
 
-import { describe, it, expect, beforeEach, afterEach } from "vitest";
-import { rmSync } from "node:fs";
 import { randomBytes } from "node:crypto";
+import { rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
+import { afterEach,beforeEach, describe, expect, it } from "vitest";
+
+import type { CaseDefinition, SutDefinition } from "../../types/index.js";
 import type { EvaluationResult } from "../../types/result.js";
 import { CheckpointManager } from "../checkpoint-manager.js";
 import { FileStorage } from "../checkpoint-storage.js";
-import type { CaseDefinition, SutDefinition } from "../../types/index.js";
 
 describe("Checkpoint Integration Bug Diagnostics", () => {
 	let testDir: string;
@@ -191,13 +192,13 @@ describe("Checkpoint Integration Bug Diagnostics", () => {
 
 	it("diagnostic-5: config hash should include all executor config properties", async () => {
 		// This test verifies which properties are included in the hash
-		const crypto = require("crypto");
+		const crypto = require("node:crypto");
 
 		const config1 = {
 			continueOnError: true,
 			repetitions: 1,
 			seedBase: 42,
-			timeoutMs: 300000,
+			timeoutMs: 300_000,
 			collectProvenance: true,
 		};
 
@@ -226,38 +227,35 @@ describe("Checkpoint Integration Bug Diagnostics", () => {
 /**
  * Create a mock SUT for testing.
  */
-function createMockSut(): SutDefinition<unknown, unknown> {
-	return {
-		registration: {
-			id: "mock-sut-v1.0.0",
-			name: "Mock SUT",
-			version: "1.0.0",
-			role: "primary",
-			config: {},
-			tags: ["test"],
-		},
-		factory: () => ({
-			id: "mock-sut-v1.0.0",
-			config: {},
-			run: async () => ({ mockResult: true }),
-		}),
-	};
-}
+const createMockSut = (): SutDefinition<unknown, unknown> => ({
+	registration: {
+		id: "mock-sut-v1.0.0",
+		name: "Mock SUT",
+		version: "1.0.0",
+		role: "primary",
+		config: {},
+		tags: ["test"],
+	},
+	factory: () => ({
+		id: "mock-sut-v1.0.0",
+		config: {},
+		run: async () => ({ mockResult: true }),
+	}),
+});
 
 /**
  * Create a mock case for testing.
+ * @param id
  */
-function createMockCase(id: string): CaseDefinition<unknown, unknown> {
-	return {
-		case: {
-			caseId: id,
-			name: `Mock Case ${id}`,
-			caseClass: "test",
-			inputs: { summary: { test: id } },
-			tags: ["test"],
-			version: "1.0.0",
-		},
-		getInput: async () => ({ mockInput: true }),
-		getInputs: () => ({ mockInputs: true }),
-	};
-}
+const createMockCase = (id: string): CaseDefinition<unknown, unknown> => ({
+	case: {
+		caseId: id,
+		name: `Mock Case ${id}`,
+		caseClass: "test",
+		inputs: { summary: { test: id } },
+		tags: ["test"],
+		version: "1.0.0",
+	},
+	getInput: async () => ({ mockInput: true }),
+	getInputs: () => ({ mockInputs: true }),
+});

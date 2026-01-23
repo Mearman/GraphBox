@@ -5,12 +5,12 @@
  * the main checkpoint instead of combining it with shard results.
  */
 
-import { describe, it, expect, beforeEach, afterEach } from "vitest";
-import { readFileSync } from "node:fs";
-import { rmSync } from "node:fs";
 import { randomBytes } from "node:crypto";
+import { readFileSync , rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+
+import { afterEach,beforeEach, describe, expect, it } from "vitest";
 
 import type { EvaluationResult } from "../../types/result.js";
 import type { CheckpointData } from "../checkpoint-manager.js";
@@ -30,10 +30,9 @@ describe("Checkpoint Merge Bug Diagnostics", () => {
 
 	/**
 	 * Helper to read checkpoint data directly from file
+	 * @param path
 	 */
-	function readCheckpointFile(path: string): CheckpointData {
-		return JSON.parse(readFileSync(path, "utf-8"));
-	}
+	const readCheckpointFile = (path: string): CheckpointData => JSON.parse(readFileSync(path, "utf-8"));
 
 	afterEach(() => {
 		rmSync(testDir, { recursive: true, force: true });
@@ -160,29 +159,30 @@ describe("Checkpoint Merge Bug Diagnostics", () => {
 
 /**
  * Create a mock evaluation result for testing
+ * @param runId
+ * @param sut
+ * @param caseId
  */
-function createMockResult(runId: string, sut: string, caseId: string): EvaluationResult {
-	return {
-		run: {
-			runId,
-			sut,
-			sutRole: "primary" as const,
-			sutVersion: "1.0.0",
-			caseId,
-			caseClass: "test-class",
-			seed: 42,
-			repetition: 0,
-		},
-		correctness: {
-			expectedExists: false,
-			producedOutput: true,
-			valid: true,
-			matchesExpected: null,
-		},
-		outputs: { summary: {} },
-		metrics: { numeric: { test: 1 } },
-		provenance: {
-			runtime: { platform: "linux", arch: "x64", nodeVersion: "v22.0.0" },
-		},
-	};
-}
+const createMockResult = (runId: string, sut: string, caseId: string): EvaluationResult => ({
+	run: {
+		runId,
+		sut,
+		sutRole: "primary" as const,
+		sutVersion: "1.0.0",
+		caseId,
+		caseClass: "test-class",
+		seed: 42,
+		repetition: 0,
+	},
+	correctness: {
+		expectedExists: false,
+		producedOutput: true,
+		valid: true,
+		matchesExpected: null,
+	},
+	outputs: { summary: {} },
+	metrics: { numeric: { test: 1 } },
+	provenance: {
+		runtime: { platform: "linux", arch: "x64", nodeVersion: "v22.0.0" },
+	},
+});

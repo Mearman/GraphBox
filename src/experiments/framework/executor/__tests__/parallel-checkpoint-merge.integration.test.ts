@@ -9,11 +9,12 @@
  * 5. Main checkpoint should have all runs, but gets overwritten
  */
 
-import { describe, it, expect, beforeEach, afterEach } from "vitest";
-import { readFileSync, rmSync, mkdirSync } from "node:fs";
 import { randomBytes } from "node:crypto";
+import { mkdirSync,readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+
+import { afterEach,beforeEach, describe, expect, it } from "vitest";
 
 import type { EvaluationResult } from "../../types/result.js";
 import type { CheckpointData } from "../checkpoint-manager.js";
@@ -34,10 +35,9 @@ describe("Parallel Checkpoint Merge Integration Tests", () => {
 
 	/**
 	 * Helper to read checkpoint data directly from file
+	 * @param path
 	 */
-	function readCheckpointFile(path: string): CheckpointData {
-		return JSON.parse(readFileSync(path, "utf-8"));
-	}
+	const readCheckpointFile = (path: string): CheckpointData => JSON.parse(readFileSync(path, "utf-8"));
 
 	afterEach(() => {
 		rmSync(testDir, { recursive: true, force: true });
@@ -190,40 +190,42 @@ describe("Parallel Checkpoint Merge Integration Tests", () => {
 
 /**
  * Create a batch of mock evaluation results
+ * @param count
  */
-function createMockRunBatch(count: number): EvaluationResult[] {
+const createMockRunBatch = (count: number): EvaluationResult[] => {
 	const results: EvaluationResult[] = [];
-	for (let i = 0; i < count; i++) {
-		results.push(createMockResult(`run-${String(i).padStart(3, "0")}`, `sut-${i % 4}`, `case-${i}`));
+	for (let index = 0; index < count; index++) {
+		results.push(createMockResult(`run-${String(index).padStart(3, "0")}`, `sut-${index % 4}`, `case-${index}`));
 	}
 	return results;
-}
+};
 
 /**
  * Create a mock evaluation result
+ * @param runId
+ * @param sut
+ * @param caseId
  */
-function createMockResult(runId: string, sut: string, caseId: string): EvaluationResult {
-	return {
-		run: {
-			runId,
-			sut,
-			sutRole: "primary" as const,
-			sutVersion: "1.0.0",
-			caseId,
-			caseClass: "test-class",
-			seed: 42,
-			repetition: 0,
-		},
-		correctness: {
-			expectedExists: false,
-			producedOutput: true,
-			valid: true,
-			matchesExpected: null,
-		},
-		outputs: { summary: {} },
-		metrics: { numeric: { test: 1 } },
-		provenance: {
-			runtime: { platform: "linux", arch: "x64", nodeVersion: "v22.0.0" },
-		},
-	};
-}
+const createMockResult = (runId: string, sut: string, caseId: string): EvaluationResult => ({
+	run: {
+		runId,
+		sut,
+		sutRole: "primary" as const,
+		sutVersion: "1.0.0",
+		caseId,
+		caseClass: "test-class",
+		seed: 42,
+		repetition: 0,
+	},
+	correctness: {
+		expectedExists: false,
+		producedOutput: true,
+		valid: true,
+		matchesExpected: null,
+	},
+	outputs: { summary: {} },
+	metrics: { numeric: { test: 1 } },
+	provenance: {
+		runtime: { platform: "linux", arch: "x64", nodeVersion: "v22.0.0" },
+	},
+});
