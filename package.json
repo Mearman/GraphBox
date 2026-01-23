@@ -35,6 +35,12 @@
     "url": "https://github.com/Mearman/GraphBox/issues"
   },
   "homepage": "https://github.com/Mearman/GraphBox#readme",
+  "lint-staged": {
+    "*.{ts,tsx}": [
+      "eslint --fix",
+      "vitest run --changed --reporter=verbose"
+    ]
+  },
   "scripts": {
     "typecheck": "tsc --noEmit",
     "lint": "eslint src --fix",
@@ -91,6 +97,7 @@
     "globals": "^17.0.0",
     "husky": "^9.1.7",
     "jiti": "^2.6.1",
+    "lint-staged": "16.2.7",
     "semantic-release": "^25.0.2",
     "turbo": "^2.7.5",
     "typescript": "5.9.3",
