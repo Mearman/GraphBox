@@ -34,7 +34,7 @@ export default defineConfig({
 				target: "node18",
 				modulePreload: false,
 				rollupOptions: {
-					external: (id: string) => id.startsWith("node:"),
+					external: (id: string) => id.startsWith("node:") || id.startsWith("ppef"),
 				},
 			}
 		: {
@@ -60,6 +60,7 @@ export default defineConfig({
 					// Externalize Node.js modules for browser compatibility
 					external: (id: string) =>
 						id.startsWith("node:") ||
+						id.startsWith("ppef") ||
 						id.includes("/experiments/evaluation/fixtures/") ||
 						id.includes("/experiments/evaluation/loaders/"),
 				},
