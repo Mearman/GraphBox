@@ -109,6 +109,7 @@
     "vitest": "4.0.17"
   },
   "dependencies": {
-    "fflate": "^0.8.2"
+    "fflate": "^0.8.2",
+    "ppef": "link:../ppef"
   }
 }

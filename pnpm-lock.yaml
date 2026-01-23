@@ -11,6 +11,9 @@ importers:
       fflate:
         specifier: ^0.8.2
         version: 0.8.2
+      ppef:
+        specifier: link:../ppef
+        version: link:../ppef
     devDependencies:
       '@commitlint/cli':
         specifier: ^20.3.1
