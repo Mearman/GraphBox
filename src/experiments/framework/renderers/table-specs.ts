@@ -375,6 +375,118 @@ export const STATISTICAL_SIGNIFICANCE_SPEC: TableRenderSpec = {
 };
 
 /**
+ * Ranking comparison table specification.
+ *
+ * Compares Path Salience ranking against baseline methods (random, shortest-path).
+ * Shows mean MI, node coverage, and path diversity across test graphs.
+ */
+export const RANKING_COMPARISON_SPEC: TableRenderSpec = {
+	id: "ranking-comparison",
+	filename: "06-ranking-comparison.tex",
+	label: "tab:ranking-comparison",
+	caption: "Path ranking comparison: Path Salience (MI) vs baseline methods. Higher MI indicates better path quality.",
+	columns: [
+		{ key: "dataset", header: "Dataset", align: "l" },
+		{ key: "miMI", header: "Path Salience MI", align: "r", format: formatNumber(3), bold: true },
+		{ key: "randomMI", header: "Random MI", align: "r", format: formatNumber(3) },
+		{ key: "shortestMI", header: "Shortest MI", align: "r", format: formatNumber(3) },
+		{ key: "miCoverage", header: "Coverage", align: "r", format: formatPercentage },
+		{ key: "miDiversity", header: "Diversity", align: "r", format: formatNumber(2) },
+	],
+	extractData: (aggregates) => {
+		// Group by dataset
+		const byDataset = new Map<string, typeof aggregates>();
+
+		for (const agg of aggregates) {
+			if (agg.sut.includes("ranking")) {
+				const datasetId = agg.caseClass ?? agg.sut.split("-")[0];
+				if (!byDataset.has(datasetId)) {
+					byDataset.set(datasetId, []);
+				}
+				byDataset.get(datasetId)?.push(agg);
+			}
+		}
+
+		const results: Array<Record<string, unknown>> = [];
+
+		for (const [dataset, aggs] of byDataset) {
+			const mi = aggs.find((a) => a.sut === "path-salience-v1.0.0");
+			const random = aggs.find((a) => a.sut === "random-ranking-v1.0.0");
+			const shortest = aggs.find((a) => a.sut === "shortest-ranking-v1.0.0");
+
+			if (mi) {
+				results.push({
+					dataset: dataset.charAt(0).toUpperCase() + dataset.slice(1),
+					miMI: mi.metrics["mean-mi"]?.mean ?? 0,
+					randomMI: random?.metrics["mean-mi"]?.mean ?? 0,
+					shortestMI: shortest?.metrics["mean-mi"]?.mean ?? 0,
+					miCoverage: (mi.metrics["node-coverage"]?.mean ?? 0) * 100,
+					miDiversity: mi.metrics["path-diversity"]?.mean ?? 0,
+				});
+			}
+		}
+
+		return results.sort((a, b) => (b.miMI as number) - (a.miMI as number));
+	},
+};
+
+/**
+ * Ranking statistical significance table specification.
+ *
+ * Wilcoxon signed-rank test results for Path Salience vs baseline methods.
+ */
+export const RANKING_SIGNIFICANCE_SPEC: TableRenderSpec = {
+	id: "ranking-significance",
+	filename: "06-ranking-significance.tex",
+	label: "tab:ranking-significance",
+	caption: "Statistical significance of Path Salience ranking improvements. Wilcoxon signed-rank test results.",
+	columns: [
+		{ key: "comparison", header: "Comparison", align: "l" },
+		{ key: "metric", header: "Metric", align: "l" },
+		{ key: "sutMean", header: "Path Salience", align: "c" },
+		{ key: "baselineMean", header: "Baseline", align: "c" },
+		{ key: "pValue", header: "p", align: "c", format: formatNumber(4), bold: true },
+		{ key: "cohensD", header: "Cohen's d", align: "c", format: formatNumber(3) },
+	],
+	extractData: (aggregates) => {
+		const miAgg = aggregates.find((a) => a.sut === "path-salience-v1.0.0");
+		if (!miAgg?.comparisons) return [];
+
+		const results: Array<Record<string, unknown>> = [];
+
+		// Compare vs random ranking
+		const randomComparison = miAgg.comparisons["random-ranking-v1.0.0"];
+		if (randomComparison) {
+			const randomAgg = aggregates.find((a) => a.sut === "random-ranking-v1.0.0");
+			results.push({
+				comparison: "Path Salience vs Random",
+				metric: "Mean MI",
+				sutMean: miAgg.metrics["mean-mi"]?.mean?.toFixed(3) ?? "--",
+				baselineMean: randomAgg?.metrics["mean-mi"]?.mean?.toFixed(3) ?? "--",
+				pValue: randomComparison.pValue,
+				cohensD: randomComparison.effectSize,
+			});
+		}
+
+		// Compare vs shortest-path ranking
+		const shortestComparison = miAgg.comparisons["shortest-ranking-v1.0.0"];
+		if (shortestComparison) {
+			const shortestAgg = aggregates.find((a) => a.sut === "shortest-ranking-v1.0.0");
+			results.push({
+				comparison: "Path Salience vs Shortest",
+				metric: "Mean MI",
+				sutMean: miAgg.metrics["mean-mi"]?.mean?.toFixed(3) ?? "--",
+				baselineMean: shortestAgg?.metrics["mean-mi"]?.mean?.toFixed(3) ?? "--",
+				pValue: shortestComparison.pValue,
+				cohensD: shortestComparison.effectSize,
+			});
+		}
+
+		return results;
+	},
+};
+
+/**
  * All table specifications.
  */
 export const TABLE_SPECS: TableRenderSpec[] = [
@@ -387,6 +499,8 @@ export const TABLE_SPECS: TableRenderSpec[] = [
 	N_SEED_GENERALIZATION_SPEC,
 	MI_RANKING_QUALITY_SPEC,
 	STATISTICAL_SIGNIFICANCE_SPEC,
+	RANKING_COMPARISON_SPEC,
+	RANKING_SIGNIFICANCE_SPEC,
 ];
 
 /**

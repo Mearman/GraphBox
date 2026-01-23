@@ -28,9 +28,11 @@ import { getClaimsByTag, getCoreClaims, THESIS_CLAIMS } from "../experiments/fra
 // Framework imports
 import { CheckpointManager, createExecutor, executeParallel, type ExecutorConfig, FileStorage, getGitCommit, InMemoryLock } from "../experiments/framework/executor/index.js";
 import { CaseRegistry } from "../experiments/framework/registry/case-registry.js";
-import { type GraphCaseRegistry,registerCases } from "../experiments/framework/registry/register-cases.js";
-import { type ExpansionSutRegistry,registerExpansionSuts } from "../experiments/framework/registry/register-suts.js";
+import { type GraphCaseRegistry, registerCases } from "../experiments/framework/registry/register-cases.js";
+import { registerExpansionSuts, type ExpansionInputs, ExpansionResult, ExpansionSutRegistry } from "../experiments/framework/registry/register-suts.js";
 import { SUTRegistry } from "../experiments/framework/registry/sut-registry.js";
+import { registerRankingCases, type RankingCaseRegistry } from "../experiments/framework/registry/register-ranking-cases.js";
+import { registerRankingSuts, type RankingInputs, RankingResult, RankingSutRegistry } from "../experiments/framework/registry/register-ranking-suts.js";
 import { createLatexRenderer } from "../experiments/framework/renderers/latex-renderer.js";
 import { TABLE_SPECS } from "../experiments/framework/renderers/table-specs.js";
 import type { CaseDefinition } from "../experiments/framework/types/case.js";
@@ -143,11 +145,19 @@ const parseRunIdFilter = (filter: string): Set<string> => {
 };
 
 /**
+ * Evaluation scenarios.
+ */
+export type EvaluationScenario = "sampling" | "ranking";
+
+/**
  * Evaluation command options.
  */
 export interface EvaluateOptions {
 	/** Phase(s) to run */
 	phase: EvaluationPhase;
+
+	/** Evaluation scenario: sampling (expansion) or ranking */
+	scenario: EvaluationScenario;
 
 	/** Output directory for results */
 	outputDir: string;
@@ -204,6 +214,7 @@ export interface EvaluateOptions {
  */
 export const parseEvaluateArgs = (arguments_: ParsedArguments): EvaluateOptions => {
 	const phase = getOptional<EvaluationPhase>(arguments_, "phase", "all");
+	const scenario = getOptional<EvaluationScenario>(arguments_, "scenario", "sampling");
 	const outputDir = getOptional<string>(arguments_, "output", "results");
 	const repetitions = getNumber(arguments_, "repetitions", 1);
 	const seedBase = getNumber(arguments_, "seed", 42);
@@ -240,8 +251,14 @@ export const parseEvaluateArgs = (arguments_: ParsedArguments): EvaluateOptions 
 		throw new Error(`Invalid phase: ${phase}. Must be one of: execute, aggregate, render, progress, all`);
 	}
 
+	// Validate scenario
+	if (!["sampling", "ranking"].includes(scenario)) {
+		throw new Error(`Invalid scenario: ${scenario}. Must be one of: sampling, ranking`);
+	}
+
 	return {
 		phase,
+		scenario,
 		outputDir,
 		repetitions,
 		seedBase,
@@ -265,7 +282,7 @@ export const parseEvaluateArgs = (arguments_: ParsedArguments): EvaluateOptions 
  * Get SUT definitions from a SUT registry.
  * @param registry
  */
-const getSutDefinitions = (registry: ExpansionSutRegistry): Array<SutDefinition<BenchmarkGraphExpander, DegreePrioritisedExpansionResult>> => {
+const getSutDefinitions = (registry: ExpansionSutRegistry): Array<SutDefinition<ExpansionInputs, ExpansionResult>> => {
 	const ids = registry.list();
 	return ids.map((id) => {
 		const registration = registry.listRegistrations().find((r) => r.id === id);
@@ -274,9 +291,8 @@ const getSutDefinitions = (registry: ExpansionSutRegistry): Array<SutDefinition<
 		}
 		return {
 			registration,
-			factory: (expander, seeds, config) =>
-				registry.createInstance(id, expander, seeds, config),
-		} as SutDefinition<BenchmarkGraphExpander, DegreePrioritisedExpansionResult>;
+			factory: (config) => registry.create(id, config),
+		} as SutDefinition<ExpansionInputs, ExpansionResult>;
 	});
 };
 
@@ -284,7 +300,34 @@ const getSutDefinitions = (registry: ExpansionSutRegistry): Array<SutDefinition<
  * Get case definitions from a case registry.
  * @param registry
  */
-const getCaseDefinitions = (registry: GraphCaseRegistry): Array<CaseDefinition<BenchmarkGraphExpander>> => {
+const getCaseDefinitions = (registry: GraphCaseRegistry): Array<CaseDefinition<BenchmarkGraphExpander, ExpansionInputs>> => {
+	const ids = registry.list();
+	return ids.map((id) => registry.getOrThrow(id));
+};
+
+/**
+ * Get ranking SUT definitions from a ranking SUT registry.
+ * @param registry
+ */
+const getRankingSutDefinitions = (registry: RankingSutRegistry): Array<SutDefinition<RankingInputs, RankingResult>> => {
+	const ids = registry.list();
+	return ids.map((id) => {
+		const registration = registry.listRegistrations().find((r) => r.id === id);
+		if (!registration) {
+			throw new Error(`SUT registration not found: ${id}`);
+		}
+		return {
+			registration,
+			factory: (config) => registry.create(id, config),
+		} as SutDefinition<RankingInputs, RankingResult>;
+	});
+};
+
+/**
+ * Get ranking case definitions from a ranking case registry.
+ * @param registry
+ */
+const getRankingCaseDefinitions = (registry: RankingCaseRegistry): Array<CaseDefinition<BenchmarkGraphExpander, RankingInputs>> => {
 	const ids = registry.list();
 	return ids.map((id) => registry.getOrThrow(id));
 };
@@ -373,7 +416,7 @@ const extractMetrics = (result: DegreePrioritisedExpansionResult): Record<string
  * @param sutRegistry
  * @param caseRegistry
  */
-const runExecutePhase = async (options: EvaluateOptions, sutRegistry: ExpansionSutRegistry, caseRegistry: GraphCaseRegistry): Promise<void> => {
+const runExecutePhase = async (options: EvaluateOptions, sutRegistry: SUTRegistry<unknown, unknown>, caseRegistry: CaseRegistry<unknown>): Promise<void> => {
 	console.log("\n╔════════════════════════════════════════════════════════════╗");
 	console.log("║  Phase 1: Execute                                         ║");
 	console.log("╚════════════════════════════════════════════════════════════╝\n");
@@ -385,9 +428,14 @@ const runExecutePhase = async (options: EvaluateOptions, sutRegistry: ExpansionS
 		console.log(`Concurrency: ${options.concurrency} (sequential)\n`);
 	}
 
-	// Get SUT and case definitions
-	const suts = getSutDefinitions(sutRegistry);
-	const cases = getCaseDefinitions(caseRegistry);
+	// Get SUT and case definitions based on scenario
+	// These are used for both checkpoint management and executor creation
+	const suts = options.scenario === "ranking"
+		? getRankingSutDefinitions(sutRegistry as RankingSutRegistry)
+		: getSutDefinitions(sutRegistry as ExpansionSutRegistry);
+	const cases = options.scenario === "ranking"
+		? getRankingCaseDefinitions(caseRegistry as RankingCaseRegistry)
+		: getCaseDefinitions(caseRegistry as GraphCaseRegistry);
 
 	console.log(`SUTs: ${suts.length}`);
 	for (const sut of suts) {
@@ -451,7 +499,10 @@ const runExecutePhase = async (options: EvaluateOptions, sutRegistry: ExpansionS
 		concurrency: options.concurrency,
 	};
 
-	const isStale = checkpoint.isStale(suts, cases, executorConfig, totalPlanned);
+	// Type assertion for checkpoint.isStale - scenario determines which type is actually used
+	const isStale = options.scenario === "ranking"
+		? checkpoint.isStale(suts as unknown as Array<SutDefinition<BenchmarkGraphExpander, RankingResult>>, cases, executorConfig, totalPlanned)
+		: checkpoint.isStale(suts as unknown as Array<SutDefinition<BenchmarkGraphExpander, ExpansionResult>>, cases, executorConfig, totalPlanned);
 
 	if (checkpoint.exists()) {
 		if (isStale) {
@@ -465,7 +516,12 @@ const runExecutePhase = async (options: EvaluateOptions, sutRegistry: ExpansionS
 		}
 	} else {
 		// Initialize new checkpoint
-		checkpoint.initializeEmpty(suts, cases, executorConfig, totalPlanned, gitCommit);
+		// Type assertion for checkpoint.initializeEmpty - scenario determines which type is actually used
+		if (options.scenario === "ranking") {
+			checkpoint.initializeEmpty(suts as unknown as Array<SutDefinition<BenchmarkGraphExpander, RankingResult>>, cases, executorConfig, totalPlanned, gitCommit);
+		} else {
+			checkpoint.initializeEmpty(suts as unknown as Array<SutDefinition<BenchmarkGraphExpander, ExpansionResult>>, cases, executorConfig, totalPlanned, gitCommit);
+		}
 		await checkpoint.save();
 		console.log("\n  Created new checkpoint (will save incrementally)");
 	}
@@ -523,127 +579,161 @@ const runExecutePhase = async (options: EvaluateOptions, sutRegistry: ExpansionS
 		},
 	} as ExecutorConfig & { onResult?: (result: EvaluationResult) => void | Promise<void> };
 
-	const executor = createExecutor<BenchmarkGraphExpander, DegreePrioritisedExpansionResult>(executorConfigWithCallbacks);
+	// Create executor based on scenario
+	// For sampling: use typed executor with BenchmarkGraphExpander, ExpansionInputs, ExpansionResult
+	// For ranking: use typed executor with BenchmarkGraphExpander, RankingInputs, RankingResult
+	if (options.scenario === "ranking") {
+		// Ranking scenario: SUTs already return metrics, use pass-through extractor
+		const rankingExecutor = createExecutor<BenchmarkGraphExpander, RankingInputs, RankingResult>(executorConfigWithCallbacks);
 
-	// Plan all runs and filter out completed ones
-	const allPlanned = executor.plan(suts, cases);
-	let remainingRuns = checkpoint.filterRemaining(allPlanned);
+		// Plan all runs and filter out completed ones
+		const allPlanned = rankingExecutor.plan(suts as unknown as Array<SutDefinition<RankingInputs, RankingResult>>, cases as Array<CaseDefinition<BenchmarkGraphExpander, RankingInputs>>);
+		let remainingRuns = checkpoint.filterRemaining(allPlanned);
 
-	// Apply run filter if specified
-	if (options.runFilter) {
-		// DEBUG: Log the raw run filter
-		console.log(`\nDEBUG: Received run filter (length ${options.runFilter.length}): ${options.runFilter.slice(0, 100)}...`);
-
-		// Try to parse as JSON array of run IDs first (for parallel workers)
-		try {
-			const runIdSet = parseRunIdFilter(options.runFilter);
-			console.log(`DEBUG: Parsed ${runIdSet.size} run IDs from filter`);
-			remainingRuns = remainingRuns.filter((run) => runIdSet.has(run.runId));
-			console.log(`\nRun filter applied: ${remainingRuns.length} runs selected (by run ID)`);
-		} catch {
-			// Fall back to index-based filtering for backward compatibility
-			const filterSet = parseRunFilter(options.runFilter, allPlanned.length);
-			remainingRuns = remainingRuns.filter((_run, index) => filterSet.has(index));
-			console.log(`\nRun filter applied: ${remainingRuns.length} runs selected (${options.runFilter})`);
-		}
-	}
-
-	// Sort runs by graph size (smallest first) for better progress visibility
-	// Default to true unless explicitly disabled
-	const sortBySize = options.sortBySize ?? true;
-	if (sortBySize && remainingRuns.length > 1) {
-		// Build a map of caseId to { nodes, edges } for sorting
-		const caseSizeMap = new Map<string, { nodes: number; edges: number }>();
-		for (const caseDef of cases) {
-			const nodeCount = caseDef.case.inputs.summary?.nodes as number | undefined;
-			const edgeCount = caseDef.case.inputs.summary?.edges as number | undefined;
-			if (typeof nodeCount === "number") {
-				caseSizeMap.set(caseDef.case.caseId, {
-					nodes: nodeCount,
-					edges: typeof edgeCount === "number" ? edgeCount : 0,
-				});
+		// Apply run filter if specified
+		if (options.runFilter) {
+			console.log(`\nDEBUG: Received run filter (length ${options.runFilter.length}): ${options.runFilter.slice(0, 100)}...`);
+			try {
+				const runIdSet = parseRunIdFilter(options.runFilter);
+				console.log(`DEBUG: Parsed ${runIdSet.size} run IDs from filter`);
+				remainingRuns = remainingRuns.filter((run) => runIdSet.has(run.runId));
+				console.log(`\nRun filter applied: ${remainingRuns.length} runs selected (by run ID)`);
+			} catch {
+				const filterSet = parseRunFilter(options.runFilter, allPlanned.length);
+				remainingRuns = remainingRuns.filter((_run, index) => filterSet.has(index));
+				console.log(`\nRun filter applied: ${remainingRuns.length} runs selected (${options.runFilter})`);
 			}
 		}
 
-		// Sort by nodes first, then edges, then caseId for determinism
-		remainingRuns = remainingRuns.sort((a, b) => {
-			const aSize = caseSizeMap.get(a.caseId) ?? { nodes: Number.MAX_SAFE_INTEGER, edges: 0 };
-			const bSize = caseSizeMap.get(b.caseId) ?? { nodes: Number.MAX_SAFE_INTEGER, edges: 0 };
-
-			// Primary sort by node count
-			if (aSize.nodes !== bSize.nodes) {
-				return aSize.nodes - bSize.nodes;
-			}
-			// Secondary sort by edge count
-			if (aSize.edges !== bSize.edges) {
-				return aSize.edges - bSize.edges;
-			}
-			// Tertiary sort by caseId for determinism
-			return a.caseId.localeCompare(b.caseId);
-		});
-
-		// Show size distribution
-		const sizeGroups = new Map<string, number>();
-		for (const run of remainingRuns) {
-			const size = caseSizeMap.get(run.caseId);
-			if (size) {
-				const key = `${size.nodes}n/${size.edges}e`;
-				sizeGroups.set(key, (sizeGroups.get(key) ?? 0) + 1);
-			}
-		}
-		// Sort by node count then edge count for display
-		const sortedSizes = [...sizeGroups.entries()].sort((a, b) => {
-			const [aNodes, aEdges] = a[0].split("/").map((s) => Number.parseInt(s, 10));
-			const [bNodes, bEdges] = b[0].split("/").map((s) => Number.parseInt(s, 10));
-			if (aNodes !== bNodes) return aNodes - bNodes;
-			return aEdges - bEdges;
-		});
-		console.log("\nRuns sorted by graph size (nodes then edges, ascending):");
-		for (const [size, count] of sortedSizes) {
-			console.log(`  ${size}: ${count} runs`);
-		}
-	}
-
-	if (remainingRuns.length === 0) {
-		console.log("\n\nAll runs already completed. Skipping execution.");
-	} else {
-		console.log(`\nRunning experiments... (${remainingRuns.length} remaining, ${completedResults.length} cached)`);
-
-		// Execute all runs - checkpoint will track which are already done
-		if (options.parallel) {
-			// Multi-process parallel execution for true multi-core utilization
-			console.log(`Using multi-process parallel execution (${options.parallelWorkers ?? cpus().length} workers)`);
-			await executeParallel(remainingRuns, suts, cases, executorConfigWithCallbacks, {
-				workers: options.parallelWorkers,
-				checkpointDir: executeDir,
-				timeoutMs: options.timeoutMs,
-			});
-
-			// Merge worker checkpoints after parallel execution (main process only)
-			if (!isWorker) {
-				console.log("\nMerging worker checkpoints...");
-
-				// Find all worker shard files
-				const shardFiles = await FileStorage.findShards(executeDir);
-
-				if (shardFiles.length > 0) {
-					console.log(`Found ${shardFiles.length} worker checkpoint shards`);
-					for (const shard of shardFiles) {
-						console.log(`  - ${shard}`);
-					}
-
-					// Merge shards into main checkpoint
-					await checkpoint.mergeShards(shardFiles);
-					console.log("Merged worker checkpoints into main checkpoint");
-
-					// Optionally clean up shard files after merge
-					// (Keep them for now for debugging)
+		// Sort runs by graph size (smallest first) for better progress visibility
+		const sortBySize = options.sortBySize ?? true;
+		if (sortBySize && remainingRuns.length > 1) {
+			const caseSizeMap = new Map<string, { nodes: number; edges: number }>();
+			for (const caseDef of cases) {
+				const nodeCount = caseDef.case.inputs.summary?.nodes as number | undefined;
+				const edgeCount = caseDef.case.inputs.summary?.edges as number | undefined;
+				if (typeof nodeCount === "number") {
+					caseSizeMap.set(caseDef.case.caseId, {
+						nodes: nodeCount,
+						edges: typeof edgeCount === "number" ? edgeCount : 0,
+					});
 				}
 			}
+			remainingRuns = remainingRuns.sort((a, b) => {
+				const sizeA = caseSizeMap.get(a.caseId);
+				const sizeB = caseSizeMap.get(b.caseId);
+				if (!sizeA) return 1;
+				if (!sizeB) return -1;
+				if (sizeA.nodes !== sizeB.nodes) return sizeA.nodes - sizeB.nodes;
+				if (sizeA.edges !== sizeB.edges) return sizeA.edges - sizeB.edges;
+				return a.caseId.localeCompare(b.caseId);
+			});
+		}
+
+		// Execute ranking scenario (single-process only for now)
+		// Pass-through metrics extractor: ranking SUTs already extract metrics
+		const passThroughExtractor = (_result: unknown): Record<string, number> => {
+			const result = _result as { metrics: Record<string, number> };
+			return result.metrics ?? {};
+		};
+		await rankingExecutor.execute(suts as unknown as Array<SutDefinition<RankingInputs, RankingResult>>, cases as Array<CaseDefinition<BenchmarkGraphExpander, RankingInputs>>, passThroughExtractor, remainingRuns);
+	} else {
+		// Sampling scenario: use typed executor with BenchmarkGraphExpander, ExpansionInputs, ExpansionResult
+		const executor = createExecutor<BenchmarkGraphExpander, ExpansionInputs, ExpansionResult>(executorConfigWithCallbacks);
+
+		// Plan all runs and filter out completed ones
+		const allPlanned = executor.plan(suts as Array<SutDefinition<ExpansionInputs, ExpansionResult>>, cases as Array<CaseDefinition<BenchmarkGraphExpander, ExpansionInputs>>);
+		let remainingRuns = checkpoint.filterRemaining(allPlanned);
+
+		// Apply run filter if specified
+		if (options.runFilter) {
+			// DEBUG: Log the raw run filter
+			console.log(`\nDEBUG: Received run filter (length ${options.runFilter.length}): ${options.runFilter.slice(0, 100)}...`);
+
+			// Try to parse as JSON array of run IDs first (for parallel workers)
+			try {
+				const runIdSet = parseRunIdFilter(options.runFilter);
+				console.log(`DEBUG: Parsed ${runIdSet.size} run IDs from filter`);
+				remainingRuns = remainingRuns.filter((run) => runIdSet.has(run.runId));
+				console.log(`\nRun filter applied: ${remainingRuns.length} runs selected (by run ID)`);
+			} catch {
+				// Fall back to index-based filtering for backward compatibility
+				const filterSet = parseRunFilter(options.runFilter, allPlanned.length);
+				remainingRuns = remainingRuns.filter((_run, index) => filterSet.has(index));
+				console.log(`\nRun filter applied: ${remainingRuns.length} runs selected (${options.runFilter})`);
+			}
+		}
+
+		// Sort runs by graph size (smallest first) for better progress visibility
+		// Default to true unless explicitly disabled
+		const sortBySize = options.sortBySize ?? true;
+		if (sortBySize && remainingRuns.length > 1) {
+			// Build a map of caseId to { nodes, edges } for sorting
+			const caseSizeMap = new Map<string, { nodes: number; edges: number }>();
+			for (const caseDef of cases) {
+				const nodeCount = caseDef.case.inputs.summary?.nodes as number | undefined;
+				const edgeCount = caseDef.case.inputs.summary?.edges as number | undefined;
+				if (typeof nodeCount === "number") {
+					caseSizeMap.set(caseDef.case.caseId, {
+						nodes: nodeCount,
+						edges: typeof edgeCount === "number" ? edgeCount : 0,
+					});
+				}
+			}
+
+			// Sort by nodes first, then edges, then caseId for determinism
+			remainingRuns = remainingRuns.sort((a, b) => {
+				const sizeA = caseSizeMap.get(a.caseId);
+				const sizeB = caseSizeMap.get(b.caseId);
+				if (!sizeA) return 1;
+				if (!sizeB) return -1;
+				if (sizeA.nodes !== sizeB.nodes) return sizeA.nodes - sizeB.nodes;
+				if (sizeA.edges !== sizeB.edges) return sizeA.edges - sizeB.edges;
+				return a.caseId.localeCompare(b.caseId);
+			});
+		}
+
+		if (remainingRuns.length === 0) {
+			console.log("\n\nAll runs already completed. Skipping execution.");
 		} else {
-			// Single-process async execution (concurrent but single-threaded)
-			// Pass remainingRuns to avoid re-executing completed runs
-			await executor.execute(suts, cases, extractMetrics, remainingRuns);
+			console.log(`\nRunning experiments... (${remainingRuns.length} remaining, ${completedResults.length} cached)`);
+
+			// Execute all runs - checkpoint will track which are already done
+			if (options.parallel) {
+				// Multi-process parallel execution for true multi-core utilization
+				console.log(`Using multi-process parallel execution (${options.parallelWorkers ?? cpus().length} workers)`);
+				await executeParallel(remainingRuns, suts, cases, executorConfigWithCallbacks, {
+					workers: options.parallelWorkers,
+					checkpointDir: executeDir,
+					timeoutMs: options.timeoutMs,
+				});
+
+				// Merge worker checkpoints after parallel execution (main process only)
+				if (!isWorker) {
+					console.log("\nMerging worker checkpoints...");
+
+					// Find all worker shard files
+					const shardFiles = await FileStorage.findShards(executeDir);
+
+					if (shardFiles.length > 0) {
+						console.log(`Found ${shardFiles.length} worker checkpoint shards`);
+						for (const shard of shardFiles) {
+							console.log(`  - ${shard}`);
+						}
+
+						// Merge shards into main checkpoint
+						await checkpoint.mergeShards(shardFiles);
+						console.log("Merged worker checkpoints into main checkpoint");
+
+						// Optionally clean up shard files after merge
+						// (Keep them for now for debugging)
+					}
+				}
+			} else {
+				// Single-process async execution (concurrent but single-threaded)
+				// Pass remainingRuns to avoid re-executing completed runs
+				await executor.execute(suts as Array<SutDefinition<ExpansionInputs, ExpansionResult>>, cases as Array<CaseDefinition<BenchmarkGraphExpander, ExpansionInputs>>, extractMetrics, remainingRuns);
+			}
 		}
 	}
 
@@ -938,9 +1028,19 @@ export const executeEvaluate = async (options: EvaluateOptions): Promise<void> =
 			return;
 		}
 
-		// Initialize registries
-		const sutRegistry = registerExpansionSuts(new SUTRegistry());
-		const caseRegistry: GraphCaseRegistry = await registerCases(new CaseRegistry());
+		// Initialize registries based on scenario
+		let sutRegistry: SUTRegistry<unknown, unknown>;
+		let caseRegistry: CaseRegistry<unknown>;
+
+		if (options.scenario === "ranking") {
+			console.log("\nScenario: Ranking (Path Salience evaluation)");
+			sutRegistry = registerRankingSuts(new SUTRegistry());
+			caseRegistry = await registerRankingCases(new CaseRegistry());
+		} else {
+			console.log("\nScenario: Sampling (expansion evaluation)");
+			sutRegistry = registerExpansionSuts(new SUTRegistry());
+			caseRegistry = await registerCases(new CaseRegistry());
+		}
 
 		console.log("╔════════════════════════════════════════════════════════════╗");
 		console.log("║   GraphBox Evaluation Framework                            ║");

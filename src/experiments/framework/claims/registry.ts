@@ -6,6 +6,7 @@
  */
 
 import type { EvaluationClaim } from "../types/claims.js";
+import { RANKING_CLAIMS } from "./ranking-claims.js";
 
 /**
  * Thesis claims for GraphBox evaluation.
@@ -182,6 +183,7 @@ export const THESIS_CLAIMS: EvaluationClaim[] = [
 		scope: "global",
 		tags: ["ranking"],
 	},
+	...RANKING_CLAIMS,
 ];
 
 /**
