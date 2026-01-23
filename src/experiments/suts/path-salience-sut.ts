@@ -5,10 +5,18 @@
  * Integrates Mutual Information-based path ranking into PPEF framework.
  */
 
+import { Graph } from "../../algorithms/graph/graph.js";
 import { rankPaths } from "../../algorithms/pathfinding/path-ranking.js";
+import type { Edge, Node } from "../../algorithms/types/graph.js";
 import { Err as Error_, Ok, type Result } from "../../algorithms/types/result.js";
 import type { BenchmarkGraphExpander } from "../evaluation/__tests__/validation/common/benchmark-graph-expander.js";
 import { computeRankingMetrics } from "../evaluation/__tests__/validation/common/path-ranking-helpers.js";
+
+/**
+ * Static cache for graph conversions.
+ * Shared across all SUT instances to avoid repeated toGraph() calls.
+ */
+const GRAPH_CACHE = new Map<BenchmarkGraphExpander, Graph<Node, Edge>>();
 
 /**
  * Configuration for Path Salience Ranking SUT.
@@ -77,8 +85,12 @@ export class PathSalienceSUT {
 	 */
 	async run(): Promise<Result<PathSalienceResult, Error>> {
 		try {
-			// Convert expander to Graph for algorithm compatibility
-			const graph = await this.expander.toGraph();
+			// Check cache for graph conversion (avoid repeated conversions for same expander)
+			let graph = GRAPH_CACHE.get(this.expander);
+			if (!graph) {
+				graph = await this.expander.toGraph();
+				GRAPH_CACHE.set(this.expander, graph);
+			}
 
 			// Run path ranking algorithm
 			const result = rankPaths(graph, this.source, this.target, {

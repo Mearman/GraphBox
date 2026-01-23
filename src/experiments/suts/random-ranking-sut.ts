@@ -5,10 +5,18 @@
  * Integrates random path ranking into PPEF framework.
  */
 
+import { Graph } from "../../algorithms/graph/graph.js";
+import type { Edge, Node } from "../../algorithms/types/graph.js";
 import { Err as Error_, Ok, type Result } from "../../algorithms/types/result.js";
 import { randomPathRanking } from "../baselines/random-path-ranking.js";
 import type { BenchmarkGraphExpander } from "../evaluation/__tests__/validation/common/benchmark-graph-expander.js";
 import { computeRankingMetrics } from "../evaluation/__tests__/validation/common/path-ranking-helpers.js";
+
+/**
+ * Static cache for graph conversions.
+ * Shared across all SUT instances to avoid repeated toGraph() calls.
+ */
+const GRAPH_CACHE = new Map<BenchmarkGraphExpander, Graph<Node, Edge>>();
 
 /**
  * Configuration for Random Path Ranking SUT.
@@ -65,8 +73,12 @@ export class RandomRankingSUT {
 	 */
 	async run(): Promise<Result<RandomRankingResult, Error>> {
 		try {
-			// Convert expander to Graph for algorithm compatibility
-			const graph = await this.expander.toGraph();
+			// Check cache for graph conversion (avoid repeated conversions for same expander)
+			let graph = GRAPH_CACHE.get(this.expander);
+			if (!graph) {
+				graph = await this.expander.toGraph();
+				GRAPH_CACHE.set(this.expander, graph);
+			}
 
 			// Run random path ranking algorithm
 			const result = randomPathRanking(graph, this.source, this.target, {
