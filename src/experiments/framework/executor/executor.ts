@@ -178,10 +178,14 @@ const getProvenance = (collectProvenance: boolean): Provenance => {
 
 /**
  * Experiment executor.
+ *
+ * @template TInput - The resource type (e.g., Graph, Dataset)
+ * @template TInputs - The algorithm inputs type
+ * @template TResult - The algorithm result type
  */
-export class Executor<TExpander, TResult> {
+export class Executor<TInput = unknown, TInputs = unknown, TResult = unknown> {
 	private readonly config: ExecutorConfig;
-	private readonly expanderCache: Map<string, TExpander>;
+	private readonly inputCache: Map<string, TInput>;
 	private readonly memoryMonitor?: MemoryMonitor;
 
 	constructor(config: Partial<ExecutorConfig> = {}) {
@@ -190,7 +194,7 @@ export class Executor<TExpander, TResult> {
 			monitorMemory: true,
 			...config,
 		};
-		this.expanderCache = new Map();
+		this.inputCache = new Map();
 
 		// Initialize memory monitor if enabled
 		if (this.config.monitorMemory) {
@@ -217,8 +221,8 @@ export class Executor<TExpander, TResult> {
 	 * @returns Array of planned runs
 	 */
 	plan(
-		suts: SutDefinition<TExpander, TResult>[],
-		cases: CaseDefinition<TExpander>[]
+		suts: SutDefinition<TInputs, TResult>[],
+		cases: CaseDefinition<TInput, TInputs>[]
 	): PlannedRun[] {
 		const runs: PlannedRun[] = [];
 
@@ -257,8 +261,8 @@ export class Executor<TExpander, TResult> {
 	 * @returns Execution summary with all results
 	 */
 	async execute(
-		suts: SutDefinition<TExpander, TResult>[],
-		cases: CaseDefinition<TExpander>[],
+		suts: SutDefinition<TInputs, TResult>[],
+		cases: CaseDefinition<TInput, TInputs>[],
 		metricsExtractor: (result: TResult) => Record<string, number>,
 		plannedRuns?: PlannedRun[]
 	): Promise<ExecutionSummary> {
@@ -304,8 +308,8 @@ export class Executor<TExpander, TResult> {
 	 */
 	private async executeSequential(
 		plannedRuns: PlannedRun[],
-		sutMap: Map<string, SutDefinition<TExpander, TResult>>,
-		caseMap: Map<string, CaseDefinition<TExpander>>,
+		sutMap: Map<string, SutDefinition<TInputs, TResult>>,
+		caseMap: Map<string, CaseDefinition<TInput, TInputs>>,
 		metricsExtractor: (result: TResult) => Record<string, number>,
 		startTime: number
 	): Promise<ExecutionSummary> {
@@ -388,8 +392,8 @@ export class Executor<TExpander, TResult> {
 	 */
 	private async executeParallel(
 		plannedRuns: PlannedRun[],
-		sutMap: Map<string, SutDefinition<TExpander, TResult>>,
-		caseMap: Map<string, CaseDefinition<TExpander>>,
+		sutMap: Map<string, SutDefinition<TInputs, TResult>>,
+		caseMap: Map<string, CaseDefinition<TInput, TInputs>>,
 		metricsExtractor: (result: TResult) => Record<string, number>,
 		startTime: number,
 		concurrency: number
@@ -499,8 +503,8 @@ export class Executor<TExpander, TResult> {
 	 */
 	private async executeRun(
 		run: PlannedRun,
-		sutDef: SutDefinition<TExpander, TResult>,
-		caseDef: CaseDefinition<TExpander>,
+		sutDef: SutDefinition<TInputs, TResult>,
+		caseDef: CaseDefinition<TInput, TInputs>,
 		metricsExtractor: (result: TResult) => Record<string, number>
 	): Promise<EvaluationResult> {
 		const runStartTime = performance.now();
@@ -514,40 +518,40 @@ export class Executor<TExpander, TResult> {
 			}
 		}
 
-		// Create or reuse expander for this case (cached to avoid rebuilding adjacency lists)
+		// Load or reuse input resource for this case (cached to avoid reloading)
 		const cacheKey = caseDef.case.caseId;
-		let expander = this.expanderCache.get(cacheKey);
-		if (!expander) {
-			// Apply timeout to graph loading as well (large graphs can hang during adjacency construction)
-			expander = await (this.config.timeoutMs > 0 ? Promise.race([
-				caseDef.createExpander(caseDef.case.inputs),
+		let input = this.inputCache.get(cacheKey);
+		if (!input) {
+			// Apply timeout to resource loading (large graphs can hang during loading)
+			input = await (this.config.timeoutMs > 0 ? Promise.race([
+				caseDef.getInput(),
 				new Promise<never>((_, reject) =>
-					setTimeout(() => reject(new Error(`Graph loading timeout after ${this.config.timeoutMs}ms`)), this.config.timeoutMs)
+					setTimeout(() => reject(new Error(`Resource loading timeout after ${this.config.timeoutMs}ms`)), this.config.timeoutMs)
 				),
-			]) : caseDef.createExpander(caseDef.case.inputs));
-			this.expanderCache.set(cacheKey, expander);
+			]) : caseDef.getInput());
+			this.inputCache.set(cacheKey, input);
 
-			// Check memory after graph loading
+			// Check memory after resource loading
 			if (this.memoryMonitor) {
 				const stats = this.memoryMonitor.getStats();
 				peakMemoryBytes = Math.max(peakMemoryBytes, stats.rssBytes);
 			}
 		}
 
-		// Get seeds
-		const seeds = caseDef.getSeeds(caseDef.case.inputs);
+		// Get algorithm inputs for this case
+		const inputs = caseDef.getInputs();
 
-		// Create SUT instance
-		const sutInstance = sutDef.factory(expander, seeds, run.config);
+		// Create SUT instance (factory now takes only config)
+		const sut = sutDef.factory(run.config);
 
 		// Execute with timeout if configured
 		let sutResult: TResult;
 		sutResult = await (this.config.timeoutMs > 0 ? Promise.race([
-			sutInstance.run(),
+			sut.run({ input, ...inputs }),
 			new Promise<never>((_, reject) =>
 				setTimeout(() => reject(new Error(`Timeout after ${this.config.timeoutMs}ms`)), this.config.timeoutMs)
 			),
-		]) : sutInstance.run());
+		]) : sut.run({ input, ...inputs }));
 
 		const executionTimeMs = performance.now() - runStartTime;
 
@@ -610,4 +614,4 @@ export class Executor<TExpander, TResult> {
  * Create a default executor with standard configuration.
  * @param config
  */
-export const createExecutor = <TExpander, TResult>(config?: Partial<ExecutorConfig>): Executor<TExpander, TResult> => new Executor(config);
+export const createExecutor = <TInput = unknown, TInputs = unknown, TResult = unknown>(config?: Partial<ExecutorConfig>): Executor<TInput, TInputs, TResult> => new Executor(config);
