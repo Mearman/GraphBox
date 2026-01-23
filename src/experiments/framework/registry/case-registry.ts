@@ -2,7 +2,7 @@
  * Case Registry
  *
  * Central registry for evaluation case definitions. Cases are registered
- * with their factories, enabling lazy loading of graph data during
+ * with their factories, enabling lazy loading of resources during
  * experiment execution.
  */
 
@@ -10,9 +10,12 @@ import type { CaseDefinition, EvaluationCase } from "../types/case.js";
 
 /**
  * Registry for evaluation case definitions.
+ *
+ * @template TInput - The resource type (e.g., Graph, Dataset)
+ * @template TInputs - The algorithm inputs type
  */
-export class CaseRegistry<TExpander = unknown> {
-	private readonly definitions = new Map<string, CaseDefinition<TExpander>>();
+export class CaseRegistry<TInput = unknown, TInputs = unknown> {
+	private readonly definitions = new Map<string, CaseDefinition<TInput, TInputs>>();
 
 	/**
 	 * Register a new case.
@@ -20,7 +23,7 @@ export class CaseRegistry<TExpander = unknown> {
 	 * @param definition - Case definition including metadata and factories
 	 * @throws Error if case with same ID already registered
 	 */
-	register(definition: CaseDefinition<TExpander>): this {
+	register(definition: CaseDefinition<TInput, TInputs>): this {
 		const caseId = definition.case.caseId;
 		if (this.definitions.has(caseId)) {
 			throw new Error(`Case already registered: ${caseId}`);
@@ -35,7 +38,7 @@ export class CaseRegistry<TExpander = unknown> {
 	 *
 	 * @param definitions - Array of case definitions
 	 */
-	registerAll(definitions: CaseDefinition<TExpander>[]): this {
+	registerAll(definitions: CaseDefinition<TInput, TInputs>[]): this {
 		for (const definition of definitions) {
 			this.register(definition);
 		}
@@ -48,7 +51,7 @@ export class CaseRegistry<TExpander = unknown> {
 	 * @param caseId - Case identifier
 	 * @returns Case definition or undefined
 	 */
-	get(caseId: string): CaseDefinition<TExpander> | undefined {
+	get(caseId: string): CaseDefinition<TInput, TInputs> | undefined {
 		return this.definitions.get(caseId);
 	}
 
@@ -59,7 +62,7 @@ export class CaseRegistry<TExpander = unknown> {
 	 * @returns Case definition
 	 * @throws Error if case not found
 	 */
-	getOrThrow(caseId: string): CaseDefinition<TExpander> {
+	getOrThrow(caseId: string): CaseDefinition<TInput, TInputs> {
 		const definition = this.definitions.get(caseId);
 		if (!definition) {
 			throw new Error(`Case not found: ${caseId}`);
@@ -73,7 +76,7 @@ export class CaseRegistry<TExpander = unknown> {
 	 * @param caseClass - Class to filter by
 	 * @returns Array of matching case definitions
 	 */
-	getByClass(caseClass: string): CaseDefinition<TExpander>[] {
+	getByClass(caseClass: string): CaseDefinition<TInput, TInputs>[] {
 		return [...this.definitions.values()].filter(
 			(d) => d.case.caseClass === caseClass
 		);
@@ -85,7 +88,7 @@ export class CaseRegistry<TExpander = unknown> {
 	 * @param tag - Tag to filter by
 	 * @returns Array of matching case definitions
 	 */
-	getByTag(tag: string): CaseDefinition<TExpander>[] {
+	getByTag(tag: string): CaseDefinition<TInput, TInputs>[] {
 		return [...this.definitions.values()].filter(
 			(d) => d.case.tags?.includes(tag)
 		);
@@ -149,25 +152,25 @@ export class CaseRegistry<TExpander = unknown> {
 	}
 
 	/**
-	 * Create a graph expander for a case.
+	 * Load the input resource for a case.
 	 *
 	 * @param caseId - Case identifier
-	 * @returns Promise resolving to graph expander
+	 * @returns Promise resolving to the input resource
 	 */
-	async createExpander(caseId: string): Promise<TExpander> {
+	async getInput(caseId: string): Promise<TInput> {
 		const definition = this.getOrThrow(caseId);
-		return definition.createExpander(definition.case.inputs);
+		return definition.getInput();
 	}
 
 	/**
-	 * Get seed nodes for a case.
+	 * Get the algorithm inputs for a case.
 	 *
 	 * @param caseId - Case identifier
-	 * @returns Array of seed node IDs
+	 * @returns Algorithm inputs
 	 */
-	getSeeds(caseId: string): string[] {
+	getInputs(caseId: string): TInputs {
 		const definition = this.getOrThrow(caseId);
-		return definition.getSeeds(definition.case.inputs);
+		return definition.getInputs();
 	}
 }
 

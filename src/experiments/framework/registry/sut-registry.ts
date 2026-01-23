@@ -6,13 +6,16 @@
  * experiment execution.
  */
 
-import type { SutDefinition, SutFactory,SutRegistration, SutRole } from "../types/sut.js";
+import type { SUT,SutDefinition, SutFactory, SutRegistration, SutRole } from "../types/sut.js";
 
 /**
  * Registry for System Under Test definitions.
+ *
+ * @template TInputs - The algorithm inputs type
+ * @template TResult - The algorithm result type
  */
-export class SUTRegistry<TExpander = unknown, TResult = unknown> {
-	private readonly definitions = new Map<string, SutDefinition<TExpander, TResult>>();
+export class SUTRegistry<TInputs = unknown, TResult = unknown> {
+	private readonly definitions = new Map<string, SutDefinition<TInputs, TResult>>();
 
 	/**
 	 * Register a new SUT.
@@ -23,7 +26,7 @@ export class SUTRegistry<TExpander = unknown, TResult = unknown> {
 	 */
 	register(
 		registration: SutRegistration,
-		factory: SutFactory<TExpander, TResult>
+		factory: SutFactory<TInputs, TResult>
 	): this {
 		if (this.definitions.has(registration.id)) {
 			throw new Error(`SUT already registered: ${registration.id}`);
@@ -39,7 +42,7 @@ export class SUTRegistry<TExpander = unknown, TResult = unknown> {
 	 * @param id - SUT identifier
 	 * @returns SUT definition or undefined
 	 */
-	get(id: string): SutDefinition<TExpander, TResult> | undefined {
+	get(id: string): SutDefinition<TInputs, TResult> | undefined {
 		return this.definitions.get(id);
 	}
 
@@ -50,7 +53,7 @@ export class SUTRegistry<TExpander = unknown, TResult = unknown> {
 	 * @returns SUT definition
 	 * @throws Error if SUT not found
 	 */
-	getOrThrow(id: string): SutDefinition<TExpander, TResult> {
+	getOrThrow(id: string): SutDefinition<TInputs, TResult> {
 		const definition = this.definitions.get(id);
 		if (!definition) {
 			throw new Error(`SUT not found: ${id}`);
@@ -64,7 +67,7 @@ export class SUTRegistry<TExpander = unknown, TResult = unknown> {
 	 * @param role - Role to filter by
 	 * @returns Array of matching SUT definitions
 	 */
-	getByRole(role: SutRole): SutDefinition<TExpander, TResult>[] {
+	getByRole(role: SutRole): SutDefinition<TInputs, TResult>[] {
 		return [...this.definitions.values()].filter(
 			(d) => d.registration.role === role
 		);
@@ -76,7 +79,7 @@ export class SUTRegistry<TExpander = unknown, TResult = unknown> {
 	 * @param tag - Tag to filter by
 	 * @returns Array of matching SUT definitions
 	 */
-	getByTag(tag: string): SutDefinition<TExpander, TResult>[] {
+	getByTag(tag: string): SutDefinition<TInputs, TResult>[] {
 		return [...this.definitions.values()].filter(
 			(d) => d.registration.tags.includes(tag)
 		);
@@ -125,22 +128,15 @@ export class SUTRegistry<TExpander = unknown, TResult = unknown> {
 	}
 
 	/**
-	 * Create a new instance of a SUT.
+	 * Create a new SUT instance.
 	 *
 	 * @param id - SUT identifier
-	 * @param expander - Graph expander
-	 * @param seeds - Seed nodes
 	 * @param config - Optional configuration overrides
 	 * @returns SUT instance ready for execution
 	 */
-	createInstance(
-		id: string,
-		expander: TExpander,
-		seeds: readonly string[],
-		config?: Record<string, unknown>
-	) {
+	create(id: string, config?: Record<string, unknown>): SUT<TInputs, TResult> {
 		const definition = this.getOrThrow(id);
-		return definition.factory(expander, seeds, config);
+		return definition.factory(config);
 	}
 }
 
