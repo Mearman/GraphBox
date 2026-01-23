@@ -19,10 +19,12 @@ import { SUTRegistry } from "./sut-registry.js";
  *
  * This type lives in the domain-specific registration file, not in the core framework.
  * The core framework remains universal - it doesn't need to know what "source" or "target" mean.
+ *
+ * Note: 'input' is the field name used by the executor when spreading { input, ...inputs }
  */
 export interface RankingInputs {
-	/** Graph expander for path discovery */
-	expander: BenchmarkGraphExpander;
+	/** Graph expander for path discovery (named 'input' to match executor pattern) */
+	input: BenchmarkGraphExpander;
 
 	/** Source node ID */
 	source: string;
@@ -149,7 +151,7 @@ class PathSalienceSUTWrapper implements SUT<RankingInputs, PathSalienceResult> {
 	}
 
 	async run(inputs: RankingInputs): Promise<PathSalienceResult> {
-		const { expander, source, target } = inputs;
+		const { input: expander, source, target } = inputs;
 		const inputsArray = [source, target] as const;
 
 		const sut = new PathSalienceSUT(expander, inputsArray, this.config as PathSalienceConfig);
@@ -176,7 +178,7 @@ class RandomRankingSUTWrapper implements SUT<RankingInputs, RandomRankingResult>
 	}
 
 	async run(inputs: RankingInputs): Promise<RandomRankingResult> {
-		const { expander, source, target } = inputs;
+		const { input: expander, source, target } = inputs;
 		const inputsArray = [source, target] as const;
 
 		const sut = new RandomRankingSUT(expander, inputsArray, this.config as RandomRankingConfig);
@@ -203,7 +205,7 @@ class ShortestRankingSUTWrapper implements SUT<RankingInputs, ShortestRankingRes
 	}
 
 	async run(inputs: RankingInputs): Promise<ShortestRankingResult> {
-		const { expander, source, target } = inputs;
+		const { input: expander, source, target } = inputs;
 		const inputsArray = [source, target] as const;
 
 		const sut = new ShortestRankingSUT(expander, inputsArray, this.config as ShortestRankingConfig);
