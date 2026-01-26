@@ -255,6 +255,12 @@ const findAllShortestPaths = <N extends Node, E extends Edge>(
 			continue;
 		}
 
+		// Don't expand neighbors from the target node
+		// We only want paths TO endId, not paths THROUGH endId to other nodes
+		if (current === endId) {
+			continue;
+		}
+
 		const neighbours = getTraversableNeighbours(current);
 
 		for (const { neighbour, edge } of neighbours) {
@@ -295,15 +301,41 @@ const findAllShortestPaths = <N extends Node, E extends Edge>(
 		currentNodes: N[],
 		currentEdges: E[],
 	): void => {
+		if ((globalThis as unknown as { DEBUG_SALIENCE?: boolean }).DEBUG_SALIENCE) {
+			const currentIds = currentNodes.map((n) => n.id);
+			console.log(`        reconstructPaths(nodeId="${nodeId}", currentNodes=[${currentIds.join(",")}])`);
+		}
+
 		if (nodeId === startId) {
-			// Reached the start, save this path (reverse to get correct order)
-			const startNode = graph.getNode(startId);
-			if (startNode.some) {
-				paths.push({
-					nodes: [startNode.value, ...[...currentNodes].reverse()],
-					edges: [...currentEdges].reverse(),
-					totalWeight: currentEdges.length,
-				});
+			// Check if this path ends at endId (i.e., endId was the starting point of reconstruction)
+			// This ensures we only save paths that end at endId, not paths that pass through it
+			// currentNodes contains nodes in reverse order: [endId, ..., nodeJustAfterStart]
+			// So we check if the LAST element (which was added first) is endId
+			const lastNode = currentNodes.at(-1);
+			const pathEndsAtTarget = currentNodes.length > 0 && lastNode?.id === endId;
+
+			if (pathEndsAtTarget) {
+				// Reached the start, save this path
+				// currentNodes is already in the correct order: [..., endId]
+				// So we just prepend startNode without reversing
+				const startNode = graph.getNode(startId);
+				if (startNode.some) {
+					const pathNodes = [startNode.value, ...currentNodes];
+					const pathIds = pathNodes.map((n) => n.id);
+
+					if ((globalThis as unknown as { DEBUG_SALIENCE?: boolean }).DEBUG_SALIENCE) {
+						console.log(`          SAVING PATH: [${pathIds.join("->")}]`);
+					}
+
+					paths.push({
+						nodes: pathNodes,
+						edges: currentEdges,
+						totalWeight: currentEdges.length,
+					});
+				}
+			} else if ((globalThis as unknown as { DEBUG_SALIENCE?: boolean }).DEBUG_SALIENCE) {
+				const pathIds = currentNodes.map((n) => n.id);
+				console.log(`          SKIPPING PATH (doesn't end at ${endId}): [${pathIds.join("->")}]`);
 			}
 			return;
 		}
@@ -663,7 +695,18 @@ export const rankPaths = <N extends Node, E extends Edge>(
 
 	// Choose path enumeration strategy based on shortestOnly flag
 	const paths = shortestOnly || maxLength === Infinity
-		? findAllShortestPaths(graph, startId, endId, traversalMode)
+		? (() => {
+			const result = findAllShortestPaths(graph, startId, endId, traversalMode);
+			// DEBUG: Log what findAllShortestPaths returned
+			if ((globalThis as unknown as { DEBUG_SALIENCE?: boolean }).DEBUG_SALIENCE) {
+				console.log(`      DEBUG findAllShortestPaths(start="${startId}", end="${endId}") returned ${result.length} paths:`);
+				for (const [index, p] of result.slice(0, 3).entries()) {
+					const nodeIds = p.nodes.map((n) => n.id);
+					console.log(`        Path ${index + 1}: ${nodeIds.join("->")}`);
+				}
+			}
+			return result;
+		})()
 		: findAllPathsUpToLength(graph, startId, endId, maxLength, traversalMode);
 
 	if (paths.length === 0) {
