@@ -16,7 +16,10 @@ import type { BidirectionalBFSResult } from "../algorithms/traversal/bidirection
 import { BidirectionalBFS } from "../algorithms/traversal/bidirectional-bfs.js";
 import type { DegreePrioritisedExpansionResult } from "../algorithms/traversal/degree-prioritised-expansion.js";
 import { DegreePrioritisedExpansion } from "../algorithms/traversal/degree-prioritised-expansion.js";
+import type { OverlapBasedExpansionResult } from "../algorithms/traversal/overlap-based/overlap-result.js";
 import { FrontierBalancedExpansion } from "../experiments/baselines/frontier-balanced.js";
+// Re-export overlap-based SUT registration for convenience
+export { OVERLAP_SUT_REGISTRATIONS,overlapSutRegistry, registerOverlapSuts } from "./register-overlap-suts.js";
 import { RandomPriorityExpansion } from "../experiments/baselines/random-priority.js";
 import { StandardBfsExpansion } from "../experiments/baselines/standard-bfs.js";
 import type { GraphExpander } from "../interfaces/graph-expander.js";
@@ -38,11 +41,12 @@ export interface ExpansionInputs {
 /**
  * Result type for all expansion SUTs.
  *
- * Union type supporting both:
+ * Union type supporting:
  * - DegreePrioritisedExpansionResult (parameter-free frontier exhaustion)
  * - BidirectionalBFSResult (parameterised termination: targetPaths, maxIterations)
+ * - OverlapBasedExpansionResult (overlap-based termination)
  */
-export type ExpansionResult = DegreePrioritisedExpansionResult | BidirectionalBFSResult;
+export type ExpansionResult = DegreePrioritisedExpansionResult | BidirectionalBFSResult | OverlapBasedExpansionResult;
 
 /**
  * Create a typed SUT registry for expansion algorithms.
