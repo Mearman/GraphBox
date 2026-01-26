@@ -151,15 +151,20 @@ export const computeSalienceGroundTruth = <N extends Node, E extends Edge>(
 	// For each seed pair, run Path Salience ranking
 	for (let index = 0; index < seeds.length; index++) {
 		for (let index_ = index + 1; index_ < seeds.length; index_++) {
-			const result = rankPaths(graph, seeds[index], seeds[index_], {
+			const startSeed = seeds[index];
+			const endSeed = seeds[index_];
+
+			const result = rankPaths(graph, startSeed, endSeed, {
 				lambda,
 				maxPaths: topK * 2, // Get more than needed to ensure quality
+				maxLength: 5, // Limit path length to avoid exponential blowup (shortest paths + few longer paths)
 				shortestOnly: false,
 				traversalMode,
 			});
 
 			if (result.ok && result.value.some) {
 				const ranked = result.value.value;
+
 				// Extract top-K path signatures with normalization
 				for (const p of ranked.slice(0, topK)) {
 					const nodeIds = p.path.nodes.map((n) => n.id);
