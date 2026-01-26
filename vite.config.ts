@@ -66,15 +66,11 @@ export default defineConfig({
 				},
 			},
 	test: {
-		plugins: [tsconfigPaths()],
 		globals: true,
 		environment: "node",
 		fileParallelism: false,
 		testTimeout: 30000,
 		exclude: ["node_modules", "dist"],
-		resolve: {
-			extensions: [".js", ".json", ".ts", ".jsx", ".tsx", ".mjs"],
-		},
 		coverage: {
 			provider: "v8",
 			reporter: isCI ? ["text", "json", "html"] : ["text"],
@@ -87,9 +83,6 @@ export default defineConfig({
 				test: {
 					name: "exp",
 					include: ["src/**/*.exp.*.test.ts"],
-					resolve: {
-						extensions: [".js", ".json", ".ts", ".jsx", ".tsx", ".mjs"],
-					},
 				},
 			},
 			{
@@ -97,9 +90,6 @@ export default defineConfig({
 				test: {
 					name: "unit",
 					include: ["src/**/*.unit.test.ts", "src/**/*.integration.test.ts"],
-					resolve: {
-						extensions: [".js", ".json", ".ts", ".jsx", ".tsx", ".mjs"],
-					},
 				},
 			},
 		],
