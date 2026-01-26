@@ -38,3 +38,13 @@ export {
 	spearmanRankCorrelation,
 	type StructuralRepresentativenessResult,
 } from "./structural-representativeness";
+
+// Salience coverage metrics
+export {
+	computeSalienceCoverage,
+	computeSalienceCoverageFromStringPaths,
+	computeSalienceGroundTruth,
+	pathSignature,
+	type SalienceCoverageConfig,
+	type SalienceCoverageResult,
+} from "./salience-coverage";
