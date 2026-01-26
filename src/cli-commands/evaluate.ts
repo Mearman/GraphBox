@@ -13,7 +13,7 @@
  *   npx graphbox evaluate --tags=core
  */
 
-import { existsSync, mkdirSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, renameSync, unlinkSync, writeFileSync } from "node:fs";
 import { cpus } from "node:os";
 import { resolve } from "node:path";
 
@@ -25,13 +25,21 @@ import { getBoolean, getNumber, getOptional } from "../cli-utils/arg-parser";
 import { formatError } from "../cli-utils/error-formatter";
 import type { BenchmarkGraphExpander } from "../experiments/evaluation/__tests__/validation/common/benchmark-graph-expander.js";
 import { aggregateResults, type AggregationPipelineOptions, createAggregationOutput } from "ppef/aggregation";
+// Salience coverage metrics
+import {
+	computeSalienceCoverageFromStringPaths,
+	computeSalienceGroundTruth,
+	type SalienceCoverageConfig,
+	type SalienceCoverageResult,
+} from "../experiments/evaluation/metrics/index.js";
+import { loadBenchmarkByIdFromUrl } from "../experiments/evaluation/fixtures/index.js";
 // TODO: Migrate to new ClaimsEvaluator API
 // import { ClaimsEvaluator } from "ppef/evaluators";
 import { getClaimsByTag, getCoreClaims, THESIS_CLAIMS } from "../domain/claims.js";
 // Framework imports
 import { CheckpointManager, createExecutor, executeParallel, type ExecutorConfig, FileStorage, getGitCommit, InMemoryLock } from "ppef/executor";
 import { CaseRegistry } from "ppef/registry/case-registry";
-import { type GraphCaseRegistry, registerCases } from "../registries/register-cases.js";
+import { type GraphCaseRegistry, registerCases, BENCHMARK_CASES } from "../registries/register-cases.js";
 import { type RankingCaseRegistry,registerRankingCases } from "../registries/register-ranking-cases.js";
 import { type RankingInputs, RankingResult, RankingResultBase, RankingSutRegistry,registerRankingSuts } from "../registries/register-ranking-suts.js";
 import { type ExpansionInputs, ExpansionResult, ExpansionSutRegistry,registerExpansionSuts } from "../registries/register-suts.js";
@@ -41,6 +49,100 @@ import { TABLE_SPECS } from "../domain/tables.js";
 import type { CaseDefinition } from "ppef/types/case";
 import type { EvaluationResult } from "ppef/types/result";
 import type { SutDefinition } from "ppef/types/sut";
+
+/**
+ * Path storage for salience coverage computation.
+ *
+ * For parallel execution compatibility, paths are written to disk immediately
+ * during metric extraction with a unique identifier, then renamed to the
+ * correct runId in the onResult callback.
+ */
+const pathStorage = {
+	/** Storage directory for paths */
+	pathsDir: null as string | null,
+	/** Map of timestamp to pathId for thread-safe lookup */
+	pendingPathIds: new Map<number, string>(),
+
+	/** Initialize with paths directory */
+	init(pathsDir: string) {
+		this.pathsDir = pathsDir;
+	},
+
+	/**
+	 * Store paths to disk with a unique identifier.
+	 * Returns the timestamp that can be used to retrieve the pathId later.
+	 * This is safe for parallel execution because each call creates a unique file.
+	 */
+	storePaths(paths: string[][]): number {
+		const timestamp = Date.now();
+
+		if (!this.pathsDir) {
+			return timestamp;
+		}
+
+		// Generate unique identifier: timestamp + random string
+		const uniqueId = `${timestamp}-${Math.random().toString(36).slice(2)}`;
+		const tempFile = resolve(this.pathsDir, `tmp-${uniqueId}.json`);
+
+		try {
+			writeFileSync(tempFile, JSON.stringify(paths), "utf-8");
+			// Store mapping from timestamp to unique ID
+			this.pendingPathIds.set(timestamp, uniqueId);
+		} catch {
+			// Silently fail
+		}
+
+		return timestamp;
+	},
+
+	/**
+	 * Rename temp paths file to the final runId location.
+	 * Called from onResult callback when we know the runId.
+	 */
+	associateWithRun(timestamp: number, runId: string) {
+		const uniqueId = this.pendingPathIds.get(timestamp);
+		if (!uniqueId || !this.pathsDir) {
+			return;
+		}
+
+		const tempFile = resolve(this.pathsDir, `tmp-${uniqueId}.json`);
+		const finalFile = resolve(this.pathsDir, `${runId}.json`);
+
+		try {
+			if (existsSync(tempFile)) {
+				renameSync(tempFile, finalFile);
+			}
+		} catch {
+			// If rename fails, try copying as fallback
+			try {
+				const content = readFileSync(tempFile, "utf-8");
+				writeFileSync(finalFile, content, "utf-8");
+				unlinkSync(tempFile);
+			} catch {
+				// Silently fail - file will be cleaned up later
+			}
+		}
+
+		// Clean up the pending entry
+		this.pendingPathIds.delete(timestamp);
+	},
+
+	/** Load paths from file (for aggregate phase) */
+	loadPathsFromFile(runId: string): string[][] | null {
+		if (this.pathsDir) {
+			const pathFile = resolve(this.pathsDir, `${runId}.json`);
+			if (existsSync(pathFile)) {
+				try {
+					const content = readFileSync(pathFile, "utf-8");
+					return JSON.parse(content) as string[][];
+				} catch {
+					return null;
+				}
+			}
+		}
+		return null;
+	},
+};
 
 /**
  * Phases of the evaluation pipeline.
@@ -201,6 +303,9 @@ export interface EvaluateOptions {
 	/** Filter claims by tag */
 	tags?: string[];
 
+	/** Filter cases by tag (e.g., "small", "medium", "large") */
+	caseFilter?: string[];
+
 	/** Specific claim ID to evaluate */
 	claim?: string;
 
@@ -245,6 +350,10 @@ export const parseEvaluateArgs = (arguments_: ParsedArguments): EvaluateOptions 
 	const tagsArgument = getOptional<string>(arguments_, "tags");
 	const tags = tagsArgument?.split(",").map((t) => t.trim());
 
+	// Case filtering by tag (e.g., "small", "medium", "large")
+	const caseFilterArgument = getOptional<string>(arguments_, "case-filter");
+	const caseFilter = caseFilterArgument?.split(",").map((t) => t.trim());
+
 	const claim = getOptional<string>(arguments_, "claim");
 	const table = getOptional<string>(arguments_, "table");
 	const verbose = getBoolean(arguments_, "verbose", false);
@@ -275,6 +384,7 @@ export const parseEvaluateArgs = (arguments_: ParsedArguments): EvaluateOptions 
 		runFilter,
 		sortBySize,
 		tags,
+		caseFilter,
 		claim,
 		table,
 		verbose,
@@ -300,12 +410,27 @@ const getSutDefinitions = (registry: ExpansionSutRegistry): Array<SutDefinition<
 };
 
 /**
- * Get case definitions from a case registry.
+ * Get case definitions from a case registry, optionally filtered by tags.
  * @param registry
+ * @param filterTags - Optional array of tags to filter cases by (e.g., ["small", "social"])
  */
-const getCaseDefinitions = (registry: GraphCaseRegistry): Array<CaseDefinition<BenchmarkGraphExpander, ExpansionInputs>> => {
+const getCaseDefinitions = (
+	registry: GraphCaseRegistry,
+	filterTags?: string[]
+): Array<CaseDefinition<BenchmarkGraphExpander, ExpansionInputs>> => {
 	const ids = registry.list();
-	return ids.map((id) => registry.getOrThrow(id));
+	const cases = ids.map((id) => registry.getOrThrow(id));
+
+	// Filter by tags if specified
+	if (filterTags && filterTags.length > 0) {
+		return cases.filter((c) => {
+			const caseTags = c.case.tags ?? [];
+			// Case matches if it has ANY of the filter tags
+			return filterTags.some((filterTag) => caseTags.includes(filterTag));
+		});
+	}
+
+	return cases;
 };
 
 /**
@@ -327,12 +452,27 @@ const getRankingSutDefinitions = (registry: RankingSutRegistry): Array<SutDefini
 };
 
 /**
- * Get ranking case definitions from a ranking case registry.
+ * Get ranking case definitions from a ranking case registry, optionally filtered by tags.
  * @param registry
+ * @param filterTags - Optional array of tags to filter cases by
  */
-const getRankingCaseDefinitions = (registry: RankingCaseRegistry): Array<CaseDefinition<BenchmarkGraphExpander, RankingInputs>> => {
+const getRankingCaseDefinitions = (
+	registry: RankingCaseRegistry,
+	filterTags?: string[]
+): Array<CaseDefinition<BenchmarkGraphExpander, RankingInputs>> => {
 	const ids = registry.list();
-	return ids.map((id) => registry.getOrThrow(id));
+	const cases = ids.map((id) => registry.getOrThrow(id));
+
+	// Filter by tags if specified
+	if (filterTags && filterTags.length > 0) {
+		return cases.filter((c) => {
+			const caseTags = c.case.tags ?? [];
+			// Case matches if it has ANY of the filter tags
+			return filterTags.some((filterTag) => caseTags.includes(filterTag));
+		});
+	}
+
+	return cases;
 };
 
 /**
@@ -354,9 +494,22 @@ function isOverlapBasedExpansionResult(result: ExpansionResult): result is Overl
 /**
  * Metrics extractor for expansion results.
  * Handles BidirectionalBFSResult, DegreePrioritisedExpansionResult, and OverlapBasedExpansionResult.
+ *
+ * Also stores paths to disk for salience coverage computation.
  * @param result
  */
 const extractMetrics = (result: ExpansionResult): Record<string, number> => {
+	// Store paths to disk for salience coverage computation
+	// Returns a timestamp that will be used to associate paths with the runId later
+	const pathsForStorage = result.paths.map((p) => {
+		// Handle both string[] and {fromSeed, toSeed, nodes[]} path formats
+		if (Array.isArray(p)) {
+			return p;
+		}
+		return p.nodes;
+	});
+	const pathTimestamp = pathStorage.storePaths(pathsForStorage);
+
 	// Handle BidirectionalBFSResult (earlier design with parameterised termination)
 	if (isBidirectionalBFSResult(result)) {
 		const sampledNodes = result.visitedA.size + result.visitedB.size;
@@ -378,9 +531,14 @@ const extractMetrics = (result: ExpansionResult): Record<string, number> => {
 			"node-coverage": 0,
 			"bucket-coverage": 0,
 			"structural-coverage": sampledNodes > 0 ? 1 : 0,
+			// Overlap-specific metrics (set to 0 for non-overlap algorithms)
+			"overlap-events": 0,
+			"termination-reason": 0,
+			// Path timestamp for salience coverage computation
+			"_pathTimestamp": pathTimestamp,
 		};
 
-		// Path diversity metrics
+		// Path diversity metrics (always include, even when no paths)
 		if (result.paths.length > 0) {
 			const uniquePaths = result.paths.length;
 			metrics["path-diversity"] = uniquePaths / Math.log(result.iterations + 2);
@@ -391,6 +549,12 @@ const extractMetrics = (result: ExpansionResult): Record<string, number> => {
 			metrics["avg-path-length"] = avgPathLength;
 			metrics["min-path-length"] = Math.min(...pathLengths);
 			metrics["max-path-length"] = Math.max(...pathLengths);
+		} else {
+			// No paths found - set defaults to ensure consistent metrics across all SUTs
+			metrics["path-diversity"] = 0;
+			metrics["avg-path-length"] = 0;
+			metrics["min-path-length"] = 0;
+			metrics["max-path-length"] = 0;
 		}
 
 		return metrics;
@@ -427,6 +591,9 @@ const extractMetrics = (result: ExpansionResult): Record<string, number> => {
 			"hub-avoidance-rate": 0,
 			"hub-avoidance-rate-100": 0,
 			"peripheral-coverage-ratio": 0,
+
+			// Path timestamp for salience coverage computation
+			"_pathTimestamp": pathTimestamp,
 		};
 
 		// Hub traversal: percentage of nodes expanded that are high-degree (51+)
@@ -457,7 +624,11 @@ const extractMetrics = (result: ExpansionResult): Record<string, number> => {
 		// Coverage metrics
 		metrics["node-coverage"] = overlapMetadata.coverage ?? 0;
 
-		// Path diversity metrics
+		// Bucket coverage: number of degree buckets with at least one node
+		const bucketsWithData = [...stats.degreeDistribution.entries()].filter(([_, count]) => count > 0).length;
+		metrics["bucket-coverage"] = bucketsWithData / stats.degreeDistribution.size;
+
+		// Path diversity metrics (always include, even when no paths)
 		if (result.paths.length > 0) {
 			const uniquePaths = result.paths.length;
 			metrics["path-diversity"] = uniquePaths / Math.log(stats.iterations + 2);
@@ -467,6 +638,12 @@ const extractMetrics = (result: ExpansionResult): Record<string, number> => {
 			metrics["avg-path-length"] = avgPathLength;
 			metrics["min-path-length"] = Math.min(...pathLengths);
 			metrics["max-path-length"] = Math.max(...pathLengths);
+		} else {
+			// No paths found - set defaults to ensure consistent metrics across all SUTs
+			metrics["path-diversity"] = 0;
+			metrics["avg-path-length"] = 0;
+			metrics["min-path-length"] = 0;
+			metrics["max-path-length"] = 0;
 		}
 
 		// Structural coverage: ratio of overlapping frontier pairs to total possible pairs
@@ -493,9 +670,16 @@ const extractMetrics = (result: ExpansionResult): Record<string, number> => {
 		"unique-paths": result.paths.length,
 		"sampled-nodes": result.sampledNodes.size,
 		"sampled-edges": result.sampledEdges.size,
+
+		// Overlap-specific metrics (set to 0 for non-overlap algorithms)
+		"overlap-events": 0,
+		"termination-reason": 0,
+
+		// Path timestamp for salience coverage computation
+		"_pathTimestamp": pathTimestamp,
 	};
 
-	// Path diversity metrics
+	// Path diversity metrics (always include, even when no paths)
 	if (result.paths.length > 0) {
 		// Path diversity: ratio of unique paths to log of iterations
 		const uniquePaths = result.paths.length;
@@ -507,6 +691,12 @@ const extractMetrics = (result: ExpansionResult): Record<string, number> => {
 		metrics["avg-path-length"] = avgPathLength;
 		metrics["min-path-length"] = Math.min(...pathLengths);
 		metrics["max-path-length"] = Math.max(...pathLengths);
+	} else {
+		// No paths found - set defaults to ensure consistent metrics across all SUTs
+		metrics["path-diversity"] = 0;
+		metrics["avg-path-length"] = 0;
+		metrics["min-path-length"] = 0;
+		metrics["max-path-length"] = 0;
 	}
 
 	// Hub traversal: percentage of nodes expanded that are high-degree (51+)
@@ -580,8 +770,8 @@ const runExecutePhase = async (options: EvaluateOptions, sutRegistry: SUTRegistr
 		? getRankingSutDefinitions(sutRegistry as RankingSutRegistry)
 		: getSutDefinitions(sutRegistry as ExpansionSutRegistry);
 	const cases = options.scenario === "ranking"
-		? getRankingCaseDefinitions(caseRegistry as RankingCaseRegistry)
-		: getCaseDefinitions(caseRegistry as GraphCaseRegistry);
+		? getRankingCaseDefinitions(caseRegistry as RankingCaseRegistry, options.caseFilter)
+		: getCaseDefinitions(caseRegistry as GraphCaseRegistry, options.caseFilter);
 
 	console.log(`SUTs: ${suts.length}`);
 	for (const sut of suts) {
@@ -593,11 +783,51 @@ const runExecutePhase = async (options: EvaluateOptions, sutRegistry: SUTRegistr
 		console.log(`  - ${case_.case.name} (${case_.case.caseClass})`);
 	}
 
+	// Precompute salience ground truth for expansion scenarios
+	// This is done once per test case, then reused for all SUT evaluations
+	const salienceGroundTruthByCaseId = new Map<string, Set<string>>();
+	if (options.scenario !== "ranking") {
+		console.log("\nPrecomputing salience ground truth...");
+		const salienceConfig: SalienceCoverageConfig = { topK: 10, lambda: 0, traversalMode: "undirected" };
+
+		for (const caseDef of cases) {
+			// Get the dataset ID from case inputs
+			const datasetId = caseDef.case.inputs.summary?.datasetId as string | undefined;
+			if (!datasetId) {
+				console.log(`  Skipping ${caseDef.case.name}: no dataset ID`);
+				continue;
+			}
+
+			// Load the benchmark graph directly
+			const benchmarkData = await loadBenchmarkByIdFromUrl(datasetId);
+			const graph = benchmarkData.graph;
+
+			// Get seeds from case inputs (stored during case registration)
+			const inputs = caseDef.getInputs() as ExpansionInputs;
+			const seeds = inputs.seeds;
+
+			const groundTruth = computeSalienceGroundTruth(graph, seeds, salienceConfig);
+			salienceGroundTruthByCaseId.set(caseDef.case.caseId, groundTruth);
+
+			console.log(`  ${caseDef.case.name}: ${groundTruth.size} top-${salienceConfig.topK} salient paths`);
+		}
+		console.log(`Ground truth computed for ${salienceGroundTruthByCaseId.size} cases\n`);
+	}
+
 	// Create checkpoint manager for resumable execution
 	const executeDir = resolve(options.outputDir, "execute");
 	if (!existsSync(executeDir)) {
 		mkdirSync(executeDir, { recursive: true });
 	}
+
+	// Create paths storage directory for salience coverage computation
+	const pathsDir = resolve(executeDir, "paths");
+	if (!existsSync(pathsDir)) {
+		mkdirSync(pathsDir, { recursive: true });
+	}
+
+	// Initialize path storage with the paths directory
+	pathStorage.init(pathsDir);
 
 	// Get worker identity for sharded checkpoint mode
 	const workerName = process.env.GRAPHBOX_WORKER_NAME ?? "main";
@@ -705,6 +935,13 @@ const runExecutePhase = async (options: EvaluateOptions, sutRegistry: SUTRegistr
 			}
 		},
 		onResult: async (result) => {
+			// Associate temporarily stored paths with this run ID
+			// Extract the timestamp from metrics and use it to find the pending pathId
+			const pathTimestamp = result.metrics.numeric["_pathTimestamp"] as number | undefined;
+			if (pathTimestamp !== undefined) {
+				pathStorage.associateWithRun(pathTimestamp, result.run.runId);
+			}
+
 			// Calculate and display run duration
 			const runKey = `${result.run.sut}-${result.run.caseId}-${result.run.repetition}`;
 			const startTime = runStartTimes.get(runKey) ?? Date.now();
@@ -908,6 +1145,44 @@ const runExecutePhase = async (options: EvaluateOptions, sutRegistry: SUTRegistr
 	// Merge all results (completed from checkpoint + new)
 	const allResults = [...checkpoint.getResults()];
 
+	// Post-process results to add salience coverage metrics
+	// Use stored paths to compute coverage
+	console.log("\nComputing salience coverage metrics...");
+
+	// Store ground truth for use in aggregate phase
+	const groundTruthFile = resolve(executeDir, "salience-ground-truth.json");
+	const groundTruthData: Record<string, string[]> = {};
+	for (const [caseId, paths] of salienceGroundTruthByCaseId) {
+		groundTruthData[caseId] = [...paths];
+	}
+	writeFileSync(groundTruthFile, JSON.stringify(groundTruthData), "utf-8");
+
+	let computedCount = 0;
+	for (const result of allResults) {
+		const groundTruth = salienceGroundTruthByCaseId.get(result.run.caseId);
+		if (!groundTruth) {
+			continue;
+		}
+
+		// Load paths from file
+		const paths = pathStorage.loadPathsFromFile(result.run.runId);
+
+		if (!paths) {
+			// No paths stored - this shouldn't happen if everything is working
+			continue;
+		}
+
+		// Compute salience coverage
+		const coverage = computeSalienceCoverageFromStringPaths(paths, groundTruth);
+
+		// Add to metrics
+		Object.assign(result.metrics, coverage);
+		computedCount++;
+	}
+
+	console.log(`Computed salience coverage for ${computedCount}/${allResults.length} results`);
+	console.log(`Ground truth saved to: ${groundTruthFile}\n`);
+
 	// Write results to file
 	const resultsFile = resolve(executeDir, "evaluation-results.json");
 	const finalSummary = {
@@ -944,9 +1219,54 @@ const runAggregatePhase = async (options: EvaluateOptions): Promise<void> => {
 	}
 
 	const summaryText = await read(resultsFile);
-	const summary = JSON.parse(summaryText);
+	const summary = JSON.parse(summaryText) as { totalRuns: number; successfulRuns: number; failedRuns: number; elapsedMs: number; results: EvaluationResult[] };
 
 	console.log(`Loaded ${summary.results.length} results from execution.`);
+
+	// Post-process results to add salience coverage metrics
+	// Load paths from files and compute coverage
+	console.log("\nComputing salience coverage metrics...");
+
+	// Initialize pathStorage with paths directory for loading stored paths
+	const aggregatePathsDir = resolve(executeDir, "paths");
+	pathStorage.init(aggregatePathsDir);
+
+	// Load ground truth from file (saved during execute phase)
+	const groundTruthFile = resolve(executeDir, "salience-ground-truth.json");
+	if (!existsSync(groundTruthFile)) {
+		console.log("Warning: Ground truth file not found. Salience coverage will be skipped.\n");
+	} else {
+		const groundTruthText = readFileSync(groundTruthFile, "utf-8");
+		const groundTruthData = JSON.parse(groundTruthText) as Record<string, string[]>;
+		const salienceGroundTruthByCaseId = new Map<string, Set<string>>();
+		for (const [caseId, paths] of Object.entries(groundTruthData)) {
+			salienceGroundTruthByCaseId.set(caseId, new Set(paths));
+		}
+
+		// Compute salience coverage for each result using stored paths
+		let computedCount = 0;
+		for (const result of summary.results) {
+			const groundTruth = salienceGroundTruthByCaseId.get(result.run.caseId);
+			if (!groundTruth) {
+				continue;
+			}
+
+			// Load paths from file
+			const paths = pathStorage.loadPathsFromFile(result.run.runId);
+			if (!paths) {
+				continue;
+			}
+
+			// Compute salience coverage
+			const coverage = computeSalienceCoverageFromStringPaths(paths, groundTruth);
+
+			// Add to metrics
+			Object.assign(result.metrics, coverage);
+			computedCount++;
+		}
+
+		console.log(`Computed salience coverage for ${computedCount}/${summary.results.length} results\n`);
+	}
 
 	// Aggregate results
 	const aggregateOptions: AggregationPipelineOptions = {
