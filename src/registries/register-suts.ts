@@ -12,6 +12,8 @@
 import { SUTRegistry } from "ppef/registry";
 import type { SUT, SutRegistration } from "ppef/types/sut";
 
+import type { BidirectionalBFSResult } from "../algorithms/traversal/bidirectional-bfs.js";
+import { BidirectionalBFS } from "../algorithms/traversal/bidirectional-bfs.js";
 import type { DegreePrioritisedExpansionResult } from "../algorithms/traversal/degree-prioritised-expansion.js";
 import { DegreePrioritisedExpansion } from "../algorithms/traversal/degree-prioritised-expansion.js";
 import { FrontierBalancedExpansion } from "../experiments/baselines/frontier-balanced.js";
@@ -35,8 +37,12 @@ export interface ExpansionInputs {
 
 /**
  * Result type for all expansion SUTs.
+ *
+ * Union type supporting both:
+ * - DegreePrioritisedExpansionResult (parameter-free frontier exhaustion)
+ * - BidirectionalBFSResult (parameterised termination: targetPaths, maxIterations)
  */
-export type ExpansionResult = DegreePrioritisedExpansionResult;
+export type ExpansionResult = DegreePrioritisedExpansionResult | BidirectionalBFSResult;
 
 /**
  * Create a typed SUT registry for expansion algorithms.
@@ -51,14 +57,23 @@ export type ExpansionSutRegistry = SUTRegistry<ExpansionInputs, ExpansionResult>
  * SUT registrations for expansion algorithms.
  */
 export const SUT_REGISTRATIONS: Record<string, SutRegistration> = {
+	"bidirectional-bfs-v1.0.0": {
+		id: "bidirectional-bfs-v1.0.0",
+		name: "Bidirectional BFS",
+		version: "1.0.0",
+		role: "baseline",
+		config: {} satisfies { targetPaths?: number; maxIterations?: number; minIterations?: number },
+		tags: ["traversal", "bidirectional", "parameterised", "early-termination"],
+		description: "Earlier design with parameterised termination (targetPaths, maxIterations, minIterations)",
+	},
 	"degree-prioritised-v1.0.0": {
 		id: "degree-prioritised-v1.0.0",
 		name: "Degree-Prioritised Expansion",
 		version: "1.0.0",
 		role: "primary",
 		config: {},
-		tags: ["traversal", "bidirectional", "hub-avoidance"],
-		description: "Bidirectional BFS with degree-based priority (low degree first)",
+		tags: ["traversal", "bidirectional", "hub-avoidance", "parameter-free"],
+		description: "Refined design with parameter-free frontier exhaustion (N≥1 seeds)",
 	},
 	"standard-bfs-v1.0.0": {
 		id: "standard-bfs-v1.0.0",
@@ -88,6 +103,48 @@ export const SUT_REGISTRATIONS: Record<string, SutRegistration> = {
 		description: "Bidirectional expansion with random node selection",
 	},
 };
+
+/**
+ * SUT wrapper for BidirectionalBFS.
+ *
+ * Wraps the earlier design with parameterised termination to conform
+ * to the universal SUT interface.
+ */
+class BidirectionalBfsSUT implements SUT<ExpansionInputs, BidirectionalBFSResult> {
+	readonly id = "bidirectional-bfs-v1.0.0";
+	readonly config: Readonly<Record<string, unknown>>;
+
+	constructor(config?: Record<string, unknown>) {
+		this.config = { ...config };
+	}
+
+	async run(inputs: ExpansionInputs): Promise<BidirectionalBFSResult> {
+		const { expander, seeds } = inputs;
+		// BidirectionalBFS requires exactly 2 seeds
+		const seedArray = seeds.length >= 2
+			? [seeds[0], seeds[1]] as [string, string]
+			: [seeds[0], seeds[0]] as [string, string];
+
+		// Extract termination parameters from config (with defaults)
+		const targetPaths = typeof this.config?.targetPaths === "number"
+			? this.config.targetPaths
+			: 5;
+		const maxIterations = typeof this.config?.maxIterations === "number"
+			? this.config.maxIterations
+			: 100;
+		const minIterations = typeof this.config?.minIterations === "number"
+			? this.config.minIterations
+			: 2;
+
+		const algorithm = new BidirectionalBFS<unknown>(
+			expander,
+			seedArray[0],
+			seedArray[1],
+			{ targetPaths, maxIterations, minIterations }
+		);
+		return algorithm.search();
+	}
+}
 
 /**
  * SUT wrapper for Degree-Prioritised Expansion.
@@ -194,7 +251,13 @@ class RandomPrioritySUT implements SUT<ExpansionInputs, ExpansionResult> {
 export const registerExpansionSuts = (
 	registry: ExpansionSutRegistry = new SUTRegistry<ExpansionInputs, ExpansionResult>()
 ): ExpansionSutRegistry => {
-	// Degree-Prioritised (Primary)
+	// BidirectionalBFS (Earlier design with parameterised termination)
+	registry.register(
+		SUT_REGISTRATIONS["bidirectional-bfs-v1.0.0"],
+		(config?: Record<string, unknown>): SUT<ExpansionInputs, ExpansionResult> => new BidirectionalBfsSUT(config)
+	);
+
+	// Degree-Prioritised (Primary - refined design)
 	registry.register(
 		SUT_REGISTRATIONS["degree-prioritised-v1.0.0"],
 		(config?: Record<string, unknown>): SUT<ExpansionInputs, ExpansionResult> => new DegreePrioritisedSUT(config)
