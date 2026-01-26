@@ -19,6 +19,7 @@ import { resolve } from "node:path";
 
 import type { BidirectionalBFSResult } from "../algorithms/traversal/bidirectional-bfs.js";
 import type { DegreePrioritisedExpansionResult } from "../algorithms/traversal/degree-prioritised-expansion.js";
+import type { OverlapBasedExpansionResult } from "../algorithms/traversal/overlap-based/overlap-result.js";
 import type { ParsedArguments } from "../cli-utils/arg-parser";
 import { getBoolean, getNumber, getOptional } from "../cli-utils/arg-parser";
 import { formatError } from "../cli-utils/error-formatter";
@@ -343,8 +344,16 @@ function isBidirectionalBFSResult(result: ExpansionResult): result is Bidirectio
 }
 
 /**
+ * Type guard to check if result is OverlapBasedExpansionResult.
+ * @param result
+ */
+function isOverlapBasedExpansionResult(result: ExpansionResult): result is OverlapBasedExpansionResult {
+	return "overlapMetadata" in result;
+}
+
+/**
  * Metrics extractor for expansion results.
- * Handles both BidirectionalBFSResult (earlier design) and DegreePrioritisedExpansionResult (refined design).
+ * Handles BidirectionalBFSResult, DegreePrioritisedExpansionResult, and OverlapBasedExpansionResult.
  * @param result
  */
 const extractMetrics = (result: ExpansionResult): Record<string, number> => {
@@ -383,6 +392,92 @@ const extractMetrics = (result: ExpansionResult): Record<string, number> => {
 			metrics["min-path-length"] = Math.min(...pathLengths);
 			metrics["max-path-length"] = Math.max(...pathLengths);
 		}
+
+		return metrics;
+	}
+
+	// Handle OverlapBasedExpansionResult (overlap-based termination)
+	if (isOverlapBasedExpansionResult(result)) {
+		const stats = result.stats;
+		const overlapMetadata = result.overlapMetadata;
+
+		// Encode termination reason as numeric code
+		const terminationCode: Record<string, number> = {
+			"overlap-satisfied": 1,
+			"n1-coverage": 2,
+			"max-iterations": 3,
+			"exhaustion": 4,
+		};
+
+		const metrics: Record<string, number> = {
+			// Basic stats
+			"nodes-expanded": stats.nodesExpanded,
+			"edges-traversed": stats.edgesTraversed,
+			"iterations": stats.iterations,
+			"unique-paths": result.paths.length,
+			"sampled-nodes": result.sampledNodes.size,
+			"sampled-edges": result.sampledEdges.size,
+
+			// Overlap-specific metrics
+			"overlap-events": overlapMetadata.overlapEvents.length,
+			"termination-reason": terminationCode[overlapMetadata.terminationReason] ?? 0,
+
+			// Hub metrics (from degree distribution)
+			"hub-traversal": 0,
+			"hub-avoidance-rate": 0,
+			"hub-avoidance-rate-100": 0,
+			"peripheral-coverage-ratio": 0,
+		};
+
+		// Hub traversal: percentage of nodes expanded that are high-degree (51+)
+		const highDegreeCount = (stats.degreeDistribution.get("51-100") ?? 0)
+			+ (stats.degreeDistribution.get("101-500") ?? 0)
+			+ (stats.degreeDistribution.get("501-1000") ?? 0)
+			+ (stats.degreeDistribution.get("1000+") ?? 0);
+		metrics["hub-traversal"] = stats.nodesExpanded > 0 ? highDegreeCount / stats.nodesExpanded : 0;
+
+		// Hub avoidance rate: proportion of expanded nodes that are hubs (50+)
+		const hubCount = (stats.degreeDistribution.get("51-100") ?? 0)
+			+ (stats.degreeDistribution.get("101-500") ?? 0)
+			+ (stats.degreeDistribution.get("501-1000") ?? 0)
+			+ (stats.degreeDistribution.get("1000+") ?? 0);
+		metrics["hub-avoidance-rate"] = stats.nodesExpanded > 0 ? hubCount / stats.nodesExpanded : 0;
+
+		// 100+ hub rate
+		const hub100Count = (stats.degreeDistribution.get("101-500") ?? 0)
+			+ (stats.degreeDistribution.get("501-1000") ?? 0)
+			+ (stats.degreeDistribution.get("1000+") ?? 0);
+		metrics["hub-avoidance-rate-100"] = stats.nodesExpanded > 0 ? hub100Count / stats.nodesExpanded : 0;
+
+		// Peripheral coverage: nodes with degree 1-10
+		const peripheralCount = (stats.degreeDistribution.get("1-5") ?? 0)
+			+ (stats.degreeDistribution.get("6-10") ?? 0);
+		metrics["peripheral-coverage-ratio"] = stats.nodesExpanded > 0 ? peripheralCount / stats.nodesExpanded : 0;
+
+		// Coverage metrics
+		metrics["node-coverage"] = overlapMetadata.coverage ?? 0;
+
+		// Path diversity metrics
+		if (result.paths.length > 0) {
+			const uniquePaths = result.paths.length;
+			metrics["path-diversity"] = uniquePaths / Math.log(stats.iterations + 2);
+
+			const pathLengths = result.paths.map((p) => p.nodes.length);
+			const avgPathLength = pathLengths.reduce((sum, length) => sum + length, 0) / pathLengths.length;
+			metrics["avg-path-length"] = avgPathLength;
+			metrics["min-path-length"] = Math.min(...pathLengths);
+			metrics["max-path-length"] = Math.max(...pathLengths);
+		}
+
+		// Structural coverage: ratio of overlapping frontier pairs to total possible pairs
+		const overlappingPairs = new Set<string>();
+		for (const event of overlapMetadata.overlapEvents) {
+			const key = event.frontierA < event.frontierB
+				? `${event.frontierA}-${event.frontierB}`
+				: `${event.frontierB}-${event.frontierA}`;
+			overlappingPairs.add(key);
+		}
+		metrics["structural-coverage"] = overlappingPairs.size > 0 ? 1 : 0;
 
 		return metrics;
 	}
