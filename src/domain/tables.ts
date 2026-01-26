@@ -21,7 +21,6 @@ const METHOD_ABBREVIATIONS: Record<string, string> = {
 	"path-salience-v1.0.0": "PS",
 	"random-ranking-v1.0.0": "RR",
 	"shortest-ranking-v1.0.0": "SR",
-	"mi-ranking-v1.0.0": "MI",
 };
 
 /**
