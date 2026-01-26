@@ -24,6 +24,7 @@ export class MinimalPathsStrategy implements BetweenGraphStrategy {
 	 * Extract the between-graph subgraph from expansion results.
 	 *
 	 * Returns only nodes and edges that appear in discovered paths.
+	 * For N=1 (no paths), returns all visited nodes as fallback.
 	 *
 	 * @param expansionResult - Raw expansion output with all visited nodes/edges
 	 * @param _graph - Original graph (unused for minimal paths)
@@ -37,6 +38,15 @@ export class MinimalPathsStrategy implements BetweenGraphStrategy {
 		edges: Set<string>;
 		paths: Array<{ fromSeed: number; toSeed: number; nodes: string[] }>;
 	} {
+		// For N=1 (no paths), return all visited nodes as fallback
+		if (expansionResult.paths.length === 0) {
+			return {
+				nodes: expansionResult.sampledNodes,
+				edges: expansionResult.sampledEdges,
+				paths: expansionResult.paths,
+			};
+		}
+
 		// Collect all nodes and edges from paths
 		const nodes = new Set<string>();
 		const edges = new Set<string>();
