@@ -11,6 +11,7 @@ import type { Edge, Node } from "../../../../../algorithms/types/graph";
 import { betweennessRanking } from "../../../../baselines/betweenness-ranking";
 import { randomPathRanking } from "../../../../baselines/random-path-ranking";
 import { shortestPathRanking } from "../../../../baselines/shortest-path-ranking";
+import { meanPairwiseEdgeJaccardDistance } from "../../../metrics/path-diversity.js";
 import { cohensD, mannWhitneyUTest } from "./statistical-functions";
 
 // ============================================================================
@@ -283,20 +284,12 @@ export const computeRankingMetrics = <N extends Node, E extends Edge>(
 	const varianceMI = miValues.reduce((sum, mi) => sum + (mi - meanMI) ** 2, 0) / miValues.length;
 	const stdMI = Math.sqrt(varianceMI);
 
-	// Path diversity (entropy of path lengths)
-	const pathLengths = rankedPaths.map((p) => p.path.edges.length);
-	const lengthCounts = new Map<number, number>();
-	for (const length of pathLengths) {
-		lengthCounts.set(length, (lengthCounts.get(length) ?? 0) + 1);
-	}
-
-	let entropy = 0;
-	for (const count of lengthCounts.values()) {
-		const p = count / pathLengths.length;
-		entropy -= p * Math.log2(p);
-	}
-	const maxEntropy = Math.log2(lengthCounts.size);
-	const pathDiversity = maxEntropy > 0 ? entropy / maxEntropy : 0;
+	// Path diversity (Jaccard distance of path edges)
+	// Measures structural diversity by comparing edge overlap between paths
+	const pathStrings = rankedPaths.map((p) => p.path.nodes.map((n) => n.id));
+	const pathDiversity = pathStrings.length < 2
+		? 0
+		: meanPairwiseEdgeJaccardDistance(pathStrings);
 
 	// Hub avoidance
 	const nodeFrequencies = new Map<string, number>();
