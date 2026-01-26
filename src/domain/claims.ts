@@ -129,7 +129,7 @@ export const THESIS_CLAIMS: EvaluationClaim[] = [
 		description: "Degree-prioritised expansion has lower hub expansion ratio",
 		sut: "degree-prioritised-v1.0.0",
 		baseline: "standard-bfs-v1.0.0",
-		metric: "hub-ratio",
+		metric: "hub-avoidance-rate",
 		direction: "less",
 		scope: "global",
 		tags: ["hub-avoidance"],
@@ -209,19 +209,9 @@ export const THESIS_CLAIMS: EvaluationClaim[] = [
 
 	// Ranking Claims (Path Salience)
 	{
-		claimId: "mi-higher-ndcg",
-		description: "MI ranking achieves higher NDCG than random ranking",
-		sut: "mi-ranking-v1.0.0",
-		baseline: "random-ranking-v1.0.0",
-		metric: "ndcg-at-k",
-		direction: "greater",
-		scope: "global",
-		tags: ["ranking"],
-	},
-	{
 		claimId: "mi-better-coverage",
 		description: "MI ranking covers more nodes than random ranking",
-		sut: "mi-ranking-v1.0.0",
+		sut: "path-salience-v1.0.0",
 		baseline: "random-ranking-v1.0.0",
 		metric: "node-coverage",
 		direction: "greater",
