@@ -1,0 +1,117 @@
+{
+  "version": "1.0.0",
+  "timestamp": "2026-01-25T23:10:30.786Z",
+  "metrics": {
+    "mi-ranking-quality": [
+      {
+        "dataset": "Karate Club",
+        "meanMI": 0.017681037381157696,
+        "nodeCoverage": 0.17647058823529413,
+        "pathDiversity": 0,
+        "paths": 4
+      },
+      {
+        "dataset": "Les Misérables",
+        "meanMI": 0.08141736864481347,
+        "nodeCoverage": 0.03896103896103896,
+        "pathDiversity": 0,
+        "paths": 1
+      },
+      {
+        "dataset": "Cora",
+        "meanMI": 0.005813953688372094,
+        "nodeCoverage": 0.0007385524372230429,
+        "pathDiversity": 0,
+        "paths": 1
+      },
+      {
+        "dataset": "CiteSeer",
+        "meanMI": 0.06666666686666665,
+        "nodeCoverage": 0.0006011421701232341,
+        "pathDiversity": 0,
+        "paths": 1
+      },
+      {
+        "dataset": "Facebook",
+        "meanMI": 0.02371906217794599,
+        "nodeCoverage": 0.0024758603614756128,
+        "pathDiversity": 0,
+        "paths": 6
+      }
+    ],
+    "mi-ranking-quality-baseline": [
+      {
+        "dataset": "Karate Club",
+        "meanMI": 0,
+        "nodeCoverage": 0.17647058823529413,
+        "pathDiversity": 0,
+        "paths": 4
+      },
+      {
+        "dataset": "Les Misérables",
+        "meanMI": 0,
+        "nodeCoverage": 0.03896103896103896,
+        "pathDiversity": 0,
+        "paths": 1
+      },
+      {
+        "dataset": "Cora",
+        "meanMI": 0,
+        "nodeCoverage": 0.0007385524372230429,
+        "pathDiversity": 0,
+        "paths": 1
+      },
+      {
+        "dataset": "CiteSeer",
+        "meanMI": 0,
+        "nodeCoverage": 0.0006011421701232341,
+        "pathDiversity": 0,
+        "paths": 1
+      },
+      {
+        "dataset": "Facebook",
+        "meanMI": 0,
+        "nodeCoverage": 0.0024758603614756128,
+        "pathDiversity": 0,
+        "paths": 6
+      }
+    ],
+    "mi-ranking-quality-shortest": [
+      {
+        "dataset": "Karate Club",
+        "meanMI": 0,
+        "nodeCoverage": 0.17647058823529413,
+        "pathDiversity": 0,
+        "paths": 4
+      },
+      {
+        "dataset": "Les Misérables",
+        "meanMI": 0,
+        "nodeCoverage": 0.03896103896103896,
+        "pathDiversity": 0,
+        "paths": 1
+      },
+      {
+        "dataset": "Cora",
+        "meanMI": 0,
+        "nodeCoverage": 0.0007385524372230429,
+        "pathDiversity": 0,
+        "paths": 1
+      },
+      {
+        "dataset": "CiteSeer",
+        "meanMI": 0,
+        "nodeCoverage": 0.0006011421701232341,
+        "pathDiversity": 0,
+        "paths": 1
+      },
+      {
+        "dataset": "Facebook",
+        "meanMI": 0,
+        "nodeCoverage": 0.0024758603614756128,
+        "pathDiversity": 0,
+        "paths": 6
+      }
+    ]
+  }
+}
