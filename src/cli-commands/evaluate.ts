@@ -17,6 +17,7 @@ import { existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { cpus } from "node:os";
 import { resolve } from "node:path";
 
+import type { BidirectionalBFSResult } from "../algorithms/traversal/bidirectional-bfs.js";
 import type { DegreePrioritisedExpansionResult } from "../algorithms/traversal/degree-prioritised-expansion.js";
 import type { ParsedArguments } from "../cli-utils/arg-parser";
 import { getBoolean, getNumber, getOptional } from "../cli-utils/arg-parser";
@@ -334,10 +335,59 @@ const getRankingCaseDefinitions = (registry: RankingCaseRegistry): Array<CaseDef
 };
 
 /**
- * Metrics extractor for degree-prioritised expansion results.
+ * Type guard to check if result is BidirectionalBFSResult.
  * @param result
  */
-const extractMetrics = (result: DegreePrioritisedExpansionResult): Record<string, number> => {
+function isBidirectionalBFSResult(result: ExpansionResult): result is BidirectionalBFSResult {
+	return "visitedA" in result && "visitedB" in result;
+}
+
+/**
+ * Metrics extractor for expansion results.
+ * Handles both BidirectionalBFSResult (earlier design) and DegreePrioritisedExpansionResult (refined design).
+ * @param result
+ */
+const extractMetrics = (result: ExpansionResult): Record<string, number> => {
+	// Handle BidirectionalBFSResult (earlier design with parameterised termination)
+	if (isBidirectionalBFSResult(result)) {
+		const sampledNodes = result.visitedA.size + result.visitedB.size;
+		const metrics: Record<string, number> = {
+			// Basic metrics
+			"iterations": result.iterations,
+			"unique-paths": result.paths.length,
+			"sampled-nodes": sampledNodes,
+			// Placeholder metrics for compatibility with aggregator
+			"nodes-expanded": sampledNodes,
+			"edges-traversed": sampledNodes, // Approximate edges ≈ nodes for bidirectional BFS
+			"sampled-edges": sampledNodes,
+			// Hub metrics (not available in BidirectionalBFSResult, use default values)
+			"hub-traversal": 0,
+			"hub-avoidance-rate": 0,
+			"hub-avoidance-rate-100": 0,
+			"peripheral-coverage-ratio": 0,
+			// Coverage metrics (placeholders)
+			"node-coverage": 0,
+			"bucket-coverage": 0,
+			"structural-coverage": sampledNodes > 0 ? 1 : 0,
+		};
+
+		// Path diversity metrics
+		if (result.paths.length > 0) {
+			const uniquePaths = result.paths.length;
+			metrics["path-diversity"] = uniquePaths / Math.log(result.iterations + 2);
+
+			// Path lengths
+			const pathLengths = result.paths.map((p) => p.length);
+			const avgPathLength = pathLengths.reduce((sum, length) => sum + length, 0) / pathLengths.length;
+			metrics["avg-path-length"] = avgPathLength;
+			metrics["min-path-length"] = Math.min(...pathLengths);
+			metrics["max-path-length"] = Math.max(...pathLengths);
+		}
+
+		return metrics;
+	}
+
+	// Handle DegreePrioritisedExpansionResult (refined design with frontier exhaustion)
 	const stats = result.stats;
 
 	// Base metrics from stats
@@ -654,7 +704,12 @@ const runExecutePhase = async (options: EvaluateOptions, sutRegistry: SUTRegistr
 		await rankingExecutor.execute(suts as unknown as Array<SutDefinition<RankingInputs, RankingResult>>, cases as Array<CaseDefinition<BenchmarkGraphExpander, RankingInputs>>, rankingMetricsExtractor, remainingRuns);
 	} else {
 		// Sampling scenario: use typed executor with BenchmarkGraphExpander, ExpansionInputs, ExpansionResult
-		const executor = createExecutor<BenchmarkGraphExpander, ExpansionInputs, ExpansionResult>(executorConfigWithCallbacks);
+		// NOTE: forceInProcess=true required because expansion SUTs use registry classes
+		// that are not compatible with worker thread serialization
+		const executor = createExecutor<BenchmarkGraphExpander, ExpansionInputs, ExpansionResult>({
+			...executorConfigWithCallbacks,
+			forceInProcess: true,
+		});
 
 		// Plan all runs and filter out completed ones
 		const allPlanned = executor.plan(suts as Array<SutDefinition<ExpansionInputs, ExpansionResult>>, cases as Array<CaseDefinition<BenchmarkGraphExpander, ExpansionInputs>>);
