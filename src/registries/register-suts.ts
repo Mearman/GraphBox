@@ -17,9 +17,12 @@ import { BidirectionalBFS } from "../algorithms/traversal/bidirectional-bfs.js";
 import type { DegreePrioritisedExpansionResult } from "../algorithms/traversal/degree-prioritised-expansion.js";
 import { DegreePrioritisedExpansion } from "../algorithms/traversal/degree-prioritised-expansion.js";
 import type { OverlapBasedExpansionResult } from "../algorithms/traversal/overlap-based/overlap-result.js";
+import { computeNodeSalienceFromRankedPaths,SaliencePrioritisedExpansion } from "../algorithms/traversal/salience-prioritised-expansion.js";
 import { FrontierBalancedExpansion } from "../experiments/baselines/frontier-balanced.js";
+import { registerOverlapSuts } from "./register-overlap-suts.js";
 // Re-export overlap-based SUT registration for convenience
-export { OVERLAP_SUT_REGISTRATIONS,overlapSutRegistry, registerOverlapSuts } from "./register-overlap-suts.js";
+export { OVERLAP_SUT_REGISTRATIONS, overlapSutRegistry, registerOverlapSuts } from "./register-overlap-suts.js";
+import { rankPaths } from "../algorithms/pathfinding/path-ranking.js";
 import { RandomPriorityExpansion } from "../experiments/baselines/random-priority.js";
 import { StandardBfsExpansion } from "../experiments/baselines/standard-bfs.js";
 import type { GraphExpander } from "../interfaces/graph-expander.js";
@@ -36,6 +39,9 @@ export interface ExpansionInputs {
 
 	/** Seed node IDs for expansion */
 	seeds: string[];
+
+	/** Optional underlying graph for algorithms that need full graph access (e.g., path ranking) */
+	graph?: import("../algorithms/graph/graph.js").Graph<import("../algorithms/types/graph.js").Node, import("../algorithms/types/graph.js").Edge>;
 }
 
 /**
@@ -105,6 +111,15 @@ export const SUT_REGISTRATIONS: Record<string, SutRegistration> = {
 		config: {},
 		tags: ["traversal", "bidirectional", "baseline", "null-hypothesis"],
 		description: "Bidirectional expansion with random node selection",
+	},
+	"salience-prioritised-v1.0.0": {
+		id: "salience-prioritised-v1.0.0",
+		name: "Salience-Prioritised Expansion",
+		version: "1.0.0",
+		role: "baseline",
+		config: {} satisfies { topK?: number },
+		tags: ["traversal", "bidirectional", "salience-aware", "parameter-free"],
+		description: "Path quality-aware expansion prioritizing nodes by participation in high-salience paths",
 	},
 };
 
@@ -247,6 +262,80 @@ class RandomPrioritySUT implements SUT<ExpansionInputs, ExpansionResult> {
 }
 
 /**
+ * SUT wrapper for Salience-Prioritised Expansion.
+ *
+ * **Novel Contribution**: Pre-computes node salience scores from Path Salience ranking
+ * and uses them to prioritize expansion toward high-quality paths.
+ *
+ * This SUT automatically:
+ * 1. Runs Path Salience ranking on the graph to find top-K salient paths
+ * 2. Computes node participation scores for those paths
+ * 3. Uses those scores to drive expansion (higher salience = expanded earlier)
+ *
+ * **Config**:
+ * - topK: Number of top salient paths to use for scoring (default: 10)
+ *
+ * **Expected Outcome**: Higher salience coverage than degree-prioritised expansion
+ * because the expansion naturally gravitates toward nodes that appear in
+ * high-quality paths.
+ */
+class SaliencePrioritisedSUT implements SUT<ExpansionInputs, ExpansionResult> {
+	readonly id = "salience-prioritised-v1.0.0";
+	readonly config: Readonly<Record<string, unknown>>;
+
+	constructor(config?: Record<string, unknown>) {
+		this.config = { ...config };
+	}
+
+	async run(inputs: ExpansionInputs): Promise<ExpansionResult> {
+		const { expander, seeds, graph } = inputs;
+		const topK = typeof this.config?.topK === "number" ? this.config.topK : 10;
+
+		// Get the graph for path ranking
+		// Priority: 1) Use provided graph, 2) Call toGraph() if available, 3) Error
+		let graphForRanking: import("../algorithms/graph/graph.js").Graph<import("../algorithms/types/graph.js").Node, import("../algorithms/types/graph.js").Edge>;
+		if (graph) {
+			graphForRanking = graph;
+		} else if ("toGraph" in expander && typeof expander.toGraph === "function") {
+			graphForRanking = await (expander as unknown as { toGraph: () => Promise<typeof graphForRanking> }).toGraph();
+		} else {
+			throw new Error("SaliencePrioritisedSUT requires either inputs.graph or expander.toGraph()");
+		}
+
+		// Pre-compute salience scores by running Path Salience ranking
+		const nodeSalience = new Map<string, number>();
+
+		// Run Path Salience for each seed pair to collect top-K paths
+		for (let index = 0; index < seeds.length; index++) {
+			for (let index_ = index + 1; index_ < seeds.length; index_++) {
+				const result = rankPaths(graphForRanking, seeds[index], seeds[index_], {
+					lambda: 0,
+					maxPaths: topK * 2, // Get more than needed
+					shortestOnly: false,
+					traversalMode: "undirected",
+				});
+
+				if (result.ok && result.value.some) {
+					const ranked = result.value.value;
+					// Compute node salience from top-K paths
+					const topKPaths = ranked.slice(0, topK);
+					const scores = computeNodeSalienceFromRankedPaths(topKPaths);
+
+					// Merge scores (sum across all pairs)
+					for (const [node, score] of scores) {
+						nodeSalience.set(node, (nodeSalience.get(node) ?? 0) + score);
+					}
+				}
+			}
+		}
+
+		// Create and run salience-prioritised expansion
+		const algorithm = new SaliencePrioritisedExpansion(expander, seeds, nodeSalience);
+		return algorithm.run();
+	}
+}
+
+/**
  * Register all expansion SUTs with a registry.
  *
  * @param registry - Registry to populate (defaults to new instance)
@@ -284,6 +373,15 @@ export const registerExpansionSuts = (
 		SUT_REGISTRATIONS["random-priority-v1.0.0"],
 		(config?: Record<string, unknown>): SUT<ExpansionInputs, ExpansionResult> => new RandomPrioritySUT(config)
 	);
+
+	// Salience-Prioritised (Baseline - path quality-aware expansion)
+	registry.register(
+		SUT_REGISTRATIONS["salience-prioritised-v1.0.0"],
+		(config?: Record<string, unknown>): SUT<ExpansionInputs, ExpansionResult> => new SaliencePrioritisedSUT(config)
+	);
+
+	// Register all 27 overlap-based expansion variants
+	registerOverlapSuts(registry);
 
 	return registry;
 };
