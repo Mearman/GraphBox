@@ -20,4 +20,7 @@ export interface FrontierState {
 
 	/** Parent pointers for path reconstruction */
 	parents: Map<string, { parent: string; edge: string }>;
+
+	/** Optional: Map of node ID to distance from seed (used by SphereIntersectionStrategy) */
+	nodeDistances?: Map<string, number>;
 }

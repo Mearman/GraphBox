@@ -121,6 +121,7 @@ export class OverlapBasedExpansion<T> {
 				frontier,
 				visited: new Set([seed]),
 				parents: new Map(),
+				nodeDistances: new Map([[seed, 0]]), // Seed is at distance 0
 			});
 
 			// Track which frontier owns this seed
@@ -235,6 +236,12 @@ export class OverlapBasedExpansion<T> {
 				activeState.visited.add(targetId);
 				activeState.parents.set(targetId, { parent: node, edge: relationshipType });
 
+				// Update nodeDistances for SphereIntersectionStrategy
+				if (activeState.nodeDistances) {
+					const parentDistance = activeState.nodeDistances.get(node) ?? 0;
+					activeState.nodeDistances.set(targetId, parentDistance + 1);
+				}
+
 				// Track which frontier owns this node (for overlap detection)
 				this.nodeToFrontierIndex.set(targetId, activeIndex);
 
@@ -325,6 +332,12 @@ export class OverlapBasedExpansion<T> {
 
 			frontier.visited.add(targetId);
 			frontier.parents.set(targetId, { parent: node, edge: relationshipType });
+
+			// Update nodeDistances for SphereIntersectionStrategy
+			if (frontier.nodeDistances) {
+				const parentDistance = frontier.nodeDistances.get(node) ?? 0;
+				frontier.nodeDistances.set(targetId, parentDistance + 1);
+			}
 
 			this.nodeToFrontierIndex.set(targetId, frontierIndex);
 

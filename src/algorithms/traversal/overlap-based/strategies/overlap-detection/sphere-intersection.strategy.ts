@@ -13,14 +13,6 @@ export interface SphereIntersectionConfig {
 }
 
 /**
- * Extended frontier state that tracks node distances.
- */
-interface FrontierStateWithDistance extends FrontierState {
-	/** Map of node ID to distance from seed */
-	readonly nodeDistances: Map<string, number>;
-}
-
-/**
  * Sphere Intersection Overlap Detection Strategy
  *
  * Detects overlap when a node falls within another frontier's search radius.
@@ -78,8 +70,7 @@ export class SphereIntersectionStrategy implements OverlapDetectionStrategy {
 		const overlapping: number[] = [];
 
 		// Get distance from active frontier's seed to this node
-		const activeWithDistance = activeFrontier as FrontierStateWithDistance;
-		const targetDistance = activeWithDistance.nodeDistances.get(targetId);
+		const targetDistance = activeFrontier.nodeDistances?.get(targetId);
 
 		if (targetDistance === undefined) {
 			// Distance not tracked, fall back to no overlap
@@ -90,8 +81,9 @@ export class SphereIntersectionStrategy implements OverlapDetectionStrategy {
 		for (const otherFrontier of allFrontiers) {
 			if (otherFrontier.index === activeFrontier.index) continue;
 
-			const otherWithDistance = otherFrontier as FrontierStateWithDistance;
-			const otherRadius = this.calculateFrontierRadius(otherWithDistance);
+			const otherRadius = otherFrontier.nodeDistances
+				? this.calculateFrontierRadius(otherFrontier.nodeDistances)
+				: 0;
 
 			if (targetDistance <= otherRadius && targetDistance <= this.maxDistance) {
 				overlapping.push(otherFrontier.index);
@@ -106,13 +98,13 @@ export class SphereIntersectionStrategy implements OverlapDetectionStrategy {
 	 *
 	 * Radius = maximum distance of any visited node from the seed.
 	 *
-	 * @param frontier - Frontier state with distance tracking
+	 * @param nodeDistances - Map of node IDs to distances from seed
 	 * @returns Current frontier radius
 	 * @private
 	 */
-	private calculateFrontierRadius(frontier: FrontierStateWithDistance): number {
+	private calculateFrontierRadius(nodeDistances: Map<string, number>): number {
 		let maxDistance = 0;
-		for (const distance of frontier.nodeDistances.values()) {
+		for (const distance of nodeDistances.values()) {
 			if (distance > maxDistance) {
 				maxDistance = distance;
 			}
