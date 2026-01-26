@@ -23,14 +23,15 @@ import { getBoolean, getNumber, getOptional } from "../cli-utils/arg-parser";
 import { formatError } from "../cli-utils/error-formatter";
 import type { BenchmarkGraphExpander } from "../experiments/evaluation/__tests__/validation/common/benchmark-graph-expander.js";
 import { aggregateResults, type AggregationPipelineOptions, createAggregationOutput } from "ppef/aggregation";
-import { createClaimSummary, evaluateClaims } from "ppef/claims";
+// TODO: Migrate to new ClaimsEvaluator API
+// import { ClaimsEvaluator } from "ppef/evaluators";
 import { getClaimsByTag, getCoreClaims, THESIS_CLAIMS } from "../domain/claims.js";
 // Framework imports
 import { CheckpointManager, createExecutor, executeParallel, type ExecutorConfig, FileStorage, getGitCommit, InMemoryLock } from "ppef/executor";
 import { CaseRegistry } from "ppef/registry/case-registry";
 import { type GraphCaseRegistry, registerCases } from "../registries/register-cases.js";
 import { type RankingCaseRegistry,registerRankingCases } from "../registries/register-ranking-cases.js";
-import { type RankingInputs, RankingResult, RankingSutRegistry,registerRankingSuts } from "../registries/register-ranking-suts.js";
+import { type RankingInputs, RankingResult, RankingResultBase, RankingSutRegistry,registerRankingSuts } from "../registries/register-ranking-suts.js";
 import { type ExpansionInputs, ExpansionResult, ExpansionSutRegistry,registerExpansionSuts } from "../registries/register-suts.js";
 import { SUTRegistry } from "ppef/registry/sut-registry";
 import { createLatexRenderer } from "ppef/renderers/latex-renderer";
@@ -584,7 +585,12 @@ const runExecutePhase = async (options: EvaluateOptions, sutRegistry: SUTRegistr
 	// For ranking: use typed executor with BenchmarkGraphExpander, RankingInputs, RankingResult
 	if (options.scenario === "ranking") {
 		// Ranking scenario: SUTs already return metrics, use pass-through extractor
-		const rankingExecutor = createExecutor<BenchmarkGraphExpander, RankingInputs, RankingResult>(executorConfigWithCallbacks);
+		// NOTE: forceInProcess=true required because ranking SUTs use wrapper classes
+		// that are not compatible with worker thread serialization
+		const rankingExecutor = createExecutor<BenchmarkGraphExpander, RankingInputs, RankingResult>({
+			...executorConfigWithCallbacks,
+			forceInProcess: true,
+		});
 
 		// Plan all runs and filter out completed ones
 		const allPlanned = rankingExecutor.plan(suts as unknown as Array<SutDefinition<RankingInputs, RankingResult>>, cases as Array<CaseDefinition<BenchmarkGraphExpander, RankingInputs>>);
@@ -631,12 +637,21 @@ const runExecutePhase = async (options: EvaluateOptions, sutRegistry: SUTRegistr
 		}
 
 		// Execute ranking scenario (single-process only for now)
-		// Pass-through metrics extractor: ranking SUTs already extract metrics
-		const passThroughExtractor = (_result: unknown): Record<string, number> => {
-			const result = _result as { metrics: Record<string, number> };
-			return result.metrics ?? {};
+		// Extract metrics from ranking results (top-level properties -> metrics.numeric)
+		const rankingMetricsExtractor = (result: unknown): Record<string, number> => {
+			const r = result as RankingResultBase;
+			return {
+				"paths-found": r.pathsFound,
+				"mean-mi": r.meanMI,
+				"std-mi": r.stdMI,
+				"path-diversity": r.pathDiversity,
+				"hub-avoidance": r.hubAvoidance,
+				"node-coverage": r.nodeCoverage,
+				"mean-score": r.meanScore,
+				"std-score": r.stdScore,
+			};
 		};
-		await rankingExecutor.execute(suts as unknown as Array<SutDefinition<RankingInputs, RankingResult>>, cases as Array<CaseDefinition<BenchmarkGraphExpander, RankingInputs>>, passThroughExtractor, remainingRuns);
+		await rankingExecutor.execute(suts as unknown as Array<SutDefinition<RankingInputs, RankingResult>>, cases as Array<CaseDefinition<BenchmarkGraphExpander, RankingInputs>>, rankingMetricsExtractor, remainingRuns);
 	} else {
 		// Sampling scenario: use typed executor with BenchmarkGraphExpander, ExpansionInputs, ExpansionResult
 		const executor = createExecutor<BenchmarkGraphExpander, ExpansionInputs, ExpansionResult>(executorConfigWithCallbacks);
@@ -806,8 +821,8 @@ const runAggregatePhase = async (options: EvaluateOptions): Promise<void> => {
 	console.log(`\nAggregated ${aggregates.length} groups.`);
 	console.log(`Results written to: ${aggregatedFile}`);
 
-	// Evaluate claims
-	await evaluateClaimsInternal(options, aggregates);
+	// TODO: Evaluate claims using new ClaimsEvaluator API
+	// await evaluateClaimsInternal(options, aggregates);
 };
 
 /**
