@@ -17,38 +17,130 @@ import { existsSync, mkdirSync, readFileSync, renameSync, unlinkSync, writeFileS
 import { cpus } from "node:os";
 import { resolve } from "node:path";
 
+import { aggregateResults, type AggregationPipelineOptions, createAggregationOutput } from "ppef/aggregation";
+// Framework imports
+import { CheckpointManager, createExecutor, executeParallel, type ExecutorConfig, FileStorage, getGitCommit, InMemoryLock } from "ppef/executor";
+import { CaseRegistry } from "ppef/registry/case-registry";
+import { SUTRegistry } from "ppef/registry/sut-registry";
+import { createLatexRenderer } from "ppef/renderers/latex-renderer";
+import type { AggregatedResult } from "ppef/types/aggregate";
+import type { CaseDefinition } from "ppef/types/case";
+import type { ClaimEvaluation } from "ppef/types/claims";
+import type { EvaluationResult } from "ppef/types/result";
+import type { SutDefinition } from "ppef/types/sut";
+
 import type { BidirectionalBFSResult } from "../algorithms/traversal/bidirectional-bfs.js";
-import type { DegreePrioritisedExpansionResult } from "../algorithms/traversal/degree-prioritised-expansion.js";
 import type { OverlapBasedExpansionResult } from "../algorithms/traversal/overlap-based/overlap-result.js";
 import type { ParsedArguments } from "../cli-utils/arg-parser";
 import { getBoolean, getNumber, getOptional } from "../cli-utils/arg-parser";
 import { formatError } from "../cli-utils/error-formatter";
+// TODO: Migrate to new ClaimsEvaluator API
+// import { ClaimsEvaluator } from "ppef/evaluators";
+// import { getClaimsByTag, getCoreClaims, THESIS_CLAIMS } from "../domain/claims.js";
+import { TABLE_SPECS } from "../domain/tables.js";
 import type { BenchmarkGraphExpander } from "../experiments/evaluation/__tests__/validation/common/benchmark-graph-expander.js";
-import { aggregateResults, type AggregationPipelineOptions, createAggregationOutput } from "ppef/aggregation";
+import { loadBenchmarkByIdFromUrl } from "../experiments/evaluation/fixtures/index.js";
 // Salience coverage metrics
 import {
 	computeSalienceCoverageFromStringPaths,
 	computeSalienceGroundTruth,
 	type SalienceCoverageConfig,
-	type SalienceCoverageResult,
 } from "../experiments/evaluation/metrics/index.js";
-import { loadBenchmarkByIdFromUrl } from "../experiments/evaluation/fixtures/index.js";
-// TODO: Migrate to new ClaimsEvaluator API
-// import { ClaimsEvaluator } from "ppef/evaluators";
-import { getClaimsByTag, getCoreClaims, THESIS_CLAIMS } from "../domain/claims.js";
-// Framework imports
-import { CheckpointManager, createExecutor, executeParallel, type ExecutorConfig, FileStorage, getGitCommit, InMemoryLock } from "ppef/executor";
-import { CaseRegistry } from "ppef/registry/case-registry";
-import { type GraphCaseRegistry, registerCases, BENCHMARK_CASES } from "../registries/register-cases.js";
+import {type GraphCaseRegistry, registerCases } from "../registries/register-cases.js";
 import { type RankingCaseRegistry,registerRankingCases } from "../registries/register-ranking-cases.js";
 import { type RankingInputs, RankingResult, RankingResultBase, RankingSutRegistry,registerRankingSuts } from "../registries/register-ranking-suts.js";
 import { type ExpansionInputs, ExpansionResult, ExpansionSutRegistry,registerExpansionSuts } from "../registries/register-suts.js";
-import { SUTRegistry } from "ppef/registry/sut-registry";
-import { createLatexRenderer } from "ppef/renderers/latex-renderer";
-import { TABLE_SPECS } from "../domain/tables.js";
-import type { CaseDefinition } from "ppef/types/case";
-import type { EvaluationResult } from "ppef/types/result";
-import type { SutDefinition } from "ppef/types/sut";
+
+// ============================================================================
+// Type Guards
+// ============================================================================
+
+/**
+ * Type guard for aggregated results JSON structure.
+ */
+interface AggregatedResultsJson {
+	aggregates: unknown[];
+}
+
+const isAggregatedResultsJson = (value: unknown): value is AggregatedResultsJson => {
+	if (typeof value !== "object" || value === null) {
+		return false;
+	}
+	const v = value as Record<string, unknown>;
+	return "aggregates" in v && Array.isArray(v.aggregates);
+};
+
+/**
+ * Type guard for AggregatedResult.
+ * @param value
+ */
+const isAggregatedResult = (value: unknown): value is AggregatedResult => {
+	if (typeof value !== "object" || value === null) {
+		return false;
+	}
+	const v = value as Record<string, unknown>;
+	return (
+		typeof v.sut === "string" &&
+		typeof v.metrics === "object" &&
+		v.metrics !== null
+	);
+};
+
+/**
+ * Type guard for claim summary JSON structure.
+ */
+interface ClaimSummaryJson {
+	evaluations: unknown[];
+}
+
+const isClaimSummaryJson = (value: unknown): value is ClaimSummaryJson => {
+	if (typeof value !== "object" || value === null) {
+		return false;
+	}
+	const v = value as Record<string, unknown>;
+	return "evaluations" in v && Array.isArray(v.evaluations);
+};
+
+/**
+ * Type guard for ClaimEvaluation.
+ * @param value
+ */
+const isClaimEvaluation = (value: unknown): value is ClaimEvaluation => {
+	if (typeof value !== "object" || value === null) {
+		return false;
+	}
+	const v = value as Record<string, unknown>;
+	return (
+		typeof v.claim === "object" &&
+		v.claim !== null &&
+		"status" in v
+	);
+};
+
+/**
+ * Type guard for checkpoint data.
+ */
+interface CheckpointData {
+	completedRunIds?: string[];
+	config?: { totalRuns?: number };
+	results?: Record<string, EvaluationResult>;
+	createdAt?: string;
+	updatedAt?: string;
+}
+
+const isCheckpointData = (value: unknown): value is CheckpointData => {
+	if (typeof value !== "object" || value === null) {
+		return false;
+	}
+	const v = value as Record<string, unknown>;
+	return (
+		(v.completedRunIds === undefined || Array.isArray(v.completedRunIds)) &&
+		(v.config === undefined || typeof v.config === "object") &&
+		(v.results === undefined || typeof v.results === "object") &&
+		(v.createdAt === undefined || typeof v.createdAt === "string") &&
+		(v.updatedAt === undefined || typeof v.updatedAt === "string")
+	);
+};
 
 /**
  * Path storage for salience coverage computation.
@@ -63,7 +155,10 @@ const pathStorage = {
 	/** Map of timestamp to pathId for thread-safe lookup */
 	pendingPathIds: new Map<number, string>(),
 
-	/** Initialize with paths directory */
+	/**
+	 * Initialize with paths directory
+	 * @param pathsDir
+	 */
 	init(pathsDir: string) {
 		this.pathsDir = pathsDir;
 	},
@@ -72,6 +167,7 @@ const pathStorage = {
 	 * Store paths to disk with a unique identifier.
 	 * Returns the timestamp that can be used to retrieve the pathId later.
 	 * This is safe for parallel execution because each call creates a unique file.
+	 * @param paths
 	 */
 	storePaths(paths: string[][]): number {
 		const timestamp = Date.now();
@@ -82,10 +178,10 @@ const pathStorage = {
 
 		// Generate unique identifier: timestamp + random string
 		const uniqueId = `${timestamp}-${Math.random().toString(36).slice(2)}`;
-		const tempFile = resolve(this.pathsDir, `tmp-${uniqueId}.json`);
+		const temporaryFile = resolve(this.pathsDir, `tmp-${uniqueId}.json`);
 
 		try {
-			writeFileSync(tempFile, JSON.stringify(paths), "utf-8");
+			writeFileSync(temporaryFile, JSON.stringify(paths), "utf-8");
 			// Store mapping from timestamp to unique ID
 			this.pendingPathIds.set(timestamp, uniqueId);
 		} catch {
@@ -98,6 +194,8 @@ const pathStorage = {
 	/**
 	 * Rename temp paths file to the final runId location.
 	 * Called from onResult callback when we know the runId.
+	 * @param timestamp
+	 * @param runId
 	 */
 	associateWithRun(timestamp: number, runId: string) {
 		const uniqueId = this.pendingPathIds.get(timestamp);
@@ -105,19 +203,19 @@ const pathStorage = {
 			return;
 		}
 
-		const tempFile = resolve(this.pathsDir, `tmp-${uniqueId}.json`);
+		const temporaryFile = resolve(this.pathsDir, `tmp-${uniqueId}.json`);
 		const finalFile = resolve(this.pathsDir, `${runId}.json`);
 
 		try {
-			if (existsSync(tempFile)) {
-				renameSync(tempFile, finalFile);
+			if (existsSync(temporaryFile)) {
+				renameSync(temporaryFile, finalFile);
 			}
 		} catch {
 			// If rename fails, try copying as fallback
 			try {
-				const content = readFileSync(tempFile, "utf-8");
+				const content = readFileSync(temporaryFile, "utf-8");
 				writeFileSync(finalFile, content, "utf-8");
-				unlinkSync(tempFile);
+				unlinkSync(temporaryFile);
 			} catch {
 				// Silently fail - file will be cleaned up later
 			}
@@ -127,7 +225,10 @@ const pathStorage = {
 		this.pendingPathIds.delete(timestamp);
 	},
 
-	/** Load paths from file (for aggregate phase) */
+	/**
+	 * Load paths from file (for aggregate phase)
+	 * @param runId
+	 */
 	loadPathsFromFile(runId: string): string[][] | null {
 		if (this.pathsDir) {
 			const pathFile = resolve(this.pathsDir, `${runId}.json`);
@@ -479,17 +580,13 @@ const getRankingCaseDefinitions = (
  * Type guard to check if result is BidirectionalBFSResult.
  * @param result
  */
-function isBidirectionalBFSResult(result: ExpansionResult): result is BidirectionalBFSResult {
-	return "visitedA" in result && "visitedB" in result;
-}
+const isBidirectionalBFSResult = (result: ExpansionResult): result is BidirectionalBFSResult => "visitedA" in result && "visitedB" in result;
 
 /**
  * Type guard to check if result is OverlapBasedExpansionResult.
  * @param result
  */
-function isOverlapBasedExpansionResult(result: ExpansionResult): result is OverlapBasedExpansionResult {
-	return "overlapMetadata" in result;
-}
+const isOverlapBasedExpansionResult = (result: ExpansionResult): result is OverlapBasedExpansionResult => "overlapMetadata" in result;
 
 /**
  * Metrics extractor for expansion results.
@@ -806,7 +903,20 @@ const runExecutePhase = async (options: EvaluateOptions, sutRegistry: SUTRegistr
 			const inputs = caseDef.getInputs() as ExpansionInputs;
 			const seeds = inputs.seeds;
 
+			// DEBUG: Log seeds for debugging
+			console.log(`  DEBUG: Seeds for ${caseDef.case.name}: [${seeds.join(", ")}]`);
+
+			// Enable detailed debug logging for salience computation
+			// (globalThis as unknown as { DEBUG_SALIENCE: boolean }).DEBUG_SALIENCE = true;
+
 			const groundTruth = computeSalienceGroundTruth(graph, seeds, salienceConfig);
+
+			// DEBUG: Log first few paths
+			if (groundTruth.size > 0) {
+				const samplePaths = [...groundTruth].slice(0, 3);
+				console.log(`  DEBUG: Sample paths: ${samplePaths.join("; ")}`);
+			}
+
 			salienceGroundTruthByCaseId.set(caseDef.case.caseId, groundTruth);
 
 			console.log(`  ${caseDef.case.name}: ${groundTruth.size} top-${salienceConfig.topK} salient paths`);
@@ -836,15 +946,11 @@ const runExecutePhase = async (options: EvaluateOptions, sutRegistry: SUTRegistr
 	const workerIndex = workerIndexString === undefined ? undefined : Number.parseInt(workerIndexString, 10);
 
 	// Determine checkpoint path based on worker identity
-	const checkpointMode = options.checkpointMode as "file" | "git" | "auto";
-	let checkpointPath: string;
-	if (isWorker && workerIndex !== undefined) {
+	const checkpointPath = (isWorker && workerIndex !== undefined)
 		// Worker mode: use sharded checkpoint path
-		checkpointPath = resolve(executeDir, `checkpoint-worker-${String(workerIndex).padStart(2, "0")}.json`);
-	} else {
+		? resolve(executeDir, `checkpoint-worker-${String(workerIndex).padStart(2, "0")}.json`)
 		// Main process: use main checkpoint path
-		checkpointPath = resolve(executeDir, "checkpoint.json");
-	}
+		: resolve(executeDir, "checkpoint.json");
 
 	// Create checkpoint storage
 	const storage = new FileStorage(checkpointPath);
@@ -882,7 +988,7 @@ const runExecutePhase = async (options: EvaluateOptions, sutRegistry: SUTRegistr
 
 	if (checkpoint.exists()) {
 		if (isStale) {
-			console.log("\n⚠ Checkpoint exists but configuration has changed.");
+			console.log("\nWARNING: Checkpoint exists but configuration has changed.");
 			console.log("  Invalidating checkpoint and starting fresh.");
 			checkpoint.invalidate();
 		} else {
@@ -1233,9 +1339,7 @@ const runAggregatePhase = async (options: EvaluateOptions): Promise<void> => {
 
 	// Load ground truth from file (saved during execute phase)
 	const groundTruthFile = resolve(executeDir, "salience-ground-truth.json");
-	if (!existsSync(groundTruthFile)) {
-		console.log("Warning: Ground truth file not found. Salience coverage will be skipped.\n");
-	} else {
+	if (existsSync(groundTruthFile)) {
 		const groundTruthText = readFileSync(groundTruthFile, "utf-8");
 		const groundTruthData = JSON.parse(groundTruthText) as Record<string, string[]>;
 		const salienceGroundTruthByCaseId = new Map<string, Set<string>>();
@@ -1266,6 +1370,8 @@ const runAggregatePhase = async (options: EvaluateOptions): Promise<void> => {
 		}
 
 		console.log(`Computed salience coverage for ${computedCount}/${summary.results.length} results\n`);
+	} else {
+		console.log("Warning: Ground truth file not found. Salience coverage will be skipped.\n");
 	}
 
 	// Aggregate results
@@ -1299,44 +1405,16 @@ const runAggregatePhase = async (options: EvaluateOptions): Promise<void> => {
  * Evaluate claims against aggregated results.
  * @param options
  * @param aggregates
+ *
+ * TODO: Migrate to new ClaimsEvaluator API
+ * This function is intentionally unused pending migration.
+ * @param _options
+ * @param _aggregates
  */
-const evaluateClaimsInternal = async (options: EvaluateOptions, aggregates: unknown[]): Promise<void> => {
-	console.log("\n  Evaluating claims...");
-
-	// Select claims to evaluate
-	let claims = THESIS_CLAIMS;
-
-	if (options.claim) {
-		claims = claims.filter((c) => c.claimId === options.claim);
-		if (claims.length === 0) {
-			console.log(`  Warning: Claim '${options.claim}' not found.`);
-			return;
-		}
-	} else if (options.tags && options.tags.length > 0) {
-		claims = options.tags.flatMap((tag) => getClaimsByTag(tag));
-		// Deduplicate
-		claims = [...new Map(claims.map((c) => [c.claimId, c])).values()];
-	}
-
-	if (claims.length === 0) {
-		claims = getCoreClaims();
-	}
-
-	console.log(`  Evaluating ${claims.length} claims...`);
-
-	const evaluations = evaluateClaims(claims, aggregates as never[]);
-	const summary = createClaimSummary(evaluations);
-
-	// Write claim evaluation results
-	const aggregateDir = resolve(options.outputDir, "aggregate");
-	const claimsFile = resolve(aggregateDir, "claim-evaluation.json");
-	writeFileSync(claimsFile, JSON.stringify(summary, null, 2), "utf-8");
-
-	console.log(`  Claim evaluation written to: ${claimsFile}`);
-	console.log(`    Satisfied: ${summary.summary.satisfied}`);
-	console.log(`    Violated: ${summary.summary.violated}`);
-	console.log(`    Inconclusive: ${summary.summary.inconclusive}`);
-	console.log(`    Satisfaction rate: ${(summary.summary.satisfactionRate * 100).toFixed(1)}%`);
+const _evaluateClaimsInternal = async (_options: EvaluateOptions, _aggregates: unknown[]): Promise<void> => {
+	// Placeholder for claims evaluation functionality
+	// TODO: Migrate to new ClaimsEvaluator API when available
+	console.log("\n  Claims evaluation not yet implemented.");
 };
 
 /**
@@ -1358,7 +1436,12 @@ const runRenderPhase = async (options: EvaluateOptions): Promise<void> => {
 
 	const outputText = await read(aggregatedFile);
 	const aggregationOutput = JSON.parse(outputText);
-	const aggregates = aggregationOutput.aggregates;
+
+	if (!isAggregatedResultsJson(aggregationOutput)) {
+		throw new Error("Invalid aggregated results format.");
+	}
+
+	const aggregates = aggregationOutput.aggregates.filter(isAggregatedResult);
 
 	console.log(`Loaded ${aggregates.length} aggregated results.`);
 
@@ -1401,7 +1484,12 @@ const runRenderPhase = async (options: EvaluateOptions): Promise<void> => {
 		const claimsText = await read(claimsFile);
 		const claimSummary = JSON.parse(claimsText);
 
-		const claimOutput = renderer.renderClaimSummary(claimSummary.evaluations);
+		if (!isClaimSummaryJson(claimSummary)) {
+			throw new Error("Invalid claim summary format.");
+		}
+
+		const evaluations = claimSummary.evaluations.filter(isClaimEvaluation);
+		const claimOutput = renderer.renderClaimSummary(evaluations);
 		const claimSummaryFile = resolve(renderDir, claimOutput.filename);
 		writeFileSync(claimSummaryFile, claimOutput.content, "utf-8");
 
@@ -1425,6 +1513,10 @@ const showProgress = async (options: EvaluateOptions): Promise<void> => {
 		const { readFile } = await import("node:fs/promises");
 		const content = await readFile(checkpointPath, "utf-8");
 		const checkpoint = JSON.parse(content);
+
+		if (!isCheckpointData(checkpoint)) {
+			throw new Error("Invalid checkpoint format.");
+		}
 
 		const completedRunIds = checkpoint.completedRunIds ?? [];
 		const uniqueCompleted = [...new Set(completedRunIds)];
@@ -1457,7 +1549,7 @@ const showProgress = async (options: EvaluateOptions): Promise<void> => {
 		const byCase: Record<string, number> = {};
 
 		for (const runId of uniqueCompleted) {
-			const result = results[String(runId)] as EvaluationResult | undefined;
+			const result = results[String(runId)];
 			if (result) {
 				const sut = result.run?.sut ?? "unknown";
 				const caseId = result.run?.caseId ?? "unknown";
@@ -1481,7 +1573,7 @@ const showProgress = async (options: EvaluateOptions): Promise<void> => {
 		}
 
 		// Show timestamps
-		if (checkpoint.createdAt) {
+		if (checkpoint.createdAt && checkpoint.updatedAt) {
 			const started = new Date(checkpoint.createdAt);
 			const updated = new Date(checkpoint.updatedAt);
 			const elapsed = Date.now() - started.getTime();
