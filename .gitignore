@@ -49,4 +49,5 @@ tap-metrics.csv
 
 # Evaluation results and checkpoints
 results/
+results-*/
 checkpoint.json
