@@ -23,7 +23,7 @@ import {
 	TruncatedComponentStrategy,
 	SaliencePreservingStrategy,
 	type OverlapBasedExpansionConfig,
-} from "../../../../../../algorithms/traversal/overlap-based/index.js";
+} from "../../../../../../../algorithms/traversal/overlap-based/index.js";
 
 describe("Overlap-Based Expansion", () => {
 	/**
