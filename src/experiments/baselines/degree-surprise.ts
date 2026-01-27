@@ -18,6 +18,9 @@ export interface DegreeSurpriseResult {
 
 	/** Statistics about the expansion */
 	stats: DegreeSurpriseStats;
+
+	/** Map from node ID to the iteration when it was first discovered */
+	nodeDiscoveryIteration: Map<string, number>;
 }
 
 /**
@@ -85,6 +88,7 @@ export class DegreeSurpriseExpansion<T> {
 	private readonly paths: Array<{ fromSeed: number; toSeed: number; nodes: string[] }> = [];
 	private readonly sampledEdges = new Set<string>();
 	private stats: DegreeSurpriseStats;
+	private readonly nodeDiscoveryIteration = new Map<string, number>();
 
 	/**
 	 * Create a new degree-surprise expansion.
@@ -109,6 +113,7 @@ export class DegreeSurpriseExpansion<T> {
 				visited: new Set([seed]),
 				parents: new Map(),
 			});
+			this.nodeDiscoveryIteration.set(seed, 0);
 		}
 
 		this.stats = {
@@ -170,6 +175,10 @@ export class DegreeSurpriseExpansion<T> {
 				activeState.visited.add(targetId);
 				activeState.parents.set(targetId, { parent: node, edge: relationshipType });
 
+				if (!this.nodeDiscoveryIteration.has(targetId)) {
+					this.nodeDiscoveryIteration.set(targetId, this.stats.iterations);
+				}
+
 				// Compute degree surprise priority for this node
 				const priority = await this.computeDegreeSurprise(targetId);
 
@@ -210,6 +219,7 @@ export class DegreeSurpriseExpansion<T> {
 			sampledEdges: this.sampledEdges,
 			visitedPerFrontier,
 			stats: this.stats,
+			nodeDiscoveryIteration: this.nodeDiscoveryIteration,
 		};
 	}
 

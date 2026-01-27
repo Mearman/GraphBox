@@ -18,6 +18,12 @@ export interface StandardBfsResult {
 
 	/** Statistics about the expansion */
 	stats: BfsExpansionStats;
+
+	/**
+	 * Maps each sampled node to the iteration when it was first discovered.
+	 * Used for computing coverage efficiency metrics.
+	 */
+	nodeDiscoveryIteration: Map<string, number>;
 }
 
 /**
@@ -78,6 +84,8 @@ export class StandardBfsExpansion<T> {
 	private readonly paths: Array<{ fromSeed: number; toSeed: number; nodes: string[] }> = [];
 	private readonly sampledEdges = new Set<string>();
 	private stats: BfsExpansionStats;
+	/** Tracks when each node was first discovered (iteration number) */
+	private readonly nodeDiscoveryIteration = new Map<string, number>();
 
 	/**
 	 * Create a new standard BFS expansion.
@@ -102,6 +110,9 @@ export class StandardBfsExpansion<T> {
 				visited: new Set([seed]),
 				parents: new Map(),
 			});
+
+			// Seeds are discovered at iteration 0
+			this.nodeDiscoveryIteration.set(seed, 0);
 		}
 
 		this.stats = {
@@ -157,6 +168,11 @@ export class StandardBfsExpansion<T> {
 				activeState.visited.add(targetId);
 				activeState.parents.set(targetId, { parent: node, edge: relationshipType });
 
+				// Track first discovery iteration (only if not already discovered)
+				if (!this.nodeDiscoveryIteration.has(targetId)) {
+					this.nodeDiscoveryIteration.set(targetId, this.stats.iterations);
+				}
+
 				// Add to queue (FIFO - end of queue)
 				activeState.queue.push(targetId);
 
@@ -195,6 +211,7 @@ export class StandardBfsExpansion<T> {
 			sampledEdges: this.sampledEdges,
 			visitedPerFrontier,
 			stats: this.stats,
+			nodeDiscoveryIteration: this.nodeDiscoveryIteration,
 		};
 	}
 

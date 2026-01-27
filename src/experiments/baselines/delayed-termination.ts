@@ -18,6 +18,9 @@ export interface DelayedTerminationResult {
 
 	/** Statistics about the expansion */
 	stats: DelayedTerminationStats;
+
+	/** Map from node ID to the iteration at which it was first discovered */
+	nodeDiscoveryIteration: Map<string, number>;
 }
 
 /**
@@ -95,6 +98,7 @@ export class DelayedTerminationExpansion<T> {
 	private readonly frontiers: FrontierState[] = [];
 	private readonly paths: Array<{ fromSeed: number; toSeed: number; nodes: string[] }> = [];
 	private readonly sampledEdges = new Set<string>();
+	private readonly nodeDiscoveryIteration = new Map<string, number>();
 	private stats: DelayedTerminationStats;
 	private firstOverlapIteration = -1;
 	private remainingDelayIterations: number;
@@ -126,6 +130,7 @@ export class DelayedTerminationExpansion<T> {
 				visited: new Set([seed]),
 				parents: new Map(),
 			});
+			this.nodeDiscoveryIteration.set(seed, 0);
 		}
 
 		this.stats = {
@@ -192,6 +197,10 @@ export class DelayedTerminationExpansion<T> {
 				activeState.visited.add(targetId);
 				activeState.parents.set(targetId, { parent: node, edge: relationshipType });
 
+				if (!this.nodeDiscoveryIteration.has(targetId)) {
+					this.nodeDiscoveryIteration.set(targetId, this.stats.iterations);
+				}
+
 				// Add to queue (FIFO - end of queue)
 				activeState.queue.push(targetId);
 
@@ -235,6 +244,7 @@ export class DelayedTerminationExpansion<T> {
 			sampledEdges: this.sampledEdges,
 			visitedPerFrontier,
 			stats: this.stats,
+			nodeDiscoveryIteration: this.nodeDiscoveryIteration,
 		};
 	}
 

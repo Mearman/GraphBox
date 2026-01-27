@@ -18,6 +18,9 @@ export interface RandomPriorityResult {
 
 	/** Statistics about the expansion */
 	stats: RandomPriorityStats;
+
+	/** Maps each node to the iteration when it was first discovered */
+	nodeDiscoveryIteration: Map<string, number>;
 }
 
 /**
@@ -109,6 +112,7 @@ export class RandomPriorityExpansion<T> {
 	private readonly sampledEdges = new Set<string>();
 	private readonly rng: SeededRandom;
 	private stats: RandomPriorityStats;
+	private readonly nodeDiscoveryIteration = new Map<string, number>();
 
 	/**
 	 * Create a new random-priority expansion.
@@ -137,6 +141,7 @@ export class RandomPriorityExpansion<T> {
 				visited: new Set([seedNode]),
 				parents: new Map(),
 			});
+			this.nodeDiscoveryIteration.set(seedNode, 0);
 		}
 
 		this.stats = {
@@ -195,6 +200,10 @@ export class RandomPriorityExpansion<T> {
 				activeState.visited.add(targetId);
 				activeState.parents.set(targetId, { parent: node, edge: relationshipType });
 
+				if (!this.nodeDiscoveryIteration.has(targetId)) {
+					this.nodeDiscoveryIteration.set(targetId, this.stats.iterations);
+				}
+
 				// Add to frontier (will be randomly selected later)
 				activeState.frontier.push(targetId);
 
@@ -233,6 +242,7 @@ export class RandomPriorityExpansion<T> {
 			sampledEdges: this.sampledEdges,
 			visitedPerFrontier,
 			stats: this.stats,
+			nodeDiscoveryIteration: this.nodeDiscoveryIteration,
 		};
 	}
 

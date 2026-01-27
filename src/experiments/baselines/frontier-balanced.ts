@@ -18,6 +18,9 @@ export interface FrontierBalancedResult {
 
 	/** Statistics about the expansion */
 	stats: FrontierBalancedStats;
+
+	/** Maps each node to the iteration when it was first discovered */
+	nodeDiscoveryIteration: Map<string, number>;
 }
 
 /**
@@ -84,6 +87,7 @@ export class FrontierBalancedExpansion<T> {
 	private readonly paths: Array<{ fromSeed: number; toSeed: number; nodes: string[] }> = [];
 	private readonly sampledEdges = new Set<string>();
 	private stats: FrontierBalancedStats;
+	private readonly nodeDiscoveryIteration = new Map<string, number>();
 	private lastActiveFrontier = 0;
 
 	/**
@@ -109,6 +113,7 @@ export class FrontierBalancedExpansion<T> {
 				visited: new Set([seed]),
 				parents: new Map(),
 			});
+			this.nodeDiscoveryIteration.set(seed, 0);
 		}
 
 		this.stats = {
@@ -171,6 +176,10 @@ export class FrontierBalancedExpansion<T> {
 				activeState.visited.add(targetId);
 				activeState.parents.set(targetId, { parent: node, edge: relationshipType });
 
+				if (!this.nodeDiscoveryIteration.has(targetId)) {
+					this.nodeDiscoveryIteration.set(targetId, this.stats.iterations);
+				}
+
 				// Add to queue
 				activeState.queue.push(targetId);
 
@@ -209,6 +218,7 @@ export class FrontierBalancedExpansion<T> {
 			sampledEdges: this.sampledEdges,
 			visitedPerFrontier,
 			stats: this.stats,
+			nodeDiscoveryIteration: this.nodeDiscoveryIteration,
 		};
 	}
 

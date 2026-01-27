@@ -18,6 +18,9 @@ export interface EnsembleExpansionResult {
 
 	/** Statistics about the expansion */
 	stats: EnsembleExpansionStats;
+
+	/** Map from node ID to the iteration when it was first discovered (across all strategies) */
+	nodeDiscoveryIteration: Map<string, number>;
 }
 
 /**
@@ -96,6 +99,7 @@ interface DegreePriorityFrontierState {
  */
 export class EnsembleExpansion<T> {
 	private readonly sampledEdges = new Set<string>();
+	private readonly nodeDiscoveryIteration = new Map<string, number>();
 	private stats: EnsembleExpansionStats;
 
 	/**
@@ -170,6 +174,7 @@ export class EnsembleExpansion<T> {
 			sampledEdges: this.sampledEdges,
 			sampledNodesPerStrategy,
 			stats: this.stats,
+			nodeDiscoveryIteration: this.nodeDiscoveryIteration,
 		};
 	}
 
@@ -181,6 +186,7 @@ export class EnsembleExpansion<T> {
 	private async runBfs(): Promise<Set<string>> {
 		const frontiers: BfsFrontierState[] = [];
 		const allVisited = new Set<string>();
+		let iteration = 0;
 
 		for (const [index, seed] of this.seeds.entries()) {
 			frontiers.push({
@@ -190,9 +196,13 @@ export class EnsembleExpansion<T> {
 				parents: new Map(),
 			});
 			allVisited.add(seed);
+			if (!this.nodeDiscoveryIteration.has(seed)) {
+				this.nodeDiscoveryIteration.set(seed, 0);
+			}
 		}
 
 		while (frontiers.some((f) => f.queue.length > 0)) {
+			iteration++;
 			for (const frontier of frontiers) {
 				if (frontier.queue.length === 0) continue;
 
@@ -207,6 +217,10 @@ export class EnsembleExpansion<T> {
 					allVisited.add(targetId);
 					frontier.parents.set(targetId, node);
 					frontier.queue.push(targetId);
+
+					if (!this.nodeDiscoveryIteration.has(targetId)) {
+						this.nodeDiscoveryIteration.set(targetId, iteration);
+					}
 
 					const edgeKey = `${node}->${targetId}`;
 					this.sampledEdges.add(edgeKey);
@@ -226,6 +240,7 @@ export class EnsembleExpansion<T> {
 	private async runDfs(): Promise<Set<string>> {
 		const frontiers: DfsFrontierState[] = [];
 		const allVisited = new Set<string>();
+		let iteration = 0;
 
 		for (const [index, seed] of this.seeds.entries()) {
 			frontiers.push({
@@ -235,9 +250,13 @@ export class EnsembleExpansion<T> {
 				parents: new Map(),
 			});
 			allVisited.add(seed);
+			if (!this.nodeDiscoveryIteration.has(seed)) {
+				this.nodeDiscoveryIteration.set(seed, 0);
+			}
 		}
 
 		while (frontiers.some((f) => f.stack.length > 0)) {
+			iteration++;
 			for (const frontier of frontiers) {
 				if (frontier.stack.length === 0) continue;
 
@@ -252,6 +271,10 @@ export class EnsembleExpansion<T> {
 					allVisited.add(targetId);
 					frontier.parents.set(targetId, node);
 					frontier.stack.push(targetId);
+
+					if (!this.nodeDiscoveryIteration.has(targetId)) {
+						this.nodeDiscoveryIteration.set(targetId, iteration);
+					}
 
 					const edgeKey = `${node}->${targetId}`;
 					this.sampledEdges.add(edgeKey);
@@ -271,6 +294,7 @@ export class EnsembleExpansion<T> {
 	private async runDegreePriority(): Promise<Set<string>> {
 		const frontiers: DegreePriorityFrontierState[] = [];
 		const allVisited = new Set<string>();
+		let iteration = 0;
 
 		for (const [index, seed] of this.seeds.entries()) {
 			frontiers.push({
@@ -280,9 +304,13 @@ export class EnsembleExpansion<T> {
 				parents: new Map(),
 			});
 			allVisited.add(seed);
+			if (!this.nodeDiscoveryIteration.has(seed)) {
+				this.nodeDiscoveryIteration.set(seed, 0);
+			}
 		}
 
 		while (frontiers.some((f) => f.frontier.length > 0)) {
+			iteration++;
 			for (const frontier of frontiers) {
 				if (frontier.frontier.length === 0) continue;
 
@@ -299,6 +327,10 @@ export class EnsembleExpansion<T> {
 					frontier.visited.add(targetId);
 					allVisited.add(targetId);
 					frontier.parents.set(targetId, item.nodeId);
+
+					if (!this.nodeDiscoveryIteration.has(targetId)) {
+						this.nodeDiscoveryIteration.set(targetId, iteration);
+					}
 
 					const degree = this.expander.getDegree(targetId);
 					frontier.frontier.push({ nodeId: targetId, degree });

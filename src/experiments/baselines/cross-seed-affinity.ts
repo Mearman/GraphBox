@@ -18,6 +18,9 @@ export interface CrossSeedAffinityResult {
 
 	/** Statistics about the expansion */
 	stats: CrossSeedAffinityStats;
+
+	/** Maps node ID to the iteration when it was first discovered */
+	nodeDiscoveryIteration: Map<string, number>;
 }
 
 /**
@@ -90,6 +93,7 @@ export class CrossSeedAffinityExpansion<T> {
 	private readonly sampledEdges = new Set<string>();
 	private readonly frontierVisitCounts = new Map<string, number>();
 	private stats: CrossSeedAffinityStats;
+	private readonly nodeDiscoveryIteration = new Map<string, number>();
 
 	/**
 	 * Create a new cross-seed-affinity expansion.
@@ -116,6 +120,8 @@ export class CrossSeedAffinityExpansion<T> {
 			});
 			// Seeds are visited by their own frontier
 			this.frontierVisitCounts.set(seed, 1);
+			// Record seed discovery at iteration 0
+			this.nodeDiscoveryIteration.set(seed, 0);
 		}
 
 		this.stats = {
@@ -184,6 +190,11 @@ export class CrossSeedAffinityExpansion<T> {
 				activeState.visited.add(targetId);
 				activeState.parents.set(targetId, { parent: node, edge: relationshipType });
 
+				// Record discovery iteration if this is the first time seeing this node
+				if (!this.nodeDiscoveryIteration.has(targetId)) {
+					this.nodeDiscoveryIteration.set(targetId, this.stats.iterations);
+				}
+
 				// Update frontier visit count
 				const currentCount = this.frontierVisitCounts.get(targetId) ?? 0;
 				this.frontierVisitCounts.set(targetId, currentCount + 1);
@@ -228,6 +239,7 @@ export class CrossSeedAffinityExpansion<T> {
 			sampledEdges: this.sampledEdges,
 			visitedPerFrontier,
 			stats: this.stats,
+			nodeDiscoveryIteration: this.nodeDiscoveryIteration,
 		};
 	}
 
