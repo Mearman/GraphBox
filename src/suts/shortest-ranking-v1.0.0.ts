@@ -102,13 +102,11 @@ export const createSut = (config?: Record<string, unknown>): SUT<RankingInputs, 
 					throw new Error(result.error.message);
 				}
 
-				const rankedPaths = result.value;
+				const paths = result.value;
 
-				if (!rankedPaths.some || rankedPaths.value.length === 0) {
+				if (paths.length === 0) {
 					return createEmptyResult();
 				}
-
-				const paths = rankedPaths.value;
 				const metrics = computeRankingMetrics(paths, graph);
 
 				// Calculate mean path length

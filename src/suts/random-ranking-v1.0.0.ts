@@ -105,13 +105,11 @@ export const createSut = (config?: Record<string, unknown>): SUT<RankingInputs, 
 					throw new Error(result.error.message);
 				}
 
-				const sampledPaths = result.value;
+				const paths = result.value;
 
-				if (!sampledPaths.some || sampledPaths.value.length === 0) {
+				if (paths.length === 0) {
 					return createEmptyResult();
 				}
-
-				const paths = sampledPaths.value;
 				const metrics = computeRankingMetrics(paths, graph);
 
 				return {
