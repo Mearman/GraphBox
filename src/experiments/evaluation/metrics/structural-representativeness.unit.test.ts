@@ -161,6 +161,19 @@ describe("degreeToRanking", () => {
 		expect(ranking.get("C")).toBe(3);
 	});
 
+	it("should sort by degree descending (highest degree = rank 1)", () => {
+		const degrees = new Map([
+			["low", 1],
+			["high", 10],
+			["mid", 5],
+		]);
+		const ranking = degreeToRanking(degrees);
+		// Validates sort direction: high degree = low rank number
+		expect(ranking.get("high")).toBe(1); // Highest degree = rank 1
+		expect(ranking.get("mid")).toBe(2);
+		expect(ranking.get("low")).toBe(3); // Lowest degree = rank 3
+	});
+
 	it("should handle ties (arbitrary but consistent ordering)", () => {
 		const degrees = new Map([
 			["A", 5],
@@ -350,12 +363,55 @@ describe("aggregateRepresentativenessResults", () => {
 
 		expect(avg.coverage).toBeCloseTo(0.5);
 		expect(avg.precision).toBeCloseTo(0.7);
+		// Explicit checks for f1Score and degreeJS (line 249, 251 mutants)
+		expect(avg.f1Score).toBeCloseTo(0.585); // (0.69 + 0.48) / 2
+		expect(avg.degreeJS).toBeCloseTo(0.1); // (0.05 + 0.15) / 2
 		expect(avg.degreeKL).toBeCloseTo(0.2);
 		expect(avg.betweennessCorrelation).toBeCloseTo(0.8);
 		expect(avg.communityCoverage).toBeCloseTo(0.75);
 		expect(avg.intersectionSize).toBeCloseTo(8);
 		expect(avg.falsePositives).toBeCloseTo(3);
 		expect(avg.falseNegatives).toBeCloseTo(5);
+	});
+
+	it("should compute exact arithmetic for simple values", () => {
+		// Use simple numbers to validate exact arithmetic (not multiplication)
+		const results: StructuralRepresentativenessResult[] = [
+			{
+				coverage: 1,
+				precision: 2,
+				f1Score: 3,
+				degreeKL: 4,
+				degreeJS: 5,
+				betweennessCorrelation: 6,
+				communityCoverage: 7,
+				intersectionSize: 8,
+				falsePositives: 9,
+				falseNegatives: 10,
+			},
+			{
+				coverage: 11,
+				precision: 12,
+				f1Score: 13,
+				degreeKL: 14,
+				degreeJS: 15,
+				betweennessCorrelation: 16,
+				communityCoverage: 17,
+				intersectionSize: 18,
+				falsePositives: 19,
+				falseNegatives: 20,
+			},
+		];
+
+		const avg = aggregateRepresentativenessResults(results);
+
+		// If arithmetic is correct: (a + b) / 2
+		// If mutated to multiplication: (a + b) * 2 → would give 2x expected
+		// If mutated to subtraction: (a - b) / 2 → would give different result
+		expect(avg.f1Score).toBe(8); // (3 + 13) / 2 = 16/2 = 8
+		expect(avg.degreeJS).toBe(10); // (5 + 15) / 2 = 20/2 = 10
+		expect(avg.coverage).toBe(6); // (1 + 11) / 2 = 12/2 = 6
+		expect(avg.precision).toBe(7); // (2 + 12) / 2 = 14/2 = 7
 	});
 
 	it("should handle single result", () => {
