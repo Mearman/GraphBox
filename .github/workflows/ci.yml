@@ -54,6 +54,18 @@ jobs:
 
       - name: Test
         run: pnpm test
+        env:
+          CI: true
+
+      - name: Upload coverage reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-report
+          path: |
+            coverage/
+            !coverage/.cache
+          retention-days: 30
 
       - name: Build
         run: pnpm build
