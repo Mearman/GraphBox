@@ -27,6 +27,20 @@ import {
 // ============================================================================
 
 /**
+ * Node pair for testing path ranking algorithms.
+ */
+export interface TestNodePair {
+	/** Source node ID (as it appears in the graph) */
+	source: string;
+
+	/** Target node ID (as it appears in the graph) */
+	target: string;
+
+	/** Optional description of this pair (e.g., "central characters", "peripheral nodes") */
+	description?: string;
+}
+
+/**
  * Metadata for a benchmark dataset.
  */
 export interface BenchmarkDatasetMeta {
@@ -66,6 +80,13 @@ export interface BenchmarkDatasetMeta {
 	 * Should point to a raw text file in edge list format.
 	 */
 	remoteUrl?: string;
+
+	/**
+	 * Representative node pairs for testing.
+	 * These are actual node IDs from the graph that can be used in path ranking tests.
+	 * Tests should use these rather than assuming generic IDs like "0", "1", etc.
+	 */
+	testPairs?: TestNodePair[];
 }
 
 /**
@@ -110,6 +131,11 @@ export const CORA: BenchmarkDatasetMeta = {
 	delimiter: /\s+/,  // Local .edges file and remote .cites both use whitespace
 	source: "McCallum et al., Automating the Construction of Internet Portals with Machine Learning, 2000",
 	remoteUrl: "https://linqs-data.soe.ucsc.edu/public/lbc/cora.tgz",
+	testPairs: [
+		{ source: "35", target: "1033", description: "First two papers" },
+		{ source: "103482", target: "1050679", description: "Mid-range papers" },
+		{ source: "35", target: "103482", description: "Early to mid papers" },
+	],
 };
 
 /**
@@ -130,6 +156,11 @@ export const CITESEER: BenchmarkDatasetMeta = {
 	delimiter: /\s+/,  // Local .edges file and remote .cites both use whitespace
 	source: "Giles et al., CiteSeer: An Automatic Citation Indexing System, 1998",
 	remoteUrl: "https://linqs-data.soe.ucsc.edu/public/lbc/citeseer.tgz",
+	testPairs: [
+		{ source: "100157", target: "364207", description: "First two papers in dataset" },
+		{ source: "bradshaw97introduction", target: "bylund99coordinating", description: "Named papers" },
+		{ source: "100157", target: "bradshaw97introduction", description: "Numeric to named paper" },
+	],
 };
 
 /**
@@ -150,6 +181,12 @@ export const FACEBOOK: BenchmarkDatasetMeta = {
 	delimiter: /\s+/,
 	source: "Leskovec & McAuley, Learning to Discover Social Circles in Ego Networks, NIPS 2012",
 	remoteUrl: "https://snap.stanford.edu/data/facebook_combined.txt.gz",
+	testPairs: [
+		{ source: "0", target: "100", description: "Early to mid-range users" },
+		{ source: "1", target: "500", description: "First user to middle user" },
+		{ source: "0", target: "1000", description: "Early to later users" },
+		{ source: "10", target: "2000", description: "Distributed pair" },
+	],
 };
 
 /**
@@ -190,6 +227,12 @@ export const LESMIS: BenchmarkDatasetMeta = {
 	delimiter: /\s+/,
 	source: "Knuth, The Stanford GraphBase: A Platform for Combinatorial Computing, 1993",
 	remoteUrl: "https://websites.umich.edu/~mejn/netdata/lesmis.zip",
+	testPairs: [
+		{ source: "Valjean", target: "Javert", description: "Main protagonist and antagonist" },
+		{ source: "Myriel", target: "Cosette", description: "Bishop and adopted daughter" },
+		{ source: "Valjean", target: "Cosette", description: "Central father-daughter relationship" },
+		{ source: "Thenardier", target: "Javert", description: "Criminal and inspector" },
+	],
 };
 
 /**
@@ -625,4 +668,39 @@ export const validateBenchmark = (benchmark: LoadedBenchmark, tolerance = 0.05):
 		valid: warnings.length === 0,
 		warnings,
 	};
+};
+
+/**
+ * Get test node pairs for a benchmark dataset.
+ *
+ * Returns representative node pairs that can be used in path ranking tests.
+ * These pairs use actual node IDs from the graph, not generic indices.
+ *
+ * @param benchmarkId - Dataset identifier (e.g., 'citeseer', 'lesmis')
+ * @param pairIndex - Index of the pair to return (defaults to 0)
+ * @returns Node pair with source and target IDs
+ * @throws Error if benchmark not found or has no test pairs defined
+ *
+ * @example
+ * ```typescript
+ * const { source, target } = getTestNodePair('lesmis'); // { source: "Valjean", target: "Javert" }
+ * const { source, target } = getTestNodePair('lesmis', 1); // { source: "Myriel", target: "Cosette" }
+ * ```
+ */
+export const getTestNodePair = (benchmarkId: string, pairIndex = 0): TestNodePair => {
+	const meta = DATASETS_BY_ID.get(benchmarkId.toLowerCase());
+	if (!meta) {
+		const available = BENCHMARK_DATASETS.map((d) => d.id).join(", ");
+		throw new Error(`Unknown benchmark dataset: '${benchmarkId}'. Available: ${available}`);
+	}
+
+	if (!meta.testPairs || meta.testPairs.length === 0) {
+		throw new Error(
+			`No test pairs defined for benchmark '${benchmarkId}'. ` +
+			`Please add testPairs to the ${benchmarkId.toUpperCase()} dataset definition.`
+		);
+	}
+
+	const pair = meta.testPairs[pairIndex % meta.testPairs.length];
+	return pair;
 };
