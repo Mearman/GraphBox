@@ -157,7 +157,7 @@ export const computeSalienceGroundTruth = <N extends Node, E extends Edge>(
 			const result = rankPaths(graph, startSeed, endSeed, {
 				lambda,
 				maxPaths: topK * 2, // Get more than needed to ensure quality
-				maxLength: 10, // Allow longer paths for social networks (increased from 5)
+				maxLength: 7, // Reduced from 10 for computational tractability
 				shortestOnly: false,
 				traversalMode,
 			});
