@@ -1,8 +1,14 @@
 {
   "$schema": "./node_modules/@stryker-mutator/core/schema/stryker-schema.json",
   "packageManager": "pnpm",
+  "plugins": [
+    "@stryker-mutator/vitest-runner"
+  ],
   "testRunner": "vitest",
-  "coverageAnalysis": "perTest",
+  "vitest": {
+    "configFile": "vitest.mutation.config.ts"
+  },
+  "coverageAnalysis": "off",
   "mutate": [
     "src/experiments/evaluation/__tests__/validation/common/benchmark-graph-expander.ts",
     "src/experiments/evaluation/__tests__/validation/common/test-graph-expander.ts",
@@ -12,7 +18,6 @@
     "src/experiments/evaluation/metrics/structural-representativeness.ts"
   ],
   "mutator": {
-    "plugins": ["@stryker-mutator/typescript-checker"],
     "excludedMutations": [
       "StringLiteral",
       "BlockStatement"
@@ -33,8 +38,7 @@
   },
   "timeoutMS": 300000,
   "timeoutFactor": 1.5,
-  "maxConcurrentTestRunners": 2,
+  "concurrency": 2,
   "disableTypeChecks": "{test,src,lib}/**/*.{js,ts,jsx,tsx,html,vue}",
-  "checkers": ["typescript"],
   "tsconfigFile": "tsconfig.json"
 }
