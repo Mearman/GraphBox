@@ -153,4 +153,19 @@ describe("DegreePrioritisedExpansion - Frontier Intersection Detection", () => {
 		expect(result.paths.length).toBeLessThanOrEqual(2);
 		expect(result.paths.length).toBeGreaterThan(0);
 	});
+
+	it("should not record paths with duplicate nodes (simple paths only)", async () => {
+		// Test with three seeds that all converge at B
+		// This can produce non-simple paths if validation is missing
+		const seeds = ["A", "C", "D"];
+		const expansion = new DegreePrioritisedExpansion(expander, seeds);
+
+		const result = await expansion.run();
+
+		// Verify all paths are simple (no repeated nodes)
+		for (const path of result.paths) {
+			const nodeSet = new Set(path.nodes);
+			expect(nodeSet.size).toBe(path.nodes.length);
+		}
+	});
 });
