@@ -223,10 +223,11 @@ describe("computeModular", () => {
 	});
 
 	it("should use degree heuristic for large graphs with distinct degrees", () => {
-		// Create a path of 15 vertices (all have degree 1 or 2, but positions differ)
-		const vertices = Array.from({ length: 15 }, (_, index) => `V${index}`);
+		// Create a path of 25 vertices (triggers heuristic at >= 25 nodes)
+		// Endpoints have degree 1, middle vertices degree 2 (not all distinct)
+		const vertices = Array.from({ length: 25 }, (_, index) => `V${index}`);
 		const edges: Array<[string, string]> = [];
-		for (let index = 0; index < 14; index++) {
+		for (let index = 0; index < 24; index++) {
 			edges.push([`V${index}`, `V${index + 1}`]);
 		}
 
