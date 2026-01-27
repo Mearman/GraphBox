@@ -116,6 +116,40 @@ export class BenchmarkGraphExpander implements GraphExpander<{ id: string }> {
 			}
 		}
 
+		// For undirected graphs, also search edges where target === nodeId
+		if (!this.directed && this.edgesByTarget) {
+			start = 0;
+			end = this.edgesByTarget.length;
+			while (start < end) {
+				const mid = Math.floor((start + end) / 2);
+				const edge = this.edgesByTarget[mid];
+				if (edge.target === nodeId) {
+					// Found the range - expand to find all matching edges
+					neighbors.push(edge.source);
+
+					// Search forward
+					let index = mid + 1;
+					while (index < end && this.edgesByTarget[index].target === nodeId) {
+						neighbors.push(this.edgesByTarget[index].source);
+						index++;
+					}
+
+					// Search backward
+					let index_ = mid - 1;
+					while (index_ >= 0 && this.edgesByTarget[index_].target === nodeId) {
+						neighbors.push(this.edgesByTarget[index_].source);
+						index_--;
+					}
+
+					break;
+				} else if (edge.target < nodeId) {
+					start = mid + 1;
+				} else {
+					end = mid;
+				}
+			}
+		}
+
 		this.adjacency.set(nodeId, neighbors);
 		this.adjacencyBuilt.add(nodeId);
 	}
