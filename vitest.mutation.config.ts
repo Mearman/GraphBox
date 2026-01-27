@@ -12,6 +12,7 @@ export default defineConfig({
 			"src/experiments/evaluation/__tests__/validation/common/*.unit.test.ts",
 			"src/experiments/evaluation/__tests__/validation/*.unit.test.ts",
 			"src/experiments/evaluation/metrics/*.property.unit.test.ts",
+			"src/experiments/evaluation/metrics/*.unit.test.ts",
 		],
 		exclude: [
 			"node_modules",
