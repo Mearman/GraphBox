@@ -83,6 +83,8 @@ export class EntropyGuidedExpansion<T> {
 	private readonly paths: Array<{ fromSeed: number; toSeed: number; nodes: string[] }> = [];
 	private readonly sampledEdges = new Set<string>();
 	private stats: ExpansionStats;
+	/** Tracks when each node was first discovered (iteration number) */
+	private readonly nodeDiscoveryIteration = new Map<string, number>();
 
 	/** Track which frontier owns each node for O(1) intersection checking */
 	private readonly nodeToFrontierIndex = new Map<string, number>();
@@ -123,6 +125,9 @@ export class EntropyGuidedExpansion<T> {
 
 			// Track which frontier owns this seed
 			this.nodeToFrontierIndex.set(seed, index);
+
+			// Seeds are discovered at iteration 0
+			this.nodeDiscoveryIteration.set(seed, 0);
 		}
 
 		this.stats = {
@@ -254,6 +259,11 @@ export class EntropyGuidedExpansion<T> {
 				activeState.visited.add(targetId);
 				activeState.parents.set(targetId, { parent: node, edge: relationshipType });
 
+				// Track first discovery iteration (only if not already discovered)
+				if (!this.nodeDiscoveryIteration.has(targetId)) {
+					this.nodeDiscoveryIteration.set(targetId, this.stats.iterations);
+				}
+
 				// Track which frontier owns this node (for O(1) intersection checking)
 				this.nodeToFrontierIndex.set(targetId, activeIndex);
 
@@ -298,6 +308,7 @@ export class EntropyGuidedExpansion<T> {
 			sampledEdges: this.sampledEdges,
 			visitedPerFrontier,
 			stats: this.stats,
+			nodeDiscoveryIteration: this.nodeDiscoveryIteration,
 		};
 	}
 

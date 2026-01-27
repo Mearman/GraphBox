@@ -83,6 +83,8 @@ export class OverlapBasedExpansion<T> {
 	}> = [];
 	private stats: ExpansionStats;
 	private iteration = 0;
+	/** Tracks when each node was first discovered (iteration number) */
+	private readonly nodeDiscoveryIteration = new Map<string, number>();
 
 	/** Track which frontier owns each node for O(1) overlap detection */
 	private readonly nodeToFrontierIndex = new Map<string, number>();
@@ -126,6 +128,9 @@ export class OverlapBasedExpansion<T> {
 
 			// Track which frontier owns this seed
 			this.nodeToFrontierIndex.set(seed, index);
+
+			// Seeds are discovered at iteration 0
+			this.nodeDiscoveryIteration.set(seed, 0);
 		}
 
 		this.stats = {
@@ -236,6 +241,11 @@ export class OverlapBasedExpansion<T> {
 				activeState.visited.add(targetId);
 				activeState.parents.set(targetId, { parent: node, edge: relationshipType });
 
+				// Track first discovery iteration (only if not already discovered)
+				if (!this.nodeDiscoveryIteration.has(targetId)) {
+					this.nodeDiscoveryIteration.set(targetId, this.iteration);
+				}
+
 				// Update nodeDistances for SphereIntersectionStrategy
 				if (activeState.nodeDistances) {
 					const parentDistance = activeState.nodeDistances.get(node) ?? 0;
@@ -336,6 +346,11 @@ export class OverlapBasedExpansion<T> {
 			frontier.visited.add(targetId);
 			frontier.parents.set(targetId, { parent: node, edge: relationshipType });
 
+			// Track first discovery iteration (only if not already discovered)
+			if (!this.nodeDiscoveryIteration.has(targetId)) {
+				this.nodeDiscoveryIteration.set(targetId, this.iteration);
+			}
+
 			// Update nodeDistances for SphereIntersectionStrategy
 			if (frontier.nodeDistances) {
 				const parentDistance = frontier.nodeDistances.get(node) ?? 0;
@@ -379,6 +394,7 @@ export class OverlapBasedExpansion<T> {
 				iterations: this.iteration,
 				overlapMatrix: this.overlapMatrix,
 			},
+			nodeDiscoveryIteration: this.nodeDiscoveryIteration,
 		};
 
 		// Apply between-graph strategy to refine output
