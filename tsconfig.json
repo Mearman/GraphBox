@@ -22,6 +22,6 @@
       "@test/fixtures/*": ["./src/experiments/evaluation/__tests__/validation/primary/traversal/degree-prioritised/representativeness/fixtures/*"]
     }
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "scripts/**/*"],
   "exclude": ["node_modules", "dist"]
 }
