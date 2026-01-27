@@ -5,13 +5,13 @@
  * Standalone file for PPEF worker thread execution.
  */
 
+import type { SUT , SutRegistration } from "ppef/types/sut";
+
 import { Graph } from "../algorithms/graph/graph.js";
 import { shortestPathRanking } from "../algorithms/pathfinding/shortest-path-ranking.js";
 import type { Edge, Node } from "../algorithms/types/graph.js";
 import type { BenchmarkGraphExpander } from "../experiments/evaluation/__tests__/validation/common/benchmark-graph-expander.js";
 import { computeRankingMetrics } from "../experiments/evaluation/__tests__/validation/common/path-ranking-helpers.js";
-import type { SUT } from "ppef/types/sut";
-import type { SutRegistration } from "ppef/types/sut";
 
 /**
  * Configuration for Shortest Path Ranking SUT.
@@ -69,8 +69,9 @@ const GRAPH_CACHE = new Map<BenchmarkGraphExpander, Graph<Node, Edge>>();
 
 /**
  * Create a Shortest Ranking SUT instance.
+ * @param config
  */
-export function createSut(config?: Record<string, unknown>): SUT<RankingInputs, ShortestRankingResult> {
+export const createSut = (config?: Record<string, unknown>): SUT<RankingInputs, ShortestRankingResult> => {
 	const sutConfig = {
 		maxPaths: (config?.maxPaths as number | undefined) ?? 10,
 	};
@@ -81,7 +82,7 @@ export function createSut(config?: Record<string, unknown>): SUT<RankingInputs, 
 			return { ...sutConfig };
 		},
 
-		async run(inputs: RankingInputs): Promise<ShortestRankingResult> {
+		run: async (inputs: RankingInputs): Promise<ShortestRankingResult> => {
 			const { input: expander, source, target } = inputs;
 
 			try {
@@ -130,22 +131,20 @@ export function createSut(config?: Record<string, unknown>): SUT<RankingInputs, 
 			}
 		},
 	};
-}
+};
 
 /**
  * Create an empty result (no paths found).
  */
-function createEmptyResult(): ShortestRankingResult {
-	return {
-		pathsFound: 0,
-		meanLength: 0,
-		meanMI: 0,
-		stdMI: 0,
-		pathDiversity: 0,
-		hubAvoidance: 0,
-		nodeCoverage: 0,
-		meanScore: 0,
-		stdScore: 0,
-		paths: [],
-	};
-}
+const createEmptyResult = (): ShortestRankingResult => ({
+	pathsFound: 0,
+	meanLength: 0,
+	meanMI: 0,
+	stdMI: 0,
+	pathDiversity: 0,
+	hubAvoidance: 0,
+	nodeCoverage: 0,
+	meanScore: 0,
+	stdScore: 0,
+	paths: [],
+});
