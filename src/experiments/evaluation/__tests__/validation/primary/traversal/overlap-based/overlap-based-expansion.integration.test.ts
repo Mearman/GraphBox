@@ -4,8 +4,7 @@
  * Verifies that all 27 variants can be instantiated and executed successfully.
  */
 
-import assert from "node:assert/strict";
-import { describe, it } from "node:test";
+import { describe, expect, it } from "vitest";
 
 // Import all strategy classes
 import {
@@ -36,18 +35,18 @@ describe("Overlap-Based Expansion", () => {
 		const result = await expansion.run();
 
 		// Verify result structure
-		assert.strictEqual(Array.isArray(result.paths), true, "paths should be an array");
-		assert.strictEqual(result.sampledNodes instanceof Set, true, "sampledNodes should be a Set");
-		assert.strictEqual(result.sampledEdges instanceof Set, true, "sampledEdges should be a Set");
-		assert.strictEqual(Array.isArray(result.visitedPerFrontier), true, "visitedPerFrontier should be an array");
-		assert.strictEqual(typeof result.stats, "object", "stats should be an object");
-		assert.strictEqual(typeof result.overlapMetadata, "object", "overlapMetadata should be an object");
+		expect(result.paths).toBeInstanceOf(Array);
+		expect(result.sampledNodes).toBeInstanceOf(Set);
+		expect(result.sampledEdges).toBeInstanceOf(Set);
+		expect(result.visitedPerFrontier).toBeInstanceOf(Array);
+		expect(result.stats).toBeTypeOf("object");
+		expect(result.overlapMetadata).toBeTypeOf("object");
 
 		// Verify overlap metadata
-		assert.ok(Array.isArray(result.overlapMetadata.overlapEvents), "overlapEvents should be an array");
-		assert.strictEqual(typeof result.overlapMetadata.iterations, "number", "iterations should be a number");
-		assert.ok(result.overlapMetadata.terminationReason, "terminationReason should be defined");
-		assert.ok(result.overlapMetadata.overlapMatrix instanceof Map, "overlapMatrix should be a Map");
+		expect(result.overlapMetadata.overlapEvents).toBeInstanceOf(Array);
+		expect(result.overlapMetadata.iterations).toBeTypeOf("number");
+		expect(result.overlapMetadata.terminationReason).toBeDefined();
+		expect(result.overlapMetadata.overlapMatrix).toBeInstanceOf(Map);
 	};
 
 	/**
@@ -115,8 +114,8 @@ describe("Overlap-Based Expansion", () => {
 			const expansion = new OverlapBasedExpansion(expander, seeds, config);
 			const result = await expansion.run();
 
-			assert.strictEqual(result.overlapMetadata.terminationReason, "n1-coverage");
-			assert.ok(result.sampledNodes.size > 0, "Should visit at least the seed node");
+			expect(result.overlapMetadata.terminationReason).toBe("n1-coverage");
+			expect(result.sampledNodes.size).toBeGreaterThan(0);
 		});
 	});
 
@@ -137,8 +136,8 @@ describe("Overlap-Based Expansion", () => {
 			const config = { ...baseConfig, overlapDetection: new PhysicalMeetingStrategy() };
 			const result = await runVariant(expander, seeds, config);
 
-			// Physical meeting requires actual node overlap
-			assert.ok(result.overlapMetadata.overlapEvents.length >= 0);
+			// Physical meeting on 4x4 grid from opposite corners should detect overlap
+			expect(result.overlapMetadata.overlapEvents.length).toBeGreaterThan(0);
 		});
 
 		const runVariant = async (expander: TestGraphExpander, seeds: string[], config: OverlapBasedExpansionConfig) => {
