@@ -125,9 +125,9 @@ describe("Path Salience Ranking: Benchmarks - Cora", () => {
 		const benchmark = await loadBenchmarkByIdFromUrl("cora");
 		const graph = benchmark.graph;
 
-		// Test with different paper pairs
-		const pair1 = { source: "0", target: "50" };
-		const pair2 = { source: "500", target: "1000" };
+		// Use actual paper IDs from test pairs (different pairs for comparison)
+		const pair1 = getTestNodePair("cora", 0);
+		const pair2 = getTestNodePair("cora", 2);
 
 		const result1 = rankPaths(graph, pair1.source, pair1.target, { maxPaths: 10 });
 		const result2 = rankPaths(graph, pair2.source, pair2.target, { maxPaths: 10 });

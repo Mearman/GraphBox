@@ -87,10 +87,8 @@ describe("Path Salience Ranking: Benchmarks - Les Misérables", () => {
 		const benchmark = await loadBenchmarkByIdFromUrl("lesmis");
 		const graph = benchmark.graph;
 
-		// Use two characters who are not directly connected
-		// but appear in the same storylines
-		const source = "1"; // Myriel
-		const target = "55"; // Mother Innocent (a peripheral character)
+		// Use actual character names from test pairs
+		const { source, target } = getTestNodePair("lesmis", 1); // Myriel and Cosette
 
 		const result = rankPaths(graph, source, target, { maxPaths: 12 });
 

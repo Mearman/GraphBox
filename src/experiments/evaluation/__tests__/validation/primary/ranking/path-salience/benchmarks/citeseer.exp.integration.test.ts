@@ -82,9 +82,8 @@ describe("Path Salience Ranking: Benchmarks - CiteSeer", () => {
 		const benchmark = await loadBenchmarkByIdFromUrl("citeseer");
 		const graph = benchmark.graph;
 
-		// Select papers likely to have multiple citation paths
-		const source = "100";
-		const target = "500";
+		// Use actual paper IDs from test pairs
+		const { source, target } = getTestNodePair("citeseer", 1);
 
 		const result = rankPaths(graph, source, target, { maxPaths: 12 });
 
