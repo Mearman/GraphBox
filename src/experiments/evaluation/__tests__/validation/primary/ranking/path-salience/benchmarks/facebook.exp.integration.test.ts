@@ -28,7 +28,7 @@ describe("Path Salience Ranking: Benchmarks - Facebook", () => {
 	 * Tests path ranking between users in the Facebook social network,
 	 * which has a scale-free structure with hub users having many connections.
 	 */
-	it("should rank paths between social network users", async () => {
+	it("should rank paths between social network users", { timeout: 60_000 }, async () => {
 		const benchmark = await loadBenchmarkByIdFromUrl("facebook");
 		const graph = benchmark.graph;
 
@@ -79,7 +79,7 @@ describe("Path Salience Ranking: Benchmarks - Facebook", () => {
 	 * Tests that paths between users include various intermediate friends,
 	 * showing different social connection patterns.
 	 */
-	it("should find diverse friend connection paths", async () => {
+	it("should find diverse friend connection paths", { timeout: 60_000 }, async () => {
 		const benchmark = await loadBenchmarkByIdFromUrl("facebook");
 		const graph = benchmark.graph;
 
@@ -122,7 +122,7 @@ describe("Path Salience Ranking: Benchmarks - Facebook", () => {
 	 * Tests path ranking on a network with hub users (high degree)
 	 * and peripheral users (low degree).
 	 */
-	it("should handle scale-free network structure", async () => {
+	it("should handle scale-free network structure", { timeout: 60_000 }, async () => {
 		const benchmark = await loadBenchmarkByIdFromUrl("facebook");
 		const graph = benchmark.graph;
 
@@ -158,7 +158,7 @@ describe("Path Salience Ranking: Benchmarks - Facebook", () => {
 	 * Measures Cohen's d effect size for path diversity
 	 * between Path Salience Ranking and random baseline.
 	 */
-	it("should show effect size against random baseline", async () => {
+	it("should show effect size against random baseline", { timeout: 60_000 }, async () => {
 		const benchmark = await loadBenchmarkByIdFromUrl("facebook");
 		const graph = benchmark.graph;
 
