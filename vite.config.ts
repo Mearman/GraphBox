@@ -76,6 +76,13 @@ export default defineConfig({
 			reporter: isCI ? ["text", "json", "html"] : ["text"],
 			include: ["src/**/*.ts"],
 			exclude: ["src/**/*.test.ts", "src/**/*.spec.ts", "src/**/fixtures/**"],
+			// Coverage thresholds for test infrastructure validation
+			thresholds: {
+				lines: 90,
+				functions: 90,
+				branches: 85,
+				statements: 90,
+			},
 		},
 		projects: [
 			{
