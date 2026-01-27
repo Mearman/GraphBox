@@ -1,0 +1,143 @@
+/**
+ * Regression test for frontier intersection detection bug (Jan 21 2026).
+ *
+ * BACKGROUND:
+ * Commit bec6dbf optimized intersection checking from O(F) to O(1) using
+ * nodeToFrontierIndex Map. The bug: Map was updated on every visit instead
+ * of only first visit, preventing intersection detection.
+ *
+ * This test creates a minimal graph where two frontiers MUST meet, verifying
+ * that path recording works correctly.
+ */
+
+import { beforeEach, describe, expect, it } from "vitest";
+
+import type { GraphExpander, Neighbor } from "../../interfaces/graph-expander";
+import { DegreePrioritisedExpansion } from "./degree-prioritised-expansion";
+
+/**
+ * Mock graph expander for controlled testing.
+ * Graph structure: A --- B --- C
+ *                       |
+ *                       D
+ *
+ * If seeds are A and C, frontiers MUST meet at B.
+ */
+class SimpleGraphExpander implements GraphExpander<void> {
+	private edges = new Map<string, string[]>([
+		["A", ["B"]],
+		["B", ["A", "C", "D"]],
+		["C", ["B"]],
+		["D", ["B"]],
+	]);
+
+	async getNeighbors(nodeId: string): Promise<Neighbor[]> {
+		const neighbors = this.edges.get(nodeId) ?? [];
+		return neighbors.map((targetId) => ({ targetId, relationshipType: "edge" }));
+	}
+
+	getDegree(nodeId: string): number {
+		return this.edges.get(nodeId)?.length ?? 0;
+	}
+
+	calculatePriority(nodeId: string): number {
+		// Lower degree = higher priority (lower value)
+		return this.getDegree(nodeId);
+	}
+
+	addEdge(_source: string, _target: string, _type: string): void {
+		// No-op for testing
+	}
+
+	async getNode(_nodeId: string): Promise<void> {
+		// No-op for testing
+		return;
+	}
+}
+
+describe("DegreePrioritisedExpansion - Frontier Intersection Detection", () => {
+	let expander: SimpleGraphExpander;
+
+	beforeEach(() => {
+		expander = new SimpleGraphExpander();
+	});
+
+	it("should detect frontier intersection when two frontiers meet at the same node", async () => {
+		// Seeds: A (left) and C (right)
+		// Both frontiers will expand to B (the meeting point)
+		const seeds = ["A", "C"];
+		const expansion = new DegreePrioritisedExpansion(expander, seeds);
+
+		const result = await expansion.run();
+
+		// CRITICAL: At least one path should be found between A and C
+		expect(result.paths.length).toBeGreaterThan(0);
+
+		// The path should connect seed 0 (A) to seed 1 (C)
+		const path = result.paths[0];
+		expect(path.fromSeed).toBeOneOf([0, 1]);
+		expect(path.toSeed).toBeOneOf([0, 1]);
+		expect(path.fromSeed).not.toBe(path.toSeed);
+
+		// The path should be A -> B -> C (length 3)
+		expect(path.nodes.length).toBe(3);
+		expect(path.nodes[0]).toBe("A");
+		expect(path.nodes[1]).toBe("B");
+		expect(path.nodes[2]).toBe("C");
+	});
+
+	it("should record path immediately when frontiers intersect", async () => {
+		// Same setup: A and C as seeds
+		const seeds = ["A", "C"];
+		const expansion = new DegreePrioritisedExpansion(expander, seeds);
+
+		const result = await expansion.run();
+
+		// Verify basic properties
+		expect(result.paths.length).toBeGreaterThan(0);
+		expect(result.sampledNodes.has("A")).toBe(true);
+		expect(result.sampledNodes.has("B")).toBe(true);
+		expect(result.sampledNodes.has("C")).toBe(true);
+
+		// Verify at least one path connects the two seeds
+		const connectingSeed0to1 = result.paths.some(
+			(p) =>
+				(p.fromSeed === 0 && p.toSeed === 1) || (p.fromSeed === 1 && p.toSeed === 0),
+		);
+		expect(connectingSeed0to1).toBe(true);
+	});
+
+	it("should handle three-way intersection correctly", async () => {
+		// Seeds: A, C, D (all converge at B)
+		const seeds = ["A", "C", "D"];
+		const expansion = new DegreePrioritisedExpansion(expander, seeds);
+
+		const result = await expansion.run();
+
+		// With 3 seeds, we should find multiple paths:
+		// - A to C through B
+		// - A to D through B
+		// - C to D through B
+		// Minimum: at least 2 paths (could be 3 depending on execution order)
+		expect(result.paths.length).toBeGreaterThanOrEqual(2);
+
+		// Verify all seeds are connected to at least one other seed
+		const seeds0Paths = result.paths.filter((p) => p.fromSeed === 0 || p.toSeed === 0);
+		const seeds1Paths = result.paths.filter((p) => p.fromSeed === 1 || p.toSeed === 1);
+		const seeds2Paths = result.paths.filter((p) => p.fromSeed === 2 || p.toSeed === 2);
+
+		expect(seeds0Paths.length).toBeGreaterThan(0);
+		expect(seeds1Paths.length).toBeGreaterThan(0);
+		expect(seeds2Paths.length).toBeGreaterThan(0);
+	});
+
+	it("should not record duplicate paths", async () => {
+		const seeds = ["A", "C"];
+		const expansion = new DegreePrioritisedExpansion(expander, seeds);
+
+		const result = await expansion.run();
+
+		// There's only one simple path A-B-C, so only one path should be recorded
+		expect(result.paths.length).toBe(1);
+	});
+});

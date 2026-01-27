@@ -203,18 +203,12 @@ export class DegreePrioritisedExpansion<T> {
 				const edgeKey = `${node}->${targetId}`;
 				this.sampledEdges.add(edgeKey);
 
-				// Mark as visited and set parent for this frontier
+				// Mark as visited and set parent for this frontier BEFORE intersection check
+				// This ensures reconstructPath has the parent info it needs
 				activeState.visited.add(targetId);
 				activeState.parents.set(targetId, { parent: node, edge: relationshipType });
 
-				// Track which frontier owns this node (for O(1) intersection checking)
-				this.nodeToFrontierIndex.set(targetId, activeIndex);
-
-				// Add to frontier with thesis priority as priority
-				const priority = this.expander.calculatePriority(targetId);
-				activeState.frontier.push(targetId, priority);
-
-				// Check for intersection using O(1) lookup
+				// Check for intersection using O(1) lookup BEFORE claiming ownership
 				// If another frontier already visited this node, we have a path
 				const otherFrontierIndex = this.nodeToFrontierIndex.get(targetId);
 				if (otherFrontierIndex !== undefined && otherFrontierIndex !== activeIndex) {
@@ -232,6 +226,16 @@ export class DegreePrioritisedExpansion<T> {
 						}
 					}
 				}
+
+				// Track which frontier FIRST visits this node (for O(1) intersection checking)
+				// Only set if not already claimed by another frontier
+				if (!this.nodeToFrontierIndex.has(targetId)) {
+					this.nodeToFrontierIndex.set(targetId, activeIndex);
+				}
+
+				// Add to frontier with thesis priority as priority
+				const priority = this.expander.calculatePriority(targetId);
+				activeState.frontier.push(targetId, priority);
 			}
 		}
 
