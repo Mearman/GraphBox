@@ -46,8 +46,29 @@ data/
 test-results.tap
 tap-results.json
 tap-metrics.csv
+test-metrics.json
+
+# Mutation testing
+.stryker-tmp/
+reports/mutation/
 
 # Evaluation results and checkpoints
 results/
 results-*/
 checkpoint.json
+
+# Compiled TypeScript in scripts (use tsx to run directly)
+scripts/**/*.js
+scripts/**/*.d.ts
+scripts/**/*.js.map
+scripts/**/*.d.ts.map
+
+# Compiled config files (use tsx/vitest directly)
+vite.config.js
+vite.config.d.ts
+vite.config.js.map
+vite.config.d.ts.map
+vitest.*.config.js
+vitest.*.config.d.ts
+vitest.*.config.js.map
+vitest.*.config.d.ts.map
