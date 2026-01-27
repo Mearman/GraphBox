@@ -33,6 +33,116 @@ import { StandardBfsExpansion } from "@graph/experiments/baselines/standard-bfs.
 import { metrics } from "@graph/experiments/metrics/index.js";
 
 /**
+ * Coverage efficiency metrics for comparing algorithms.
+ */
+interface CoverageEfficiencyMetrics {
+	/** First-discovery iteration for each salient path (path signature → iteration) */
+	pathDiscoveryIterations: Map<string, number>;
+	/** Coverage at budget checkpoints (10%, 25%, 50%, 75%, 100%) */
+	budgetCheckpoints: { budget: number; coverage: number }[];
+	/** Area under the coverage-vs-iterations curve (normalised 0-1) */
+	auc: number;
+	/** Median first-discovery iteration across all salient paths */
+	medianDiscoveryIteration: number;
+}
+
+/**
+ * Compute coverage efficiency metrics using node discovery iteration data.
+ *
+ * @param groundTruth - Set of path signatures representing top-K salient paths
+ * @param nodeDiscoveryIteration - Map of node → iteration when first discovered
+ * @param totalIterations - Total iterations run by the algorithm
+ * @returns Coverage efficiency metrics
+ */
+const computeCoverageEfficiency = (
+	groundTruth: Set<string>,
+	nodeDiscoveryIteration: Map<string, number>,
+	totalIterations: number,
+): CoverageEfficiencyMetrics => {
+	// Compute first-discovery iteration for each salient path
+	// A path is "discoverable" when ALL its nodes have been sampled
+	const pathDiscoveryIterations = new Map<string, number>();
+
+	for (const pathSig of groundTruth) {
+		const nodes = pathSig.split("->");
+		let maxIteration = 0;
+		let allNodesDiscovered = true;
+
+		for (const node of nodes) {
+			const iteration = nodeDiscoveryIteration.get(node);
+			if (iteration === undefined) {
+				allNodesDiscovered = false;
+				break;
+			}
+			maxIteration = Math.max(maxIteration, iteration);
+		}
+
+		if (allNodesDiscovered) {
+			pathDiscoveryIterations.set(pathSig, maxIteration);
+		}
+	}
+
+	// Compute coverage at budget checkpoints
+	const budgetPercentages = [0.1, 0.25, 0.5, 0.75, 1];
+	const budgetCheckpoints: { budget: number; coverage: number }[] = [];
+
+	for (const pct of budgetPercentages) {
+		const budgetIterations = Math.floor(totalIterations * pct);
+		let pathsDiscoveredByBudget = 0;
+
+		for (const [, iteration] of pathDiscoveryIterations) {
+			if (iteration <= budgetIterations) {
+				pathsDiscoveredByBudget++;
+			}
+		}
+
+		budgetCheckpoints.push({
+			budget: pct,
+			coverage: groundTruth.size > 0 ? pathsDiscoveredByBudget / groundTruth.size : 0,
+		});
+	}
+
+	// Compute AUC using trapezoidal rule
+	// Higher AUC = finds salient paths earlier
+	let auc = 0;
+	if (totalIterations > 0 && groundTruth.size > 0) {
+		// Create coverage curve at each iteration
+		const discoveryIterations = [...pathDiscoveryIterations.values()].sort((a, b) => a - b);
+		let pathsFound = 0;
+		let previousIteration = 0;
+
+		for (const iteration of discoveryIterations) {
+			// Add area for flat region from prevIteration to iteration
+			const width = (iteration - previousIteration) / totalIterations;
+			const height = pathsFound / groundTruth.size;
+			auc += width * height;
+
+			pathsFound++;
+			previousIteration = iteration;
+		}
+
+		// Add area from last discovery to end
+		const remainingWidth = (totalIterations - previousIteration) / totalIterations;
+		const finalHeight = pathsFound / groundTruth.size;
+		auc += remainingWidth * finalHeight;
+	}
+
+	// Compute median first-discovery iteration
+	const sortedIterations = [...pathDiscoveryIterations.values()].sort((a, b) => a - b);
+	const medianDiscoveryIteration =
+		sortedIterations.length > 0
+			? sortedIterations[Math.floor(sortedIterations.length / 2)]
+			: totalIterations; // If no paths found, use max
+
+	return {
+		pathDiscoveryIterations,
+		budgetCheckpoints,
+		auc,
+		medianDiscoveryIteration,
+	};
+};
+
+/**
  * Configuration for a test case
  */
 interface TestCase {
@@ -172,15 +282,20 @@ const evaluateMethod = async (
 	const expansionResult = await algo.run();
 	const elapsedMs = performance.now() - startTime;
 
-	// POST-PROCESS: Enumerate ALL paths through sampled subgraph
-	// This fixes the 0% coverage problem where paths exist in the subgraph
-	// but weren't discovered during frontier intersection
-	const { paths } = await retroactivePathEnumeration(
+	// POST-PROCESS: Enumerate ALL simple paths through sampled subgraph
+	// This measures subgraph quality: does the sampled region contain high-salience paths?
+	// We use retroactive enumeration for all methods to ensure fair comparison,
+	// since different algorithms have different online path detection strategies.
+	//
+	// Use shorter maxLength (7) for tractability on dense graphs like Les Misérables.
+	// The ground truth computation uses maxLength=10, so we may miss some longer paths.
+	const enumResult = await retroactivePathEnumeration(
 		expansionResult,
 		expander,
 		seeds,
-		10, // maxLength matches ground truth (karate: 7-10, lesmis: similar)
+		7, // maxLength - reduced for computational tractability
 	);
+	const paths = enumResult.paths;
 
 	const coverage = computeSalienceCoverage(paths, groundTruth);
 
@@ -190,6 +305,20 @@ const evaluateMethod = async (
 			: expansionResult.sampledNodes.size;
 	const iterations =
 		"iterations" in expansionResult.stats ? expansionResult.stats.iterations : 0;
+
+	// Compute coverage efficiency metrics using node discovery iteration data
+	const nodeDiscoveryIteration =
+		"nodeDiscoveryIteration" in expansionResult
+			? (expansionResult.nodeDiscoveryIteration)
+			: new Map<string, number>();
+
+	const efficiencyMetrics = computeCoverageEfficiency(groundTruth, nodeDiscoveryIteration, iterations);
+
+	// Extract checkpoint coverages for recording
+	const coverage10 = efficiencyMetrics.budgetCheckpoints.find((c) => c.budget === 0.1)?.coverage ?? 0;
+	const coverage25 = efficiencyMetrics.budgetCheckpoints.find((c) => c.budget === 0.25)?.coverage ?? 0;
+	const coverage50 = efficiencyMetrics.budgetCheckpoints.find((c) => c.budget === 0.5)?.coverage ?? 0;
+	const coverage75 = efficiencyMetrics.budgetCheckpoints.find((c) => c.budget === 0.75)?.coverage ?? 0;
 
 	metrics.record("salience-coverage-comparison", {
 		dataset: testCaseName,
@@ -202,11 +331,18 @@ const evaluateMethod = async (
 		pathsDiscovered: paths.length,
 		nodesExpanded,
 		iterations,
+		// Coverage efficiency metrics
+		coverage10pct: Math.round(coverage10 * 1000) / 1000,
+		coverage25pct: Math.round(coverage25 * 1000) / 1000,
+		coverage50pct: Math.round(coverage50 * 1000) / 1000,
+		coverage75pct: Math.round(coverage75 * 1000) / 1000,
+		auc: Math.round(efficiencyMetrics.auc * 1000) / 1000,
+		medianDiscoveryIteration: efficiencyMetrics.medianDiscoveryIteration,
 		runtimeMs: Math.round(elapsedMs * 10) / 10,
 	});
 
 	console.log(
-		`   ✓ ${method.name.padEnd(30)} Coverage: ${(coverage["salience-coverage"] * 100).toFixed(1)}% (${coverage["top-k-found"]}/${coverage["top-k-total"]})`,
+		`   ✓ ${method.name.padEnd(30)} Coverage: ${(coverage["salience-coverage"] * 100).toFixed(1)}% (${coverage["top-k-found"]}/${coverage["top-k-total"]}) | AUC: ${efficiencyMetrics.auc.toFixed(3)} | Median: ${efficiencyMetrics.medianDiscoveryIteration}`,
 	);
 };
 
