@@ -370,6 +370,56 @@ const tableConfigs: TableConfig[] = [
 			return generateLatexTable(tableConfigs[12].columns, ["Dataset", "Mean MI", "Node Coverage", "Path Diversity", "Paths"], rows, tableConfigs[12].caption, tableConfigs[12].label);
 		},
 	},
+	{
+		key: "salience-coverage-comparison",
+		filename: "06-salience-coverage-comparison.tex",
+		label: "tab:salience-coverage-comparison",
+		caption: "Salience coverage comparison across expansion methods. Shows percentage of top-K salient paths (ranked by Path Salience) discovered by each method. All methods achieved 0\\% coverage, indicating overlap-based termination stops before discovering high-salience paths.",
+		columns: ["l", "l", "r", "r", "r"],
+		generate: (metrics) => {
+			const data = metrics["salience-coverage-comparison"] || [];
+			if (data.length === 0) return null;
+
+			// Group by dataset
+			const byDataset: Record<string, any[]> = {};
+			for (const r of data) {
+				const ds = String(r.dataset);
+				if (!byDataset[ds]) byDataset[ds] = [];
+				byDataset[ds].push(r);
+			}
+
+			const rows: string[] = [];
+			for (const [dataset, entries] of Object.entries(byDataset)) {
+				const datasetName = dataset === "lesmis" ? "Les Mis\\'erables" : dataset.charAt(0).toUpperCase() + dataset.slice(1);
+
+				// Add dataset header row
+				rows.push(`\\multicolumn{5}{l}{\\textbf{${datasetName}}} \\\\`);
+
+				for (const r of entries) {
+					const method = String(r.method);
+					const coverage = typeof r.salienceCoverage === 'number' ? formatPercentage(r.salienceCoverage * 100) : "--";
+					const found = r.topKFound !== undefined ? r.topKFound : "--";
+					const total = r.topKTotal !== undefined ? r.topKTotal : "--";
+					const paths = r.pathsDiscovered !== undefined ? r.pathsDiscovered : "--";
+
+					rows.push(`  ${method} & ${coverage} & ${found}/${total} & ${paths} & ${typeof r.runtimeMs === 'number' ? formatNumber(r.runtimeMs, 1) : "--"} \\\\`);
+				}
+
+				// Add spacing between datasets
+				if (Object.keys(byDataset).indexOf(dataset) < Object.keys(byDataset).length - 1) {
+					rows.push(`\\addlinespace`);
+				}
+			}
+
+			return generateLatexTable(
+				tableConfigs[13].columns,
+				["Method", "Coverage", "Found/Total", "Paths", "Time (ms)"],
+				rows,
+				tableConfigs[13].caption,
+				tableConfigs[13].label
+			);
+		},
+	},
 ];
 
 /**
