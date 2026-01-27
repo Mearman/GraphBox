@@ -16,7 +16,7 @@
 import { rankPaths } from "@graph/algorithms/pathfinding/path-ranking";
 import { computeRankingMetrics } from "@graph/evaluation/__tests__/validation/common/path-ranking-helpers";
 import { cohensD } from "@graph/evaluation/__tests__/validation/common/statistical-functions";
-import { loadBenchmarkByIdFromUrl } from "@graph/evaluation/fixtures/benchmark-datasets";
+import { getTestNodePair, loadBenchmarkByIdFromUrl } from "@graph/evaluation/fixtures/benchmark-datasets";
 import { randomPathRanking } from "@graph/experiments/baselines/random-path-ranking";
 import { shortestPathRanking } from "@graph/experiments/baselines/shortest-path-ranking";
 import { describe, expect, it } from "vitest";
@@ -32,9 +32,8 @@ describe("Path Salience Ranking: Benchmarks - Cora", () => {
 		const benchmark = await loadBenchmarkByIdFromUrl("cora");
 		const graph = benchmark.graph;
 
-		// Use nodes with different IDs that likely represent different papers
-		const source = "0";
-		const target = "100";
+		// Use actual paper IDs from the graph (not generic numeric indices)
+		const { source, target } = getTestNodePair("cora");
 
 		const salienceResult = rankPaths(graph, source, target, { maxPaths: 15 });
 		const shortestResult = shortestPathRanking(graph, source, target, { maxPaths: 15 });
@@ -83,9 +82,8 @@ describe("Path Salience Ranking: Benchmarks - Cora", () => {
 		const benchmark = await loadBenchmarkByIdFromUrl("cora");
 		const graph = benchmark.graph;
 
-		// Select papers likely to have multiple citation paths
-		const source = "50";
-		const target = "200";
+		// Use actual paper IDs from test pairs (second pair)
+		const { source, target } = getTestNodePair("cora", 1);
 
 		const result = rankPaths(graph, source, target, { maxPaths: 12 });
 
@@ -163,8 +161,8 @@ describe("Path Salience Ranking: Benchmarks - Cora", () => {
 		const benchmark = await loadBenchmarkByIdFromUrl("cora");
 		const graph = benchmark.graph;
 
-		const source = "0";
-		const target = "100";
+		// Use actual paper IDs from test pairs
+		const { source, target } = getTestNodePair("cora");
 
 		// Run multiple trials
 		const salienceScores: number[] = [];
