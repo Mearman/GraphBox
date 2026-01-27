@@ -21,6 +21,13 @@ export interface OverlapBasedExpansionResult {
 
 	/** Overlap-specific metadata */
 	overlapMetadata: OverlapMetadata;
+
+	/**
+	 * Maps each sampled node to the iteration when it was first discovered.
+	 * Used for computing coverage efficiency metrics (first-discovery iteration,
+	 * budget checkpoint coverage, area-under-curve).
+	 */
+	nodeDiscoveryIteration: Map<string, number>;
 }
 
 /**

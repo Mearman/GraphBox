@@ -19,6 +19,13 @@ export interface DegreePrioritisedExpansionResult {
 
 	/** Statistics about the expansion */
 	stats: ExpansionStats;
+
+	/**
+	 * Maps each sampled node to the iteration when it was first discovered.
+	 * Used for computing coverage efficiency metrics (first-discovery iteration,
+	 * budget checkpoint coverage, area-under-curve).
+	 */
+	nodeDiscoveryIteration: Map<string, number>;
 }
 
 /**
@@ -118,6 +125,8 @@ export class DegreePrioritisedExpansion<T> {
 	private readonly paths: Array<{ fromSeed: number; toSeed: number; nodes: string[] }> = [];
 	private readonly sampledEdges = new Set<string>();
 	private stats: ExpansionStats;
+	/** Tracks when each node was first discovered (iteration number) */
+	private readonly nodeDiscoveryIteration = new Map<string, number>();
 
 	/** Track which frontier owns each node for O(1) intersection checking */
 	private readonly nodeToFrontierIndex = new Map<string, number>();
@@ -155,6 +164,9 @@ export class DegreePrioritisedExpansion<T> {
 
 			// Track which frontier owns this seed
 			this.nodeToFrontierIndex.set(seed, index);
+
+			// Seeds are discovered at iteration 0
+			this.nodeDiscoveryIteration.set(seed, 0);
 		}
 
 		this.stats = {
@@ -208,6 +220,11 @@ export class DegreePrioritisedExpansion<T> {
 				activeState.visited.add(targetId);
 				activeState.parents.set(targetId, { parent: node, edge: relationshipType });
 
+				// Track first discovery iteration (only if not already discovered by another frontier)
+				if (!this.nodeDiscoveryIteration.has(targetId)) {
+					this.nodeDiscoveryIteration.set(targetId, this.stats.iterations);
+				}
+
 				// Check for intersection using O(1) lookup BEFORE claiming ownership
 				// If another frontier already visited this node, we have a path
 				const otherFrontierIndex = this.nodeToFrontierIndex.get(targetId);
@@ -255,6 +272,7 @@ export class DegreePrioritisedExpansion<T> {
 			sampledEdges: this.sampledEdges,
 			visitedPerFrontier,
 			stats: this.stats,
+			nodeDiscoveryIteration: this.nodeDiscoveryIteration,
 		};
 	}
 
@@ -339,12 +357,24 @@ export class DegreePrioritisedExpansion<T> {
 		if (pathFromB.length > 0 && pathFromB.at(-1) !== seedB && // Path from B should end at seed B, or be empty if meeting node is seed B
       meetingNode !== seedB) return null;
 
-		return [...pathFromA, ...pathFromB];
+		const fullPath = [...pathFromA, ...pathFromB];
+
+		// Validate simple path (no repeated nodes)
+		// This can happen when both frontiers explore through the same intermediate
+		// node before meeting at a further node. In such cases, a shorter path
+		// connecting the seeds should already exist.
+		const nodeSet = new Set(fullPath);
+		if (nodeSet.size !== fullPath.length) {
+			return null;
+		}
+
+		return fullPath;
 	}
 
 	/**
 	 * Create a unique signature for a path to enable O(1) deduplication.
-	 * Signature is bidirectional (A-B same as B-A).
+	 * Signature is bidirectional (A-B same as B-A) and includes the actual
+	 * node sequence to distinguish different paths with the same length.
 	 * @param fromSeed
 	 * @param toSeed
 	 * @param nodes
@@ -353,7 +383,9 @@ export class DegreePrioritisedExpansion<T> {
 	private createPathSignature(fromSeed: number, toSeed: number, nodes: string[]): string {
 		// Sort seed indices to make signature bidirectional
 		const [a, b] = fromSeed < toSeed ? [fromSeed, toSeed] : [toSeed, fromSeed];
-		return `${a}-${b}-${nodes.length}`;
+		// Include actual node sequence, normalized to consistent direction
+		const normalizedNodes = a === fromSeed ? nodes.join("-") : [...nodes].reverse().join("-");
+		return `${a}-${b}-${normalizedNodes}`;
 	}
 
 	/**
