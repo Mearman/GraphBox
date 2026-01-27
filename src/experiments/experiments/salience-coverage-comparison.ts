@@ -1,8 +1,9 @@
 /**
  * Salience Coverage Comparison Experiments
  *
- * Evaluates novel expansion algorithms (EGE, PPME, RSGE) and baseline variants
- * on their ability to discover high-salience paths.
+ * Evaluates novel expansion algorithms (EGE, PPME, RSGE), baseline variants,
+ * and intelligent termination strategies (IDT) on their ability to discover
+ * high-salience paths.
  *
  * Ground truth: Paths ranked highly by Path Salience algorithm (MI-based ranking)
  * Metric: What percentage of top-K salient paths does each method discover?
@@ -11,6 +12,7 @@
 import { Graph } from "@graph/algorithms/graph/graph.js";
 import { DegreePrioritisedExpansion } from "@graph/algorithms/traversal/degree-prioritised-expansion.js";
 import { EntropyGuidedExpansion } from "@graph/algorithms/traversal/entropy-guided-expansion.js";
+import { IntelligentDelayedTermination } from "@graph/algorithms/traversal/intelligent-delayed-termination.js";
 import { PathPreservingExpansion } from "@graph/algorithms/traversal/path-preserving-expansion.js";
 import { RetrospectiveSalienceExpansion } from "@graph/algorithms/traversal/retrospective-salience-expansion.js";
 import type { Edge, Node } from "@graph/algorithms/types/graph.js";
@@ -128,6 +130,22 @@ const createMethods = (expander: BenchmarkGraphExpander, seeds: string[]) => [
 	{
 		name: "Cross-Seed Affinity",
 		create: () => new CrossSeedAffinityExpansion(expander, seeds),
+	},
+
+	// Intelligent termination strategies
+	{
+		name: "Intelligent Delayed +50",
+		create: () =>
+			new IntelligentDelayedTermination(expander, seeds, {
+				delayIterations: 50,
+			}),
+	},
+	{
+		name: "Intelligent Delayed +100",
+		create: () =>
+			new IntelligentDelayedTermination(expander, seeds, {
+				delayIterations: 100,
+			}),
 	},
 ];
 
