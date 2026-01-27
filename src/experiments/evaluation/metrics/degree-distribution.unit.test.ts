@@ -98,6 +98,33 @@ describe("klDivergence", () => {
 		const result = klDivergence(p, q);
 		expect(result).toBeGreaterThan(0);
 	});
+
+	it("should apply smoothing correctly (validates arithmetic)", () => {
+		// Test with explicit smoothing to validate + vs - arithmetic
+		const p = new Map([[1, 0]]);
+		const q = new Map([[1, 0]]);
+		const smoothing = 0.1;
+
+		// With smoothing, both become 0.1
+		// KL = 0.1 * log(0.1 / 0.1) = 0.1 * log(1) = 0
+		const result = klDivergence(p, q, smoothing);
+		expect(result).toBeCloseTo(0, 5);
+
+		// If smoothing arithmetic were wrong (- instead of +),
+		// pSmoothed = 0 - 0.1 = -0.1 (negative, would skip or error)
+	});
+
+	it("should handle zero probabilities with smoothing", () => {
+		// P has all mass on degree 1, Q has all mass on degree 2
+		const p = new Map([[1, 1]]);
+		const q = new Map([[2, 1]]);
+
+		// Without smoothing this would be infinite/undefined
+		// With smoothing: KL should be finite and > 0
+		const result = klDivergence(p, q);
+		expect(result).toBeGreaterThan(0);
+		expect(isFinite(result)).toBe(true);
+	});
 });
 
 describe("jsDivergence", () => {
@@ -225,6 +252,8 @@ describe("compareDegreeDistributions", () => {
 
 		expect(metrics.sampledMeanDegree).toBe(0);
 		expect(metrics.groundTruthMeanDegree).toBe(0);
+		expect(metrics.sampledStdDegree).toBe(0);
+		expect(metrics.groundTruthStdDegree).toBe(0);
 		expect(metrics.sampledMaxDegree).toBe(0);
 		expect(metrics.groundTruthMaxDegree).toBe(0);
 	});

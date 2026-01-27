@@ -29,7 +29,10 @@ describe("Boundary Conditions - Path Diversity", () => {
 		});
 
 		it("meanPairwiseJaccardDistance returns 0 for single path", () => {
-			expect(meanPairwiseJaccardDistance([["1", "2"]])).toBe(0);
+			// Single path = 0 pairs = pairCount = 0, validates ternary guard
+			const result = meanPairwiseJaccardDistance([["1", "2"]]);
+			expect(result).toBe(0);
+			expect(isNaN(result)).toBe(false); // Not NaN from division by zero
 		});
 
 		it("meanPairwiseEdgeJaccardDistance returns 0 for empty paths", () => {
@@ -37,7 +40,10 @@ describe("Boundary Conditions - Path Diversity", () => {
 		});
 
 		it("meanPairwiseEdgeJaccardDistance returns 0 for single path", () => {
-			expect(meanPairwiseEdgeJaccardDistance([["1", "2"]])).toBe(0);
+			// Single path = 0 pairs = pairCount = 0, validates ternary guard
+			const result = meanPairwiseEdgeJaccardDistance([["1", "2"]]);
+			expect(result).toBe(0);
+			expect(isNaN(result)).toBe(false); // Not NaN from division by zero
 		});
 
 		it("computePathDiversityMetrics handles empty paths", () => {
