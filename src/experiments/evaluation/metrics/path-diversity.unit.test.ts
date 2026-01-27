@@ -279,4 +279,40 @@ describe("identifyHubNodes", () => {
 		expect(hubs.size).toBe(1);
 		expect(hubs.has("A")).toBe(true);
 	});
+
+	it("should sort by degree descending (validates sort arithmetic)", () => {
+		const degrees = new Map([
+			["A", 100],
+			["B", 90],
+			["C", 80],
+			["D", 70],
+			["E", 60],
+		]);
+		// Top 40% = 2 nodes, should get A and B (highest degrees)
+		const hubs = identifyHubNodes(degrees, 0.4);
+		expect(hubs.size).toBe(2);
+		expect(hubs.has("A")).toBe(true); // Degree 100
+		expect(hubs.has("B")).toBe(true); // Degree 90
+		// Explicitly check lower-degree nodes are NOT included
+		expect(hubs.has("C")).toBe(false); // Degree 80
+		expect(hubs.has("D")).toBe(false); // Degree 70
+		expect(hubs.has("E")).toBe(false); // Degree 60
+	});
+
+	it("should return exact top N nodes in degree order", () => {
+		const degrees = new Map([
+			["low1", 1],
+			["low2", 2],
+			["mid", 50],
+			["high1", 99],
+			["high2", 100],
+		]);
+		// Top 40% of 5 = 2 nodes, should get high2 and high1
+		const hubs = identifyHubNodes(degrees, 0.4);
+		expect(hubs).toEqual(new Set(["high2", "high1"]));
+		// NOT low or mid nodes
+		expect(hubs.has("mid")).toBe(false);
+		expect(hubs.has("low1")).toBe(false);
+		expect(hubs.has("low2")).toBe(false);
+	});
 });
