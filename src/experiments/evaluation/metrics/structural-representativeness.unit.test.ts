@@ -349,6 +349,36 @@ describe("computeStructuralRepresentativeness", () => {
 		expect(result.degreeJS).toBeGreaterThan(0);
 	});
 
+	it("should use both degree arrays for divergence calculation (validates both array spreads)", () => {
+		// Specific test to catch if sampledDegreeArray is emptied (line 169 mutation)
+		const sampled = new Set(["A", "B"]);
+		const groundTruth = new Set(["A", "B"]);
+		const sampledDegrees = new Map([
+			["A", 10], // Skewed distribution
+			["B", 10],
+		]);
+		const gtDegrees = new Map([
+			["A", 5], // Uniform distribution
+			["B", 5],
+		]);
+
+		const result = computeStructuralRepresentativeness(
+			sampled,
+			groundTruth,
+			sampledDegrees,
+			gtDegrees
+		);
+
+		// Correct: sampledDist = {10: 1.0}, gtDist = {5: 1.0}
+		//   KL(gtDist || sampledDist) compares degree distributions
+		//   With these different distributions, KL is significant (>20)
+		// Mutated (sampledDegreeArray = []): sampledDist = {} (empty)
+		//   KL(gtDist || {}) = comparing {5:1.0} vs empty
+		//   This would be much smaller (~5, just the smoothing term)
+		expect(result.degreeKL).toBeGreaterThan(20);
+		expect(isFinite(result.degreeKL)).toBe(true);
+	});
+
 	it("should correctly identify intersection vs false positives (validates has() check)", () => {
 		// Explicit test for the groundTruthNodes.has(node) logic
 		const sampled = new Set(["A", "B", "C", "X", "Y"]);
@@ -378,6 +408,38 @@ describe("computeStructuralRepresentativeness", () => {
 		// False positives: X, Y (in sampled but not in ground truth)
 		expect(result.falsePositives).toBe(2);
 		// If has() is flipped, these counts would be wrong
+	});
+
+	it("should compute valid betweenness correlation only for common nodes (validates has() check)", () => {
+		// The has() check at line 181 determines which nodes go into commonNodes
+		// commonNodes is used for betweennessCorrelation calculation
+		const sampled = new Set(["A", "B", "C", "X"]);
+		const groundTruth = new Set(["A", "B", "C", "Y"]);
+		const sampledDegrees = new Map([
+			["A", 3], // Common, high degree
+			["B", 2], // Common, medium degree
+			["C", 1], // Common, low degree
+			["X", 10], // Not in GT (false positive)
+		]);
+		const gtDegrees = new Map([
+			["A", 3], // Common, same degree
+			["B", 2], // Common, same degree
+			["C", 1], // Common, same degree
+			["Y", 10], // Not in sampled (false negative)
+		]);
+
+		const result = computeStructuralRepresentativeness(
+			sampled,
+			groundTruth,
+			sampledDegrees,
+			gtDegrees
+		);
+
+		// With correct has() check: commonNodes = {A, B, C} (3 nodes)
+		// Spearman correlation should be computed on 3 common nodes
+		// If has() is always true: commonNodes = {A, B, C, X} (4 nodes, but X not in GT degrees)
+		// If has() is always false: commonNodes = {} (0 nodes), correlation = 0
+		expect(result.betweennessCorrelation).toBeCloseTo(1, 5); // Perfect correlation
 	});
 });
 
