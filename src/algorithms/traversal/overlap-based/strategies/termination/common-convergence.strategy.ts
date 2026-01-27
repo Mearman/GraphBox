@@ -1,5 +1,5 @@
-import type { TerminationStrategy } from "./termination-strategy.js";
 import type { FrontierState } from "../../frontier-state.js";
+import type { TerminationStrategy } from "./termination-strategy.js";
 
 /**
  * Common Convergence Termination Strategy
@@ -66,8 +66,8 @@ export class CommonConvergenceStrategy implements TerminationStrategy {
 		const commonNodes = new Set(allFrontiers[0].visited);
 
 		// Intersect with each subsequent frontier's visited set
-		for (let i = 1; i < allFrontiers.length; i++) {
-			const otherVisited = allFrontiers[i].visited;
+		for (let index = 1; index < allFrontiers.length; index++) {
+			const otherVisited = allFrontiers[index].visited;
 
 			// Remove nodes not in this frontier's visited set
 			for (const node of commonNodes) {

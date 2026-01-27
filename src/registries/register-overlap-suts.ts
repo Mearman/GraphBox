@@ -225,7 +225,7 @@ const createOverlapSutClass = (combination: StrategyCombination): new (
 				betweenGraph,
 				maxIterations: typeof this.config?.maxIterations === "number"
 					? this.config.maxIterations
-					: 10000, // Default limit to prevent infinite loops
+					: 10_000, // Default limit to prevent infinite loops
 				totalNodes: typeof this.config?.totalNodes === "number"
 					? this.config.totalNodes
 					: undefined,

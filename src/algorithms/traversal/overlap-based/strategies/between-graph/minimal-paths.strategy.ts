@@ -1,5 +1,5 @@
-import type { BetweenGraphStrategy } from "./between-graph-strategy.js";
 import type { OverlapBasedExpansionResult } from "../../overlap-result.js";
+import type { BetweenGraphStrategy } from "./between-graph-strategy.js";
 
 /**
  * Minimal Paths Between-Graph Strategy
@@ -58,8 +58,8 @@ export class MinimalPathsStrategy implements BetweenGraphStrategy {
 			}
 
 			// Add all edges in the path
-			for (let i = 0; i < path.nodes.length - 1; i++) {
-				const edgeKey = `${path.nodes[i]}->${path.nodes[i + 1]}`;
+			for (let index = 0; index < path.nodes.length - 1; index++) {
+				const edgeKey = `${path.nodes[index]}->${path.nodes[index + 1]}`;
 				edges.add(edgeKey);
 			}
 		}

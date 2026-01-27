@@ -1,5 +1,5 @@
-import type { OverlapDetectionStrategy } from "./overlap-detection-strategy.js";
 import type { FrontierState } from "../../frontier-state.js";
+import type { OverlapDetectionStrategy } from "./overlap-detection-strategy.js";
 
 /**
  * Physical Meeting Overlap Detection Strategy

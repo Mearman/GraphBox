@@ -47,39 +47,39 @@
  */
 
 // Core classes and types
-export { OverlapBasedExpansion } from "./overlap-based-expansion.js";
-export type { OverlapBasedExpansionConfig } from "./overlap-based-expansion.js";
 export type { FrontierState } from "./frontier-state.js";
+export type { OverlapBasedExpansionConfig } from "./overlap-based-expansion.js";
+export { OverlapBasedExpansion } from "./overlap-based-expansion.js";
 export type {
-	OverlapBasedExpansionResult,
-	OverlapMetadata,
 	ExpansionStats,
+	OverlapBasedExpansionResult,
 	OverlapEvent,
+	OverlapMetadata,
 } from "./overlap-result.js";
 
 // Overlap Detection Strategies
-export { PhysicalMeetingStrategy } from "./strategies/overlap-detection/physical-meeting.strategy.js";
-export { ThresholdSharingStrategy } from "./strategies/overlap-detection/threshold-sharing.strategy.js";
-export { SphereIntersectionStrategy } from "./strategies/overlap-detection/sphere-intersection.strategy.js";
 export type { OverlapDetectionStrategy } from "./strategies/overlap-detection/overlap-detection-strategy.js";
-export type { ThresholdSharingConfig } from "./strategies/overlap-detection/threshold-sharing.strategy.js";
+export { PhysicalMeetingStrategy } from "./strategies/overlap-detection/physical-meeting.strategy.js";
 export type { SphereIntersectionConfig } from "./strategies/overlap-detection/sphere-intersection.strategy.js";
+export { SphereIntersectionStrategy } from "./strategies/overlap-detection/sphere-intersection.strategy.js";
+export type { ThresholdSharingConfig } from "./strategies/overlap-detection/threshold-sharing.strategy.js";
+export { ThresholdSharingStrategy } from "./strategies/overlap-detection/threshold-sharing.strategy.js";
 
 // N=1 Handling Strategies
+export type { CoverageThresholdConfig } from "./strategies/n1-handling/coverage-threshold.strategy.js";
 export { CoverageThresholdStrategy } from "./strategies/n1-handling/coverage-threshold.strategy.js";
 export type { N1HandlingStrategy } from "./strategies/n1-handling/n1-handling-strategy.js";
-export type { CoverageThresholdConfig } from "./strategies/n1-handling/coverage-threshold.strategy.js";
 
 // Termination Strategies
-export { FullPairwiseStrategy } from "./strategies/termination/full-pairwise.strategy.js";
-export { TransitiveConnectivityStrategy } from "./strategies/termination/transitive-connectivity.strategy.js";
 export { CommonConvergenceStrategy } from "./strategies/termination/common-convergence.strategy.js";
+export { FullPairwiseStrategy } from "./strategies/termination/full-pairwise.strategy.js";
 export type { TerminationStrategy } from "./strategies/termination/termination-strategy.js";
+export { TransitiveConnectivityStrategy } from "./strategies/termination/transitive-connectivity.strategy.js";
 
 // Between-Graph Strategies
-export { MinimalPathsStrategy } from "./strategies/between-graph/minimal-paths.strategy.js";
-export { TruncatedComponentStrategy } from "./strategies/between-graph/truncated-component.strategy.js";
-export { SaliencePreservingStrategy } from "./strategies/between-graph/salience-preserving.strategy.js";
 export type { BetweenGraphStrategy } from "./strategies/between-graph/between-graph-strategy.js";
 export type { BetweenGraphOutput } from "./strategies/between-graph/between-graph-strategy.js";
+export { MinimalPathsStrategy } from "./strategies/between-graph/minimal-paths.strategy.js";
 export type { SaliencePreservingConfig } from "./strategies/between-graph/salience-preserving.strategy.js";
+export { SaliencePreservingStrategy } from "./strategies/between-graph/salience-preserving.strategy.js";
+export { TruncatedComponentStrategy } from "./strategies/between-graph/truncated-component.strategy.js";

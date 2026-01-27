@@ -1,5 +1,5 @@
-import type { BetweenGraphStrategy } from "./between-graph-strategy.js";
 import type { OverlapBasedExpansionResult } from "../../overlap-result.js";
+import type { BetweenGraphStrategy } from "./between-graph-strategy.js";
 
 /**
  * Truncated Component Between-Graph Strategy
@@ -99,8 +99,14 @@ export class TruncatedComponentStrategy implements BetweenGraphStrategy {
 				adj.set(target, new Set());
 			}
 
-			adj.get(source)!.add(target);
-			adj.get(target)!.add(source); // Undirected for connectivity
+			const sourceSet = adj.get(source);
+			const targetSet = adj.get(target);
+			if (sourceSet !== undefined) {
+				sourceSet.add(target);
+			}
+			if (targetSet !== undefined) {
+				targetSet.add(source); // Undirected for connectivity
+			}
 		}
 
 		return adj;
@@ -126,7 +132,8 @@ export class TruncatedComponentStrategy implements BetweenGraphStrategy {
 		visited.add(startNode);
 
 		while (queue.length > 0) {
-			const current = queue.shift()!;
+			const current = queue.shift();
+			if (current === undefined) continue;
 
 			// Add this node to component
 			componentNodes.add(current);

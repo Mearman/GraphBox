@@ -13,6 +13,7 @@ export type { DegreePrioritisedExpansionResult, ExpansionStats } from "./degree-
 export { DegreePrioritisedExpansion } from "./degree-prioritised-expansion";
 export type { DFSTraversalResult } from "./dfs";
 export { dfs } from "./dfs";
+export { EntropyGuidedExpansion } from "./entropy-guided-expansion";
 export type { PriorityOptions } from "./priority-calculator";
 export {
 	calculatePriority,
@@ -23,3 +24,4 @@ export {
 	legacyCalculatePriority,
 } from "./priority-calculator";
 export { PriorityQueue } from "./priority-queue";
+export { RetrospectiveSalienceExpansion } from "./retrospective-salience-expansion";

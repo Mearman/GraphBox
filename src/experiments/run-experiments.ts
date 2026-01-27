@@ -13,6 +13,7 @@
  *   1. Bidirectional BFS (Degree-Prioritised vs baselines)
  *   2. Seeded Expansion (N=1, N=2, N>=3 variants)
  *   3. Path Salience Ranking (MI-based ranking)
+ *   4. Salience Coverage Comparison (Novel algorithms vs baselines)
  */
 
 import {resolve } from "node:path";
@@ -20,6 +21,7 @@ import { fileURLToPath } from "node:url";
 
 import { runBidirectionalBFSExperiments } from "./experiments/bidirectional-bfs.js";
 import { runPathRankingExperiments } from "./experiments/path-ranking.js";
+import { runSalienceCoverageExperiments } from "./experiments/salience-coverage-comparison.js";
 import { runSeededExpansionExperiments } from "./experiments/seeded-expansion.js";
 import { metrics } from "./metrics/collector.js";
 import { resolveOutputPath,writeMetrics } from "./metrics/storage.js";
@@ -49,6 +51,7 @@ const main = async (options: Options = {}): Promise<void> => {
 	await runBidirectionalBFSExperiments();
 	await runSeededExpansionExperiments();
 	await runPathRankingExperiments();
+	await runSalienceCoverageExperiments();
 
 	// Serialize metrics
 	const metricsOutput = metrics.serialize();

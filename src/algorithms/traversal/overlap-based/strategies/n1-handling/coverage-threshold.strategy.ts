@@ -1,5 +1,5 @@
-import type { N1HandlingStrategy } from "./n1-handling-strategy.js";
 import type { FrontierState } from "../../frontier-state.js";
+import type { N1HandlingStrategy } from "./n1-handling-strategy.js";
 
 /**
  * Configuration for CoverageThresholdStrategy.

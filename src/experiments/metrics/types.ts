@@ -259,6 +259,47 @@ export interface HubAvoidanceMetric {
 }
 
 /**
+ * Salience coverage comparison metric
+ *
+ * Measures how well expansion algorithms discover high-salience paths
+ * (as ranked by Path Salience algorithm using mutual information).
+ */
+export interface SalienceCoverageComparisonMetric {
+	/** Dataset identifier */
+	dataset: string;
+
+	/** Algorithm method name */
+	method: string;
+
+	/** Number of seeds (N) */
+	n: number;
+
+	/** Salience coverage: fraction of top-K paths found (0-1) */
+	salienceCoverage: number;
+
+	/** Salience precision: of discovered paths, fraction that are in top-K (0-1) */
+	saliencePrecision: number;
+
+	/** Number of top-K salient paths found */
+	topKFound: number;
+
+	/** Total number of top-K salient paths (ground truth) */
+	topKTotal: number;
+
+	/** Total paths discovered by the algorithm */
+	pathsDiscovered: number;
+
+	/** Total nodes expanded during traversal */
+	nodesExpanded: number;
+
+	/** Number of expansion iterations */
+	iterations: number;
+
+	/** Runtime in milliseconds */
+	runtimeMs: number;
+}
+
+/**
  * Union of all metric types for internal handling
  */
 export type Metric =
@@ -282,7 +323,8 @@ export type Metric =
 	| RankingBenchmarksMetric
 	| HubMitigationMetric
 	| MultiHubEfficiencyMetric
-	| HubAvoidanceMetric;
+	| HubAvoidanceMetric
+	| SalienceCoverageComparisonMetric;
 
 /**
  * Metric category - groups related metrics for table generation
@@ -308,7 +350,8 @@ export type MetricCategory =
 	| "mi-ranking-quality"
 	| "ranking-benchmarks"
 	| "hub-mitigation"
-	| "multi-hub-efficiency";
+	| "multi-hub-efficiency"
+	| "salience-coverage-comparison";
 
 /**
  * Typed metric record with category

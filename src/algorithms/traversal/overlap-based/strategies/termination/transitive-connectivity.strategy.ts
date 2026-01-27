@@ -1,5 +1,5 @@
-import type { TerminationStrategy } from "./termination-strategy.js";
 import type { FrontierState } from "../../frontier-state.js";
+import type { TerminationStrategy } from "./termination-strategy.js";
 
 /**
  * Transitive Connectivity Termination Strategy
@@ -44,13 +44,19 @@ export class TransitiveConnectivityStrategy implements TerminationStrategy {
 
 		// Build adjacency list for overlap graph
 		const adj = new Map<number, Set<number>>();
-		for (let i = 0; i < n; i++) {
-			adj.set(i, new Set());
+		for (let index = 0; index < n; index++) {
+			adj.set(index, new Set());
 		}
 
 		for (const event of overlapEvents) {
-			adj.get(event.frontierA)!.add(event.frontierB);
-			adj.get(event.frontierB)!.add(event.frontierA);
+			const setA = adj.get(event.frontierA);
+			const setB = adj.get(event.frontierB);
+			if (setA !== undefined) {
+				setA.add(event.frontierB);
+			}
+			if (setB !== undefined) {
+				setB.add(event.frontierA);
+			}
 		}
 
 		// Check if graph is connected using BFS from node 0
@@ -73,7 +79,8 @@ export class TransitiveConnectivityStrategy implements TerminationStrategy {
 		visited.add(0);
 
 		while (queue.length > 0) {
-			const current = queue.shift()!;
+			const current = queue.shift();
+			if (current === undefined) continue;
 
 			for (const neighbor of adj.get(current) || []) {
 				if (!visited.has(neighbor)) {

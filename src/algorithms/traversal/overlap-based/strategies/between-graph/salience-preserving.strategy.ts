@@ -1,5 +1,5 @@
-import type { BetweenGraphStrategy } from "./between-graph-strategy.js";
 import type { OverlapBasedExpansionResult } from "../../overlap-result.js";
+import type { BetweenGraphStrategy } from "./between-graph-strategy.js";
 
 /**
  * Configuration for SaliencePreservingStrategy.
@@ -89,7 +89,7 @@ export class SaliencePreservingStrategy implements BetweenGraphStrategy {
 		const nodeSalience = this.calculateNodeSalience(expansionResult.paths);
 
 		// Sort nodes by salience score
-		const sortedNodes = Array.from(nodeSalience.entries()).sort((a, b) => b[1] - a[1]);
+		const sortedNodes = [...nodeSalience.entries()].sort((a, b) => b[1] - a[1]);
 
 		// Determine how many nodes to preserve
 		const targetCount = Math.max(
@@ -99,16 +99,18 @@ export class SaliencePreservingStrategy implements BetweenGraphStrategy {
 
 		// Select top-K salient nodes
 		const preservedNodes = new Set<string>();
-		for (let i = 0; i < Math.min(targetCount, sortedNodes.length); i++) {
-			preservedNodes.add(sortedNodes[i][0]);
+		for (let index = 0; index < Math.min(targetCount, sortedNodes.length); index++) {
+			preservedNodes.add(sortedNodes[index][0]);
 		}
 
 		// Include seeds regardless of salience (for connectivity)
 		for (const path of expansionResult.paths) {
 			const seedA = path.nodes[0];
-			const seedB = path.nodes[path.nodes.length - 1];
+			const seedB = path.nodes.at(-1);
 			preservedNodes.add(seedA);
-			preservedNodes.add(seedB);
+			if (seedB !== undefined) {
+				preservedNodes.add(seedB);
+			}
 		}
 
 		// Filter edges to only include those between preserved nodes

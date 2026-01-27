@@ -10,13 +10,13 @@
  *   const result = await sut.run({ input, source, target });
  */
 
+import type { SUT , SutRegistration } from "ppef/types/sut";
+
 import { Graph } from "../algorithms/graph/graph.js";
 import { rankPaths } from "../algorithms/pathfinding/path-ranking.js";
 import type { Edge, Node } from "../algorithms/types/graph.js";
 import type { BenchmarkGraphExpander } from "../experiments/evaluation/__tests__/validation/common/benchmark-graph-expander.js";
 import { computeRankingMetrics } from "../experiments/evaluation/__tests__/validation/common/path-ranking-helpers.js";
-import type { SUT } from "ppef/types/sut";
-import type { SutRegistration } from "ppef/types/sut";
 
 /**
  * Configuration for Path Salience Ranking SUT.
@@ -85,7 +85,7 @@ const GRAPH_CACHE = new Map<BenchmarkGraphExpander, Graph<Node, Edge>>();
  * @param config - Optional configuration overrides
  * @returns PPEF-compatible SUT object
  */
-export function createSut(config?: Record<string, unknown>): SUT<RankingInputs, PathSalienceResult> {
+export const createSut = (config?: Record<string, unknown>): SUT<RankingInputs, PathSalienceResult> => {
 	const sutConfig = {
 		maxPaths: (config?.maxPaths as number | undefined) ?? 10,
 		traversalMode: (config?.traversalMode as "directed" | "undirected" | undefined) ?? "undirected",
@@ -104,7 +104,7 @@ export function createSut(config?: Record<string, unknown>): SUT<RankingInputs, 
 		 * @param inputs - Graph expander and node IDs
 		 * @returns Path ranking result with metrics
 		 */
-		async run(inputs: RankingInputs): Promise<PathSalienceResult> {
+		run: async (inputs: RankingInputs): Promise<PathSalienceResult> => {
 			const { input: expander, source, target } = inputs;
 
 			try {
@@ -150,21 +150,19 @@ export function createSut(config?: Record<string, unknown>): SUT<RankingInputs, 
 			}
 		},
 	};
-}
+};
 
 /**
  * Create an empty result (no paths found).
  */
-function createEmptyResult(): PathSalienceResult {
-	return {
-		pathsFound: 0,
-		meanMI: 0,
-		stdMI: 0,
-		pathDiversity: 0,
-		hubAvoidance: 0,
-		nodeCoverage: 0,
-		meanScore: 0,
-		stdScore: 0,
-		paths: [],
-	};
-}
+const createEmptyResult = (): PathSalienceResult => ({
+	pathsFound: 0,
+	meanMI: 0,
+	stdMI: 0,
+	pathDiversity: 0,
+	hubAvoidance: 0,
+	nodeCoverage: 0,
+	meanScore: 0,
+	stdScore: 0,
+	paths: [],
+});

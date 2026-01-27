@@ -1,5 +1,5 @@
-import type { TerminationStrategy } from "./termination-strategy.js";
 import type { FrontierState } from "../../frontier-state.js";
+import type { TerminationStrategy } from "./termination-strategy.js";
 
 /**
  * Full Pairwise Termination Strategy

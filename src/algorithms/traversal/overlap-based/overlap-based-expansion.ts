@@ -1,11 +1,11 @@
 import { GraphExpander } from "../../../interfaces/graph-expander";
 import { PriorityQueue } from "../priority-queue";
 import type { FrontierState } from "./frontier-state.js";
-import type { OverlapBasedExpansionResult, OverlapMetadata, ExpansionStats } from "./overlap-result.js";
+import type { ExpansionStats,OverlapBasedExpansionResult, OverlapMetadata } from "./overlap-result.js";
+import type { BetweenGraphStrategy } from "./strategies/between-graph/between-graph-strategy.js";
+import type { N1HandlingStrategy } from "./strategies/n1-handling/n1-handling-strategy.js";
 import type { OverlapDetectionStrategy } from "./strategies/overlap-detection/overlap-detection-strategy.js";
 import type { TerminationStrategy } from "./strategies/termination/termination-strategy.js";
-import type { N1HandlingStrategy } from "./strategies/n1-handling/n1-handling-strategy.js";
-import type { BetweenGraphStrategy } from "./strategies/between-graph/between-graph-strategy.js";
 
 /**
  * Configuration for OverlapBasedExpansion.
@@ -274,7 +274,10 @@ export class OverlapBasedExpansion<T> {
 					if (!this.overlapMatrix.has(matrixKey)) {
 						this.overlapMatrix.set(matrixKey, new Set());
 					}
-					this.overlapMatrix.get(matrixKey)!.add(targetId);
+					const overlapSet = this.overlapMatrix.get(matrixKey);
+					if (overlapSet !== undefined) {
+						overlapSet.add(targetId);
+					}
 
 					// Reconstruct path
 					const path = this.reconstructPath(activeState, otherState, targetId);
@@ -298,10 +301,10 @@ export class OverlapBasedExpansion<T> {
 		let terminationReason: OverlapMetadata["terminationReason"];
 		if (this.config.termination.shouldTerminate(this.frontiers, this.overlapEvents, this.iteration)) {
 			terminationReason = "overlap-satisfied";
-		} else if (!this.hasNonEmptyFrontier()) {
-			terminationReason = "exhaustion";
-		} else {
+		} else if (this.hasNonEmptyFrontier()) {
 			terminationReason = "max-iterations";
+		} else {
+			terminationReason = "exhaustion";
 		}
 
 		return this.buildResult(terminationReason);
@@ -423,6 +426,7 @@ export class OverlapBasedExpansion<T> {
 
 	/**
 	 * Peek at the priority of the front item without removing it.
+	 * @param queue
 	 * @private
 	 */
 	private peekPriority(queue: PriorityQueue<string>): number {
@@ -431,6 +435,9 @@ export class OverlapBasedExpansion<T> {
 
 	/**
 	 * Reconstruct path from meeting point between two frontiers.
+	 * @param stateA
+	 * @param stateB
+	 * @param meetingNode
 	 * @private
 	 */
 	private reconstructPath(
@@ -471,6 +478,9 @@ export class OverlapBasedExpansion<T> {
 	/**
 	 * Create a unique signature for a path to enable O(1) deduplication.
 	 * Signature is bidirectional (A-B same as B-A).
+	 * @param fromSeed
+	 * @param toSeed
+	 * @param nodes
 	 * @private
 	 */
 	private createPathSignature(fromSeed: number, toSeed: number, nodes: string[]): string {
@@ -480,6 +490,8 @@ export class OverlapBasedExpansion<T> {
 
 	/**
 	 * Get matrix key for overlap tracking (always sorted).
+	 * @param a
+	 * @param b
 	 * @private
 	 */
 	private getMatrixKey(a: number, b: number): string {
@@ -488,6 +500,7 @@ export class OverlapBasedExpansion<T> {
 
 	/**
 	 * Record degree in distribution histogram.
+	 * @param degree
 	 * @private
 	 */
 	private recordDegree(degree: number): void {
@@ -498,6 +511,7 @@ export class OverlapBasedExpansion<T> {
 
 	/**
 	 * Get histogram bucket for a degree value.
+	 * @param degree
 	 * @private
 	 */
 	private getDegreeBucket(degree: number): string {
