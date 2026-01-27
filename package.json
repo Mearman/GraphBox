@@ -36,10 +36,8 @@
   },
   "homepage": "https://github.com/Mearman/GraphBox#readme",
   "lint-staged": {
-    "*.{ts,tsx}": [
-      "eslint --fix",
-      "typecheck-files"
-    ]
+    "*.{ts,tsx}": "eslint --fix",
+    "src/**/*.{ts,tsx}": "typecheck-files"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",

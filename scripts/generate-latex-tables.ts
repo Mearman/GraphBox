@@ -130,11 +130,11 @@ const generateSalienceCoverageRows = (entries: MetricRecord[]): string[] =>
 	entries.map((r) => {
 		const method = String(r.method);
 		const coverage = typeof r.salienceCoverage === "number" ? formatPercentage(r.salienceCoverage * 100) : "--";
+		const auc = typeof r.auc === "number" ? formatNumber(r.auc, 3) : "--";
+		const median = r.medianDiscoveryIteration ?? "--";
 		const found = r.topKFound ?? "--";
 		const total = r.topKTotal ?? "--";
-		const paths = r.pathsDiscovered ?? "--";
-		const runtimeMs = typeof r.runtimeMs === "number" ? formatNumber(r.runtimeMs, 1) : "--";
-		return String.raw`  ${method} & ${coverage} & ${found}/${total} & ${paths} & ${runtimeMs} \\`;
+		return String.raw`  ${method} & ${coverage} & ${auc} & ${median} & ${found}/${total} \\`;
 	});
 
 /**
@@ -507,8 +507,8 @@ const tableConfigs: TableConfig[] = [
 		key: "salience-coverage-comparison",
 		filename: "06-salience-coverage-comparison.tex",
 		label: "tab:salience-coverage-comparison",
-		caption: String.raw`Salience coverage comparison across expansion methods. Shows percentage of top-K salient paths (ranked by Path Salience) discovered by each method. All methods achieved 0\% coverage, indicating overlap-based termination stops before discovering high-salience paths.`,
-		columns: ["l", "l", "r", "r", "r"],
+		caption: String.raw`Salience coverage and efficiency comparison across expansion methods. Coverage shows percentage of top-K salient paths discovered. AUC (Area Under Curve) measures how early paths are discovered (higher = faster discovery). Median shows the iteration at which half of salient paths become discoverable. Higher AUC and lower Median indicate more efficient coverage.`,
+		columns: ["l", "r", "r", "r", "r"],
 		generate: (metrics) => {
 			const data = metrics["salience-coverage-comparison"];
 			if (!data) return "";
@@ -530,7 +530,7 @@ const tableConfigs: TableConfig[] = [
 
 			return generateLatexTable(
 				tableConfigs[13].columns,
-				["Method", "Coverage", "Found/Total", "Paths", "Time (ms)"],
+				["Method", "Coverage", "AUC", "Median", "Found/Total"],
 				rows,
 				tableConfigs[13].caption,
 				tableConfigs[13].label
