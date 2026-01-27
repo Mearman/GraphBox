@@ -16,7 +16,7 @@
 import { rankPaths } from "@graph/algorithms/pathfinding/path-ranking";
 import { computeRankingMetrics } from "@graph/evaluation/__tests__/validation/common/path-ranking-helpers";
 import { cohensD } from "@graph/evaluation/__tests__/validation/common/statistical-functions";
-import { loadBenchmarkByIdFromUrl } from "@graph/evaluation/fixtures/benchmark-datasets";
+import { getTestNodePair, loadBenchmarkByIdFromUrl } from "@graph/evaluation/fixtures/benchmark-datasets";
 import { randomPathRanking } from "@graph/experiments/baselines/random-path-ranking";
 import { shortestPathRanking } from "@graph/experiments/baselines/shortest-path-ranking";
 import { describe, expect, it } from "vitest";
@@ -32,9 +32,8 @@ describe("Path Salience Ranking: Benchmarks - CiteSeer", () => {
 		const benchmark = await loadBenchmarkByIdFromUrl("citeseer");
 		const graph = benchmark.graph;
 
-		// Use nodes representing different papers
-		const source = "0";
-		const target = "200";
+		// Use actual paper IDs from the graph (not generic numeric indices)
+		const { source, target } = getTestNodePair("citeseer");
 
 		const salienceResult = rankPaths(graph, source, target, { maxPaths: 15 });
 		const shortestResult = shortestPathRanking(graph, source, target, { maxPaths: 15 });
@@ -126,11 +125,11 @@ describe("Path Salience Ranking: Benchmarks - CiteSeer", () => {
 		const benchmark = await loadBenchmarkByIdFromUrl("citeseer");
 		const graph = benchmark.graph;
 
-		// Test different paper pairs
+		// Test different paper pairs using actual paper IDs from graph
 		const pairs = [
-			{ source: "0", target: "100" },
-			{ source: "200", target: "600" },
-			{ source: "1000", target: "1500" },
+			getTestNodePair("citeseer", 0),
+			getTestNodePair("citeseer", 1),
+			getTestNodePair("citeseer", 2),
 		];
 
 		const results: Array<{ pair: string; paths: number }> = [];
@@ -166,8 +165,8 @@ describe("Path Salience Ranking: Benchmarks - CiteSeer", () => {
 		const benchmark = await loadBenchmarkByIdFromUrl("citeseer");
 		const graph = benchmark.graph;
 
-		const source = "0";
-		const target = "200";
+		// Use actual paper IDs from test pairs
+		const { source, target } = getTestNodePair("citeseer");
 
 		// Run multiple trials
 		const salienceScores: number[] = [];
