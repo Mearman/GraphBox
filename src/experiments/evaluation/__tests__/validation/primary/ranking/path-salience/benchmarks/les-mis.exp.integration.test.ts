@@ -16,7 +16,7 @@
 import { rankPaths } from "@graph/algorithms/pathfinding/path-ranking";
 import { computeRankingMetrics } from "@graph/evaluation/__tests__/validation/common/path-ranking-helpers";
 import { cohensD } from "@graph/evaluation/__tests__/validation/common/statistical-functions";
-import { loadBenchmarkByIdFromUrl } from "@graph/evaluation/fixtures/benchmark-datasets";
+import { getTestNodePair, loadBenchmarkByIdFromUrl } from "@graph/evaluation/fixtures/benchmark-datasets";
 import { randomPathRanking } from "@graph/experiments/baselines/random-path-ranking";
 import { shortestPathRanking } from "@graph/experiments/baselines/shortest-path-ranking";
 import { describe, expect, it } from "vitest";
@@ -33,9 +33,8 @@ describe("Path Salience Ranking: Benchmarks - Les Misérables", () => {
 		const benchmark = await loadBenchmarkByIdFromUrl("lesmis");
 		const graph = benchmark.graph;
 
-		// Jean Valjean (11) and Javert (27) are central characters
-		const source = "11";
-		const target = "27";
+		// Use actual character names from the graph (not numeric indices)
+		const { source, target } = getTestNodePair("lesmis"); // Valjean and Javert
 
 		const salienceResult = rankPaths(graph, source, target, { maxPaths: 15 });
 		const shortestResult = shortestPathRanking(graph, source, target, { maxPaths: 15 });
@@ -134,13 +133,12 @@ describe("Path Salience Ranking: Benchmarks - Les Misérables", () => {
 		const benchmark = await loadBenchmarkByIdFromUrl("lesmis");
 		const graph = benchmark.graph;
 
-		// Central characters have many connections
-		const central1 = "11"; // Jean Valjean
-		const central2 = "27"; // Javert
+		// Central characters have many connections (use test pairs)
+		const { source: central1, target: central2 } = getTestNodePair("lesmis"); // Valjean and Javert
 
-		// Peripheral characters have few connections
-		const peripheral1 = "1"; // Myriel (appears mainly in early chapters)
-		const peripheral2 = "76"; // A peripheral character
+		// Peripheral characters have few connections (actual character names from graph)
+		const peripheral1 = "Myriel"; // Bishop who appears mainly in early chapters
+		const peripheral2 = "Napoleon"; // Minor character
 
 		// Test central-central
 		const ccResult = rankPaths(graph, central1, central2, { maxPaths: 10 });
@@ -184,8 +182,8 @@ describe("Path Salience Ranking: Benchmarks - Les Misérables", () => {
 		const benchmark = await loadBenchmarkByIdFromUrl("lesmis");
 		const graph = benchmark.graph;
 
-		const source = "11"; // Jean Valjean
-		const target = "27"; // Javert
+		// Use actual character names from test pairs
+		const { source, target } = getTestNodePair("lesmis"); // Valjean and Javert
 
 		// Run multiple trials
 		const salienceScores: number[] = [];
