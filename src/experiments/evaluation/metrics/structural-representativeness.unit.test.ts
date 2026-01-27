@@ -318,6 +318,67 @@ describe("computeStructuralRepresentativeness", () => {
 
 		expect(result.communityCoverage).toBe(1); // Both communities covered
 	});
+
+	it("should compute non-zero degree divergence from degree arrays (validates array spreading)", () => {
+		// Different degree distributions should produce non-zero KL/JS
+		const sampled = new Set(["A", "B", "C"]);
+		const groundTruth = new Set(["A", "B", "C"]);
+		const sampledDegrees = new Map([
+			["A", 10], // Two nodes with degree 10
+			["B", 10],
+			["C", 1], // One node with degree 1
+		]);
+		const gtDegrees = new Map([
+			["A", 5], // All nodes with degree 5
+			["B", 5],
+			["C", 5],
+		]);
+
+		const result = computeStructuralRepresentativeness(
+			sampled,
+			groundTruth,
+			sampledDegrees,
+			gtDegrees
+		);
+
+		// sampledDegreeArray = [10, 10, 1] → distribution: {10: 2/3, 1: 1/3}
+		// gtDegreeArray = [5, 5, 5] → distribution: {5: 1.0}
+		// These are different distributions, so KL/JS should be > 0
+		// If degree arrays are emptied (mutation), these would be 0
+		expect(result.degreeKL).toBeGreaterThan(0);
+		expect(result.degreeJS).toBeGreaterThan(0);
+	});
+
+	it("should correctly identify intersection vs false positives (validates has() check)", () => {
+		// Explicit test for the groundTruthNodes.has(node) logic
+		const sampled = new Set(["A", "B", "C", "X", "Y"]);
+		const groundTruth = new Set(["A", "B", "C"]);
+		const sampledDegrees = new Map([
+			["A", 1],
+			["B", 1],
+			["C", 1],
+			["X", 1],
+			["Y", 1],
+		]);
+		const gtDegrees = new Map([
+			["A", 1],
+			["B", 1],
+			["C", 1],
+		]);
+
+		const result = computeStructuralRepresentativeness(
+			sampled,
+			groundTruth,
+			sampledDegrees,
+			gtDegrees
+		);
+
+		// Intersection: A, B, C
+		expect(result.intersectionSize).toBe(3);
+		// False positives: X, Y (in sampled but not in ground truth)
+		expect(result.falsePositives).toBe(2);
+		// If has() is flipped, these counts would be wrong
+	});
 });
 
 describe("aggregateRepresentativenessResults", () => {

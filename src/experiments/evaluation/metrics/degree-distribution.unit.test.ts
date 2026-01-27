@@ -125,6 +125,32 @@ describe("klDivergence", () => {
 		expect(result).toBeGreaterThan(0);
 		expect(isFinite(result)).toBe(true);
 	});
+
+	it("should produce different results for different distributions with smoothing", () => {
+		// Different distributions should have different KL divergences
+		// This catches if smoothing arithmetic is wrong (+ vs -)
+		const p = new Map([
+			[1, 0.8],
+			[2, 0.2],
+		]);
+		const q1 = new Map([
+			[1, 0.2],
+			[2, 0.8],
+		]);
+		const q2 = new Map([
+			[1, 0.5],
+			[2, 0.5],
+		]);
+
+		const kl1 = klDivergence(p, q1, 0.001);
+		const kl2 = klDivergence(p, q2, 0.001);
+
+		// q2 is closer to p than q1, so KL(p||q2) < KL(p||q1)
+		expect(kl2).toBeLessThan(kl1);
+		// Both should be positive
+		expect(kl1).toBeGreaterThan(0);
+		expect(kl2).toBeGreaterThan(0);
+	});
 });
 
 describe("jsDivergence", () => {
@@ -209,6 +235,29 @@ describe("earthMoversDistance", () => {
 
 		// Farther distribution should have higher EMD
 		expect(emd2).toBeGreaterThan(emd1);
+	});
+
+	it("should compute exact EMD for multi-degree distributions (validates loop bounds)", () => {
+		// P: 50% at degree 1, 50% at degree 3
+		// Q: 100% at degree 2
+		const p = new Map([
+			[1, 0.5],
+			[3, 0.5],
+		]);
+		const q = new Map([[2, 1]]);
+
+		// Manual calculation:
+		// Sorted degrees: [1, 2, 3]
+		// At degree 1: cdfP=0.5, cdfQ=0,   width=1, contrib=0.5*1=0.5
+		// At degree 2: cdfP=0.5, cdfQ=1.0, width=1, contrib=0.5*1=0.5
+		// At degree 3: cdfP=1.0, cdfQ=1.0, width=1, contrib=0*1=0
+		// EMD = 0.5 + 0.5 + 0 = 1.0
+		const emd = earthMoversDistance(p, q);
+		expect(emd).toBeCloseTo(1, 5);
+
+		// If loop runs one extra iteration (index <= length), EMD would be different
+		expect(emd).not.toBeCloseTo(2, 5);
+		expect(emd).not.toBeCloseTo(1.5, 5);
 	});
 });
 
