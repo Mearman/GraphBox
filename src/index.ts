@@ -80,6 +80,8 @@ export type {
 export { DegreePrioritisedExpansion } from "./algorithms/traversal/degree-prioritised-expansion";
 export type { DFSTraversalResult } from "./algorithms/traversal/dfs";
 export { dfs } from "./algorithms/traversal/dfs";
+export type { IntelligentDelayedTerminationConfig } from "./algorithms/traversal/intelligent-delayed-termination";
+export { IntelligentDelayedTermination } from "./algorithms/traversal/intelligent-delayed-termination";
 export { PriorityQueue } from "./algorithms/traversal/priority-queue";
 
 // Extraction algorithms

@@ -14,6 +14,8 @@ export { DegreePrioritisedExpansion } from "./degree-prioritised-expansion";
 export type { DFSTraversalResult } from "./dfs";
 export { dfs } from "./dfs";
 export { EntropyGuidedExpansion } from "./entropy-guided-expansion";
+export type { IntelligentDelayedTerminationConfig } from "./intelligent-delayed-termination";
+export { IntelligentDelayedTermination } from "./intelligent-delayed-termination";
 export type { PriorityOptions } from "./priority-calculator";
 export {
 	calculatePriority,
