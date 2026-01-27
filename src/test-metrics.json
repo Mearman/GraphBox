@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "timestamp": "2026-01-27T07:01:32.658Z",
+  "timestamp": "2026-01-27T07:28:30.406Z",
   "metrics": {
     "hub-traversal-comparison": [
       {
@@ -48,26 +48,26 @@
       {
         "dataset": "Karate Club",
         "nodes": 34,
-        "dpTime": 0.1,
+        "dpTime": 0.11,
         "bfsTime": 0.05,
-        "dpNodesPerSec": 246260,
-        "bfsNodesPerSec": 528448
+        "dpNodesPerSec": 214125,
+        "bfsNodesPerSec": 490216
       },
       {
         "dataset": "Les Misérables",
         "nodes": 77,
         "dpTime": 0.12,
-        "bfsTime": 0.11,
-        "dpNodesPerSec": 307175,
-        "bfsNodesPerSec": 345715
+        "bfsTime": 0.12,
+        "dpNodesPerSec": 318434,
+        "bfsNodesPerSec": 313943
       },
       {
         "dataset": "Facebook",
         "nodes": 4039,
-        "dpTime": 24.89,
-        "bfsTime": 13.53,
-        "dpNodesPerSec": 153830,
-        "bfsNodesPerSec": 282898
+        "dpTime": 19.97,
+        "bfsTime": 10.11,
+        "dpNodesPerSec": 191760,
+        "bfsNodesPerSec": 378840
       }
     ],
     "scalability": [
@@ -76,21 +76,21 @@
         "nodes": 34,
         "dpTime": 0.1,
         "bfsTime": 0,
-        "ratio": 0.47
+        "ratio": 0.44
       },
       {
         "dataset": "lesmis",
         "nodes": 77,
         "dpTime": 0.1,
         "bfsTime": 0.1,
-        "ratio": 0.89
+        "ratio": 1.01
       },
       {
         "dataset": "facebook",
         "nodes": 4039,
-        "dpTime": 24.9,
-        "bfsTime": 13.5,
-        "ratio": 0.54
+        "dpTime": 20,
+        "bfsTime": 10.1,
+        "ratio": 0.51
       }
     ],
     "path-lengths": [
@@ -394,7 +394,7 @@
         "pathsDiscovered": 1,
         "nodesExpanded": 25,
         "iterations": 25,
-        "runtimeMs": 0.1
+        "runtimeMs": 0
       },
       {
         "dataset": "karate",
@@ -446,7 +446,7 @@
         "pathsDiscovered": 0,
         "nodesExpanded": 25,
         "iterations": 25,
-        "runtimeMs": 0.5
+        "runtimeMs": 0.4
       },
       {
         "dataset": "karate",
@@ -472,7 +472,7 @@
         "pathsDiscovered": 0,
         "nodesExpanded": 25,
         "iterations": 25,
-        "runtimeMs": 0.5
+        "runtimeMs": 0.2
       },
       {
         "dataset": "karate",
@@ -511,7 +511,7 @@
         "pathsDiscovered": 1,
         "nodesExpanded": 25,
         "iterations": 25,
-        "runtimeMs": 0.4
+        "runtimeMs": 0.3
       },
       {
         "dataset": "karate",
@@ -538,6 +538,32 @@
         "nodesExpanded": 25,
         "iterations": 25,
         "runtimeMs": 0.3
+      },
+      {
+        "dataset": "karate",
+        "method": "Intelligent Delayed +50",
+        "n": 2,
+        "salienceCoverage": 0,
+        "saliencePrecision": 0,
+        "topKFound": 0,
+        "topKTotal": 10,
+        "pathsDiscovered": 1,
+        "nodesExpanded": 25,
+        "iterations": 25,
+        "runtimeMs": 0.5
+      },
+      {
+        "dataset": "karate",
+        "method": "Intelligent Delayed +100",
+        "n": 2,
+        "salienceCoverage": 0,
+        "saliencePrecision": 0,
+        "topKFound": 0,
+        "topKTotal": 10,
+        "pathsDiscovered": 1,
+        "nodesExpanded": 25,
+        "iterations": 25,
+        "runtimeMs": 0.1
       },
       {
         "dataset": "lesmis",
@@ -589,7 +615,7 @@
         "pathsDiscovered": 5,
         "nodesExpanded": 23,
         "iterations": 23,
-        "runtimeMs": 0.1
+        "runtimeMs": 0.2
       },
       {
         "dataset": "lesmis",
@@ -628,7 +654,7 @@
         "pathsDiscovered": 0,
         "nodesExpanded": 23,
         "iterations": 23,
-        "runtimeMs": 0.1
+        "runtimeMs": 0
       },
       {
         "dataset": "lesmis",
@@ -641,7 +667,7 @@
         "pathsDiscovered": 5,
         "nodesExpanded": 23,
         "iterations": 23,
-        "runtimeMs": 0.1
+        "runtimeMs": 0.2
       },
       {
         "dataset": "lesmis",
@@ -680,7 +706,7 @@
         "pathsDiscovered": 0,
         "nodesExpanded": 18,
         "iterations": 0,
-        "runtimeMs": 0.1
+        "runtimeMs": 0.2
       },
       {
         "dataset": "lesmis",
@@ -691,6 +717,32 @@
         "topKFound": 0,
         "topKTotal": 10,
         "pathsDiscovered": 5,
+        "nodesExpanded": 23,
+        "iterations": 23,
+        "runtimeMs": 0.1
+      },
+      {
+        "dataset": "lesmis",
+        "method": "Intelligent Delayed +50",
+        "n": 2,
+        "salienceCoverage": 0,
+        "saliencePrecision": 0,
+        "topKFound": 0,
+        "topKTotal": 10,
+        "pathsDiscovered": 2,
+        "nodesExpanded": 23,
+        "iterations": 23,
+        "runtimeMs": 0.2
+      },
+      {
+        "dataset": "lesmis",
+        "method": "Intelligent Delayed +100",
+        "n": 2,
+        "salienceCoverage": 0,
+        "saliencePrecision": 0,
+        "topKFound": 0,
+        "topKTotal": 10,
+        "pathsDiscovered": 2,
         "nodesExpanded": 23,
         "iterations": 23,
         "runtimeMs": 0.1
