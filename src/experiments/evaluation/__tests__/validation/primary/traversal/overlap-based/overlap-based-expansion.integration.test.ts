@@ -4,36 +4,34 @@
  * Verifies that all 27 variants can be instantiated and executed successfully.
  */
 
-import { describe, it } from "node:test";
 import assert from "node:assert/strict";
-
-import { TestGraphExpander, createChainGraphExpander, createGridGraphExpander } from "../../../common/graph-generators.js";
+import { describe, it } from "node:test";
 
 // Import all strategy classes
 import {
-	OverlapBasedExpansion,
-	PhysicalMeetingStrategy,
-	ThresholdSharingStrategy,
-	SphereIntersectionStrategy,
+	CommonConvergenceStrategy,
 	CoverageThresholdStrategy,
 	FullPairwiseStrategy,
-	TransitiveConnectivityStrategy,
-	CommonConvergenceStrategy,
 	MinimalPathsStrategy,
-	TruncatedComponentStrategy,
-	SaliencePreservingStrategy,
+	OverlapBasedExpansion,
 	type OverlapBasedExpansionConfig,
+	PhysicalMeetingStrategy,
+	SaliencePreservingStrategy,
+	SphereIntersectionStrategy,
+	ThresholdSharingStrategy,
+	TransitiveConnectivityStrategy,
+	TruncatedComponentStrategy,
 } from "../../../../../../../algorithms/traversal/overlap-based/index.js";
+import { createChainGraphExpander, createGridGraphExpander,TestGraphExpander } from "../../../common/graph-generators.js";
 
 describe("Overlap-Based Expansion", () => {
 	/**
 	 * Helper to run a single variant and verify basic properties.
+	 * @param graph
+	 * @param seeds
+	 * @param config
 	 */
-	async function runVariant(
-		graph: TestGraphExpander,
-		seeds: string[],
-		config: OverlapBasedExpansionConfig
-	): Promise<void> {
+	const runVariant = async (graph: TestGraphExpander, seeds: string[], config: OverlapBasedExpansionConfig): Promise<void> => {
 		const expansion = new OverlapBasedExpansion(graph, seeds, config);
 		const result = await expansion.run();
 
@@ -46,11 +44,11 @@ describe("Overlap-Based Expansion", () => {
 		assert.strictEqual(typeof result.overlapMetadata, "object", "overlapMetadata should be an object");
 
 		// Verify overlap metadata
-		assert(Array.isArray(result.overlapMetadata.overlapEvents), "overlapEvents should be an array");
+		assert.ok(Array.isArray(result.overlapMetadata.overlapEvents), "overlapEvents should be an array");
 		assert.strictEqual(typeof result.overlapMetadata.iterations, "number", "iterations should be a number");
-		assert(result.overlapMetadata.terminationReason, "terminationReason should be defined");
-		assert(result.overlapMetadata.overlapMatrix instanceof Map, "overlapMatrix should be a Map");
-	}
+		assert.ok(result.overlapMetadata.terminationReason, "terminationReason should be defined");
+		assert.ok(result.overlapMetadata.overlapMatrix instanceof Map, "overlapMatrix should be a Map");
+	};
 
 	/**
 	 * Test all 27 combinations of strategies.
@@ -118,7 +116,7 @@ describe("Overlap-Based Expansion", () => {
 			const result = await expansion.run();
 
 			assert.strictEqual(result.overlapMetadata.terminationReason, "n1-coverage");
-			assert(result.sampledNodes.size >= 1, "Should visit at least the seed node");
+			assert.ok(result.sampledNodes.size > 0, "Should visit at least the seed node");
 		});
 	});
 
@@ -140,12 +138,12 @@ describe("Overlap-Based Expansion", () => {
 			const result = await runVariant(expander, seeds, config);
 
 			// Physical meeting requires actual node overlap
-			assert(result.overlapMetadata.overlapEvents.length >= 0);
+			assert.ok(result.overlapMetadata.overlapEvents.length >= 0);
 		});
 
-		async function runVariant(expander: TestGraphExpander, seeds: string[], config: OverlapBasedExpansionConfig) {
+		const runVariant = async (expander: TestGraphExpander, seeds: string[], config: OverlapBasedExpansionConfig) => {
 			const expansion = new OverlapBasedExpansion(expander, seeds, config);
 			return expansion.run();
-		}
+		};
 	});
 });
