@@ -10,12 +10,12 @@
  *   npx tsx scripts/generate-latex-tables.ts --input src/test-metrics.json --output ../Thesis/content/tables/
  */
 
-import { dirname, join, resolve } from "node:path";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { readFileSync, writeFileSync, existsSync, mkdirSync } from "node:fs";
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
-const projectRoot = resolve(__dirname, "..");
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const projectRoot = path.resolve(__dirname, "..");
 
 /**
  * Metrics output format from run-experiments.ts
@@ -23,57 +23,119 @@ const projectRoot = resolve(__dirname, "..");
 interface MetricsOutput {
 	version: string;
 	timestamp: string;
-	metrics: Record<string, Array<Record<string, string | number>>>;
+	metrics: Record<string, MetricRecord[] | undefined>;
+}
+
+/**
+ * Individual metric record with flexible schema
+ */
+interface MetricRecord {
+	[key: string]: string | number | undefined;
 }
 
 /**
  * Generate a LaTeX table with the given columns and rows.
+ *
+ * @param columns - Column specification strings (e.g., ["l", "r", "r"])
+ * @param headers - Column header labels
+ * @param rows - Pre-formatted row strings
+ * @param caption - Table caption text
+ * @param label - LaTeX label for cross-references
+ * @returns Complete LaTeX table markup
  */
-function generateLatexTable(
+const generateLatexTable = (
 	columns: string[],
 	headers: string[],
 	rows: string[],
 	caption: string,
 	label: string,
-): string {
+): string => {
 	const columnSpec = columns.join("");
 
-	return `\\begin{table}[htbp]
-  \\centering
-  \\caption{${caption}}
-  \\label{${label}}
-  \\begin{tabular}{${columnSpec}}
-    \\toprule
-    ${headers.join(" & ")} \\\\
-    \\midrule
+	return String.raw`\begin{table}[htbp]
+  \centering
+  \caption{${caption}}
+  \label{${label}}
+  \begin{tabular}{${columnSpec}}
+    \toprule
+    ${headers.join(" & ")} \\
+    \midrule
 ${rows.map((r) => `    ${r}`).join("\n")}
-    \\bottomrule
-  \\end{tabular}
-\\end{table}
+    \bottomrule
+  \end{tabular}
+\end{table}
 `;
-}
+};
 
 /**
  * Format a number to specified decimal places.
+ *
+ * @param n - Number to format (or undefined/null for missing values)
+ * @param decimals - Number of decimal places (default: 2)
+ * @returns Formatted number string or "--" for undefined/null values
  */
-function formatNumber(n: number | null, decimals: number = 2): string {
-	if (n === null || n === undefined) return "--";
+const formatNumber = (n: number | undefined | null, decimals = 2): string => {
+	if (n === undefined || n === null) return "--";
 	return n.toFixed(decimals);
-}
+};
 
 /**
  * Format a speedup ratio as LaTeX times command.
+ *
+ * @param ratio - Speedup ratio value
+ * @returns LaTeX-formatted speedup string
  */
-function formatSpeedup(ratio: number): string {
-	return `$${ratio.toFixed(2)}\\times$`;
-}
+const formatSpeedup = (ratio: number): string => String.raw`$${ratio.toFixed(2)}\times$`;
 
 /**
  * Format a percentage for LaTeX.
+ *
+ * @param n - Percentage value
+ * @returns LaTeX-formatted percentage string
  */
-function formatPercentage(n: number): string {
-	return `${Math.round(n)}\\%`;
-}
+const formatPercentage = (n: number): string => String.raw`${Math.round(n)}\%`;
+
+/**
+ * Group metric records by dataset.
+ *
+ * @param data - Array of metric records
+ * @returns Record mapping dataset names to their metric records
+ */
+const groupByDataset = (data: MetricRecord[]): Record<string, MetricRecord[]> => {
+	const byDataset: Record<string, MetricRecord[]> = {};
+	for (const r of data) {
+		const ds = String(r.dataset);
+		byDataset[ds] ??= [];
+		byDataset[ds].push(r);
+	}
+	return byDataset;
+};
+
+/**
+ * Format a dataset name for LaTeX display.
+ *
+ * @param dataset - Raw dataset identifier
+ * @returns Formatted dataset name
+ */
+const formatDatasetName = (dataset: string): string =>
+	dataset === "lesmis" ? String.raw`Les Mis\'erables` : dataset.charAt(0).toUpperCase() + dataset.slice(1);
+
+/**
+ * Generate table rows for salience coverage comparison.
+ *
+ * @param entries - Array of metric records for a dataset
+ * @returns Array of formatted LaTeX row strings
+ */
+const generateSalienceCoverageRows = (entries: MetricRecord[]): string[] =>
+	entries.map((r) => {
+		const method = String(r.method);
+		const coverage = typeof r.salienceCoverage === "number" ? formatPercentage(r.salienceCoverage * 100) : "--";
+		const found = r.topKFound ?? "--";
+		const total = r.topKTotal ?? "--";
+		const paths = r.pathsDiscovered ?? "--";
+		const runtimeMs = typeof r.runtimeMs === "number" ? formatNumber(r.runtimeMs, 1) : "--";
+		return String.raw`  ${method} & ${coverage} & ${found}/${total} & ${paths} & ${runtimeMs} \\`;
+	});
 
 /**
  * Table configuration and generator function.
@@ -84,7 +146,7 @@ interface TableConfig {
 	label: string;
 	caption: string;
 	columns: string[];
-	generate: (metrics: Record<string, Array<Record<string, string | number>>>) => string | null;
+	generate: (metrics: Record<string, MetricRecord[] | undefined>) => string | undefined;
 }
 
 /**
@@ -98,15 +160,22 @@ const tableConfigs: TableConfig[] = [
 		caption: "Runtime performance comparison (milliseconds). DP achieves {SPEEDUP} speedup on Facebook dataset.",
 		columns: ["l", "r", "r", "r", "r"],
 		generate: (metrics) => {
-			const data = metrics["runtime-performance"] || [];
-			if (data.length === 0) return null;
+			const data = metrics["runtime-performance"];
+			if (!data) return "";
+			if (data.length === 0) return "";
 
-			const maxSpeedup = Math.max(...data.map((r: any) => (r.bfsTime / r.dpTime)));
+			const maxSpeedup = Math.max(...data.map((r) => {
+				const bfsTime = r.bfsTime as number;
+				const dpTime = r.dpTime as number;
+				return bfsTime / dpTime;
+			}));
 			const caption = tableConfigs[0].caption.replace("{SPEEDUP}", formatSpeedup(maxSpeedup));
 
-			const rows = data.map((r: any) => {
-				const speedup = formatSpeedup(r.bfsTime / r.dpTime);
-				return `${r.dataset} & ${r.nodes} & ${formatNumber(r.dpTime, 2)} & ${formatNumber(r.bfsTime, 2)} & ${speedup} \\\\`;
+			const rows = data.map((r) => {
+				const bfsTime = r.bfsTime as number;
+				const dpTime = r.dpTime as number;
+				const speedup = formatSpeedup(bfsTime / dpTime);
+				return String.raw`${r.dataset} & ${r.nodes} & ${formatNumber(dpTime, 2)} & ${formatNumber(bfsTime, 2)} & ${speedup} \\`;
 			});
 
 			return generateLatexTable(tableConfigs[0].columns, ["Dataset", "Nodes", "DP (ms)", "BFS (ms)", "Speedup"], rows, caption, tableConfigs[0].label);
@@ -119,12 +188,11 @@ const tableConfigs: TableConfig[] = [
 		caption: "Path length distribution comparison (Les Misérables). DP discovers longer, more varied paths through peripheral regions.",
 		columns: ["l", "r", "r", "r", "r"],
 		generate: (metrics) => {
-			const data = metrics["path-lengths"] || [];
-			if (data.length === 0) return null;
+			const data = metrics["path-lengths"];
+			if (!data) return "";
+			if (data.length === 0) return "";
 
-			const rows = data.map((r: any) => {
-				return `${r.method} & ${r.min} & ${r.max} & ${formatNumber(r.mean, 2)} & ${r.median} \\\\`;
-			});
+			const rows = data.map((r) => String.raw`${r.method} & ${r.min} & ${r.max} & ${formatNumber(r.mean as number, 2)} & ${r.median} \\`);
 
 			return generateLatexTable(tableConfigs[1].columns, ["Method", "Min", "Max", "Mean", "Median"], rows, tableConfigs[1].caption, tableConfigs[1].label);
 		},
@@ -136,12 +204,13 @@ const tableConfigs: TableConfig[] = [
 		caption: "Scalability analysis across graph sizes. DP speedup increases with graph size.",
 		columns: ["l", "r", "r", "r", "r"],
 		generate: (metrics) => {
-			const data = metrics["scalability"] || [];
-			if (data.length === 0) return null;
+			const data = metrics["scalability"];
+			if (!data) return "";
+			if (data.length === 0) return "";
 
-			const rows = data.map((r: any) => {
-				const speedup = formatSpeedup(r.ratio);
-				return `${r.dataset} & ${r.nodes} & ${formatNumber(r.dpTime, 1)} & ${formatNumber(r.bfsTime, 1)} & ${speedup} \\\\`;
+			const rows = data.map((r) => {
+				const speedup = formatSpeedup(r.ratio as number);
+				return String.raw`${r.dataset} & ${r.nodes} & ${formatNumber(r.dpTime as number, 1)} & ${formatNumber(r.bfsTime as number, 1)} & ${speedup} \\`;
 			});
 
 			return generateLatexTable(tableConfigs[2].columns, ["Dataset", "Nodes", "DP (ms)", "BFS (ms)", "Speedup"], rows, tableConfigs[2].caption, tableConfigs[2].label);
@@ -154,15 +223,16 @@ const tableConfigs: TableConfig[] = [
 		caption: "Hub traversal comparison for N=2 (bidirectional) variant on scale-free graph (100 nodes). Higher diversity indicates more structurally varied paths between seeds.",
 		columns: ["l", "r", "r"],
 		generate: (metrics) => {
-			const data = metrics["n-seed-hub-traversal"] || [];
-			const scaleFreeData = data.filter((r: any) => r.graph === "scale-free-100" || r.graph === "karate-100");
+			const data = metrics["n-seed-hub-traversal"];
+			if (!data) return "";
+			const scaleFreeData = data.filter((r) => r.graph === "scale-free-100" || r.graph === "karate-100");
 
-			if (scaleFreeData.length === 0) return null;
+			if (scaleFreeData.length === 0) return "";
 
-			const rows = scaleFreeData.map((r: any) => {
+			const rows = scaleFreeData.map((r) => {
 				const method = r.method;
-				const hubText = r.hubTraversal !== undefined ? `\\textbf{${formatPercentage(r.hubTraversal)}}` : "--";
-				return `${method} & ${r.paths} & ${hubText} \\\\`;
+				const hubText = r.hubTraversal === undefined ? "--" : String.raw`\textbf{${formatPercentage(r.hubTraversal as number)}}`;
+				return String.raw`${method} & ${r.paths} & ${hubText} \\`;
 			});
 
 			return generateLatexTable(tableConfigs[3].columns, ["Method", "Paths", "Hub Traversal"], rows, tableConfigs[3].caption, tableConfigs[3].label);
@@ -175,20 +245,21 @@ const tableConfigs: TableConfig[] = [
 		caption: "Statistical comparison across 10 trials (Les Misérables). Degree-prioritised expansion shows significantly higher path diversity (p = {P_VALUE}, large effect size).",
 		columns: ["l", "c", "c", "c", "c", "c"],
 		generate: (metrics) => {
-			const data = metrics["statistical-significance"] || [];
-			if (data.length === 0) return null;
+			const data = metrics["statistical-significance"];
+			if (!data) return "";
+			if (data.length === 0) return "";
 
-			const r = data[0] as any;
-			const pValue = r.pValue !== undefined ? formatNumber(r.pValue, 4) : "0.0025";
+			const r = data[0];
+			const pValue = r.pValue === undefined ? "0.0025" : formatNumber(r.pValue as number, 4);
 			const caption = tableConfigs[4].caption.replace("{P_VALUE}", pValue);
 
-			const dpMean = r.method1Mean !== undefined ? formatNumber(r.method1Mean, 3) : "--";
-			const bfsMean = r.method2Mean !== undefined ? formatNumber(r.method2Mean, 3) : "--";
-			const u = r.u !== undefined ? formatNumber(r.u, 2) : "--";
-			const cohensD = r.cohensD !== undefined ? formatNumber(r.cohensD, 3) : "--";
+			const dpMean = r.method1Mean === undefined ? "--" : formatNumber(r.method1Mean as number, 3);
+			const bfsMean = r.method2Mean === undefined ? "--" : formatNumber(r.method2Mean as number, 3);
+			const u = r.u === undefined ? "--" : formatNumber(r.u as number, 2);
+			const cohensD = r.cohensD === undefined ? "--" : formatNumber(r.cohensD as number, 3);
 
 			const rows = [
-				`Path Diversity (95\\% CI) & [${(parseFloat(dpMean) - 0.017).toFixed(3)}, ${(parseFloat(dpMean) + 0.016).toFixed(3)}] & [${(parseFloat(bfsMean) - 0.042).toFixed(3)}, ${(parseFloat(bfsMean) + 0.041).toFixed(3)}] & ${u} & ${pValue} & \\textbf{${cohensD}} \\\\`,
+				String.raw`Path Diversity (95\% CI) & [${(Number.parseFloat(dpMean) - 0.017).toFixed(3)}, ${(Number.parseFloat(dpMean) + 0.016).toFixed(3)}] & [${(Number.parseFloat(bfsMean) - 0.042).toFixed(3)}, ${(Number.parseFloat(bfsMean) + 0.041).toFixed(3)}] & ${u} & ${pValue} & \textbf{${cohensD}} \\`,
 			];
 
 			return generateLatexTable(tableConfigs[4].columns, ["Metric", "DP Mean", "BFS Mean", "U", "p", "Cohen's d"], rows, caption, tableConfigs[4].label);
@@ -201,14 +272,15 @@ const tableConfigs: TableConfig[] = [
 		caption: "Path diversity improvement across datasets. DP advantage increases with graph size and complexity.",
 		columns: ["l", "r", "r", "r", "l"],
 		generate: (metrics) => {
-			const data = metrics["cross-dataset"] || [];
-			if (data.length === 0) return null;
+			const data = metrics["cross-dataset"];
+			if (!data) return "";
+			if (data.length === 0) return "";
 
-			const rows = data.map((r: any) => {
-				const dpDiv = r.dpDiversity !== undefined ? formatNumber(r.dpDiversity, 3) : "--";
-				const bfsDiv = r.bfsDiversity !== undefined ? formatNumber(r.bfsDiversity, 3) : "--";
-				const improvement = r.improvement !== undefined ? `${r.improvement}\\%` : "--";
-				return `${r.dataset} & ${r.nodes} & ${dpDiv} & ${bfsDiv} & ${improvement} \\\\`;
+			const rows = data.map((r) => {
+				const dpDiv = r.dpDiversity === undefined ? "--" : formatNumber(r.dpDiversity as number, 3);
+				const bfsDiv = r.bfsDiversity === undefined ? "--" : formatNumber(r.bfsDiversity as number, 3);
+				const improvement = r.improvement === undefined ? "--" : String.raw`${r.improvement}\%`;
+				return String.raw`${r.dataset} & ${r.nodes} & ${dpDiv} & ${bfsDiv} & ${improvement} \\`;
 			});
 
 			return generateLatexTable(tableConfigs[5].columns, ["Dataset", "Nodes", "DP Diversity", "BFS Diversity", "Improvement"], rows, tableConfigs[5].caption, tableConfigs[5].label);
@@ -221,14 +293,15 @@ const tableConfigs: TableConfig[] = [
 		caption: "Method ranking by path diversity (Les Misérables). Degree-prioritised expansion achieves highest diversity with fewer paths.",
 		columns: ["l", "l", "r"],
 		generate: (metrics) => {
-			const data = metrics["method-ranking"] || [];
-			if (data.length === 0) return null;
+			const data = metrics["method-ranking"];
+			if (!data) return "";
+			if (data.length === 0) return "";
 
-			const rows = data.map((r: any, i: number) => {
-				const methodName = r.method.replace(" (Thesis)", "").replace("Priority", "-Priority");
-				const diversity = r.diversity !== undefined ? formatNumber(r.diversity, 3) : "--";
-				const paths = r.paths !== undefined ? `(${r.paths} paths)` : "";
-				return `${i + 1} & ${methodName} & ${diversity} ${paths} \\\\`;
+			const rows = data.map((r, index) => {
+				const methodName = String(r.method).replace(" (Thesis)", "").replace("Priority", "-Priority");
+				const diversity = r.diversity === undefined ? "--" : formatNumber(r.diversity as number, 3);
+				const paths = r.paths === undefined ? "" : `(${r.paths} paths)`;
+				return String.raw`${index + 1} & ${methodName} & ${diversity} ${paths} \\`;
 			});
 
 			return generateLatexTable(tableConfigs[6].columns, ["Rank", "Method", "Path Diversity"], rows, tableConfigs[6].caption, tableConfigs[6].label);
@@ -238,25 +311,26 @@ const tableConfigs: TableConfig[] = [
 		key: "structural-representativeness",
 		filename: "06-structural-representativeness.tex",
 		label: "tab:structural-representativeness",
-		caption: "Structural representativeness of sampled subgraphs. Degree-prioritised expansion achieves {COVERAGE}\\% coverage of ground truth ego network.",
+		caption: String.raw`Structural representativeness of sampled subgraphs. Degree-prioritised expansion achieves {COVERAGE}\% coverage of ground truth ego network.`,
 		columns: ["l", "r", "r", "r", "r"],
 		generate: (metrics) => {
-			const data = metrics["structural-representativeness"] || [];
-			if (data.length === 0) return null;
+			const data = metrics["structural-representativeness"];
+			if (!data) return "";
+			if (data.length === 0) return "";
 
-			const r = data[0] as any;
-			const coverage = r.coverage !== undefined ? formatPercentage(r.coverage * 100) : "--";
-			const precision = r.precision !== undefined ? formatPercentage(r.precision * 100) : "--";
-			const f1 = r.f1Score !== undefined ? `${formatNumber(r.f1Score * 100, 1)}\\%` : "--";
-			const intersection = r.intersectionSize !== undefined && r.totalNodes !== undefined
-				? `${r.intersectionSize}/${r.totalNodes}` : "--";
+			const r = data[0];
+			const coverage = r.coverage === undefined ? "--" : formatPercentage((r.coverage as number) * 100);
+			const precision = r.precision === undefined ? "--" : formatPercentage((r.precision as number) * 100);
+			const f1 = r.f1Score === undefined ? "--" : String.raw`${formatNumber((r.f1Score as number) * 100, 1)}\%`;
+			const intersection = r.intersectionSize === undefined || r.totalNodes === undefined
+				? "--" : `${r.intersectionSize}/${r.totalNodes}`;
 
-			const caption = tableConfigs[7].caption.replace("{COVERAGE}", coverage.replace("\\%", ""));
+			const caption = tableConfigs[7].caption.replace("{COVERAGE}", coverage.replace(String.raw`\%`, ""));
 
 			const rows = [
-				`Coverage & ${coverage} & -- & -- & ${intersection} \\\\`,
-				`Precision & -- & ${precision} & -- & -- \\\\`,
-				`F1 Score & -- & -- & ${f1} & -- \\\\`,
+				String.raw`Coverage & ${coverage} & -- & -- & ${intersection} \\`,
+				String.raw`Precision & -- & ${precision} & -- & -- \\`,
+				String.raw`F1 Score & -- & -- & ${f1} & -- \\`,
 			];
 
 			return generateLatexTable(["l", "r", "r", "r", "r"], ["Metric", "Value", "Reference", "F1", "Intersection"], rows, caption, "tab:structural-representativeness");
@@ -269,14 +343,31 @@ const tableConfigs: TableConfig[] = [
 		caption: "N-Seed generalisation across ego-graph (N=1), between-graph (N=2), and multi-seed (N>=3) variants.",
 		columns: ["l", "l", "r", "r"],
 		generate: (metrics) => {
-			const data = metrics["n-seed-generalization"] || [];
-			if (data.length === 0) return null;
+			const data = metrics["n-seed-generalization"];
+			if (!data) return "";
+			if (data.length === 0) return "";
 
-			const rows = data.map((r: any) => {
-				const variantName = r.variant === "ego-graph" ? "Ego Network" :
-					r.variant === "between-graph" ? "Bidirectional" :
-						r.variant === "multi-seed" ? "Multi-Seed" : r.variant;
-				return `N=${r.n} & ${variantName} & ${r.nodes} & ${r.paths} \\\\`;
+			const rows = data.map((r) => {
+				let variantName: string | number = r.variant ?? "--";
+				switch (r.variant) {
+					case "ego-graph": {
+						variantName = "Ego Network";
+						break;
+					}
+					case "between-graph": {
+						variantName = "Bidirectional";
+						break;
+					}
+					case "multi-seed": {
+						variantName = "Multi-Seed";
+						break;
+					}
+					default: {
+						// Keep original value
+						break;
+					}
+				}
+				return String.raw`N=${r.n} & ${variantName} & ${r.nodes} & ${r.paths} \\`;
 			});
 
 			return generateLatexTable(tableConfigs[8].columns, ["Seeds", "Variant", "Nodes", "Paths"], rows, tableConfigs[8].caption, tableConfigs[8].label);
@@ -289,16 +380,36 @@ const tableConfigs: TableConfig[] = [
 		caption: "Comprehensive comparison of Seeded Node Expansion variants (N=1, N=2, N=3) across all methods. Results show consistent coverage and performance across baseline methods.",
 		columns: ["l", "c", "r", "r", "r", "r"],
 		generate: (metrics) => {
-			const data = metrics["n-seed-comparison"] || [];
-			if (data.length === 0) return null;
+			const data = metrics["n-seed-comparison"];
+			if (!data) return "";
+			if (data.length === 0) return "";
 
-			const rows = data.map((r: any) => {
-				const shortName = r.method === "Degree-Prioritised" ? "DP" :
-					r.method === "Standard BFS" ? "BFS" :
-						r.method === "Frontier-Balanced" ? "FB" :
-							r.method === "Random Priority" ? "Rand" : r.method;
-				const cov = r.coverage !== undefined ? `${r.coverage}\\%` : "--";
-				return `${shortName} & N=${r.n} & ${r.nodes} & ${r.paths} & ${r.iterations} & ${cov} \\\\`;
+			const rows = data.map((r) => {
+				let shortName: string | number = r.method ?? "--";
+				switch (r.method) {
+					case "Degree-Prioritised": {
+						shortName = "DP";
+						break;
+					}
+					case "Standard BFS": {
+						shortName = "BFS";
+						break;
+					}
+					case "Frontier-Balanced": {
+						shortName = "FB";
+						break;
+					}
+					case "Random Priority": {
+						shortName = "Rand";
+						break;
+					}
+					default: {
+						// Keep original value
+						break;
+					}
+				}
+				const cov = r.coverage === undefined ? "--" : String.raw`${r.coverage}\%`;
+				return String.raw`${shortName} & N=${r.n} & ${r.nodes} & ${r.paths} & ${r.iterations} & ${cov} \\`;
 			});
 
 			return generateLatexTable(tableConfigs[9].columns, ["Method", "Seeds", "Nodes", "Paths", "Iters", "Cov"], rows, tableConfigs[9].caption, tableConfigs[9].label);
@@ -311,17 +422,37 @@ const tableConfigs: TableConfig[] = [
 		caption: "Path diversity comparison for N=2 (bidirectional) variant on scale-free graph (100 nodes). Higher diversity indicates more structurally varied paths between seeds.",
 		columns: ["l", "r", "r", "r"],
 		generate: (metrics) => {
-			const data = metrics["n-seed-path-diversity"] || [];
-			const scaleFreeData = data.filter((r: any) => r.graph === "scale-free-100");
+			const data = metrics["n-seed-path-diversity"];
+			if (!data) return "";
+			const scaleFreeData = data.filter((r) => r.graph === "scale-free-100");
 
-			if (scaleFreeData.length === 0) return null;
+			if (scaleFreeData.length === 0) return "";
 
-			const rows = scaleFreeData.map((r: any) => {
-				const shortName = r.method === "Degree-Prioritised" ? "DP" :
-					r.method === "Standard BFS" ? "BFS" :
-						r.method === "Frontier-Balanced" ? "FB" :
-							r.method === "Random Priority" ? "Rand" : r.method;
-				return `${shortName} & ${r.paths} & ${r.uniqueNodes} & ${formatNumber(r.diversity, 3)} \\\\`;
+			const rows = scaleFreeData.map((r) => {
+				let shortName: string | number = r.method ?? "--";
+				switch (r.method) {
+					case "Degree-Prioritised": {
+						shortName = "DP";
+						break;
+					}
+					case "Standard BFS": {
+						shortName = "BFS";
+						break;
+					}
+					case "Frontier-Balanced": {
+						shortName = "FB";
+						break;
+					}
+					case "Random Priority": {
+						shortName = "Rand";
+						break;
+					}
+					default: {
+						// Keep original value
+						break;
+					}
+				}
+				return String.raw`${shortName} & ${r.paths} & ${r.uniqueNodes} & ${formatNumber(r.diversity as number, 3)} \\`;
 			});
 
 			return generateLatexTable(tableConfigs[10].columns, ["Method", "Paths", "Nodes", "Diversity"], rows, tableConfigs[10].caption, tableConfigs[10].label);
@@ -331,18 +462,19 @@ const tableConfigs: TableConfig[] = [
 		key: "structural-representativeness-metrics",
 		filename: "06-structural-representativeness-metrics.tex",
 		label: "tab:structural-representativeness-metrics",
-		caption: "Structural representativeness metrics on hub graph (4 hubs, 60 leaves). Sample includes nodes from multiple degree buckets achieving 6\\% hub coverage.",
+		caption: String.raw`Structural representativeness metrics on hub graph (4 hubs, 60 leaves). Sample includes nodes from multiple degree buckets achieving 6\% hub coverage.`,
 		columns: ["l", "r"],
 		generate: (metrics) => {
-			const data = metrics["structural-representativeness-metrics"] || [];
-			if (data.length === 0) return null;
+			const data = metrics["structural-representativeness-metrics"];
+			if (!data) return "";
+			if (data.length === 0) return "";
 
-			const r = data[0] as any;
+			const r = data[0];
 
 			const rows = [
-				`Total Sampled & ${r.totalSampled} \\\\`,
-				`Hub Coverage & ${r.hubCoverage}\\% \\\\`,
-				`Buckets Covered & ${r.bucketsCovered}/${r.totalBuckets} \\\\`,
+				String.raw`Total Sampled & ${r.totalSampled} \\`,
+				String.raw`Hub Coverage & ${r.hubCoverage}\% \\`,
+				String.raw`Buckets Covered & ${r.bucketsCovered}/${r.totalBuckets} \\`,
 			];
 
 			return generateLatexTable(tableConfigs[11].columns, ["Metric", "Value"], rows, tableConfigs[11].caption, tableConfigs[11].label);
@@ -355,16 +487,17 @@ const tableConfigs: TableConfig[] = [
 		caption: "Path ranking quality by dataset using mutual information (MI). Path Salience Ranking achieves higher mean MI and node coverage across all benchmark datasets.",
 		columns: ["l", "r", "r", "r", "r"],
 		generate: (metrics) => {
-			const data = metrics["mi-ranking-quality"] || [];
-			if (data.length === 0) return null;
+			const data = metrics["mi-ranking-quality"];
+			if (!data) return "";
+			if (data.length === 0) return "";
 
-			const rows = data.map((r: any) => {
-				const datasetName = r.dataset === "Les Misérables" ? "Les Mis\\'erables" : r.dataset;
-				const meanMI = r.meanMI !== undefined ? formatNumber(r.meanMI, 2) : "--";
-				const nodeCov = r.nodeCoverage !== undefined ? formatNumber(r.nodeCoverage, 2) : "--";
-				const pathDiv = r.pathDiversity !== undefined ? formatNumber(r.pathDiversity, 2) : "--";
-				const paths = r.paths !== undefined ? r.paths : "--";
-				return `${datasetName} & ${meanMI} & ${nodeCov} & ${pathDiv} & ${paths} \\\\`;
+			const rows = data.map((r) => {
+				const datasetName = r.dataset === "Les Misérables" ? String.raw`Les Mis\'erables` : r.dataset;
+				const meanMI = r.meanMI === undefined ? "--" : formatNumber(r.meanMI as number, 2);
+				const nodeCov = r.nodeCoverage === undefined ? "--" : formatNumber(r.nodeCoverage as number, 2);
+				const pathDiv = r.pathDiversity === undefined ? "--" : formatNumber(r.pathDiversity as number, 2);
+				const paths = r.paths ?? "--";
+				return String.raw`${datasetName} & ${meanMI} & ${nodeCov} & ${pathDiv} & ${paths} \\`;
 			});
 
 			return generateLatexTable(tableConfigs[12].columns, ["Dataset", "Mean MI", "Node Coverage", "Path Diversity", "Paths"], rows, tableConfigs[12].caption, tableConfigs[12].label);
@@ -374,40 +507,24 @@ const tableConfigs: TableConfig[] = [
 		key: "salience-coverage-comparison",
 		filename: "06-salience-coverage-comparison.tex",
 		label: "tab:salience-coverage-comparison",
-		caption: "Salience coverage comparison across expansion methods. Shows percentage of top-K salient paths (ranked by Path Salience) discovered by each method. All methods achieved 0\\% coverage, indicating overlap-based termination stops before discovering high-salience paths.",
+		caption: String.raw`Salience coverage comparison across expansion methods. Shows percentage of top-K salient paths (ranked by Path Salience) discovered by each method. All methods achieved 0\% coverage, indicating overlap-based termination stops before discovering high-salience paths.`,
 		columns: ["l", "l", "r", "r", "r"],
 		generate: (metrics) => {
-			const data = metrics["salience-coverage-comparison"] || [];
-			if (data.length === 0) return null;
+			const data = metrics["salience-coverage-comparison"];
+			if (!data) return "";
+			if (data.length === 0) return "";
 
-			// Group by dataset
-			const byDataset: Record<string, any[]> = {};
-			for (const r of data) {
-				const ds = String(r.dataset);
-				if (!byDataset[ds]) byDataset[ds] = [];
-				byDataset[ds].push(r);
-			}
-
+			const byDataset = groupByDataset(data);
 			const rows: string[] = [];
-			for (const [dataset, entries] of Object.entries(byDataset)) {
-				const datasetName = dataset === "lesmis" ? "Les Mis\\'erables" : dataset.charAt(0).toUpperCase() + dataset.slice(1);
+			const datasetEntries = Object.entries(byDataset);
 
-				// Add dataset header row
-				rows.push(`\\multicolumn{5}{l}{\\textbf{${datasetName}}} \\\\`);
+			for (const [index, [dataset, entries]] of datasetEntries.entries()) {
+				const datasetName = formatDatasetName(dataset);
+				rows.push(String.raw`\multicolumn{5}{l}{\textbf{${datasetName}}} \\`);
+				rows.push(...generateSalienceCoverageRows(entries));
 
-				for (const r of entries) {
-					const method = String(r.method);
-					const coverage = typeof r.salienceCoverage === 'number' ? formatPercentage(r.salienceCoverage * 100) : "--";
-					const found = r.topKFound !== undefined ? r.topKFound : "--";
-					const total = r.topKTotal !== undefined ? r.topKTotal : "--";
-					const paths = r.pathsDiscovered !== undefined ? r.pathsDiscovered : "--";
-
-					rows.push(`  ${method} & ${coverage} & ${found}/${total} & ${paths} & ${typeof r.runtimeMs === 'number' ? formatNumber(r.runtimeMs, 1) : "--"} \\\\`);
-				}
-
-				// Add spacing between datasets
-				if (Object.keys(byDataset).indexOf(dataset) < Object.keys(byDataset).length - 1) {
-					rows.push(`\\addlinespace`);
+				if (index < datasetEntries.length - 1) {
+					rows.push(String.raw`\addlinespace`);
 				}
 			}
 
@@ -425,10 +542,10 @@ const tableConfigs: TableConfig[] = [
 /**
  * Main function to generate all LaTeX tables.
  */
-function main(): void {
-	const args = process.argv.slice(2);
-	const inputPath = args.find((a) => a.startsWith("--input="))?.split("=")[1] || join(projectRoot, "src/test-metrics.json");
-	const outputPath = args.find((a) => a.startsWith("--output="))?.split("=")[1] || resolve(projectRoot, "../Thesis/content/tables");
+const main = (): void => {
+	const arguments_ = process.argv.slice(2);
+	const inputPath = arguments_.find((a) => a.startsWith("--input="))?.split("=")[1] ?? path.join(projectRoot, "src/test-metrics.json");
+	const outputPath = arguments_.find((a) => a.startsWith("--output="))?.split("=")[1] ?? path.resolve(projectRoot, "../Thesis/content/tables");
 
 	// Read metrics file
 	if (!existsSync(inputPath)) {
@@ -437,8 +554,8 @@ function main(): void {
 		process.exit(1);
 	}
 
-	const metricsContent = readFileSync(inputPath, "utf-8");
-	const metricsOutput: MetricsOutput = JSON.parse(metricsContent);
+	const metricsContent = readFileSync(inputPath, "utf8");
+	const metricsOutput = JSON.parse(metricsContent) as MetricsOutput;
 
 	// Ensure output directory exists
 	if (!existsSync(outputPath)) {
@@ -453,7 +570,7 @@ function main(): void {
 		const tableContent = config.generate(metricsOutput.metrics);
 
 		if (tableContent) {
-			const tablePath = join(outputPath, config.filename);
+			const tablePath = path.join(outputPath, config.filename);
 			writeFileSync(tablePath, tableContent);
 			generatedCount++;
 			console.log(`✓ Generated: ${config.filename}`);
@@ -465,6 +582,6 @@ function main(): void {
 
 	console.log(`\nGenerated ${generatedCount} tables, skipped ${skippedCount}`);
 	console.log(`Output directory: ${outputPath}`);
-}
+};
 
 main();
