@@ -201,17 +201,23 @@ export class PathPreservingExpansion<T> {
 					this.nodeDiscoveryIteration.set(targetId, this.stats.iterations);
 				}
 
+				// Check for intersection BEFORE setting ownership
+				// If another frontier already visited this node, we have a path
+				const otherFrontierIndex = this.nodeToFrontierIndex.get(targetId);
+				const isIntersection = otherFrontierIndex !== undefined && otherFrontierIndex !== activeIndex;
+
 				// Track which frontier owns this node (for O(1) intersection checking)
-				this.nodeToFrontierIndex.set(targetId, activeIndex);
+				// Must happen AFTER intersection check to preserve the original owner
+				if (otherFrontierIndex === undefined) {
+					this.nodeToFrontierIndex.set(targetId, activeIndex);
+				}
 
 				// Add to frontier with PPME priority
 				const priority = this.calculatePPMEPriority(targetId, activeIndex);
 				activeState.frontier.push(targetId, priority);
 
-				// Check for intersection using O(1) lookup
-				// If another frontier already visited this node, we have a path
-				const otherFrontierIndex = this.nodeToFrontierIndex.get(targetId);
-				if (otherFrontierIndex !== undefined && otherFrontierIndex !== activeIndex) {
+				// Handle intersection if found
+				if (isIntersection) {
 					const path = this.reconstructPath(activeState, this.frontiers[otherFrontierIndex], targetId);
 					if (path) {
 						// Use path signature for O(1) deduplication
