@@ -139,8 +139,8 @@ describe("Thesis Validation: Perturbed Graph Robustness", () => {
 		expect(result.sampledNodes.size).toBeGreaterThan(0);
 	});
 
-	// Note: This test is memory-intensive. Run individually with: pnpm vitest run --no-coverage src/experiments/evaluation/__tests__/validation/comparative/perturbation-consistency.exp.integration.test.ts
-	it.skip("should show consistent method ranking across perturbations", async () => {
+	// Note: This test is memory-intensive and runs sequentially with extended timeout.
+	it.sequential("should show consistent method ranking across perturbations", { timeout: 120_000 }, async () => {
 		const benchmark = await loadBenchmarkByIdFromUrl("lesmis");
 		const originalEdges = benchmark.graph.getAllEdges();
 
