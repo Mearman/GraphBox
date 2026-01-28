@@ -12,8 +12,10 @@ import { generateGraph } from "../../generation/generator";
 import { makeGraphSpec } from "../../generation/spec";
 import { toAnalyzerGraph } from "./helpers";
 
-// Note: These tests hang during full test runs due to expensive analyzer imports.
-// Run individually with: pnpm vitest run --no-coverage src/__tests__/integration/tree.integration.test.ts
+// KNOWN ISSUE: This test file hangs during vitest execution (even in isolation).
+// The issue appears to be in module resolution/loading, not test execution.
+// Other integration tests in this directory work fine. Investigation pending.
+// Run with: pnpm vitest run --no-coverage src/__tests__/integration/tree.integration.test.ts
 describe.skip("Tree Graph Class", { timeout: 30_000 }, () => {
 	describe("generation and classification roundtrip", () => {
 		it("should generate and classify a tree correctly", () => {
