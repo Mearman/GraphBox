@@ -1,7 +1,7 @@
 /**
  * Thesis Validation Tests with Statistical Rigor
  *
- * Comprehensive experimental validation for novelty, validity, and value claims.
+ * Experimental validation for originality, correctness, and significance claims.
  * Uses real-world benchmark datasets, statistical significance testing, and
  * application-specific metrics.
  *
