@@ -175,6 +175,33 @@ const getTestCases = (): TestCase[] => [
 		seeds: ["Valjean", "Javert"], // Two major characters (reduced to avoid path enumeration explosion)
 		topK: 10,
 	},
+	{
+		name: "cora",
+		getGraph: async () => {
+			const benchmark = await loadBenchmarkByIdFromUrl("cora");
+			return { graph: benchmark.graph, directed: benchmark.meta.directed };
+		},
+		seeds: ["35", "103482"],
+		topK: 20,
+	},
+	{
+		name: "citeseer",
+		getGraph: async () => {
+			const benchmark = await loadBenchmarkByIdFromUrl("citeseer");
+			return { graph: benchmark.graph, directed: benchmark.meta.directed };
+		},
+		seeds: ["100157", "364207"],
+		topK: 20,
+	},
+	{
+		name: "facebook",
+		getGraph: async () => {
+			const benchmark = await loadBenchmarkByIdFromUrl("facebook");
+			return { graph: benchmark.graph, directed: benchmark.meta.directed };
+		},
+		seeds: ["0", "1000"],
+		topK: 25,
+	},
 ];
 
 /**
