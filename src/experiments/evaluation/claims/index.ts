@@ -1,0 +1,28 @@
+/**
+ * Claims Module
+ *
+ * Exports thesis evaluation claims for PPEF-based validation.
+ */
+
+export {
+	// Individual claims
+	CLAIM_R1_MI_SENSITIVITY,
+	CLAIM_R2_LENGTH_INDEPENDENCE,
+	CLAIM_R3_WEAK_LINK,
+	CLAIM_T1_HUB_DEFERRAL,
+	CLAIM_T2_PATH_DIVERSITY,
+	CLAIM_T3_ENTROPY_ORDERING,
+	CLAIM_T4_PATH_DISCOVERY,
+	CLAIM_T5_ADAPTATION,
+	CLAIM_T6_CROSS_DOMAIN,
+	CLAIM_T7_SALIENCE_IMPROVEMENT,
+	CLAIM_T8_TERMINATION_EFFICIENCY,
+	// Collections
+	CLAIMS_BY_CATEGORY,
+	// Utilities
+	getClaimsBySut,
+	getClaimsByTag,
+	RANKING_CLAIMS,
+	THESIS_CLAIMS,
+	TRAVERSAL_CLAIMS,
+} from "./thesis-claims.js";
