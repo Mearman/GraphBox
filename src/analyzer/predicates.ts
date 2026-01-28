@@ -27,6 +27,7 @@ import {
 	countSelfLoopsBinary,
 	defaultComputePolicy,
 	degreesUndirectedBinary,
+	isAcyclicDirectedBinary,
 	isBipartiteUndirectedBinary,
 	isConnectedUndirectedBinary} from "./types";
 
@@ -454,37 +455,92 @@ const isComparabilityUndirectedBinary = (g: AnalyzerGraph): boolean => {
 
 /**
  * Check if graph is a tree (undirected, acyclic, connected).
- * @param g
+ *
+ * Optimised O(V+E) implementation that avoids computing the full graph spec.
+ * A tree must be:
+ * - All edges undirected
+ * - Simple (no multi-edges)
+ * - No self-loops
+ * - Connected
+ * - Acyclic (for connected undirected graph: E = V - 1)
+ *
+ * @param g - Graph to check
+ * @returns true if graph is a tree
  */
-export const isTree = (g: AnalyzerGraph): boolean => hasGraphSpec({
-	directionality: { kind: "undirected" },
-	edgeMultiplicity: { kind: "simple" },
-	selfLoops: { kind: "disallowed" },
-	cycles: { kind: "acyclic" },
-	connectivity: { kind: "connected" },
-})(g);
+export const isTree = (g: AnalyzerGraph): boolean => {
+	// Empty graph is a tree (trivially)
+	if (g.vertices.length === 0) return true;
+
+	// All edges must be binary and undirected
+	if (!g.edges.every(e => !e.directed && e.endpoints.length === 2)) return false;
+
+	// No self-loops
+	if (countSelfLoopsBinary(g) > 0) return false;
+
+	// Simple graph (no multi-edges)
+	if (computeEdgeMultiplicity(g).kind !== "simple") return false;
+
+	// Tree property: connected and E = V - 1
+	// For a connected undirected simple graph, E = V - 1 implies acyclic (tree)
+	if (g.edges.length !== g.vertices.length - 1) return false;
+
+	// Must be connected
+	return isConnectedUndirectedBinary(g);
+};
 
 /**
  * Check if graph is a forest (undirected, acyclic).
- * @param g
+ *
+ * Optimised O(V+E) implementation that avoids computing the full graph spec.
+ * A forest must be:
+ * - All edges undirected
+ * - Simple (no multi-edges)
+ * - No self-loops
+ * - Acyclic (E < V for undirected graph)
+ *
+ * @param g - Graph to check
+ * @returns true if graph is a forest
  */
-export const isForest = (g: AnalyzerGraph): boolean => hasGraphSpec({
-	directionality: { kind: "undirected" },
-	edgeMultiplicity: { kind: "simple" },
-	selfLoops: { kind: "disallowed" },
-	cycles: { kind: "acyclic" },
-})(g);
+export const isForest = (g: AnalyzerGraph): boolean => {
+	// Empty graph is a forest (trivially)
+	if (g.vertices.length === 0) return true;
+
+	// All edges must be binary and undirected
+	if (!g.edges.every(e => !e.directed && e.endpoints.length === 2)) return false;
+
+	// No self-loops
+	if (countSelfLoopsBinary(g) > 0) return false;
+
+	// Simple graph (no multi-edges)
+	if (computeEdgeMultiplicity(g).kind !== "simple") return false;
+
+	// Forest property: E < V (or E = V - k for k components)
+	// Any undirected simple graph with E < V is acyclic
+	return g.edges.length < g.vertices.length;
+};
 
 /**
  * Check if graph is a DAG (directed, acyclic).
- * @param g
+ *
+ * Optimised O(V+E) implementation that avoids computing the full graph spec.
+ * Uses Kahn's algorithm for cycle detection.
+ *
+ * @param g - Graph to check
+ * @returns true if graph is a DAG
  */
-export const isDAG = (g: AnalyzerGraph): boolean => hasGraphSpec({
-	directionality: { kind: "directed" },
-	edgeMultiplicity: { kind: "simple" },
-	selfLoops: { kind: "disallowed" },
-	cycles: { kind: "acyclic" },
-})(g);
+export const isDAG = (g: AnalyzerGraph): boolean => {
+	// All edges must be binary and directed
+	if (!g.edges.every(e => e.directed && e.endpoints.length === 2)) return false;
+
+	// No self-loops
+	if (countSelfLoopsBinary(g) > 0) return false;
+
+	// Simple graph (no multi-edges)
+	if (computeEdgeMultiplicity(g).kind !== "simple") return false;
+
+	// Check acyclicity using Kahn's algorithm
+	return isAcyclicDirectedBinary(g);
+};
 
 /**
  * Check if graph is bipartite.
