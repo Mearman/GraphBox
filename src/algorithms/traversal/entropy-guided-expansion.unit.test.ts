@@ -5,17 +5,29 @@ import { EntropyGuidedExpansion } from "./entropy-guided-expansion.js";
 
 describe("EntropyGuidedExpansion", () => {
 	const createMockExpander = (): GraphExpander<unknown> => {
-		// Simple graph: A -> B -> C -> D
-		//              A -> E -> D
+		// Simple bidirectional graph: A <-> B <-> C <-> D
+		//                             A <-> E <-> D
 		const graph = new Map<string, Array<{ targetId: string; relationshipType: string }>>([
 			["A", [
 				{ targetId: "B", relationshipType: "cites" },
 				{ targetId: "E", relationshipType: "references" }
 			]],
-			["B", [{ targetId: "C", relationshipType: "cites" }]],
-			["C", [{ targetId: "D", relationshipType: "cites" }]],
-			["E", [{ targetId: "D", relationshipType: "references" }]],
-			["D", []],
+			["B", [
+				{ targetId: "A", relationshipType: "cites" },
+				{ targetId: "C", relationshipType: "cites" }
+			]],
+			["C", [
+				{ targetId: "B", relationshipType: "cites" },
+				{ targetId: "D", relationshipType: "cites" }
+			]],
+			["E", [
+				{ targetId: "A", relationshipType: "references" },
+				{ targetId: "D", relationshipType: "references" }
+			]],
+			["D", [
+				{ targetId: "C", relationshipType: "cites" },
+				{ targetId: "E", relationshipType: "references" }
+			]],
 		]);
 
 		return {
