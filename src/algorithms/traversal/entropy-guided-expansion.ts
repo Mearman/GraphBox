@@ -264,14 +264,7 @@ export class EntropyGuidedExpansion<T> {
 					this.nodeDiscoveryIteration.set(targetId, this.stats.iterations);
 				}
 
-				// Track which frontier owns this node (for O(1) intersection checking)
-				this.nodeToFrontierIndex.set(targetId, activeIndex);
-
-				// Add to frontier with entropy-based priority
-				const priority = await this.calculateEntropyPriorityAsync(targetId);
-				activeState.frontier.push(targetId, priority);
-
-				// Check for intersection using O(1) lookup
+				// Check for intersection BEFORE setting frontier ownership
 				// If another frontier already visited this node, we have a path
 				const otherFrontierIndex = this.nodeToFrontierIndex.get(targetId);
 				if (otherFrontierIndex !== undefined && otherFrontierIndex !== activeIndex) {
@@ -289,6 +282,13 @@ export class EntropyGuidedExpansion<T> {
 						}
 					}
 				}
+
+				// Track which frontier owns this node (for O(1) intersection checking)
+				this.nodeToFrontierIndex.set(targetId, activeIndex);
+
+				// Add to frontier with entropy-based priority
+				const priority = await this.calculateEntropyPriorityAsync(targetId);
+				activeState.frontier.push(targetId, priority);
 			}
 		}
 
