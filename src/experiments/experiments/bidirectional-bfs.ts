@@ -10,6 +10,7 @@ import { BenchmarkGraphExpander } from "@graph/evaluation/__tests__/validation/c
 import { loadBenchmarkByIdFromUrl } from "@graph/evaluation/fixtures/index.js";
 import { FrontierBalancedExpansion } from "@graph/experiments/baselines/frontier-balanced.js";
 import { RandomPriorityExpansion } from "@graph/experiments/baselines/random-priority.js";
+import { retroactivePathEnumeration } from "@graph/experiments/baselines/retroactive-path-enum.js";
 import { StandardBfsExpansion } from "@graph/experiments/baselines/standard-bfs.js";
 import { metrics } from "@graph/experiments/metrics/index.js";
 
@@ -128,42 +129,52 @@ export const runPathDiversityExperiments = async (): Promise<void> => {
 	const dp = new DegreePrioritisedExpansion(expander, seeds);
 	const dpResult = await dp.run();
 
-	// Calculate path length distribution
-	const pathLengths = dpResult.paths.map((p) => p.nodes.length);
-	const minLength = Math.min(...pathLengths);
-	const maxLength = Math.max(...pathLengths);
-	const meanLength = pathLengths.reduce((a, b) => a + b, 0) / pathLengths.length;
-	const sortedLengths = [...pathLengths].sort((a, b) => a - b);
-	const medianLength = sortedLengths[Math.floor(sortedLengths.length / 2)];
+	// Use retroactive path enumeration for fair comparison (maxLength=5 for tractability)
+	const dpRetroPaths = await retroactivePathEnumeration(dpResult, expander, seeds, 5);
 
-	metrics.record("path-lengths", {
-		dataset: "Les Misérables",
-		method: "Degree-Prioritised",
-		min: minLength,
-		max: maxLength,
-		mean: Math.round(meanLength * 100) / 100,
-		median: medianLength,
-	});
+	// Calculate path length distribution from retroactive paths
+	const pathLengths = dpRetroPaths.paths.map((p) => p.nodes.length);
+	if (pathLengths.length > 0) {
+		const minLength = Math.min(...pathLengths);
+		const maxLength = Math.max(...pathLengths);
+		const meanLength = pathLengths.reduce((a, b) => a + b, 0) / pathLengths.length;
+		const sortedLengths = [...pathLengths].sort((a, b) => a - b);
+		const medianLength = sortedLengths[Math.floor(sortedLengths.length / 2)];
+
+		metrics.record("path-lengths", {
+			dataset: "Les Misérables",
+			method: "Degree-Prioritised",
+			min: minLength,
+			max: maxLength,
+			mean: Math.round(meanLength * 100) / 100,
+			median: medianLength,
+		});
+	}
 
 	// Run BFS for comparison
 	const bfs = new StandardBfsExpansion(expander, seeds);
 	const bfsResult = await bfs.run();
 
-	const bfsPathLengths = bfsResult.paths.map((p) => p.nodes.length);
-	const bfsMinLength = Math.min(...bfsPathLengths);
-	const bsfMaxLength = Math.max(...bfsPathLengths);
-	const bfsMeanLength = bfsPathLengths.reduce((a, b) => a + b, 0) / bfsPathLengths.length;
-	const bfsSortedLengths = [...bfsPathLengths].sort((a, b) => a - b);
-	const bfsMedianLength = bfsSortedLengths[Math.floor(bfsSortedLengths.length / 2)];
+	// Use retroactive path enumeration for fair comparison (maxLength=5 for tractability)
+	const bfsRetroPaths = await retroactivePathEnumeration(bfsResult, expander, seeds, 5);
 
-	metrics.record("path-lengths", {
-		dataset: "Les Misérables",
-		method: "Standard BFS",
-		min: bfsMinLength,
-		max: bsfMaxLength,
-		mean: Math.round(bfsMeanLength * 100) / 100,
-		median: bfsMedianLength,
-	});
+	const bfsPathLengths = bfsRetroPaths.paths.map((p) => p.nodes.length);
+	if (bfsPathLengths.length > 0) {
+		const bfsMinLength = Math.min(...bfsPathLengths);
+		const bsfMaxLength = Math.max(...bfsPathLengths);
+		const bfsMeanLength = bfsPathLengths.reduce((a, b) => a + b, 0) / bfsPathLengths.length;
+		const bfsSortedLengths = [...bfsPathLengths].sort((a, b) => a - b);
+		const bfsMedianLength = bfsSortedLengths[Math.floor(bfsSortedLengths.length / 2)];
+
+		metrics.record("path-lengths", {
+			dataset: "Les Misérables",
+			method: "Standard BFS",
+			min: bfsMinLength,
+			max: bsfMaxLength,
+			mean: Math.round(bfsMeanLength * 100) / 100,
+			median: bfsMedianLength,
+		});
+	}
 };
 
 /**
@@ -201,15 +212,20 @@ export const runMethodRankingExperiments = async (): Promise<void> => {
 		{ name: "Frontier-Balanced", algo: new FrontierBalancedExpansion(expander, seeds) },
 	];
 
-	const rankings: Array<{ method: string; diversity: number; paths: number }> = [];
+	const rankings: Array<{ method: string; diversity: number; paths: number; onlinePaths: number }> = [];
 
 	for (const method of methods) {
 		const result = await method.algo.run();
-		const diversity = calculateDiversity(result.paths);
+
+		// Use retroactive path enumeration for fair comparison (maxLength=5 for tractability)
+		const retroactivePaths = await retroactivePathEnumeration(result, expander, seeds, 5);
+		const diversity = calculateDiversity(retroactivePaths.paths);
+
 		rankings.push({
 			method: method.name,
 			diversity: Math.round(diversity * 1000) / 1000,
-			paths: result.paths.length,
+			paths: retroactivePaths.paths.length, // Retroactive path count
+			onlinePaths: result.paths.length, // Keep online for reference
 		});
 	}
 
@@ -255,11 +271,17 @@ export const runCrossDatasetExperiments = async (): Promise<void> => {
 
 		const dp = new DegreePrioritisedExpansion(expander, seeds);
 		const dpResult = await dp.run();
-		const dpDiversity = calculateDiversity(dpResult.paths);
+
+		// Use retroactive path enumeration for fair comparison
+		const dpRetroPaths = await retroactivePathEnumeration(dpResult, expander, seeds, 5);
+		const dpDiversity = calculateDiversity(dpRetroPaths.paths);
 
 		const bfs = new StandardBfsExpansion(expander, seeds);
 		const bfsResult = await bfs.run();
-		const bfsDiversity = calculateDiversity(bfsResult.paths);
+
+		// Use retroactive path enumeration for fair comparison
+		const bfsRetroPaths = await retroactivePathEnumeration(bfsResult, expander, seeds, 5);
+		const bfsDiversity = calculateDiversity(bfsRetroPaths.paths);
 
 		const improvement = bfsDiversity > 0
 			? ((dpDiversity - bfsDiversity) / bfsDiversity) * 100
@@ -271,6 +293,8 @@ export const runCrossDatasetExperiments = async (): Promise<void> => {
 			dpDiversity: Math.round(dpDiversity * 1000) / 1000,
 			bfsDiversity: Math.round(bfsDiversity * 1000) / 1000,
 			improvement: Math.round(improvement * 10) / 10,
+			dpPaths: dpRetroPaths.paths.length,
+			bfsPaths: bfsRetroPaths.paths.length,
 		});
 	}
 };
