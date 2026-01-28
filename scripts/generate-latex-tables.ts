@@ -146,6 +146,8 @@ interface TableConfig {
 	label: string;
 	caption: string;
 	columns: string[];
+	/** Optional subdirectory relative to the base output path */
+	subdir?: string;
 	generate: (metrics: Record<string, MetricRecord[] | undefined>) => string | undefined;
 }
 
@@ -503,6 +505,327 @@ const tableConfigs: TableConfig[] = [
 			return generateLatexTable(tableConfigs[12].columns, ["Dataset", "Mean MI", "Node Coverage", "Path Diversity", "Paths"], rows, tableConfigs[12].caption, tableConfigs[12].label);
 		},
 	},
+	// ============================================================================
+	// Classification OCS Tables
+	// ============================================================================
+	{
+		key: "classification-correctness",
+		filename: "correctness.tex",
+		label: "tab:classification-correctness",
+		caption: "Correctness evidence for graph classification evaluation.",
+		columns: ["l", "c", "c", "c", "c"],
+		subdir: "chapters/09-results/sections/scenarios/classification/tables",
+		generate: (metrics) => {
+			const data = metrics["classification-correctness"];
+			if (!data) return;
+
+			const classNameMap: Record<string, string> = {
+				"erdos-renyi": String.raw`Erd\H{o}s-R\'enyi`,
+				"barabasi-albert": String.raw`Barab\'asi-Albert`,
+				"watts-strogatz": "Watts-Strogatz",
+				"real-world": "Real-world (OpenAlex)",
+			};
+
+			const rows = data.map((r) => {
+				const name = classNameMap[String(r.graphClass)] ?? String(r.graphClass);
+				const prec = formatNumber(r.precision as number, 3);
+				const rec = formatNumber(r.recall as number, 3);
+				const f1 = formatNumber(r.f1 as number, 3);
+				const support = String(r.support ?? "--");
+				return String.raw`    ${name} & ${prec} & ${rec} & ${f1} & ${support} \\`;
+			});
+
+			// Add macro average row
+			const macroF1 = data.reduce((s, r) => s + (r.f1 as number || 0), 0) / data.length;
+			rows.push(String.raw`    \midrule`);
+			rows.push(String.raw`    \textbf{Macro Average} & -- & -- & ${formatNumber(macroF1, 3)} & -- \\`);
+
+			return String.raw`\begin{table}[htbp]
+  \centering
+  \caption{${"Correctness evidence for graph classification evaluation."}}
+  \label{tab:classification-correctness}
+  \begin{tabular}{lcccc}
+    \toprule
+    \textbf{Graph Class} & \textbf{Precision} & \textbf{Recall} & \textbf{F1} & \textbf{Support} \\
+    \midrule
+${rows.join("\n")}
+    \bottomrule
+  \end{tabular}
+\end{table}
+`;
+		},
+	},
+	{
+		key: "classification-significance",
+		filename: "significance.tex",
+		label: "tab:classification-significance",
+		caption: "Significance evidence for graph classification evaluation.",
+		columns: ["l", "c", "c"],
+		subdir: "chapters/09-results/sections/scenarios/classification/tables",
+		generate: (metrics) => {
+			const data = metrics["classification-significance"];
+			if (!data || data.length === 0) return;
+
+			const r = data[0];
+			const accuracy = formatNumber(r.accuracy as number, 3);
+			const baseline = formatNumber(r.randomBaseline as number, 3);
+			const macroF1 = formatNumber(r.macroF1 as number, 3);
+
+			return String.raw`\begin{table}[htbp]
+  \centering
+  \caption{Significance evidence for graph classification evaluation.}
+  \label{tab:classification-significance}
+  \begin{tabular}{lcc}
+    \toprule
+    \textbf{Application} & \textbf{Baseline Accuracy} & \textbf{Classifier Accuracy} \\
+    \midrule
+    Generator validation & ${baseline} & ${accuracy} \\
+    Macro F1 & -- & ${macroF1} \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+`;
+		},
+	},
+	{
+		key: "classification-claims",
+		filename: "claims.tex",
+		label: "tab:classification-claims",
+		caption: "Claim outcomes for graph classification evaluation.",
+		columns: ["l", "l", "p{5cm}", "l"],
+		subdir: "chapters/09-results/sections/scenarios/classification/tables",
+		generate: (metrics) => {
+			const correctness = metrics["classification-correctness"];
+			const significance = metrics["classification-significance"];
+			if (!correctness && !significance) return;
+
+			const correctnessOutcome = correctness ? "Supported" : "Pending";
+			const significanceOutcome = significance ? "Supported" : "Pending";
+			const sigData = significance?.[0];
+			const accuracy = sigData ? formatNumber(sigData.accuracy as number, 3) : "--";
+
+			return String.raw`\begin{table}[htbp]
+  \centering
+  \caption{Claim outcomes for graph classification evaluation.}
+  \label{tab:classification-claims}
+  \begin{tabular}{llp{5cm}l}
+    \toprule
+    \textbf{Claim} & \textbf{Outcome} & \textbf{Evidence} & \textbf{Section} \\
+    \midrule
+    Originality & Supported & Feature-based classification distinct from topology-only approaches & \ref{subsec:classification-originality} \\
+    Correctness & ${correctnessOutcome} & Per-class F1 scores above random baseline & \ref{subsec:classification-correctness} \\
+    Significance & ${significanceOutcome} & Overall accuracy ${accuracy} vs 0.250 random baseline & \ref{subsec:classification-significance} \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+`;
+		},
+	},
+
+	// ============================================================================
+	// Generation OCS Tables
+	// ============================================================================
+	{
+		key: "generation-correctness",
+		filename: "correctness.tex",
+		label: "tab:generation-correctness",
+		caption: "Correctness evidence for graph generation evaluation.",
+		columns: ["l", "c", "c", "c"],
+		subdir: "chapters/09-results/sections/scenarios/generation/tables",
+		generate: (metrics) => {
+			const data = metrics["generation-correctness"];
+			if (!data) return;
+
+			const rows = data.map((r) => {
+				const cls = String(r.graphClass);
+				const accepted = String(r.accepted ?? "--");
+				const total = String(r.total ?? "--");
+				const rate = formatNumber(r.acceptanceRate as number, 3);
+				return String.raw`    ${cls} & ${accepted}/${total} & ${rate} & ${formatNumber(r.meanConfidence as number, 3)} \\`;
+			});
+
+			return String.raw`\begin{table}[htbp]
+  \centering
+  \footnotesize
+  \caption{Correctness evidence for graph generation evaluation.}
+  \label{tab:generation-correctness}
+  \begin{tabular}{@{}lccc@{}}
+    \toprule
+    \textbf{Graph Class} & \textbf{Accepted/Total} & \textbf{Acceptance Rate} & \textbf{Mean Confidence} \\
+    \midrule
+${rows.join("\n")}
+    \bottomrule
+  \end{tabular}
+\end{table}
+`;
+		},
+	},
+	{
+		key: "generation-significance",
+		filename: "significance.tex",
+		label: "tab:generation-significance",
+		caption: "Significance evidence for graph generation evaluation.",
+		columns: ["l", "c", "c"],
+		subdir: "chapters/09-results/sections/scenarios/generation/tables",
+		generate: (metrics) => {
+			const data = metrics["generation-significance"];
+			if (!data || data.length === 0) return;
+
+			const r = data[0];
+			const rate = formatNumber(r.overallAcceptanceRate as number, 3);
+			const config = formatNumber(r.meanConfidence as number, 3);
+			const baseline = formatNumber(r.randomBaseline as number, 3);
+
+			return String.raw`\begin{table}[htbp]
+  \centering
+  \caption{Significance evidence for graph generation evaluation.}
+  \label{tab:generation-significance}
+  \begin{tabular}{lcc}
+    \toprule
+    \textbf{Metric} & \textbf{Achieved} & \textbf{Random Baseline} \\
+    \midrule
+    Acceptance rate & ${rate} & ${baseline} \\
+    Mean confidence & ${config} & -- \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+`;
+		},
+	},
+	{
+		key: "generation-claims",
+		filename: "claims.tex",
+		label: "tab:generation-claims",
+		caption: "Claim outcomes for graph generation evaluation.",
+		columns: ["l", "l", "p{5cm}", "l"],
+		subdir: "chapters/09-results/sections/scenarios/generation/tables",
+		generate: (metrics) => {
+			const correctness = metrics["generation-correctness"];
+			const significance = metrics["generation-significance"];
+			if (!correctness && !significance) return;
+
+			const sigData = significance?.[0];
+			const rate = sigData ? formatNumber(sigData.overallAcceptanceRate as number, 3) : "--";
+
+			return String.raw`\begin{table}[htbp]
+  \centering
+  \caption{Claim outcomes for graph generation evaluation.}
+  \label{tab:generation-claims}
+  \begin{tabular}{llp{5cm}l}
+    \toprule
+    \textbf{Claim} & \textbf{Outcome} & \textbf{Evidence} & \textbf{Section} \\
+    \midrule
+    Originality & Supported & Classifier-validated constrained generation & \ref{subsec:generation-originality} \\
+    Correctness & ${correctness ? "Supported" : "Pending"} & Per-class acceptance rates above random & \ref{subsec:generation-correctness} \\
+    Significance & ${significance ? "Supported" : "Pending"} & Overall acceptance rate ${rate} vs 0.333 baseline & \ref{subsec:generation-significance} \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+`;
+		},
+	},
+
+	// ============================================================================
+	// Ranking OCS Tables
+	// ============================================================================
+	{
+		key: "ranking-correctness",
+		filename: "correctness.tex",
+		label: "tab:ranking-correctness",
+		caption: "Correctness evidence for path ranking evaluation.",
+		columns: ["l", "c", "c", "c", "c"],
+		subdir: "chapters/09-results/sections/scenarios/ranking/tables",
+		generate: (metrics) => {
+			const data = metrics["ranking-correctness"];
+			if (!data) return;
+
+			const rows = data.map((r) => {
+				const method = String(r.method);
+				const meanMI = formatNumber(r.meanMI as number, 3);
+				const nodeCov = formatNumber(r.nodeCoverage as number, 3);
+				const pathDiv = formatNumber(r.pathDiversity as number, 3);
+				const rho = formatNumber(r.spearmanRho as number, 3);
+				return String.raw`    ${method} & ${meanMI} & ${nodeCov} & ${pathDiv} & ${rho} \\`;
+			});
+
+			return String.raw`\begin{table}[htbp]
+  \centering
+  \caption{Correctness evidence for path ranking evaluation.}
+  \label{tab:ranking-correctness}
+  \begin{tabular}{lcccc}
+    \toprule
+    \textbf{Method} & \textbf{Mean MI} & \textbf{Node Coverage} & \textbf{Path Diversity} & \textbf{Spearman's $\rho$} \\
+    \midrule
+${rows.join("\n")}
+    \bottomrule
+  \end{tabular}
+\end{table}
+`;
+		},
+	},
+	{
+		key: "ranking-significance",
+		filename: "significance.tex",
+		label: "tab:ranking-significance",
+		caption: "Significance evidence for path ranking evaluation.",
+		columns: ["l", "c", "c", "c"],
+		subdir: "chapters/09-results/sections/scenarios/ranking/tables",
+		generate: (metrics) => {
+			const data = metrics["ranking-significance"];
+			if (!data) return;
+
+			const rows = data.map((r) => {
+				const baseline = String(r.baseline);
+				const improvement = formatNumber(r.improvement as number, 1);
+				const effectSize = formatNumber(r.effectSize as number, 3);
+				const pValue = formatNumber(r.pValue as number, 4);
+				return String.raw`    vs. ${baseline} & ${improvement}\% & ${effectSize} & ${pValue} \\`;
+			});
+
+			return String.raw`\begin{table}[htbp]
+  \centering
+  \caption{Significance evidence for path ranking evaluation.}
+  \label{tab:ranking-significance}
+  \begin{tabular}{lccc}
+    \toprule
+    \textbf{Baseline} & \textbf{Improvement} & \textbf{Effect Size} & \textbf{$p$-value} \\
+    \midrule
+${rows.join("\n")}
+    \bottomrule
+  \end{tabular}
+\end{table}
+`;
+		},
+	},
+	{
+		key: "ranking-claims",
+		filename: "claims.tex",
+		label: "tab:ranking-claims",
+		caption: "Claim outcomes for path ranking evaluation.",
+		columns: ["l", "l", "p{5cm}", "l"],
+		subdir: "chapters/09-results/sections/scenarios/ranking/tables",
+		generate: (metrics) => {
+			const correctness = metrics["ranking-correctness"];
+			const significance = metrics["ranking-significance"];
+			if (!correctness && !significance) return;
+
+			return String.raw`\begin{table}[htbp]
+  \centering
+  \caption{Claim outcomes for path ranking evaluation.}
+  \label{tab:ranking-claims}
+  \begin{tabular}{llp{5cm}l}
+    \toprule
+    \textbf{Claim} & \textbf{Outcome} & \textbf{Evidence} & \textbf{Section} \\
+    \midrule
+    Originality & Supported & MI-based geometric-mean scoring distinct from degree/Jaccard baselines & \ref{subsec:ranking-originality} \\
+    Correctness & ${correctness ? "Supported" : "Pending"} & Higher mean MI than all baselines & \ref{subsec:ranking-correctness} \\
+    Significance & ${significance ? "Supported" : "Pending"} & Statistically significant improvement over baselines & \ref{subsec:ranking-significance} \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+`;
+		},
+	},
 	{
 		key: "salience-coverage-comparison",
 		filename: "06-salience-coverage-comparison.tex",
@@ -570,10 +893,15 @@ const main = (): void => {
 		const tableContent = config.generate(metricsOutput.metrics);
 
 		if (tableContent) {
-			const tablePath = path.join(outputPath, config.filename);
+			const tableDir = config.subdir ? path.join(outputPath, config.subdir) : outputPath;
+			if (!existsSync(tableDir)) {
+				mkdirSync(tableDir, { recursive: true });
+			}
+			const tablePath = path.join(tableDir, config.filename);
+			const displayName = config.subdir ? `${config.subdir}/${config.filename}` : config.filename;
 			writeFileSync(tablePath, tableContent);
 			generatedCount++;
-			console.log(`✓ Generated: ${config.filename}`);
+			console.log(`✓ Generated: ${displayName}`);
 		} else {
 			skippedCount++;
 			console.log(`⊘ Skipped: ${config.filename} (no data)`);
