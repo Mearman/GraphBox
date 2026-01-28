@@ -106,7 +106,7 @@ export class SaliencePreservingStrategy implements BetweenGraphStrategy {
 		// Include seeds regardless of salience (for connectivity)
 		for (const path of expansionResult.paths) {
 			const seedA = path.nodes[0];
-			const seedB = path.nodes.at(-1);
+			const seedB = path.nodes[path.nodes.length - 1];
 			preservedNodes.add(seedA);
 			if (seedB !== undefined) {
 				preservedNodes.add(seedB);

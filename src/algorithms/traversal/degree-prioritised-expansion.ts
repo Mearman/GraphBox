@@ -354,7 +354,7 @@ export class DegreePrioritisedExpansion<T> {
 		const seedB = this.seeds[stateB.index];
 
 		if (pathFromA[0] !== seedA) return null;
-		if (pathFromB.length > 0 && pathFromB.at(-1) !== seedB && // Path from B should end at seed B, or be empty if meeting node is seed B
+		if (pathFromB.length > 0 && pathFromB[pathFromB.length - 1] !== seedB && // Path from B should end at seed B, or be empty if meeting node is seed B
       meetingNode !== seedB) return null;
 
 		const fullPath = [...pathFromA, ...pathFromB];
