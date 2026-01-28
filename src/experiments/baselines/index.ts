@@ -53,5 +53,8 @@ export { type BfsExpansionStats,StandardBfsExpansion, type StandardBfsResult } f
 
 // Path ranking baselines for comparison with Path Salience Ranking
 export { type BetweennessConfig,betweennessRanking } from "./betweenness-ranking";
+export { type DegreeRankingConfig, degreeSumRanking } from "./degree-sum-ranking";
+export { jaccardArithmeticRanking,type JaccardRankingConfig } from "./jaccard-arithmetic-ranking";
+export { type PageRankRankingConfig, pageRankSumRanking } from "./pagerank-sum-ranking";
 export { type RandomPathConfig,randomPathRanking } from "./random-path-ranking";
 export { type ShortestPathConfig,shortestPathRanking } from "./shortest-path-ranking";
