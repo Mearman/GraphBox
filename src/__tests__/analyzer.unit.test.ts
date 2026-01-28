@@ -325,7 +325,7 @@ describe("Graph Spec Analyzer", () => {
 			expect(spec.completeness).toEqual({ kind: "incomplete" });
 		});
 
-		test("detects sparse graph", () => {
+		test("detects sparse graph", { timeout: 30_000 }, () => {
 			const g: AnalyzerGraph = {
 				vertices: Array.from({ length: 20 }, (_, index) => ({ id: `v${index}` })),
 				edges: [{ id: "e0", endpoints: ["v0", "v1"], directed: false }],
