@@ -26,8 +26,8 @@ import {
 
 describe("Benchmark Dataset Metadata", () => {
 	it("should have all expected datasets", () => {
-		expect(BENCHMARK_DATASETS).toHaveLength(6);
-		expect(DATASETS_BY_ID.size).toBe(6);
+		expect(BENCHMARK_DATASETS).toHaveLength(11);
+		expect(DATASETS_BY_ID.size).toBe(11);
 	});
 
 	it("should have consistent IDs in map", () => {
@@ -190,7 +190,7 @@ describe("Benchmark Utilities", () => {
 
 		expect(result.valid).toBe(true);
 		expect(result.warnings).toHaveLength(0);
-	});
+	}, 60_000); // 60s timeout for large dataset
 });
 
 describe("Browser-Compatible Loaders", () => {
