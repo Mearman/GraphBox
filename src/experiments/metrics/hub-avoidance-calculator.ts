@@ -22,7 +22,7 @@ import type { BfsExpansionStats } from "../baselines/standard-bfs.js";
  * @readonly
  */
  
-const DEGREE_BUCKETS = [
+const _DEGREE_BUCKETS = [
 	"1-5", "6-10", "11-50", "51-100", "101-500", "501-1000", "1000+"
 ] as const;
 
