@@ -65,6 +65,9 @@ export class SaliencePrioritisedExpansion<T> implements GraphExpander<T> {
 	/** Track which seed pairs have connected */
 	private readonly connectedPairs = new Set<string>();
 
+	/** Tracks when each node was first discovered (iteration number) */
+	private readonly nodeDiscoveryIteration = new Map<string, number>();
+
 	/**
 	 * Create a new salience-prioritised expansion.
 	 *
@@ -98,6 +101,9 @@ export class SaliencePrioritisedExpansion<T> implements GraphExpander<T> {
 			});
 
 			this.nodeToFrontierIndex.set(seed, index);
+
+			// Seeds are discovered at iteration 0
+			this.nodeDiscoveryIteration.set(seed, 0);
 		}
 	}
 
@@ -178,6 +184,11 @@ export class SaliencePrioritisedExpansion<T> implements GraphExpander<T> {
 				activeState.parents.set(targetId, { parent: node, edge: relationshipType });
 				this.nodeToFrontierIndex.set(targetId, activeIndex);
 
+				// Track first discovery iteration (only if not already discovered)
+				if (!this.nodeDiscoveryIteration.has(targetId)) {
+					this.nodeDiscoveryIteration.set(targetId, this.stats.iterations);
+				}
+
 				// Add to frontier with salience priority
 				const neighborSalience = this.nodeSalience.get(targetId) ?? 0;
 				const priority = neighborSalience * 1000 - this.expander.calculatePriority(targetId);
@@ -225,6 +236,7 @@ export class SaliencePrioritisedExpansion<T> implements GraphExpander<T> {
 			sampledEdges,
 			visitedPerFrontier,
 			stats: this.stats,
+			nodeDiscoveryIteration: this.nodeDiscoveryIteration,
 		};
 	}
 
