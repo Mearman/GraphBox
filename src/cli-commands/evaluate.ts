@@ -38,6 +38,7 @@ import { formatError } from "../cli-utils/error-formatter";
 // import { ClaimsEvaluator } from "ppef/evaluators";
 // import { getClaimsByTag, getCoreClaims, THESIS_CLAIMS } from "../domain/claims.js";
 import { TABLE_SPECS } from "../domain/tables.js";
+import type { EnsembleExpansionResult } from "../experiments/baselines/ensemble-expansion.js";
 import type { BenchmarkGraphExpander } from "../experiments/evaluation/__tests__/validation/common/benchmark-graph-expander.js";
 import { loadBenchmarkByIdFromUrl } from "../experiments/evaluation/fixtures/index.js";
 // Salience coverage metrics
@@ -589,6 +590,12 @@ const isBidirectionalBFSResult = (result: ExpansionResult): result is Bidirectio
 const isOverlapBasedExpansionResult = (result: ExpansionResult): result is OverlapBasedExpansionResult => "overlapMetadata" in result;
 
 /**
+ * Type guard to check if result is EnsembleExpansionResult.
+ * @param result
+ */
+const isEnsembleExpansionResult = (result: ExpansionResult): result is EnsembleExpansionResult => "sampledNodesPerStrategy" in result;
+
+/**
  * Metrics extractor for expansion results.
  * Handles BidirectionalBFSResult, DegreePrioritisedExpansionResult, and OverlapBasedExpansionResult.
  *
@@ -752,6 +759,64 @@ const extractMetrics = (result: ExpansionResult): Record<string, number> => {
 			overlappingPairs.add(key);
 		}
 		metrics["structural-coverage"] = overlappingPairs.size > 0 ? 1 : 0;
+
+		return metrics;
+	}
+
+	// Handle EnsembleExpansionResult (ensemble strategy with union-based results)
+	if (isEnsembleExpansionResult(result)) {
+		const stats = result.stats;
+
+		// Estimate iterations from total paths (ensemble doesn't track iterations directly)
+		const estimatedIterations = stats.totalPaths > 0 ? stats.totalPaths : stats.totalUnionNodes;
+
+		const metrics: Record<string, number> = {
+			// Basic metrics - derived from ensemble stats
+			"nodes-expanded": stats.totalUnionNodes,
+			"edges-traversed": result.sampledEdges.size,
+			"iterations": estimatedIterations,
+			"unique-paths": result.paths.length,
+			"sampled-nodes": result.sampledNodes.size,
+			"sampled-edges": result.sampledEdges.size,
+
+			// Overlap-specific metrics (not applicable to ensemble)
+			"overlap-events": 0,
+			"termination-reason": 0,
+
+			// Hub metrics (ensemble doesn't track degree distribution)
+			"hub-traversal": 0,
+			"hub-avoidance-rate": 0,
+			"hub-avoidance-rate-100": 0,
+			"peripheral-coverage-ratio": 0,
+
+			// Coverage metrics
+			"node-coverage": result.sampledNodes.size / Math.max(1, result.sampledNodes.size * 2),
+			"bucket-coverage": 0, // Not available without degree distribution
+			"structural-coverage": result.sampledEdges.size > 0 && result.sampledNodes.size > 0
+				? result.sampledEdges.size / result.sampledNodes.size
+				: 0,
+
+			// Path timestamp for salience coverage computation
+			"_pathTimestamp": pathTimestamp,
+		};
+
+		// Path diversity metrics (always include, even when no paths)
+		if (result.paths.length > 0) {
+			const uniquePaths = result.paths.length;
+			metrics["path-diversity"] = uniquePaths / Math.log(estimatedIterations + 2);
+
+			const pathLengths = result.paths.map((p) => p.nodes.length);
+			const avgPathLength = pathLengths.reduce((sum, length) => sum + length, 0) / pathLengths.length;
+			metrics["avg-path-length"] = avgPathLength;
+			metrics["min-path-length"] = Math.min(...pathLengths);
+			metrics["max-path-length"] = Math.max(...pathLengths);
+		} else {
+			// No paths found - set defaults to ensure consistent metrics across all SUTs
+			metrics["path-diversity"] = 0;
+			metrics["avg-path-length"] = 0;
+			metrics["min-path-length"] = 0;
+			metrics["max-path-length"] = 0;
+		}
 
 		return metrics;
 	}
