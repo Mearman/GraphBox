@@ -12,12 +12,13 @@
  */
 
 import { spawn } from "node:child_process";
+import { existsSync, mkdirSync,writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { writeFileSync, existsSync, mkdirSync } from "node:fs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const projectRoot = join(__dirname, "..");
+const vitestBin = join(projectRoot, "node_modules", ".bin", "vitest");
 
 interface MetricSection {
 	title: string;
@@ -43,14 +44,47 @@ interface TestMetrics {
 	nSeedPathDiversity?: MetricSection;
 	algorithmComparison?: MetricSection;
 	hubTraversalComparison?: MetricSection;
+	miRankingQuality?: MetricSection;
+	// Classification, Generation, Ranking OCS metrics
+	classificationCorrectness?: MetricSection;
+	classificationSignificance?: MetricSection;
+	generationCorrectness?: MetricSection;
+	generationSignificance?: MetricSection;
+	rankingCorrectness?: MetricSection;
+	rankingSignificance?: MetricSection;
+}
+
+interface VitestTestResult {
+	title: string;
+	status: string;
+	duration: number;
+	ancestorTitles: string[];
+}
+
+interface VitestTestSuite {
+	testResults: VitestTestSuite[];
+	assertionResults: VitestTestResult[];
+	name: string;
+}
+
+interface VitestJsonOutput {
+	testResults?: VitestTestSuite[];
+}
+
+interface CollectedTest {
+	name: string;
+	status: string;
+	duration: number;
+	suite: string;
+	ancestorTitles: string[];
 }
 
 // Helper to collect all tests from test results
-function collectTests(results: any): any[] {
-	const tests: any[] = [];
+const collectTests = (results: VitestJsonOutput): CollectedTest[] => {
+	const tests: CollectedTest[] = [];
 
-	for (const suite of results.testResults || []) {
-		for (const test of suite.assertionResults || []) {
+	for (const suite of results.testResults ?? []) {
+		for (const test of suite.assertionResults ?? []) {
 			tests.push({
 				name: test.title,
 				status: test.status,
@@ -62,34 +96,34 @@ function collectTests(results: any): any[] {
 	}
 
 	return tests;
-}
+};
 
 /**
  * Parse console output to extract metrics sections
+ * @param stdout
  */
-function parseConsoleMetrics(stdout: string): TestMetrics {
+const parseConsoleMetrics = (stdout: string): TestMetrics => {
 	const metrics: TestMetrics = {};
 	const lines = stdout.split("\n");
 
 	interface Parser {
 		header: RegExp;
-		parse: (lines: string[], startIdx: number) => MetricSection | null;
+		parse: (lines: string[], startIndex: number) => MetricSection | null;
 	}
 
 	const parsers: Parser[] = [
 		// Runtime Performance (Karate Club)
 		{
 			header: /=== Runtime Performance \(Karate Club\) ===/,
-			parse: (lines, startIdx) => {
-				const rows: Record<string, string | number>[] = [];
+			parse: (lines, startIndex) => {
 				let currentMethod: string | null = null;
 				const methodData: Record<string, Record<string, string | number>> = {};
 
-				for (let i = startIdx; i < Math.min(startIdx + 20, lines.length); i++) {
-					const line = lines[i];
+				for (let index = startIndex; index < Math.min(startIndex + 20, lines.length); index++) {
+					const line = lines[index];
 
 					// Detect method name followed by colon
-					if (line.match(/^(Degree-Prioritised|Standard BFS|Frontier-Balanced|Random Priority):$/) && !line.includes("\t")) {
+					if (/^(Degree-Prioritised|Standard BFS|Frontier-Balanced|Random Priority):$/.test(line) && !line.includes("\t")) {
 						currentMethod = line.replace(":", "");
 						methodData[currentMethod] = {};
 						continue;
@@ -98,19 +132,19 @@ function parseConsoleMetrics(stdout: string): TestMetrics {
 					// Parse metric lines like "  Time: 0.08ms"
 					if (line.trim().startsWith("Time:") && currentMethod) {
 						const match = line.match(/Time:\s+([\d.]+)ms/);
-						if (match) methodData[currentMethod].time = parseFloat(match[1]);
+						if (match) methodData[currentMethod].time = Number.parseFloat(match[1]);
 					}
 					if (line.trim().startsWith("Nodes/sec:") && currentMethod) {
 						const match = line.match(/Nodes\/sec:\s+([\d,]+)/);
-						if (match) methodData[currentMethod].nodesPerSec = parseInt(match[1].replace(",", ""));
+						if (match) methodData[currentMethod].nodesPerSec = Number.parseInt(match[1].replace(",", ""));
 					}
 					if (line.trim().startsWith("Iterations:") && currentMethod) {
 						const match = line.match(/Iterations:\s+(\d+)/);
-						if (match) methodData[currentMethod].iterations = parseInt(match[1]);
+						if (match) methodData[currentMethod].iterations = Number.parseInt(match[1]);
 					}
 
 					// Empty line or next section ends this block
-					if (line.trim() === "" && i > startIdx + 2) break;
+					if (line.trim() === "" && index > startIndex + 2) break;
 				}
 
 				return Object.keys(methodData).length > 0 ? { title: "Runtime Performance (Karate Club)", rows: [] } : null;
@@ -119,18 +153,18 @@ function parseConsoleMetrics(stdout: string): TestMetrics {
 		// Runtime Performance (Facebook) - for scalability table
 		{
 			header: /=== Runtime Performance \(Facebook\) ===/,
-			parse: (lines, startIdx) => {
+			parse: (lines, startIndex) => {
 				const data: Record<string, string | number> = {};
-				for (let i = startIdx; i < Math.min(startIdx + 10, lines.length); i++) {
-					const line = lines[i];
+				for (let index = startIndex; index < Math.min(startIndex + 10, lines.length); index++) {
+					const line = lines[index];
 					const dpMatch = line.match(/Degree-Prioritised:\s+([\d.]+)ms/);
-					if (dpMatch) data.dpTime = parseFloat(dpMatch[1]);
+					if (dpMatch) data.dpTime = Number.parseFloat(dpMatch[1]);
 					const bfsMatch = line.match(/Standard BFS:\s+([\d.]+)ms/);
-					if (bfsMatch) data.bfsTime = parseFloat(bfsMatch[1]);
+					if (bfsMatch) data.bfsTime = Number.parseFloat(bfsMatch[1]);
 					const dpNsMatch = line.match(/DP nodes\/sec:\s+([\d,]+)/);
-					if (dpNsMatch) data.dpNodesPerSec = parseInt(dpNsMatch[1].replace(",", ""));
+					if (dpNsMatch) data.dpNodesPerSec = Number.parseInt(dpNsMatch[1].replace(",", ""));
 					const bfsNsMatch = line.match(/BFS nodes\/sec:\s+([\d,]+)/);
-					if (bfsNsMatch) data.bfsNodesPerSec = parseInt(bfsNsMatch[1].replace(",", ""));
+					if (bfsNsMatch) data.bfsNodesPerSec = Number.parseInt(bfsNsMatch[1].replace(",", ""));
 					if (line.trim() === "") break;
 				}
 				return Object.keys(data).length > 0 ? { title: "Runtime Performance (Facebook)", rows: [data] } : null;
@@ -139,20 +173,20 @@ function parseConsoleMetrics(stdout: string): TestMetrics {
 		// Scalability Analysis
 		{
 			header: /=== Scalability Analysis ===/,
-			parse: (lines, startIdx) => {
+			parse: (lines, startIndex) => {
 				const rows: Record<string, string | number>[] = [];
 				// Skip header line
-				for (let i = startIdx + 2; i < Math.min(startIdx + 10, lines.length); i++) {
-					const line = lines[i];
+				for (let index = startIndex + 2; index < Math.min(startIndex + 10, lines.length); index++) {
+					const line = lines[index];
 					if (line.trim() === "" || line.startsWith("===")) break;
 					const parts = line.split("\t");
 					if (parts.length >= 5) {
 						rows.push({
 							dataset: parts[0],
-							nodes: parseInt(parts[1]),
-							dpTime: parseFloat(parts[2]),
-							bfsTime: parseFloat(parts[3]),
-							ratio: parseFloat(parts[4]),
+							nodes: Number.parseInt(parts[1]),
+							dpTime: Number.parseFloat(parts[2]),
+							bfsTime: Number.parseFloat(parts[3]),
+							ratio: Number.parseFloat(parts[4]),
 						});
 					}
 				}
@@ -162,13 +196,13 @@ function parseConsoleMetrics(stdout: string): TestMetrics {
 		// Hub Traversal
 		{
 			header: /=== Hub Traversal Efficiency ===/,
-			parse: (lines, startIdx) => {
+			parse: (lines, startIndex) => {
 				const rows: Record<string, string | number>[] = [];
 				let currentMethod: string | null = null;
 				const currentData: Record<string, string | number> = {};
 
-				for (let i = startIdx + 1; i < Math.min(startIdx + 10, lines.length); i++) {
-					const line = lines[i];
+				for (let index = startIndex + 1; index < Math.min(startIndex + 10, lines.length); index++) {
+					const line = lines[index];
 					if (line.trim() === "" || line.startsWith("===")) break;
 
 					// Match "Method: X/Y hubs (Z%)" or "Method: value paths, Z% hub"
@@ -184,13 +218,13 @@ function parseConsoleMetrics(stdout: string): TestMetrics {
 						// Parse "X/Y hubs (Z%)"
 						const hubMatch = methodMatch[2].match(/(\d+)\/\d+\s+hubs\s*\(([\d.]+)%\)/);
 						if (hubMatch) {
-							currentData.hubTraversal = parseFloat(hubMatch[2]);
+							currentData.hubTraversal = Number.parseFloat(hubMatch[2]);
 						} else {
 							// Try "X paths, Y% hub" format
 							const pathsHubMatch = methodMatch[2].match(/(\d+)\s+paths?,\s*([\d.]+)%/);
 							if (pathsHubMatch) {
-								currentData.path = parseInt(pathsHubMatch[1]);
-								currentData.hubTraversal = parseFloat(pathsHubMatch[2]);
+								currentData.path = Number.parseInt(pathsHubMatch[1]);
+								currentData.hubTraversal = Number.parseFloat(pathsHubMatch[2]);
 							}
 						}
 					}
@@ -206,13 +240,13 @@ function parseConsoleMetrics(stdout: string): TestMetrics {
 		// Path Lengths
 		{
 			header: /=== Path Length Distribution ===/,
-			parse: (lines, startIdx) => {
+			parse: (lines, startIndex) => {
 				const rows: Record<string, string | number>[] = [];
 				let currentMethod: string | null = null;
 				const currentData: Record<string, number> = {};
 
-				for (let i = startIdx + 1; i < Math.min(startIdx + 10, lines.length); i++) {
-					const line = lines[i];
+				for (let index = startIndex + 1; index < Math.min(startIndex + 10, lines.length); index++) {
+					const line = lines[index];
 					if (line.trim() === "" || line.startsWith("===")) break;
 
 					// Method name line: "Method:" or just "Method"
@@ -233,10 +267,10 @@ function parseConsoleMetrics(stdout: string): TestMetrics {
 						const meanMatch = line.match(/Mean:\s*([\d.]+)/);
 						const medianMatch = line.match(/Median:\s*(\d+)/);
 
-						if (minMatch) currentData.min = parseInt(minMatch[1]);
-						if (maxMatch) currentData.max = parseInt(maxMatch[1]);
-						if (meanMatch) currentData.mean = parseFloat(meanMatch[1]);
-						if (medianMatch) currentData.median = parseInt(medianMatch[1]);
+						if (minMatch) currentData.min = Number.parseInt(minMatch[1]);
+						if (maxMatch) currentData.max = Number.parseInt(maxMatch[1]);
+						if (meanMatch) currentData.mean = Number.parseFloat(meanMatch[1]);
+						if (medianMatch) currentData.median = Number.parseInt(medianMatch[1]);
 					}
 				}
 
@@ -250,21 +284,21 @@ function parseConsoleMetrics(stdout: string): TestMetrics {
 		// Statistical Significance (Path Salience vs Random)
 		{
 			header: /=== Statistical Test: Path Salience vs Random ===/,
-			parse: (lines, startIdx) => {
+			parse: (lines, startIndex) => {
 				const data: Record<string, string | number> = {};
-				for (let i = startIdx; i < Math.min(startIdx + 10, lines.length); i++) {
-					const line = lines[i];
+				for (let index = startIndex; index < Math.min(startIndex + 10, lines.length); index++) {
+					const line = lines[index];
 					const salienceMean = line.match(/Path Salience mean MI:\s+([\d.]+)/);
-					if (salienceMean) data.salienceMean = parseFloat(salienceMean[1]);
+					if (salienceMean) data.salienceMean = Number.parseFloat(salienceMean[1]);
 					const randomMean = line.match(/Random mean MI:\s+([\d.]+)/);
-					if (randomMean) data.randomMean = parseFloat(randomMean[1]);
+					if (randomMean) data.randomMean = Number.parseFloat(randomMean[1]);
 					const uMatch = line.match(/Mann-Whitney U:\s+([\d.]+)/);
-					if (uMatch) data.u = parseFloat(uMatch[1]);
+					if (uMatch) data.u = Number.parseFloat(uMatch[1]);
 					const pMatch = line.match(/p-value:\s+([\d.]+)/);
-					if (pMatch) data.pValue = parseFloat(pMatch[1]);
+					if (pMatch) data.pValue = Number.parseFloat(pMatch[1]);
 					const dMatch = line.match(/Cohen's d:\s+([\d.-]+)/);
-					if (dMatch) data.cohensD = parseFloat(dMatch[1]);
-					if (line.trim() === "" && i > startIdx + 3) break;
+					if (dMatch) data.cohensD = Number.parseFloat(dMatch[1]);
+					if (line.trim() === "" && index > startIndex + 3) break;
 				}
 				return Object.keys(data).length >= 3 ? { title: "Statistical Test: Path Diversity", rows: [data] } : null;
 			},
@@ -272,17 +306,17 @@ function parseConsoleMetrics(stdout: string): TestMetrics {
 		// Perturbation Consistency
 		{
 			header: /=== Consistent Method Ranking ===/,
-			parse: (lines, startIdx) => {
+			parse: (lines, startIndex) => {
 				const rows: Record<string, string | number>[] = [];
-				for (let i = startIdx + 1; i < Math.min(startIdx + 10, lines.length); i++) {
-					const line = lines[i];
+				for (let index = startIndex + 1; index < Math.min(startIndex + 10, lines.length); index++) {
+					const line = lines[index];
 					if (line.trim() === "" || line.startsWith("===")) break;
 					const match = line.match(/^(.+?):\s+DP=([\d.]+),\s+BFS=([\d.]+)\s+\((\w+)\)/);
 					if (match) {
 						rows.push({
 							perturbation: match[1].trim(),
-							dpDiversity: parseFloat(match[2]),
-							bfsDiversity: parseFloat(match[3]),
+							dpDiversity: Number.parseFloat(match[2]),
+							bfsDiversity: Number.parseFloat(match[3]),
 							winner: match[4],
 						});
 					}
@@ -293,17 +327,16 @@ function parseConsoleMetrics(stdout: string): TestMetrics {
 		// Cross-Dataset
 		{
 			header: /=== Cross-Dataset Path Diversity ===/,
-			parse: (lines, startIdx) => {
+			parse: (lines, startIndex) => {
 				const rows: Record<string, string | number>[] = [];
-				let jsonStr = "";
-				let lineIdx = startIdx + 1;
+				let jsonString = "";
+				let lineIndex = startIndex + 1;
 				let braceCount = 0;
 				let hasStartedJson = false;
-				let inJson = false;
 
 				// Find and collect JSON
-				while (lineIdx < lines.length) {
-					const line = lines[lineIdx];
+				while (lineIndex < lines.length) {
+					const line = lines[lineIndex];
 					const trimmed = line.trim();
 
 					// Detect JSON start
@@ -313,12 +346,11 @@ function parseConsoleMetrics(stdout: string): TestMetrics {
 
 					// Track braces when in JSON
 					if (hasStartedJson) {
-						inJson = true;
-						braceCount += (trimmed.match(/{/g) || []).length;
-						braceCount -= (trimmed.match(/}/g) || []).length;
+						braceCount += (trimmed.match(/\{/g) || []).length;
+						braceCount -= (trimmed.match(/\}/g) || []).length;
 					}
 
-					jsonStr += line;
+					jsonString += line;
 
 					// Stop when JSON is complete
 					if (hasStartedJson && braceCount === 0 && trimmed.includes("}")) {
@@ -326,24 +358,24 @@ function parseConsoleMetrics(stdout: string): TestMetrics {
 					}
 
 					// Stop at next section (test output or new header)
-					if (trimmed.startsWith("===") && lineIdx > startIdx + 1) {
+					if (trimmed.startsWith("===") && lineIndex > startIndex + 1) {
 						break;
 					}
-					if ((trimmed.includes("✓") || trimmed.includes("×")) && lineIdx > startIdx + 10) {
+					if ((trimmed.includes("✓") || trimmed.includes("×")) && lineIndex > startIndex + 10) {
 						break;
 					}
 
-					lineIdx++;
-					if (lineIdx > startIdx + 50) break;
+					lineIndex++;
+					if (lineIndex > startIndex + 50) break;
 				}
 
 				try {
 					// Extract just the JSON part
-					const jsonStart = jsonStr.indexOf("{");
-					const jsonEnd = jsonStr.lastIndexOf("}") + 1;
-					if (jsonStart >= 0 && jsonEnd > jsonStart) {
-						jsonStr = jsonStr.substring(jsonStart, jsonEnd);
-						const jsonData = JSON.parse(jsonStr);
+					const jsonStart = jsonString.indexOf("{");
+					const jsonEnd = jsonString.lastIndexOf("}") + 1;
+					if (jsonStart !== -1 && jsonEnd > jsonStart) {
+						jsonString = jsonString.slice(jsonStart, jsonEnd);
+						const jsonData = JSON.parse(jsonString);
 						for (const [dataset, data] of Object.entries(jsonData)) {
 							const d = data as { nodes?: number; dpDiversity?: number; bfsDiversity?: number; dpPaths?: number; bfsPaths?: number };
 							if (typeof d.dpDiversity === "number" && typeof d.bfsDiversity === "number") {
@@ -368,17 +400,17 @@ function parseConsoleMetrics(stdout: string): TestMetrics {
 		// Method Ranking
 		{
 			header: /=== Method Ranking by Path Diversity ===/,
-			parse: (lines, startIdx) => {
+			parse: (lines, startIndex) => {
 				const rows: Record<string, string | number>[] = [];
-				for (let i = startIdx + 1; i < Math.min(startIdx + 15, lines.length); i++) {
-					const line = lines[i];
+				for (let index = startIndex + 1; index < Math.min(startIndex + 15, lines.length); index++) {
+					const line = lines[index];
 					if (line.trim() === "" || line.startsWith("===")) break;
-					const match = line.match(/^\d+\.\s+(.+?):\s+([\d.]+)\s+\((\d+)\s+paths\)/);
+					const match = line.match(/^\d+\.\s+(\S[^:]*):\s+([\d.]+)\s+\((\d+)\s+paths\)/);
 					if (match) {
 						rows.push({
 							method: match[1],
-							diversity: parseFloat(match[2]),
-							paths: parseInt(match[3]),
+							diversity: Number.parseFloat(match[2]),
+							paths: Number.parseInt(match[3]),
 						});
 					}
 				}
@@ -388,22 +420,22 @@ function parseConsoleMetrics(stdout: string): TestMetrics {
 		// Structural Representativeness (Ego Network)
 		{
 			header: /=== Structural Representativeness \(Ego Network\) ===/,
-			parse: (lines, startIdx) => {
+			parse: (lines, startIndex) => {
 				const data: Record<string, string | number> = {};
-				for (let i = startIdx; i < Math.min(startIdx + 10, lines.length); i++) {
-					const line = lines[i];
+				for (let index = startIndex; index < Math.min(startIndex + 10, lines.length); index++) {
+					const line = lines[index];
 					const coverageMatch = line.match(/Coverage:\s+([\d.]+)/);
-					if (coverageMatch) data.coverage = parseFloat(coverageMatch[1]);
+					if (coverageMatch) data.coverage = Number.parseFloat(coverageMatch[1]);
 					const precisionMatch = line.match(/Precision:\s+([\d.]+)/);
-					if (precisionMatch) data.precision = parseFloat(precisionMatch[1]);
+					if (precisionMatch) data.precision = Number.parseFloat(precisionMatch[1]);
 					const f1Match = line.match(/F1 Score:\s+([\d.]+)/);
-					if (f1Match) data.f1Score = parseFloat(f1Match[1]);
+					if (f1Match) data.f1Score = Number.parseFloat(f1Match[1]);
 					const intersectionMatch = line.match(/Intersection:\s+(\d+)\/(\d+)/);
 					if (intersectionMatch) {
-						data.intersectionSize = parseInt(intersectionMatch[1]);
-						data.totalNodes = parseInt(intersectionMatch[2]);
+						data.intersectionSize = Number.parseInt(intersectionMatch[1]);
+						data.totalNodes = Number.parseInt(intersectionMatch[2]);
 					}
-					if (line.trim() === "" && i > startIdx + 3) break;
+					if (line.trim() === "" && index > startIndex + 3) break;
 				}
 				return Object.keys(data).length >= 2 ? { title: "Structural Representativeness (Ego Network)", rows: [data] } : null;
 			},
@@ -411,18 +443,18 @@ function parseConsoleMetrics(stdout: string): TestMetrics {
 		// N-Seed Generalisation
 		{
 			header: /=== N-Seed Generalisation ===/,
-			parse: (lines, startIdx) => {
+			parse: (lines, startIndex) => {
 				const rows: Record<string, string | number>[] = [];
-				for (let i = startIdx + 1; i < Math.min(startIdx + 10, lines.length); i++) {
-					const line = lines[i];
+				for (let index = startIndex + 1; index < Math.min(startIndex + 10, lines.length); index++) {
+					const line = lines[index];
 					if (line.trim() === "" || line.startsWith("===")) break;
 					const match = line.match(/N=(\d+) \(([^)]+)\): (\d+) nodes,\s+(\d+) paths/);
 					if (match) {
 						rows.push({
-							n: parseInt(match[1]),
+							n: Number.parseInt(match[1]),
 							variant: match[2],
-							nodes: parseInt(match[3]),
-							paths: parseInt(match[4]),
+							nodes: Number.parseInt(match[3]),
+							paths: Number.parseInt(match[4]),
 						});
 					}
 				}
@@ -432,18 +464,18 @@ function parseConsoleMetrics(stdout: string): TestMetrics {
 		// Hub Mitigation Analysis
 		{
 			header: /=== Hub Mitigation Analysis ===/,
-			parse: (lines, startIdx) => {
+			parse: (lines, startIndex) => {
 				const rows: Record<string, string | number>[] = [];
-				for (let i = startIdx + 2; i < Math.min(startIdx + 10, lines.length); i++) {
-					const line = lines[i];
+				for (let index = startIndex + 2; index < Math.min(startIndex + 10, lines.length); index++) {
+					const line = lines[index];
 					if (line.trim() === "" || line.startsWith("===")) break;
 					const match = line.match(/^(Degree-Prioritised|Standard BFS)\s*&\s+(\d+)\s*&\s+--\s*&\s+(\d+)\s*&\s+(\d+)/);
 					if (match) {
 						rows.push({
 							method: match[1],
-							nodes: parseInt(match[2]),
-							paths: parseInt(match[3]),
-							iterations: parseInt(match[4]),
+							nodes: Number.parseInt(match[2]),
+							paths: Number.parseInt(match[3]),
+							iterations: Number.parseInt(match[4]),
 						});
 					}
 				}
@@ -453,19 +485,19 @@ function parseConsoleMetrics(stdout: string): TestMetrics {
 		// Multi-Hub Expansion Efficiency
 		{
 			header: /=== Multi-Hub Expansion Efficiency ===/,
-			parse: (lines, startIdx) => {
+			parse: (lines, startIndex) => {
 				const rows: Record<string, string | number>[] = [];
-				for (let i = startIdx + 2; i < Math.min(startIdx + 10, lines.length); i++) {
-					const line = lines[i];
+				for (let index = startIndex + 2; index < Math.min(startIndex + 10, lines.length); index++) {
+					const line = lines[index];
 					if (line.trim() === "" || line.startsWith("===")) break;
 					const match = line.match(/^(Degree-Prioritised|Standard BFS|Frontier-Balanced)\s*&\s+(\d+)\s*&\s+(\d+)\s+\(([\d.]+)%\)\s*&\s+(\d+)/);
 					if (match) {
 						rows.push({
 							method: match[1],
-							nodesExpanded: parseInt(match[2]),
-							hubsExpanded: parseInt(match[3]),
-							hubRatio: parseFloat(match[4]),
-							pathsFound: parseInt(match[5]),
+							nodesExpanded: Number.parseInt(match[2]),
+							hubsExpanded: Number.parseInt(match[3]),
+							hubRatio: Number.parseFloat(match[4]),
+							pathsFound: Number.parseInt(match[5]),
 						});
 					}
 				}
@@ -475,20 +507,20 @@ function parseConsoleMetrics(stdout: string): TestMetrics {
 		// Structural Representativeness Metrics
 		{
 			header: /=== Structural Representativeness Metrics ===/,
-			parse: (lines, startIdx) => {
+			parse: (lines, startIndex) => {
 				const data: Record<string, string | number> = {};
-				for (let i = startIdx; i < Math.min(startIdx + 10, lines.length); i++) {
-					const line = lines[i];
+				for (let index = startIndex; index < Math.min(startIndex + 10, lines.length); index++) {
+					const line = lines[index];
 					const totalMatch = line.match(/Total Sampled:\s+(\d+)\s+nodes/);
-					if (totalMatch) data.totalSampled = parseInt(totalMatch[1]);
+					if (totalMatch) data.totalSampled = Number.parseInt(totalMatch[1]);
 					const hubMatch = line.match(/Hub Coverage:\s+([\d.]+)%/);
-					if (hubMatch) data.hubCoverage = parseFloat(hubMatch[1]);
+					if (hubMatch) data.hubCoverage = Number.parseFloat(hubMatch[1]);
 					const bucketMatch = line.match(/Buckets Covered:\s+(\d+)\/(\d+)/);
 					if (bucketMatch) {
-						data.bucketsCovered = parseInt(bucketMatch[1]);
-						data.totalBuckets = parseInt(bucketMatch[2]);
+						data.bucketsCovered = Number.parseInt(bucketMatch[1]);
+						data.totalBuckets = Number.parseInt(bucketMatch[2]);
 					}
-					if (line.trim() === "" && i > startIdx + 3) break;
+					if (line.trim() === "" && index > startIndex + 3) break;
 				}
 				return Object.keys(data).length >= 2 ? { title: "Structural Representativeness Metrics", rows: [data] } : null;
 			},
@@ -496,20 +528,20 @@ function parseConsoleMetrics(stdout: string): TestMetrics {
 		// N-Seed Comparison Across Methods
 		{
 			header: /=== N-Seed Comparison Across Methods ===/,
-			parse: (lines, startIdx) => {
+			parse: (lines, startIndex) => {
 				const rows: Record<string, string | number>[] = [];
-				for (let i = startIdx + 2; i < Math.min(startIdx + 20, lines.length); i++) {
-					const line = lines[i];
+				for (let index = startIndex + 2; index < Math.min(startIndex + 20, lines.length); index++) {
+					const line = lines[index];
 					if (line.trim() === "" || line.startsWith("===")) break;
 					const match = line.match(/^(Degree-Prioritised|Standard BFS|Frontier-Balanced|Random Priority)\s*&\s+(\d+)\s*&\s+(\d+)\s*&\s+(\d+)\s*&\s+(\d+)\s*&\s+([\d.]+)%/);
 					if (match) {
 						rows.push({
 							method: match[1],
-							n: parseInt(match[2]),
-							nodes: parseInt(match[3]),
-							paths: parseInt(match[4]),
-							iterations: parseInt(match[5]),
-							coverage: parseFloat(match[6]),
+							n: Number.parseInt(match[2]),
+							nodes: Number.parseInt(match[3]),
+							paths: Number.parseInt(match[4]),
+							iterations: Number.parseInt(match[5]),
+							coverage: Number.parseFloat(match[6]),
 						});
 					}
 				}
@@ -519,17 +551,17 @@ function parseConsoleMetrics(stdout: string): TestMetrics {
 		// N=2 Hub Traversal Comparison
 		{
 			header: /=== N=2 Hub Traversal Comparison ===/,
-			parse: (lines, startIdx) => {
+			parse: (lines, startIndex) => {
 				const rows: Record<string, string | number>[] = [];
-				for (let i = startIdx + 2; i < Math.min(startIdx + 10, lines.length); i++) {
-					const line = lines[i];
+				for (let index = startIndex + 2; index < Math.min(startIndex + 10, lines.length); index++) {
+					const line = lines[index];
 					if (line.trim() === "" || line.startsWith("===")) break;
 					const match = line.match(/^(Degree-Prioritised|Standard BFS|Frontier-Balanced|Random Priority)\s*&\s+(\d+)\s*&\s+(\d+)%/);
 					if (match) {
 						rows.push({
 							method: match[1],
-							paths: parseInt(match[2]),
-							hubTraversal: parseInt(match[3]),
+							paths: Number.parseInt(match[2]),
+							hubTraversal: Number.parseInt(match[3]),
 						});
 					}
 				}
@@ -539,18 +571,18 @@ function parseConsoleMetrics(stdout: string): TestMetrics {
 		// N=2 Path Diversity Comparison
 		{
 			header: /=== N=2 Path Diversity Comparison ===/,
-			parse: (lines, startIdx) => {
+			parse: (lines, startIndex) => {
 				const rows: Record<string, string | number>[] = [];
-				for (let i = startIdx + 2; i < Math.min(startIdx + 10, lines.length); i++) {
-					const line = lines[i];
+				for (let index = startIndex + 2; index < Math.min(startIndex + 10, lines.length); index++) {
+					const line = lines[index];
 					if (line.trim() === "" || line.startsWith("===")) break;
 					const match = line.match(/^(Degree-Prioritised|Standard BFS|Frontier-Balanced|Random Priority)\s*&\s+(\d+)\s*&\s+(\d+)\s*&\s+([\d.]+)/);
 					if (match) {
 						rows.push({
 							method: match[1],
-							paths: parseInt(match[2]),
-							uniqueNodes: parseInt(match[3]),
-							diversity: parseFloat(match[4]),
+							paths: Number.parseInt(match[2]),
+							uniqueNodes: Number.parseInt(match[3]),
+							diversity: Number.parseFloat(match[4]),
 						});
 					}
 				}
@@ -560,11 +592,11 @@ function parseConsoleMetrics(stdout: string): TestMetrics {
 		// Algorithm Comparison (from evaluation harness)
 		{
 			header: /=== Algorithm Comparison ===/,
-			parse: (lines, startIdx) => {
+			parse: (lines, startIndex) => {
 				const rows: Record<string, string | number>[] = [];
 				// Skip the table header and separator
-				for (let i = startIdx + 3; i < Math.min(startIdx + 100, lines.length); i++) {
-					const line = lines[i];
+				for (let index = startIndex + 3; index < Math.min(startIndex + 100, lines.length); index++) {
+					const line = lines[index];
 					if (line.trim() === "" || line.startsWith("===")) break;
 
 					// Parse table row format by splitting on |
@@ -580,20 +612,20 @@ function parseConsoleMetrics(stdout: string): TestMetrics {
 						// Extract N value from seeds (e.g., "N2" -> 2)
 						const nMatch = seeds.match(/N(\d+)/);
 						if (!nMatch) continue;
-						const n = parseInt(nMatch[1]);
+						const n = Number.parseInt(nMatch[1]);
 
 						// Only include N=2 results for n-seed tables
 						if (n === 2) {
-							const nodeVal = nodes === "N/A" ? 0 : parseInt(nodes);
-							const pathVal = paths === "N/A" ? 0 : parseInt(paths);
-							const divVal = diversity === "N/A" || diversity === "N/A" ? 0 : parseFloat(diversity);
+							const nodeValue = nodes === "N/A" ? 0 : Number.parseInt(nodes);
+							const pathValue = paths === "N/A" ? 0 : Number.parseInt(paths);
+							const divValue = diversity === "N/A" ? 0 : Number.parseFloat(diversity);
 							rows.push({
 								graph,
 								n,
 								method,
-								nodes: nodeVal,
-								paths: pathVal,
-								diversity: divVal,
+								nodes: nodeValue,
+								paths: pathValue,
+								diversity: divValue,
 							});
 						}
 					}
@@ -604,20 +636,20 @@ function parseConsoleMetrics(stdout: string): TestMetrics {
 		// Hub Traversal Comparison (from evaluation harness)
 		{
 			header: /=== Hub Traversal Comparison ===/,
-			parse: (lines, startIdx) => {
+			parse: (lines, startIndex) => {
 				const rows: Record<string, string | number>[] = [];
 				// Skip the table header and separator
-				for (let i = startIdx + 3; i < Math.min(startIdx + 100, lines.length); i++) {
-					const line = lines[i];
+				for (let index = startIndex + 3; index < Math.min(startIndex + 100, lines.length); index++) {
+					const line = lines[index];
 					if (line.trim() === "" || line.startsWith("===") || line.includes("Average hub")) break;
 
 					// Parse table row format: "scale-free-100 | Degree-Prioritised | 18.5%"
-					const match = line.match(/^([\w-]+)\s*\|\s*([\w\s-]+?)\s*\|\s*([\d.]+)%/);
+					const match = line.match(/^([\w-]+)\s*\|\s*(\w[\w -]*\w)\s*\|\s*([\d.]+)%/);
 					if (match) {
 						rows.push({
 							graph: match[1],
 							method: match[2].trim(),
-							hubTraversal: parseFloat(match[3]),
+							hubTraversal: Number.parseFloat(match[3]),
 						});
 					}
 				}
@@ -627,36 +659,36 @@ function parseConsoleMetrics(stdout: string): TestMetrics {
 		// MI Ranking Quality (from benchmark tests)
 		{
 			header: /=== (Karate Club|Les Misérables|Facebook) (Path Ranking|Character Path) Analysis ===/,
-			parse: (lines, startIdx) => {
+			parse: (lines, startIndex) => {
 				const data: Record<string, string | number> = {};
 				let datasetName = "";
 
 				// Extract dataset name from header
-				const headerMatch = lines[startIdx].match(/=== (Karate Club|Les Misérables|Facebook) /);
+				const headerMatch = lines[startIndex].match(/=== (Karate Club|Les Misérables|Facebook) /);
 				if (headerMatch) {
 					datasetName = headerMatch[1];
 				}
 
-				for (let i = startIdx; i < Math.min(startIdx + 15, lines.length); i++) {
-					const line = lines[i];
+				for (let index = startIndex; index < Math.min(startIndex + 15, lines.length); index++) {
+					const line = lines[index];
 
 					// Parse "Path Salience: X paths"
 					const pathsMatch = line.match(/Path Salience:\s+(\d+)\s+paths/);
-					if (pathsMatch) data.paths = parseInt(pathsMatch[1]);
+					if (pathsMatch) data.paths = Number.parseInt(pathsMatch[1]);
 
 					// Parse "  Mean MI: X.XXX"
 					const meanMIMatch = line.match(/Mean MI:\s+([\d.]+)/);
-					if (meanMIMatch) data.meanMI = parseFloat(meanMIMatch[1]);
+					if (meanMIMatch) data.meanMI = Number.parseFloat(meanMIMatch[1]);
 
 					// Parse "  Node Coverage: X.XX"
 					const coverageMatch = line.match(/Node Coverage:\s+([\d.]+)/);
-					if (coverageMatch) data.nodeCoverage = parseFloat(coverageMatch[1]);
+					if (coverageMatch) data.nodeCoverage = Number.parseFloat(coverageMatch[1]);
 
 					// Parse "  Path Diversity: X.XXX"
 					const diversityMatch = line.match(/Path Diversity:\s+([\d.]+)/);
-					if (diversityMatch) data.pathDiversity = parseFloat(diversityMatch[1]);
+					if (diversityMatch) data.pathDiversity = Number.parseFloat(diversityMatch[1]);
 
-					if (line.trim() === "" && i > startIdx + 3) break;
+					if (line.trim() === "" && index > startIndex + 3) break;
 				}
 
 				if (Object.keys(data).length >= 3) {
@@ -665,15 +697,142 @@ function parseConsoleMetrics(stdout: string): TestMetrics {
 				return null;
 			},
 		},
+		// Classification Correctness
+		{
+			header: /=== Classification Correctness ===/,
+			parse: (lines, startIndex) => {
+				const rows: Record<string, string | number>[] = [];
+				for (let index = startIndex + 1; index < Math.min(startIndex + 20, lines.length); index++) {
+					const line = lines[index];
+					if (line.trim() === "" || line.startsWith("===")) break;
+					// Format: "ClassName\tPrecision\tRecall\tF1\tSupport"
+					const parts = line.split("\t").map((p) => p.trim());
+					if (parts.length >= 5) {
+						rows.push({
+							graphClass: parts[0],
+							precision: Number.parseFloat(parts[1]),
+							recall: Number.parseFloat(parts[2]),
+							f1: Number.parseFloat(parts[3]),
+							support: Number.parseInt(parts[4]),
+						});
+					}
+				}
+				return rows.length > 0 ? { title: "Classification Correctness", rows } : null;
+			},
+		},
+		// Classification Significance
+		{
+			header: /=== Classification Significance ===/,
+			parse: (lines, startIndex) => {
+				const data: Record<string, string | number> = {};
+				for (let index = startIndex + 1; index < Math.min(startIndex + 10, lines.length); index++) {
+					const line = lines[index];
+					if (line.trim() === "" || line.startsWith("===")) break;
+					const accuracyMatch = line.match(/Overall Accuracy:\s+([\d.]+)/);
+					if (accuracyMatch) data.accuracy = Number.parseFloat(accuracyMatch[1]);
+					const baselineMatch = line.match(/Random Baseline:\s+([\d.]+)/);
+					if (baselineMatch) data.randomBaseline = Number.parseFloat(baselineMatch[1]);
+					const macroF1Match = line.match(/Macro F1:\s+([\d.]+)/);
+					if (macroF1Match) data.macroF1 = Number.parseFloat(macroF1Match[1]);
+				}
+				return Object.keys(data).length >= 2 ? { title: "Classification Significance", rows: [data] } : null;
+			},
+		},
+		// Generation Correctness
+		{
+			header: /=== Generation Correctness ===/,
+			parse: (lines, startIndex) => {
+				const rows: Record<string, string | number>[] = [];
+				for (let index = startIndex + 1; index < Math.min(startIndex + 20, lines.length); index++) {
+					const line = lines[index];
+					if (line.trim() === "" || line.startsWith("===")) break;
+					// Format: "ClassName\tAccepted\tTotal\tRate\tMeanConfidence"
+					const parts = line.split("\t").map((p) => p.trim());
+					if (parts.length >= 5) {
+						rows.push({
+							graphClass: parts[0],
+							accepted: Number.parseInt(parts[1]),
+							total: Number.parseInt(parts[2]),
+							acceptanceRate: Number.parseFloat(parts[3]),
+							meanConfidence: Number.parseFloat(parts[4]),
+						});
+					}
+				}
+				return rows.length > 0 ? { title: "Generation Correctness", rows } : null;
+			},
+		},
+		// Generation Significance
+		{
+			header: /=== Generation Significance ===/,
+			parse: (lines, startIndex) => {
+				const data: Record<string, string | number> = {};
+				for (let index = startIndex + 1; index < Math.min(startIndex + 10, lines.length); index++) {
+					const line = lines[index];
+					if (line.trim() === "" || line.startsWith("===")) break;
+					const rateMatch = line.match(/Overall Acceptance Rate:\s+([\d.]+)/);
+					if (rateMatch) data.overallAcceptanceRate = Number.parseFloat(rateMatch[1]);
+					const configMatch = line.match(/Mean Confidence:\s+([\d.]+)/);
+					if (configMatch) data.meanConfidence = Number.parseFloat(configMatch[1]);
+					const baseMatch = line.match(/Random Baseline:\s+([\d.]+)/);
+					if (baseMatch) data.randomBaseline = Number.parseFloat(baseMatch[1]);
+				}
+				return Object.keys(data).length >= 2 ? { title: "Generation Significance", rows: [data] } : null;
+			},
+		},
+		// Ranking Correctness
+		{
+			header: /=== Ranking Correctness ===/,
+			parse: (lines, startIndex) => {
+				const rows: Record<string, string | number>[] = [];
+				for (let index = startIndex + 1; index < Math.min(startIndex + 20, lines.length); index++) {
+					const line = lines[index];
+					if (line.trim() === "" || line.startsWith("===")) break;
+					// Format: "Method\tMeanMI\tNodeCoverage\tPathDiversity\tSpearman"
+					const parts = line.split("\t").map((p) => p.trim());
+					if (parts.length >= 5) {
+						rows.push({
+							method: parts[0],
+							meanMI: Number.parseFloat(parts[1]),
+							nodeCoverage: Number.parseFloat(parts[2]),
+							pathDiversity: Number.parseFloat(parts[3]),
+							spearmanRho: Number.parseFloat(parts[4]),
+						});
+					}
+				}
+				return rows.length > 0 ? { title: "Ranking Correctness", rows } : null;
+			},
+		},
+		// Ranking Significance
+		{
+			header: /=== Ranking Significance ===/,
+			parse: (lines, startIndex) => {
+				const rows: Record<string, string | number>[] = [];
+				for (let index = startIndex + 1; index < Math.min(startIndex + 20, lines.length); index++) {
+					const line = lines[index];
+					if (line.trim() === "" || line.startsWith("===")) break;
+					// Format: "Baseline\tImprovement\tEffectSize\tPValue"
+					const parts = line.split("\t").map((p) => p.trim());
+					if (parts.length >= 4) {
+						rows.push({
+							baseline: parts[0],
+							improvement: Number.parseFloat(parts[1]),
+							effectSize: Number.parseFloat(parts[2]),
+							pValue: Number.parseFloat(parts[3]),
+						});
+					}
+				}
+				return rows.length > 0 ? { title: "Ranking Significance", rows } : null;
+			},
+		},
 	];
 
 	// Find and parse all metric sections
-	for (let i = 0; i < lines.length; i++) {
-		const line = lines[i];
+	for (let index = 0; index < lines.length; index++) {
+		const line = lines[index];
 
 		for (const parser of parsers) {
 			if (parser.header.test(line)) {
-				const section = parser.parse(lines, i);
+				const section = parser.parse(lines, index);
 				if (section) {
 					// Map section titles to metric keys
 					const keyMap: Record<string, keyof TestMetrics> = {
@@ -697,6 +856,12 @@ function parseConsoleMetrics(stdout: string): TestMetrics {
 						"Algorithm Comparison": "algorithmComparison",
 						"Hub Traversal Comparison": "hubTraversalComparison",
 						"MI Ranking Quality": "miRankingQuality",
+						"Classification Correctness": "classificationCorrectness",
+						"Classification Significance": "classificationSignificance",
+						"Generation Correctness": "generationCorrectness",
+						"Generation Significance": "generationSignificance",
+						"Ranking Correctness": "rankingCorrectness",
+						"Ranking Significance": "rankingSignificance",
 					};
 					const key = keyMap[section.title];
 					if (key) {
@@ -708,11 +873,9 @@ function parseConsoleMetrics(stdout: string): TestMetrics {
 						];
 						if (deduplicateSections.includes(key)) {
 							// These sections can have multiple rows - merge with deduplication
-							if (!metrics[key]) {
-								metrics[key] = section;
-							} else {
+							if (metrics[key]) {
 								// Deduplicate existing rows by creating a unique key
-								const existingRows = metrics[key]!.rows;
+								const existingRows = metrics[key].rows;
 								const newRows = section.rows;
 								const seen = new Set<string>();
 
@@ -725,7 +888,9 @@ function parseConsoleMetrics(stdout: string): TestMetrics {
 										combinedRows.push(row);
 									}
 								}
-								metrics[key]!.rows = combinedRows;
+								metrics[key].rows = combinedRows;
+							} else {
+								metrics[key] = section;
 							}
 						} else {
 							// For single-value sections, replace with latest
@@ -739,28 +904,28 @@ function parseConsoleMetrics(stdout: string): TestMetrics {
 	}
 
 	return metrics;
-}
+};
 
 // Helper to parse verbose output for TAP generation
 interface ParsedTest {
 	name: string;
-	status: "passed" | "failed";
+	status: "passed" | "failed" | "skipped" | "pending";
 }
 
-function parseVerboseOutput(output: string): { tests: ParsedTest[]; summary: string } {
+const parseVerboseOutput = (output: string): { tests: ParsedTest[]; summary: string } => {
 	const tests: ParsedTest[] = [];
 	const lines = output.split("\n");
 
 	for (const line of lines) {
 		// Look for test result lines like "✓ test name" or "✗ test name"
 		// Vitest verbose format: [32m✓[39m ... test name
-		const passMatch = line.match(/\[32m✓\[39m.*?\s+(.+)$/);
+		const passMatch = line.match(/\[32m✓\[39m\S*\s+(\S.*)$/);
 		if (passMatch) {
 			tests.push({ name: passMatch[1].trim(), status: "passed" });
 			continue;
 		}
 
-		const failMatch = line.match(/\[31m✗\[39m.*?\s+(.+)$/);
+		const failMatch = line.match(/\[31m✗\[39m\S*\s+(\S.*)$/);
 		if (failMatch) {
 			tests.push({ name: failMatch[1].trim(), status: "failed" });
 		}
@@ -771,14 +936,14 @@ function parseVerboseOutput(output: string): { tests: ParsedTest[]; summary: str
 	const summary = summaryMatch ? `${summaryMatch[1]} passed` : "tests completed";
 
 	return { tests, summary };
-}
+};
 
 // Main
-async function main() {
-	const args = process.argv.slice(2);
-	const outputFile = args.find((a) => a.startsWith("--output="))?.split("=")[1] || null;
-	const metricsMode = args.includes("--metrics");
-	const metricsOutput = args.find((a) => a.startsWith("--metrics-output="))?.split("=")[1] || join(projectRoot, "test-metrics.json");
+const main = async () => {
+	const arguments_ = process.argv.slice(2);
+	const outputFile = arguments_.find((a) => a.startsWith("--output="))?.split("=")[1];
+	const metricsMode = arguments_.includes("--metrics");
+	const metricsOutput = arguments_.find((a) => a.startsWith("--metrics-output="))?.split("=")[1] || join(projectRoot, "test-metrics.json");
 
 	let tests: ParsedTest[] = [];
 	let metrics: TestMetrics = {};
@@ -786,14 +951,14 @@ async function main() {
 
 	if (metricsMode) {
 		// In metrics mode, run vitest once with verbose reporter for both TAP and metrics
-		const vitest = spawn("npx", ["vitest", "run", "--project=exp", "--reporter=verbose"], {
+		const vitest = spawn(vitestBin, ["run", "--project=exp", "--reporter=verbose"], {
 			cwd: projectRoot,
 			stdio: ["ignore", "pipe", "inherit"],
 		});
 
 		let verboseOutput = "";
 
-		for await (const chunk of vitest.stdout) {
+		for await (const chunk of vitest.stdout as AsyncIterable<Buffer>) {
 			const text = chunk.toString();
 			verboseOutput += text;
 		}
@@ -808,14 +973,14 @@ async function main() {
 		metrics = parseConsoleMetrics(verboseOutput);
 	} else {
 		// Normal mode: run with JSON reporter for TAP
-		const vitest = spawn("npx", ["vitest", "run", "--project=exp", "--reporter=json"], {
+		const vitest = spawn(vitestBin, ["run", "--project=exp", "--reporter=json"], {
 			cwd: projectRoot,
 			stdio: ["ignore", "pipe", "inherit"],
 		});
 
 		let jsonOutput = "";
 
-		for await (const chunk of vitest.stdout) {
+		for await (const chunk of vitest.stdout as AsyncIterable<Buffer>) {
 			const text = chunk.toString();
 			jsonOutput += text;
 		}
@@ -826,22 +991,19 @@ async function main() {
 
 		// Parse JSON output
 		const jsonLines = jsonOutput.split("\n").filter((line) => line.trim().startsWith("{"));
-		const results = JSON.parse(jsonLines[jsonLines.length - 1] || "{}");
+		const results = JSON.parse(jsonLines.at(-1) ?? "{}") as VitestJsonOutput;
 		tests = collectTests(results).map((t) => ({
 			name: t.name,
-			status: t.status as "passed" | "failed",
+			status: t.status as ParsedTest["status"],
 		}));
 	}
 
 	// Generate TAP output
-	const tapLines: string[] = [];
-	tapLines.push("TAP version 13");
-	tapLines.push(`1..${tests.length}`);
+	const tapLines: string[] = [ "TAP version 13", `1..${tests.length}`];
 
-	for (let i = 0; i < tests.length; i++) {
-		const test = tests[i];
+	for (const [index, test] of tests.entries()) {
 		const isOk = test.status === "passed" || test.status === "skipped";
-		tapLines.push(`${isOk ? "ok" : "not ok"} ${i + 1} - ${test.name}`);
+		tapLines.push(`${isOk ? "ok" : "not ok"} ${index + 1} - ${test.name}`);
 	}
 
 	const passed = tests.filter((t) => t.status === "passed").length;
@@ -857,9 +1019,9 @@ async function main() {
 
 	// Write TAP to file if requested
 	if (outputFile) {
-		const dir = dirname(outputFile);
-		if (!existsSync(dir)) {
-			mkdirSync(dir, { recursive: true });
+		const directory = dirname(outputFile);
+		if (!existsSync(directory)) {
+			mkdirSync(directory, { recursive: true });
 		}
 		writeFileSync(outputFile, tapOutput);
 		console.error(`\nTAP output written to: ${outputFile}`);
@@ -872,7 +1034,7 @@ async function main() {
 		console.error(`\nMetrics written to: ${metricsOutput}`);
 	}
 
-	process.exit(exitCode ?? 0);
-}
+	process.exit(exitCode);
+};
 
-main();
+void main();
