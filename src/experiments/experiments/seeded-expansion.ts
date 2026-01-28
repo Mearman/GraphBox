@@ -12,6 +12,7 @@ import { BenchmarkGraphExpander } from "@graph/evaluation/__tests__/validation/c
 import { loadBenchmarkByIdFromUrl } from "@graph/evaluation/fixtures/index.js";
 import { FrontierBalancedExpansion } from "@graph/experiments/baselines/frontier-balanced.js";
 import { RandomPriorityExpansion } from "@graph/experiments/baselines/random-priority.js";
+import { retroactivePathEnumeration } from "@graph/experiments/baselines/retroactive-path-enum.js";
 import { StandardBfsExpansion } from "@graph/experiments/baselines/standard-bfs.js";
 import { metrics } from "@graph/experiments/metrics/index.js";
 
@@ -81,17 +82,17 @@ export const runNSeedComparisonExperiments = async (): Promise<void> => {
 		switch (method.name) {
 			case "Degree-Prioritised": {
 				algo = new DegreePrioritisedExpansion(expander, n2Seeds);
-		
+
 				break;
 			}
 			case "Standard BFS": {
 				algo = new StandardBfsExpansion(expander, n2Seeds);
-		
+
 				break;
 			}
 			case "Frontier-Balanced": {
 				algo = new FrontierBalancedExpansion(expander, n2Seeds);
-		
+
 				break;
 			}
 			default: {
@@ -101,11 +102,15 @@ export const runNSeedComparisonExperiments = async (): Promise<void> => {
 
 		const result = await algo.run();
 
+		// Use retroactive path enumeration for fair comparison (maxLength=5 for tractability)
+		const retroactivePaths = await retroactivePathEnumeration(result, expander, n2Seeds, 5);
+
 		metrics.record("n-seed-comparison", {
 			method: method.name,
 			n: 2,
 			nodes: result.sampledNodes.size,
-			paths: result.paths.length,
+			paths: retroactivePaths.paths.length, // Use retroactive count for fair comparison
+			onlinePaths: result.paths.length, // Keep online paths for reference
 			iterations: result.stats.iterations,
 			coverage: 100,
 		});
@@ -120,35 +125,44 @@ export const runNSeedComparisonExperiments = async (): Promise<void> => {
 
 	for (const method of methods) {
 		let algo;
+		let seedsForRetro: readonly string[];
 		switch (method.name) {
 			case "Degree-Prioritised": {
-			// Use first and last seeds for bidirectional expansion
+				// Use first and last seeds for bidirectional expansion
 				algo = new DegreePrioritisedExpansion(expander, [n3Seeds[0], n3Seeds[2]]);
-		
+				seedsForRetro = [n3Seeds[0], n3Seeds[2]];
+
 				break;
 			}
 			case "Standard BFS": {
 				algo = new StandardBfsExpansion(expander, n3Seeds);
-		
+				seedsForRetro = n3Seeds;
+
 				break;
 			}
 			case "Frontier-Balanced": {
 				algo = new FrontierBalancedExpansion(expander, n3Seeds);
-		
+				seedsForRetro = n3Seeds;
+
 				break;
 			}
 			default: {
 				algo = new RandomPriorityExpansion(expander, n3Seeds, 42);
+				seedsForRetro = n3Seeds;
 			}
 		}
 
 		const result = await algo.run();
 
+		// Use retroactive path enumeration for fair comparison across methods
+		const retroactivePaths = await retroactivePathEnumeration(result, expander, seedsForRetro, 5);
+
 		metrics.record("n-seed-comparison", {
 			method: method.name,
 			n: 3,
 			nodes: result.sampledNodes.size,
-			paths: result.paths.length,
+			paths: retroactivePaths.paths.length, // Use retroactive count for fair comparison
+			onlinePaths: result.paths.length, // Keep online paths for reference
 			iterations: result.stats.iterations,
 			coverage: 112.5, // Multi-seed can exceed 100% due to path overlap
 		});
@@ -235,13 +249,17 @@ export const runN2PathDiversityExperiments = async (): Promise<void> => {
 
 	for (const method of methods) {
 		const result = await method.algo.run();
-		const diversity = calculateDiversity(result.paths);
+
+		// Use retroactive path enumeration for fair diversity comparison
+		const retroactivePaths = await retroactivePathEnumeration(result, expander, seeds, 5);
+		const diversity = calculateDiversity(retroactivePaths.paths);
 		const uniqueNodes = result.sampledNodes.size;
 
 		metrics.record("n-seed-path-diversity", {
 			graph: "scale-free-100",
 			method: method.name,
-			paths: result.paths.length,
+			paths: retroactivePaths.paths.length, // Retroactive path count
+			onlinePaths: result.paths.length, // Online path count for reference
 			uniqueNodes,
 			diversity: Math.round(diversity * 1000) / 1000,
 		});
