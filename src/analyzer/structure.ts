@@ -9,6 +9,8 @@ import type {
 } from "./types";
 import {
 	edgeKeyBinary,
+	hasAnyDirectedEdges,
+	hasAnyUndirectedEdges,
 	isBipartiteUndirectedBinary
 } from "./types";
 
@@ -68,11 +70,6 @@ export const computeDensity = (g: AnalyzerGraph): { kind: "unconstrained" } | { 
 	return { kind: "unconstrained" };
 };
 
-// Import computeDirectionality for use in computeCompleteness
-import {
-	hasAnyDirectedEdges,
-	hasAnyUndirectedEdges
-} from "./types";
 
 const computeDirectionality = (g: AnalyzerGraph):
   | { kind: "undirected" }

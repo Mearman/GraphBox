@@ -7,6 +7,7 @@
 
 import {
 	computeCograph,
+	computeSpecificRegular,
 	computeSplit} from "./advanced-structures";
 import {
 	computeEdgeMultiplicity,
@@ -944,5 +945,3 @@ export const isVertexTransitive = (g: AnalyzerGraph): boolean => axisKindIs("ver
  */
 export const isCompleteBipartite = (g: AnalyzerGraph): boolean => axisKindIs("completeBipartite", "complete_bipartite")(g);
 
-// Import computeSpecificRegular for use in isKRegular
-import { computeSpecificRegular } from "./advanced-structures";
