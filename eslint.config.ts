@@ -120,7 +120,9 @@ export default tseslint.config(
     extends: [js.configs.recommended, ...tseslint.configs.recommendedTypeChecked],
     languageOptions: {
       parserOptions: {
-        projectService: true,
+        projectService: {
+          allowDefaultProject: ['scripts/*.ts'],
+        },
         tsconfigRootDir: import.meta.dirname,
       },
     },

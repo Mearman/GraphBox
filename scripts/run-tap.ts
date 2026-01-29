@@ -55,6 +55,7 @@ interface TestMetrics {
 	generationSignificance?: MetricSection;
 	rankingCorrectness?: MetricSection;
 	rankingSignificance?: MetricSection;
+	rankingBenchmarks?: MetricSection;
 	communityDetection?: MetricSection;
 	kCoreDecomposition?: MetricSection;
 }
@@ -878,6 +879,33 @@ const parseConsoleMetrics = (stdout: string): TestMetrics => {
 				return rows.length > 0 ? { title: "Ranking Significance", rows } : null;
 			},
 		},
+		// Ranking Benchmarks
+		// Tab-separated: dataset, method, meanMI, nodeCoverage, pathDiversity, pathsFound, uniqueNodes, runtimeMs
+		// Only first 5 columns map to RankingBenchmarksMetric; remaining are informational.
+		{
+			header: /=== Ranking Benchmarks ===/,
+			parse: (lines, startIndex) => {
+				const rows: Record<string, string | number>[] = [];
+				for (let index = startIndex + 1; index < Math.min(startIndex + 20, lines.length); index++) {
+					const line = lines[index];
+					if (line.trim() === "" || line.startsWith("===")) break;
+					const parts = line.split("\t").map((p) => p.trim());
+					if (parts.length >= 5) {
+						const meanMI = Number.parseFloat(parts[2]);
+						// Skip header row where numeric columns parse to NaN
+						if (Number.isNaN(meanMI)) continue;
+						rows.push({
+							dataset: parts[0],
+							method: parts[1],
+							meanMI,
+							nodeCoverage: Number.parseFloat(parts[3]),
+							pathDiversity: Number.parseFloat(parts[4]),
+						});
+					}
+				}
+				return rows.length > 0 ? { title: "Ranking Benchmarks", rows } : null;
+			},
+		},
 		// Community Detection
 		{
 			header: /=== Community Detection ===/,
@@ -966,6 +994,7 @@ const parseConsoleMetrics = (stdout: string): TestMetrics => {
 						"Generation Significance": "generationSignificance",
 						"Ranking Correctness": "rankingCorrectness",
 						"Ranking Significance": "rankingSignificance",
+						"Ranking Benchmarks": "rankingBenchmarks",
 						"Community Detection": "communityDetection",
 						"K-Core Decomposition": "kCoreDecomposition",
 					};
@@ -976,7 +1005,7 @@ const parseConsoleMetrics = (stdout: string): TestMetrics => {
 						const deduplicateSections: (keyof TestMetrics)[] = [
 							"runtimePerformance", "scalability", "crossDataset",
 							"hubTraversalComparison", "algorithmComparison", "miRankingQuality",
-							"rankingCorrectness", "rankingSignificance",
+							"rankingCorrectness", "rankingSignificance", "rankingBenchmarks",
 							"communityDetection", "kCoreDecomposition",
 						];
 						if (deduplicateSections.includes(key)) {
@@ -1150,6 +1179,7 @@ const main = async () => {
 			generationSignificance: "generation-significance",
 			rankingCorrectness: "ranking-correctness",
 			rankingSignificance: "ranking-significance",
+			rankingBenchmarks: "ranking-benchmarks",
 			communityDetection: "community-detection",
 			kCoreDecomposition: "k-core-decomposition",
 		};
