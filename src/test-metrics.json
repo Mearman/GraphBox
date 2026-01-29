@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "timestamp": "2026-01-27T07:28:30.406Z",
+  "timestamp": "2026-01-28T22:36:14.105Z",
   "metrics": {
     "hub-traversal-comparison": [
       {
@@ -724,7 +724,7 @@
         "pathsDiscovered": 18281,
         "nodesExpanded": 77,
         "iterations": 77,
-        "auc": 0.990,
+        "auc": 0.99,
         "medianDiscoveryIteration": 1,
         "runtimeMs": 0.1
       },
@@ -742,6 +742,173 @@
         "auc": 0.994,
         "medianDiscoveryIteration": 1,
         "runtimeMs": 0.1
+      }
+    ],
+    "classification-correctness": [
+      {
+        "graphClass": "erdos-renyi",
+        "precision": 1,
+        "recall": 1,
+        "f1": 1,
+        "support": 15
+      },
+      {
+        "graphClass": "barabasi-albert",
+        "precision": 1,
+        "recall": 1,
+        "f1": 1,
+        "support": 15
+      },
+      {
+        "graphClass": "watts-strogatz",
+        "precision": 1,
+        "recall": 1,
+        "f1": 1,
+        "support": 15
+      },
+      {
+        "graphClass": "real-world",
+        "precision": 1,
+        "recall": 1,
+        "f1": 1,
+        "support": 2
+      }
+    ],
+    "classification-significance": [
+      {
+        "application": "Generator validation",
+        "baselineAccuracy": 0.25,
+        "classifierAccuracy": 1
+      },
+      {
+        "application": "Sampling quality assessment",
+        "baselineAccuracy": 0.25,
+        "classifierAccuracy": 1
+      },
+      {
+        "application": "Real-world graph identification",
+        "baselineAccuracy": 0.25,
+        "classifierAccuracy": 1
+      }
+    ],
+    "generation-correctness": [
+      {
+        "graphClass": "erdos-renyi",
+        "acceptedTotal": "15/15",
+        "acceptanceRate": 1,
+        "meanConfidence": 0.87
+      },
+      {
+        "graphClass": "barabasi-albert",
+        "acceptedTotal": "15/15",
+        "acceptanceRate": 1,
+        "meanConfidence": 0.874
+      },
+      {
+        "graphClass": "watts-strogatz",
+        "acceptedTotal": "15/15",
+        "acceptanceRate": 1,
+        "meanConfidence": 0.875
+      }
+    ],
+    "generation-significance": [
+      {
+        "metric": "Acceptance rate",
+        "achieved": 1,
+        "randomBaseline": 0.333
+      },
+      {
+        "metric": "Mean confidence",
+        "achieved": null,
+        "randomBaseline": null
+      }
+    ],
+    "ranking-correctness": [
+      {
+        "method": "path-salience",
+        "meanMI": 0.0177,
+        "nodeCoverage": 0.176,
+        "pathDiversity": 1,
+        "spearmanRho": 1
+      },
+      {
+        "method": "degree-sum",
+        "meanMI": 0,
+        "nodeCoverage": 0.176,
+        "pathDiversity": 1,
+        "spearmanRho": 0.4
+      },
+      {
+        "method": "jaccard-arithmetic",
+        "meanMI": 0,
+        "nodeCoverage": 0.176,
+        "pathDiversity": 1,
+        "spearmanRho": 0.8
+      },
+      {
+        "method": "pagerank-sum",
+        "meanMI": 0,
+        "nodeCoverage": 0.176,
+        "pathDiversity": 1,
+        "spearmanRho": 0.8
+      },
+      {
+        "method": "random",
+        "meanMI": 0,
+        "nodeCoverage": 0.176,
+        "pathDiversity": 1,
+        "spearmanRho": 0.8
+      },
+      {
+        "method": "shortest-path",
+        "meanMI": 0,
+        "nodeCoverage": 0.176,
+        "pathDiversity": 1,
+        "spearmanRho": 0.8
+      }
+    ],
+    "ranking-significance": [
+      {
+        "baseline": "degree-sum",
+        "salienceMI": 0.0177,
+        "baselineMI": 0,
+        "improvement": "+0.0177",
+        "relative": "+Infinity%"
+      },
+      {
+        "baseline": "jaccard-arithmetic",
+        "salienceMI": 0.0177,
+        "baselineMI": 0,
+        "improvement": "+0.0177",
+        "relative": "+Infinity%"
+      },
+      {
+        "baseline": "pagerank-sum",
+        "salienceMI": 0.0177,
+        "baselineMI": 0,
+        "improvement": "+0.0177",
+        "relative": "+Infinity%"
+      },
+      {
+        "baseline": "random",
+        "salienceMI": 0.0177,
+        "baselineMI": 0,
+        "improvement": "+0.0177",
+        "relative": "+Infinity%"
+      },
+      {
+        "baseline": "shortest-path",
+        "salienceMI": 0.0177,
+        "baselineMI": 0,
+        "improvement": "+0.0177",
+        "relative": "+Infinity%"
+      },
+      {
+        "baseline": "vs. Random (multi-seed)",
+        "salienceMI": 0.0163,
+        "baselineMI": 0,
+        "improvement": "0.0163",
+        "relative": "4/4"
       }
     ]
   }
