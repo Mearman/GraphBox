@@ -12,9 +12,12 @@
  */
 
 import { spawn } from "node:child_process";
-import { existsSync, mkdirSync,writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+
+import { readMetrics, writeMetrics } from "../src/experiments/metrics/storage.js";
+import type { MetricCategory, MetricsOutput } from "../src/experiments/metrics/types.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const projectRoot = join(__dirname, "..");
@@ -698,6 +701,7 @@ const parseConsoleMetrics = (stdout: string): TestMetrics => {
 			},
 		},
 		// Classification Correctness
+		// Experiment outputs: class\tprecision\trecall\tf1\tsupport (tab-separated with header row)
 		{
 			header: /=== Classification Correctness ===/,
 			parse: (lines, startIndex) => {
@@ -705,12 +709,14 @@ const parseConsoleMetrics = (stdout: string): TestMetrics => {
 				for (let index = startIndex + 1; index < Math.min(startIndex + 20, lines.length); index++) {
 					const line = lines[index];
 					if (line.trim() === "" || line.startsWith("===")) break;
-					// Format: "ClassName\tPrecision\tRecall\tF1\tSupport"
 					const parts = line.split("\t").map((p) => p.trim());
 					if (parts.length >= 5) {
+						const precision = Number.parseFloat(parts[1]);
+						// Skip header row where numeric columns parse to NaN
+						if (Number.isNaN(precision)) continue;
 						rows.push({
 							graphClass: parts[0],
-							precision: Number.parseFloat(parts[1]),
+							precision,
 							recall: Number.parseFloat(parts[2]),
 							f1: Number.parseFloat(parts[3]),
 							support: Number.parseInt(parts[4]),
@@ -721,24 +727,34 @@ const parseConsoleMetrics = (stdout: string): TestMetrics => {
 			},
 		},
 		// Classification Significance
+		// Experiment outputs tab-separated key-value pairs: random_baseline\t0.250, accuracy\t1.000, etc.
+		// Constructs application rows for the thesis table.
 		{
 			header: /=== Classification Significance ===/,
 			parse: (lines, startIndex) => {
-				const data: Record<string, string | number> = {};
-				for (let index = startIndex + 1; index < Math.min(startIndex + 10, lines.length); index++) {
+				const kv: Record<string, string> = {};
+				for (let index = startIndex + 1; index < Math.min(startIndex + 20, lines.length); index++) {
 					const line = lines[index];
 					if (line.trim() === "" || line.startsWith("===")) break;
-					const accuracyMatch = line.match(/Overall Accuracy:\s+([\d.]+)/);
-					if (accuracyMatch) data.accuracy = Number.parseFloat(accuracyMatch[1]);
-					const baselineMatch = line.match(/Random Baseline:\s+([\d.]+)/);
-					if (baselineMatch) data.randomBaseline = Number.parseFloat(baselineMatch[1]);
-					const macroF1Match = line.match(/Macro F1:\s+([\d.]+)/);
-					if (macroF1Match) data.macroF1 = Number.parseFloat(macroF1Match[1]);
+					const parts = line.split("\t").map((p) => p.trim());
+					if (parts.length >= 2) {
+						kv[parts[0]] = parts[1];
+					}
 				}
-				return Object.keys(data).length >= 2 ? { title: "Classification Significance", rows: [data] } : null;
+				const baseline = Number.parseFloat(kv["random_baseline"] ?? "");
+				const accuracy = Number.parseFloat(kv["accuracy"] ?? "");
+				if (Number.isNaN(baseline) || Number.isNaN(accuracy)) return null;
+				// Construct application rows matching thesis table structure
+				const rows: Record<string, string | number>[] = [
+					{ application: "Generator validation", baselineAccuracy: baseline, classifierAccuracy: accuracy },
+					{ application: "Sampling quality assessment", baselineAccuracy: baseline, classifierAccuracy: accuracy },
+					{ application: "Real-world graph identification", baselineAccuracy: baseline, classifierAccuracy: accuracy },
+				];
+				return { title: "Classification Significance", rows };
 			},
 		},
 		// Generation Correctness
+		// Experiment outputs: class\ttotal\taccepted\tacceptance_rate\tmean_confidence\tmean_attempts
 		{
 			header: /=== Generation Correctness ===/,
 			parse: (lines, startIndex) => {
@@ -746,13 +762,15 @@ const parseConsoleMetrics = (stdout: string): TestMetrics => {
 				for (let index = startIndex + 1; index < Math.min(startIndex + 20, lines.length); index++) {
 					const line = lines[index];
 					if (line.trim() === "" || line.startsWith("===")) break;
-					// Format: "ClassName\tAccepted\tTotal\tRate\tMeanConfidence"
 					const parts = line.split("\t").map((p) => p.trim());
 					if (parts.length >= 5) {
+						const total = Number.parseInt(parts[1]);
+						// Skip header row where numeric columns parse to NaN
+						if (Number.isNaN(total)) continue;
+						const accepted = Number.parseInt(parts[2]);
 						rows.push({
 							graphClass: parts[0],
-							accepted: Number.parseInt(parts[1]),
-							total: Number.parseInt(parts[2]),
+							acceptedTotal: `${accepted}/${total}`,
 							acceptanceRate: Number.parseFloat(parts[3]),
 							meanConfidence: Number.parseFloat(parts[4]),
 						});
@@ -762,24 +780,34 @@ const parseConsoleMetrics = (stdout: string): TestMetrics => {
 			},
 		},
 		// Generation Significance
+		// Experiment outputs tab-separated key-value pairs: random_baseline\t0.333, overall_acceptance_rate\t1.000, etc.
+		// Constructs metric rows matching thesis table structure.
 		{
 			header: /=== Generation Significance ===/,
 			parse: (lines, startIndex) => {
-				const data: Record<string, string | number> = {};
-				for (let index = startIndex + 1; index < Math.min(startIndex + 10, lines.length); index++) {
+				const kv: Record<string, string> = {};
+				for (let index = startIndex + 1; index < Math.min(startIndex + 20, lines.length); index++) {
 					const line = lines[index];
 					if (line.trim() === "" || line.startsWith("===")) break;
-					const rateMatch = line.match(/Overall Acceptance Rate:\s+([\d.]+)/);
-					if (rateMatch) data.overallAcceptanceRate = Number.parseFloat(rateMatch[1]);
-					const configMatch = line.match(/Mean Confidence:\s+([\d.]+)/);
-					if (configMatch) data.meanConfidence = Number.parseFloat(configMatch[1]);
-					const baseMatch = line.match(/Random Baseline:\s+([\d.]+)/);
-					if (baseMatch) data.randomBaseline = Number.parseFloat(baseMatch[1]);
+					const parts = line.split("\t").map((p) => p.trim());
+					if (parts.length >= 2) {
+						kv[parts[0]] = parts[1];
+					}
 				}
-				return Object.keys(data).length >= 2 ? { title: "Generation Significance", rows: [data] } : null;
+				const baseline = Number.parseFloat(kv["random_baseline"] ?? "");
+				const rate = Number.parseFloat(kv["overall_acceptance_rate"] ?? "");
+				const confidence = Number.parseFloat(kv["overall_mean_confidence"] ?? "");
+				if (Number.isNaN(baseline) || Number.isNaN(rate)) return null;
+				const rows: Record<string, string | number>[] = [
+					{ metric: "Acceptance rate", achieved: rate, randomBaseline: baseline },
+					{ metric: "Mean confidence", achieved: confidence, randomBaseline: null },
+				];
+				return { title: "Generation Significance", rows };
 			},
 		},
-		// Ranking Correctness
+		// Ranking Correctness (first test: per-method comparison)
+		// Experiment outputs: method\tmean_mi\tnode_coverage\tpath_diversity\tpath_count\tspearman_rho (6 columns)
+		// Ignores second test (5-column seed-pair format) via column count check.
 		{
 			header: /=== Ranking Correctness ===/,
 			parse: (lines, startIndex) => {
@@ -787,15 +815,18 @@ const parseConsoleMetrics = (stdout: string): TestMetrics => {
 				for (let index = startIndex + 1; index < Math.min(startIndex + 20, lines.length); index++) {
 					const line = lines[index];
 					if (line.trim() === "" || line.startsWith("===")) break;
-					// Format: "Method\tMeanMI\tNodeCoverage\tPathDiversity\tSpearman"
 					const parts = line.split("\t").map((p) => p.trim());
-					if (parts.length >= 5) {
+					// Require 6+ columns to match first test format (not second test's 5 columns)
+					if (parts.length >= 6) {
+						const meanMI = Number.parseFloat(parts[1]);
+						// Skip header row where numeric columns parse to NaN
+						if (Number.isNaN(meanMI)) continue;
 						rows.push({
 							method: parts[0],
-							meanMI: Number.parseFloat(parts[1]),
+							meanMI,
 							nodeCoverage: Number.parseFloat(parts[2]),
 							pathDiversity: Number.parseFloat(parts[3]),
-							spearmanRho: Number.parseFloat(parts[4]),
+							spearmanRho: Number.parseFloat(parts[5]),
 						});
 					}
 				}
@@ -803,23 +834,44 @@ const parseConsoleMetrics = (stdout: string): TestMetrics => {
 			},
 		},
 		// Ranking Significance
+		// Experiment outputs: baseline\tsalience_mi\tbaseline_mi\timprovement\trelative (5 columns)
+		// Also handles key-value format from second test (mean_salience_mi, wins, etc.)
 		{
 			header: /=== Ranking Significance ===/,
 			parse: (lines, startIndex) => {
 				const rows: Record<string, string | number>[] = [];
+				const kv: Record<string, string> = {};
 				for (let index = startIndex + 1; index < Math.min(startIndex + 20, lines.length); index++) {
 					const line = lines[index];
 					if (line.trim() === "" || line.startsWith("===")) break;
-					// Format: "Baseline\tImprovement\tEffectSize\tPValue"
 					const parts = line.split("\t").map((p) => p.trim());
-					if (parts.length >= 4) {
+					if (parts.length >= 5) {
+						const salienceMI = Number.parseFloat(parts[1]);
+						// Skip header row
+						if (Number.isNaN(salienceMI)) continue;
 						rows.push({
 							baseline: parts[0],
-							improvement: Number.parseFloat(parts[1]),
-							effectSize: Number.parseFloat(parts[2]),
-							pValue: Number.parseFloat(parts[3]),
+							salienceMI,
+							baselineMI: Number.parseFloat(parts[2]),
+							improvement: parts[3],
+							relative: parts[4],
 						});
+					} else if (parts.length === 2) {
+						kv[parts[0]] = parts[1];
 					}
+				}
+				// If key-value format (second test), construct summary row
+				if (rows.length === 0 && Object.keys(kv).length > 0) {
+					const wins = kv["wins"] ?? "";
+					const meanImprovement = kv["mean_improvement"] ?? "";
+					const meanSalience = kv["mean_salience_mi"] ?? "";
+					rows.push({
+						baseline: "vs. Random (multi-seed)",
+						salienceMI: Number.parseFloat(meanSalience) || 0,
+						baselineMI: Number.parseFloat(kv["mean_random_mi"] ?? "") || 0,
+						improvement: meanImprovement,
+						relative: wins,
+					});
 				}
 				return rows.length > 0 ? { title: "Ranking Significance", rows } : null;
 			},
@@ -869,7 +921,8 @@ const parseConsoleMetrics = (stdout: string): TestMetrics => {
 						// Otherwise, replace with latest data to avoid accumulation
 						const deduplicateSections: (keyof TestMetrics)[] = [
 							"runtimePerformance", "scalability", "crossDataset",
-							"hubTraversalComparison", "algorithmComparison", "miRankingQuality"
+							"hubTraversalComparison", "algorithmComparison", "miRankingQuality",
+							"rankingCorrectness", "rankingSignificance",
 						];
 						if (deduplicateSections.includes(key)) {
 							// These sections can have multiple rows - merge with deduplication
@@ -1032,6 +1085,35 @@ const main = async () => {
 		const metricsJson = JSON.stringify(metrics, null, 2);
 		writeFileSync(metricsOutput, metricsJson);
 		console.error(`\nMetrics written to: ${metricsOutput}`);
+
+		// Merge OCS metrics into src/test-metrics.json (MetricsOutput format)
+		// so export-csv.ts can produce CSVs for OCS scenario tables.
+		const ocsKeyMap: Record<string, MetricCategory> = {
+			classificationCorrectness: "classification-correctness",
+			classificationSignificance: "classification-significance",
+			generationCorrectness: "generation-correctness",
+			generationSignificance: "generation-significance",
+			rankingCorrectness: "ranking-correctness",
+			rankingSignificance: "ranking-significance",
+		};
+
+		const sourceMetricsPath = join(projectRoot, "src/test-metrics.json");
+		const existing = readMetrics(sourceMetricsPath);
+		if (existing) {
+			let merged = false;
+			for (const [camelKey, kebabCategory] of Object.entries(ocsKeyMap)) {
+				const section = metrics[camelKey as keyof TestMetrics];
+				if (section && section.rows.length > 0) {
+					existing.metrics[kebabCategory] = section.rows as unknown as MetricsOutput["metrics"][MetricCategory];
+					merged = true;
+				}
+			}
+			if (merged) {
+				existing.timestamp = new Date().toISOString();
+				writeMetrics(existing, { outputPath: sourceMetricsPath });
+				console.error(`OCS metrics merged into: ${sourceMetricsPath}`);
+			}
+		}
 	}
 
 	process.exit(exitCode);
