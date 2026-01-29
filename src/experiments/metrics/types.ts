@@ -299,6 +299,71 @@ export interface SalienceCoverageComparisonMetric {
 	runtimeMs: number;
 }
 
+// ---------------------------------------------------------------------------
+// OCS (Operational Correctness / Significance) scenario metrics
+// ---------------------------------------------------------------------------
+
+/**
+ * Classification correctness metric (per-class precision/recall/F1)
+ */
+export interface ClassificationCorrectnessMetric {
+	graphClass: string;
+	precision: number;
+	recall: number;
+	f1: number;
+	support: number;
+}
+
+/**
+ * Classification significance metric (overall accuracy vs baseline)
+ */
+export interface ClassificationSignificanceMetric {
+	application: string;
+	baselineAccuracy: number;
+	classifierAccuracy: number;
+}
+
+/**
+ * Generation correctness metric (per-class acceptance rate)
+ */
+export interface GenerationCorrectnessMetric {
+	graphClass: string;
+	accepted: number;
+	total: number;
+	acceptanceRate: number;
+	meanConfidence: number;
+}
+
+/**
+ * Generation significance metric (overall rate vs baseline)
+ */
+export interface GenerationSignificanceMetric {
+	metric: string;
+	achieved: number;
+	randomBaseline: number | null;
+}
+
+/**
+ * Ranking correctness metric (per-method MI quality)
+ */
+export interface RankingCorrectnessMetric {
+	method: string;
+	meanMI: number;
+	nodeCoverage: number;
+	pathDiversity: number;
+	spearmanRho: number;
+}
+
+/**
+ * Ranking significance metric (pairwise baseline comparisons)
+ */
+export interface RankingSignificanceMetric {
+	baseline: string;
+	miImprovement: number;
+	wins: string;
+	meanMI: number;
+}
+
 /**
  * Union of all metric types for internal handling
  */
@@ -324,7 +389,13 @@ export type Metric =
 	| HubMitigationMetric
 	| MultiHubEfficiencyMetric
 	| HubAvoidanceMetric
-	| SalienceCoverageComparisonMetric;
+	| SalienceCoverageComparisonMetric
+	| ClassificationCorrectnessMetric
+	| ClassificationSignificanceMetric
+	| GenerationCorrectnessMetric
+	| GenerationSignificanceMetric
+	| RankingCorrectnessMetric
+	| RankingSignificanceMetric;
 
 /**
  * Metric category - groups related metrics for table generation
@@ -351,7 +422,13 @@ export type MetricCategory =
 	| "ranking-benchmarks"
 	| "hub-mitigation"
 	| "multi-hub-efficiency"
-	| "salience-coverage-comparison";
+	| "salience-coverage-comparison"
+	| "classification-correctness"
+	| "classification-significance"
+	| "generation-correctness"
+	| "generation-significance"
+	| "ranking-correctness"
+	| "ranking-significance";
 
 /**
  * Typed metric record with category
