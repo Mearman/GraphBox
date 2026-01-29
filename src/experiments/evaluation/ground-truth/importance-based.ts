@@ -195,7 +195,6 @@ const aggregateScores = (scores: number[], method: "mean" | "sum" | "geometric-m
 			const logSum = scores.reduce((sum, s) => sum + Math.log(s + 1e-10), 0);
 			return Math.exp(logSum / scores.length);
 		}
-		case "mean":
 		default: {
 			return scores.reduce((a, b) => a + b, 0) / scores.length;
 		}
