@@ -37,9 +37,8 @@ describe("Expansion Order Analysis", () => {
 
 		for (const method of ["Degree-Prioritised", "Standard BFS"]) {
 			const expander = new InstrumentedExpander(edges, 0.1);
-			let expansion;
 
-			expansion = method === "Degree-Prioritised"
+			const expansion = method === "Degree-Prioritised"
 				? new DegreePrioritisedExpansion(expander, ["SA0", "SB0"])
 				: new StandardBfsExpansion(expander, ["SA0", "SB0"]);
 

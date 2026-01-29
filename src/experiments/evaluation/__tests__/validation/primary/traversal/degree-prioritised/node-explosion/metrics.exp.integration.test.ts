@@ -68,8 +68,7 @@ describe("Node Explosion Metrics", () => {
 			const expander = new InstrumentedExpander(edges, 0.2);
 			const totalHubs = expander.getHubNodes().size;
 
-			let expansion;
-			expansion = method === "Degree-Prioritised"
+			const expansion = method === "Degree-Prioritised"
 				? new DegreePrioritisedExpansion(expander, ["L0_0", "L3_5"])
 				: new StandardBfsExpansion(expander, ["L0_0", "L3_5"]);
 

@@ -494,8 +494,7 @@ describe("Node Explosion Mitigation Integration", () => {
 				const lowDegreeNode = sortedNodes[5][0];
 				const midDegreeNode = sortedNodes[Math.floor(sortedNodes.length / 2)][0];
 
-				let expansion;
-				expansion = method === "Degree-Prioritised" ? new DegreePrioritisedExpansion(expander, [lowDegreeNode, midDegreeNode]) : new StandardBfsExpansion(expander, [lowDegreeNode, midDegreeNode]);
+				const expansion = method === "Degree-Prioritised" ? new DegreePrioritisedExpansion(expander, [lowDegreeNode, midDegreeNode]) : new StandardBfsExpansion(expander, [lowDegreeNode, midDegreeNode]);
 
 				await expansion.run();
 
@@ -538,9 +537,8 @@ describe("Node Explosion Mitigation Integration", () => {
 
 			for (const method of ["Degree-Prioritised", "Standard BFS"]) {
 				const expander = new InstrumentedExpander(edges, 0.1);
-				let expansion;
 
-				expansion = method === "Degree-Prioritised" ? new DegreePrioritisedExpansion(expander, ["SA0", "SB0"]) : new StandardBfsExpansion(expander, ["SA0", "SB0"]);
+				const expansion = method === "Degree-Prioritised" ? new DegreePrioritisedExpansion(expander, ["SA0", "SB0"]) : new StandardBfsExpansion(expander, ["SA0", "SB0"]);
 
 				await expansion.run();
 				orders[method] = expander.getExpansionOrder();
@@ -613,8 +611,7 @@ describe("Node Explosion Metrics", () => {
 			const expander = new InstrumentedExpander(edges, 0.2);
 			const totalHubs = expander.getHubNodes().size;
 
-			let expansion;
-			expansion = method === "Degree-Prioritised" ? new DegreePrioritisedExpansion(expander, ["L0_0", "L3_5"]) : new StandardBfsExpansion(expander, ["L0_0", "L3_5"]);
+			const expansion = method === "Degree-Prioritised" ? new DegreePrioritisedExpansion(expander, ["L0_0", "L3_5"]) : new StandardBfsExpansion(expander, ["L0_0", "L3_5"]);
 
 			await expansion.run();
 

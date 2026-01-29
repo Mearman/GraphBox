@@ -45,8 +45,7 @@ describe("Scale-Free Graph", () => {
 			const lowDegreeNode = sortedNodes[5][0];
 			const midDegreeNode = sortedNodes[Math.floor(sortedNodes.length / 2)][0];
 
-			let expansion;
-			expansion = method === "Degree-Prioritised"
+			const expansion = method === "Degree-Prioritised"
 				? new DegreePrioritisedExpansion(expander, [lowDegreeNode, midDegreeNode])
 				: new StandardBfsExpansion(expander, [lowDegreeNode, midDegreeNode]);
 
