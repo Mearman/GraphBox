@@ -349,7 +349,7 @@ export class RetrospectiveSalienceExpansion<T> {
 		}
 
 		// Union = neighbors ∪ pathNodes
-		const union = new Set([...Array.from(neighbors), ...Array.from(pathNodes)]);
+		const union = new Set([...neighbors, ...pathNodes]);
 
 		// Jaccard = |intersection| / |union|
 		if (union.size === 0) {
@@ -437,7 +437,7 @@ export class RetrospectiveSalienceExpansion<T> {
 		const seedB = this.seeds[stateB.index];
 
 		if (pathFromA[0] !== seedA) return null;
-		if (pathFromB.length > 0 && pathFromB[pathFromB.length - 1] !== seedB && meetingNode !== seedB) return null;
+		if (pathFromB.length > 0 && pathFromB.at(-1) !== seedB && meetingNode !== seedB) return null;
 
 		return [...pathFromA, ...pathFromB];
 	}

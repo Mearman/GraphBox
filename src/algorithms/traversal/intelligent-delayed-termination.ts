@@ -534,7 +534,7 @@ export class IntelligentDelayedTermination<T> {
 		const seedB = this.seeds[stateB.index];
 
 		if (pathFromA[0] !== seedA) return undefined;
-		if (pathFromB.length > 0 && pathFromB[pathFromB.length - 1] !== seedB && meetingNode !== seedB) return undefined;
+		if (pathFromB.length > 0 && pathFromB.at(-1) !== seedB && meetingNode !== seedB) return undefined;
 
 		return [...pathFromA, ...pathFromB];
 	}
