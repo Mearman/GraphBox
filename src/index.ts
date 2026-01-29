@@ -199,7 +199,6 @@ export type {
 	LeidenCommunity,
 	LeidenResult,
 	LouvainConfiguration,
-	LouvainResult,
 	MergeStep,
 	Modularity,
 	ModuleId,

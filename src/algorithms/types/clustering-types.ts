@@ -498,7 +498,7 @@ export type HierarchicalError =
  * @template T - Node identifier type (typically string)
  * @remarks
  * This interface defines the data structure returned by the Louvain algorithm.
- * The actual function returns `Result<LouvainResult<string>, ClusteringError>`.
+ * The actual function returns `Result<LouvainResult<string>, ClusteringError>` (see clustering/louvain.ts).
  *
  * **Performance Characteristics** (1000-node graph):
  * - Phase 1 (Parameter Tuning): ~10-12 seconds
@@ -510,7 +510,7 @@ export type HierarchicalError =
  * - Auto mode (large graphs): Modularity ~0.19 (5% loss for 3-6x speedup)
  * - Random mode: Modularity ~0.18-0.19 (acceptable for speed-critical use cases)
  */
-export interface LouvainResult<T = string> {
+export interface LouvainDesignResult<T = string> {
 	/** Map of community ID → community structure */
 	communities: Map<number, Community<T>>;
 
