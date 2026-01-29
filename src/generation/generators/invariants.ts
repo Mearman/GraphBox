@@ -55,9 +55,27 @@ export const generateHereditaryClassEdges = (nodes: TestNode[], edges: TestEdge[
 
 	// For simplicity, generate a graph and filter out forbidden patterns
 	// Start with a random graph
-	const density = spec.density.kind === "sparse" ? 0.15 :
-		spec.density.kind === "moderate" ? 0.4 :
-			spec.density.kind === "dense" ? 0.7 : 0.3;
+	let density: number;
+	switch (spec.density.kind) {
+		case "sparse": {
+			density = 0.15;
+	
+			break;
+		}
+		case "moderate": {
+			density = 0.4;
+	
+			break;
+		}
+		case "dense": {
+			density = 0.7;
+	
+			break;
+		}
+		default: {
+			density = 0.3;
+		}
+	}
 
 	const totalPossibleEdges = (nodes.length * (nodes.length - 1)) / 2;
 	const targetEdgeCount = Math.floor(totalPossibleEdges * density);
