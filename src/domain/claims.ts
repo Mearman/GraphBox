@@ -55,6 +55,64 @@ const RANKING_CLAIMS: EvaluationClaim[] = [
 ];
 
 /**
+ * Community Detection Claims for Louvain evaluation.
+ * Tests structural decomposition quality on benchmark graphs.
+ */
+const COMMUNITY_DETECTION_CLAIMS: EvaluationClaim[] = [
+	{
+		claimId: "louvain-positive-modularity",
+		description: "Louvain detects communities with positive modularity on benchmark graphs",
+		sut: "louvain-v1.0.0",
+		baseline: "random-partition-v1.0.0",
+		metric: "modularity",
+		direction: "greater",
+		scope: "global",
+		tags: ["community-detection", "core"],
+	},
+	{
+		claimId: "louvain-fewer-iterations-than-leiden",
+		description: "Louvain converges in fewer iterations than Leiden on small graphs",
+		sut: "louvain-v1.0.0",
+		baseline: "leiden-v1.0.0",
+		metric: "iterations",
+		direction: "less",
+		scope: "caseClass",
+		scopeConstraints: { caseClass: "small-world" },
+		tags: ["community-detection", "efficiency"],
+	},
+];
+
+/**
+ * K-Core Decomposition Claims.
+ * Tests hierarchical structure identification on benchmark graphs.
+ */
+const KCORE_CLAIMS: EvaluationClaim[] = [
+	{
+		claimId: "kcore-identifies-hierarchical-structure",
+		description: "K-core decomposition produces nested core hierarchy on benchmark graphs",
+		sut: "k-core-v1.0.0",
+		baseline: "random-partition-v1.0.0",
+		metric: "coreCount",
+		direction: "greater",
+		threshold: 2,
+		scope: "global",
+		tags: ["decomposition", "core"],
+	},
+	{
+		claimId: "kcore-core-periphery-separation",
+		description: "K-core degeneracy separates core literature from peripheral on collaboration networks",
+		sut: "k-core-v1.0.0",
+		baseline: "random-partition-v1.0.0",
+		metric: "degeneracy",
+		direction: "greater",
+		threshold: 1,
+		scope: "caseClass",
+		scopeConstraints: { caseClass: "collaboration" },
+		tags: ["decomposition"],
+	},
+];
+
+/**
  * Thesis claims for GraphBox evaluation.
  *
  * Each claim represents a testable hypothesis about algorithm performance.
@@ -215,6 +273,8 @@ export const THESIS_CLAIMS: EvaluationClaim[] = [
 		tags: ["ranking"],
 	},
 	...RANKING_CLAIMS,
+	...COMMUNITY_DETECTION_CLAIMS,
+	...KCORE_CLAIMS,
 ];
 
 /**
@@ -254,5 +314,5 @@ export const getClaimsByBaseline = (baselineId: string): EvaluationClaim[] => TH
  */
 export const getClaim = (claimId: string): EvaluationClaim | undefined => THESIS_CLAIMS.find((c) => c.claimId === claimId);
 
-// Re-export RANKING_CLAIMS for backwards compatibility
-export { RANKING_CLAIMS };
+// Re-export claim arrays
+export { COMMUNITY_DETECTION_CLAIMS, KCORE_CLAIMS,RANKING_CLAIMS };
