@@ -365,6 +365,30 @@ export interface RankingSignificanceMetric {
 }
 
 /**
+ * Community detection metric (Louvain, Leiden, Label Propagation)
+ */
+export interface CommunityDetectionMetric {
+	dataset: string;
+	method: string;
+	communities: number;
+	modularity: number;
+	iterations: number;
+	nodes: number;
+}
+
+/**
+ * K-core decomposition metric
+ */
+export interface KCoreDecompositionMetric {
+	dataset: string;
+	degeneracy: number;
+	coreCount: number;
+	maxCoreSize: number;
+	nodes: number;
+	edges: number;
+}
+
+/**
  * Union of all metric types for internal handling
  */
 export type Metric =
@@ -395,7 +419,9 @@ export type Metric =
 	| GenerationCorrectnessMetric
 	| GenerationSignificanceMetric
 	| RankingCorrectnessMetric
-	| RankingSignificanceMetric;
+	| RankingSignificanceMetric
+	| CommunityDetectionMetric
+	| KCoreDecompositionMetric;
 
 /**
  * Metric category - groups related metrics for table generation
@@ -428,7 +454,9 @@ export type MetricCategory =
 	| "generation-correctness"
 	| "generation-significance"
 	| "ranking-correctness"
-	| "ranking-significance";
+	| "ranking-significance"
+	| "community-detection"
+	| "k-core-decomposition";
 
 /**
  * Typed metric record with category
