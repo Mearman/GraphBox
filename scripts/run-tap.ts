@@ -55,6 +55,8 @@ interface TestMetrics {
 	generationSignificance?: MetricSection;
 	rankingCorrectness?: MetricSection;
 	rankingSignificance?: MetricSection;
+	communityDetection?: MetricSection;
+	kCoreDecomposition?: MetricSection;
 }
 
 interface VitestTestResult {
@@ -876,6 +878,56 @@ const parseConsoleMetrics = (stdout: string): TestMetrics => {
 				return rows.length > 0 ? { title: "Ranking Significance", rows } : null;
 			},
 		},
+		// Community Detection
+		{
+			header: /=== Community Detection ===/,
+			parse: (lines, startIndex) => {
+				const rows: Record<string, string | number>[] = [];
+				for (let index = startIndex + 1; index < Math.min(startIndex + 20, lines.length); index++) {
+					const line = lines[index];
+					if (line.trim() === "" || line.startsWith("===")) break;
+					const parts = line.split("\t").map((p) => p.trim());
+					if (parts.length >= 6) {
+						const communities = Number.parseInt(parts[2]);
+						if (Number.isNaN(communities)) continue; // Skip header row
+						rows.push({
+							dataset: parts[0],
+							method: parts[1],
+							communities,
+							modularity: Number.parseFloat(parts[3]),
+							iterations: Number.parseInt(parts[4]),
+							nodes: Number.parseInt(parts[5]),
+						});
+					}
+				}
+				return rows.length > 0 ? { title: "Community Detection", rows } : null;
+			},
+		},
+		// K-Core Decomposition
+		{
+			header: /=== K-Core Decomposition ===/,
+			parse: (lines, startIndex) => {
+				const rows: Record<string, string | number>[] = [];
+				for (let index = startIndex + 1; index < Math.min(startIndex + 20, lines.length); index++) {
+					const line = lines[index];
+					if (line.trim() === "" || line.startsWith("===")) break;
+					const parts = line.split("\t").map((p) => p.trim());
+					if (parts.length >= 6) {
+						const degeneracy = Number.parseInt(parts[1]);
+						if (Number.isNaN(degeneracy)) continue; // Skip header row
+						rows.push({
+							dataset: parts[0],
+							degeneracy,
+							coreCount: Number.parseInt(parts[2]),
+							maxCoreSize: Number.parseInt(parts[3]),
+							nodes: Number.parseInt(parts[4]),
+							edges: Number.parseInt(parts[5]),
+						});
+					}
+				}
+				return rows.length > 0 ? { title: "K-Core Decomposition", rows } : null;
+			},
+		},
 	];
 
 	// Find and parse all metric sections
@@ -914,6 +966,8 @@ const parseConsoleMetrics = (stdout: string): TestMetrics => {
 						"Generation Significance": "generationSignificance",
 						"Ranking Correctness": "rankingCorrectness",
 						"Ranking Significance": "rankingSignificance",
+						"Community Detection": "communityDetection",
+						"K-Core Decomposition": "kCoreDecomposition",
 					};
 					const key = keyMap[section.title];
 					if (key) {
@@ -923,6 +977,7 @@ const parseConsoleMetrics = (stdout: string): TestMetrics => {
 							"runtimePerformance", "scalability", "crossDataset",
 							"hubTraversalComparison", "algorithmComparison", "miRankingQuality",
 							"rankingCorrectness", "rankingSignificance",
+							"communityDetection", "kCoreDecomposition",
 						];
 						if (deduplicateSections.includes(key)) {
 							// These sections can have multiple rows - merge with deduplication
@@ -1095,6 +1150,8 @@ const main = async () => {
 			generationSignificance: "generation-significance",
 			rankingCorrectness: "ranking-correctness",
 			rankingSignificance: "ranking-significance",
+			communityDetection: "community-detection",
+			kCoreDecomposition: "k-core-decomposition",
 		};
 
 		const sourceMetricsPath = join(projectRoot, "src/test-metrics.json");
