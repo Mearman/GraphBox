@@ -115,6 +115,6 @@
   },
   "dependencies": {
     "fflate": "^0.8.2",
-    "ppef": "link:../ppef"
+    "ppef": "1.2.0"
   }
 }

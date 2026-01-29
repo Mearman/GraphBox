@@ -12,8 +12,8 @@ importers:
         specifier: ^0.8.2
         version: 0.8.2
       ppef:
-        specifier: link:../ppef
-        version: link:../ppef
+        specifier: 1.2.0
+        version: 1.2.0(typescript@5.9.3)
     devDependencies:
       '@commitlint/cli':
         specifier: ^20.3.1
@@ -1679,6 +1679,10 @@ packages:
   colorette@2.0.20:
     resolution: {integrity: sha512-IfEDxwoWIjkeXL1eXcDiow4UbKjhLdq6/EuSVR9GMN7KVH3r9gQ83e73hsz1Nd1T3ijd5xv1wcWRYO+D6kCI2w==}
 
+  commander@12.1.0:
+    resolution: {integrity: sha512-Vw8qHK3bZM9y/P10u3Vib8o/DdkvA2OtPtZvD871QKjy74Wj1WSKFILMPRPSdUSx5RFK1arlJzEtA4PkFgnbuA==}
+    engines: {node: '>=18'}
+
   commander@14.0.2:
     resolution: {integrity: sha512-TywoWNNRbhoD0BXs1P3ZEScW8W5iKrnbithIl0YH+uCmBd0QpPOA8yc82DS3BIE5Ma6FnBVUsJ7wVUDz4dvOWQ==}
     engines: {node: '>=20'}
@@ -3321,6 +3325,13 @@ packages:
   postcss@8.5.6:
     resolution: {integrity: sha512-3Ybi1tAuwAP9s0r1UQ2J4n5Y0G05bJkpUIO0/bI9MhwmD70S5aTWbXGBwxHrelT+XM1k6dM0pk+SwNkpTRN7Pg==}
     engines: {node: ^10 || ^12 || >=14}
+
+  ppef@1.2.0:
+    resolution: {integrity: sha512-ZXawS4zYcTiICu/EtxHep5DpsxXvbpegvgF1hPAVk6fe5UVusPLmUnwZD0s827k3KpSrq283z/4+KokJ3VdTtw==}
+    engines: {node: '>=18'}
+    hasBin: true
+    peerDependencies:
+      typescript: 5.0.0
 
   prelude-ls@1.2.1:
     resolution: {integrity: sha512-vkcDPrRZo1QZLbn5RLGPpg/WmIQ65qoWWhcGKf/b5eplkkarX0m9z8ppCat4mlOqUsWpyNuYgO3VRyrYHSzX5g==}
@@ -5868,6 +5879,8 @@ snapshots:
 
   colorette@2.0.20: {}
 
+  commander@12.1.0: {}
+
   commander@14.0.2: {}
 
   comment-parser@1.4.1: {}
@@ -7508,6 +7521,11 @@ snapshots:
       nanoid: 3.3.11
       picocolors: 1.1.1
       source-map-js: 1.2.1
+
+  ppef@1.2.0(typescript@5.9.3):
+    dependencies:
+      commander: 12.1.0
+      typescript: 5.9.3
 
   prelude-ls@1.2.1: {}
 
