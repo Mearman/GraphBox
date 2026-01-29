@@ -119,7 +119,7 @@ describe("detectCommunities", () => {
 	describe("empty graph", () => {
 		it("should return empty array for empty graph", () => {
 			const graph = new Graph<TestNode, TestEdge>(false);
-			const communities = detectCommunities(graph);
+			const { communities } = detectCommunities(graph);
 
 			expect(communities).toHaveLength(0);
 		});
@@ -130,7 +130,7 @@ describe("detectCommunities", () => {
 			const graph = new Graph<TestNode, TestEdge>(false);
 			graph.addNode(createNode("A"));
 
-			const communities = detectCommunities(graph);
+			const { communities } = detectCommunities(graph);
 
 			expect(communities).toHaveLength(1);
 			expect(communities[0].size).toBe(1);
@@ -145,7 +145,7 @@ describe("detectCommunities", () => {
 			graph.addNode(createNode("C"));
 			// No edges
 
-			const communities = detectCommunities(graph);
+			const { communities } = detectCommunities(graph);
 
 			expect(communities).toHaveLength(3);
 			for (const community of communities) {
@@ -165,7 +165,7 @@ describe("detectCommunities", () => {
 			graph.addEdge(createEdge("e2", "B", "C"));
 			graph.addEdge(createEdge("e3", "A", "C"));
 
-			const communities = detectCommunities(graph);
+			const { communities } = detectCommunities(graph);
 
 			// Small densely connected graph typically forms single community
 			expect(communities.length).toBeGreaterThanOrEqual(1);
@@ -180,7 +180,7 @@ describe("detectCommunities", () => {
 			graph.addEdge(createEdge("e1", "A", "B"));
 			graph.addEdge(createEdge("e2", "B", "C"));
 
-			const communities = detectCommunities(graph);
+			const { communities } = detectCommunities(graph);
 
 			const totalNodes = communities.reduce((sum, c) => sum + c.size, 0);
 			expect(totalNodes).toBe(3);
@@ -197,7 +197,7 @@ describe("detectCommunities", () => {
 			graph.addEdge(createEdge("e2", "B", "C"));
 			graph.addEdge(createEdge("e3", "C", "A"));
 
-			const communities = detectCommunities(graph);
+			const { communities } = detectCommunities(graph);
 
 			expect(communities.length).toBeGreaterThan(0);
 		});
@@ -213,7 +213,7 @@ describe("detectCommunities", () => {
 			graph.addEdge(createEdge("e2", "B", "C"));
 			graph.addEdge(createEdge("e3", "A", "C"));
 
-			const communities = detectCommunities(graph);
+			const { communities } = detectCommunities(graph);
 
 			for (const community of communities) {
 				expect(community.density).toBeGreaterThanOrEqual(0);
@@ -227,7 +227,7 @@ describe("detectCommunities", () => {
 			graph.addNode(createNode("B"));
 			graph.addEdge(createEdge("e1", "A", "B"));
 
-			const communities = detectCommunities(graph);
+			const { communities } = detectCommunities(graph);
 
 			for (const community of communities) {
 				expect(community.internalEdges).toBeGreaterThanOrEqual(0);
@@ -244,12 +244,12 @@ describe("detectCommunities", () => {
 			graph.addEdge(createEdge("e1", "A", "B"));
 
 			// Higher resolution tends to find more communities
-			const communitiesLow = detectCommunities(graph, { resolution: 0.5 });
-			const communitiesHigh = detectCommunities(graph, { resolution: 2 });
+			const resultLow = detectCommunities(graph, { resolution: 0.5 });
+			const resultHigh = detectCommunities(graph, { resolution: 2 });
 
 			// Both should return valid results
-			expect(communitiesLow.length).toBeGreaterThan(0);
-			expect(communitiesHigh.length).toBeGreaterThan(0);
+			expect(resultLow.communities.length).toBeGreaterThan(0);
+			expect(resultHigh.communities.length).toBeGreaterThan(0);
 		});
 
 		it("should accept mode parameter", () => {
@@ -258,11 +258,11 @@ describe("detectCommunities", () => {
 			graph.addNode(createNode("B"));
 			graph.addEdge(createEdge("e1", "A", "B"));
 
-			const communitiesBest = detectCommunities(graph, { mode: "best" });
-			const communitiesAuto = detectCommunities(graph, { mode: "auto" });
+			const resultBest = detectCommunities(graph, { mode: "best" });
+			const resultAuto = detectCommunities(graph, { mode: "auto" });
 
-			expect(communitiesBest.length).toBeGreaterThan(0);
-			expect(communitiesAuto.length).toBeGreaterThan(0);
+			expect(resultBest.communities.length).toBeGreaterThan(0);
+			expect(resultAuto.communities.length).toBeGreaterThan(0);
 		});
 
 		it("should accept maxIterations parameter", () => {
@@ -271,7 +271,7 @@ describe("detectCommunities", () => {
 			graph.addNode(createNode("B"));
 			graph.addEdge(createEdge("e1", "A", "B"));
 
-			const communities = detectCommunities(graph, { maxIterations: 5 });
+			const { communities } = detectCommunities(graph, { maxIterations: 5 });
 
 			expect(communities.length).toBeGreaterThan(0);
 		});
@@ -285,11 +285,11 @@ describe("detectCommunities", () => {
 				graph.addEdge(createEdge(`e${index}`, `N${index}`, `N${index + 1}`));
 			}
 
-			const communities1 = detectCommunities(graph, { seed: 42 });
-			const communities2 = detectCommunities(graph, { seed: 42 });
+			const result1 = detectCommunities(graph, { seed: 42 });
+			const result2 = detectCommunities(graph, { seed: 42 });
 
 			// Same seed should produce same community count
-			expect(communities1.length).toBe(communities2.length);
+			expect(result1.communities.length).toBe(result2.communities.length);
 		});
 	});
 
@@ -304,7 +304,7 @@ describe("detectCommunities", () => {
 			// Weak connection B-C
 			graph.addEdge(createEdge("e2", "B", "C", 1));
 
-			const communities = detectCommunities(graph, {
+			const { communities } = detectCommunities(graph, {
 				weightFn: (edge) => edge.weight ?? 1,
 			});
 

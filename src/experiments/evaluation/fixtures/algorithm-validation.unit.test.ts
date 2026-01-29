@@ -139,7 +139,7 @@ describe("Karate Club Clustering Validation", () => {
 
 	describe("Louvain algorithm", () => {
 		it("should detect communities", async () => {
-			const communities = detectCommunities(benchmark.graph);
+			const { communities } = detectCommunities(benchmark.graph);
 
 			// Louvain should detect some communities
 			// Note: Due to a known issue with single-community convergence,
@@ -148,7 +148,7 @@ describe("Karate Club Clustering Validation", () => {
 		});
 
 		it("should have valid density scores when communities found", async () => {
-			const communities = detectCommunities(benchmark.graph);
+			const { communities } = detectCommunities(benchmark.graph);
 
 			// Only validate if communities were found
 			if (communities.length > 0) {

@@ -21,6 +21,23 @@ import type { WeightFunction } from "../types/weight-function";
 import { convertToCSR, type CSRGraph } from "../utils/csr";
 
 /**
+ * Result of Louvain community detection including performance statistics.
+ */
+export interface LouvainResult<N extends Node> {
+	/** Detected communities */
+	communities: Community<N>[];
+	/** Performance and convergence statistics */
+	stats: {
+		/** Total iterations across all hierarchy levels */
+		totalIterations: number;
+		/** Number of hierarchy levels processed */
+		hierarchyLevels: number;
+		/** Runtime in milliseconds */
+		runtimeMs: number;
+	};
+}
+
+/**
  * Internal representation of a community during Louvain execution.
  */
 interface LouvainCommunity {
@@ -145,17 +162,17 @@ export const shuffle = <T>(array: T[], seed?: number): T[] => {
  * // ... add nodes and edges ...
  *
  * // Basic usage (adaptive defaults)
- * const communities = detectCommunities(graph);
- * console.log(`Found ${communities.length} communities`);
+ * const { communities, stats } = detectCommunities(graph);
+ * console.log(`Found ${communities.length} communities in ${stats.totalIterations} iterations`);
  *
  * // Quality-first mode
- * const qualityCommunities = detectCommunities(graph, { mode: "best" });
+ * const result = detectCommunities(graph, { mode: "best" });
  *
  * // Speed-first mode for large graphs
- * const fastCommunities = detectCommunities(graph, { mode: "random", maxIterations: 10 });
+ * const fast = detectCommunities(graph, { mode: "random", maxIterations: 10 });
  *
  * // Reproducible results
- * const deterministicCommunities = detectCommunities(graph, { seed: 42 });
+ * const deterministic = detectCommunities(graph, { seed: 42 });
  * ```
  */
 export const detectCommunities = <N extends Node, E extends Edge>(graph: Graph<N, E>, options: {
@@ -165,7 +182,7 @@ export const detectCommunities = <N extends Node, E extends Edge>(graph: Graph<N
 	seed?: number;
 	minModularityIncrease?: number;
 	maxIterations?: number;
-} = {}): Community<N>[] => {
+} = {}): LouvainResult<N> => {
 	// T014: Runtime tracking (spec-027 Phase 1)
 	const startTime = performance.now();
 
@@ -179,7 +196,7 @@ export const detectCommunities = <N extends Node, E extends Edge>(graph: Graph<N
 	// Handle empty graph
 	const allNodes = graph.getAllNodes();
 	if (allNodes.length === 0) {
-		return [];
+		return { communities: [], stats: { totalIterations: 0, hierarchyLevels: 0, runtimeMs: 0 } };
 	}
 
 	// T042: Convert to CSR format for better cache locality (spec-027 Phase 5)
@@ -256,7 +273,11 @@ export const detectCommunities = <N extends Node, E extends Edge>(graph: Graph<N
 	const m = calculateTotalEdgeWeight(graph, weightFunction);
 	if (m === 0) {
 		// No edges - return each node as separate community
-		return buildCommunityResults(graph, nodeToCommunity);
+		const endTimeNoEdges = performance.now();
+		return {
+			communities: buildCommunityResults(graph, nodeToCommunity),
+			stats: { totalIterations: 0, hierarchyLevels: 0, runtimeMs: endTimeNoEdges - startTime },
+		};
 	}
 
 	// Track hierarchy: superNodeId -> set of original node IDs
@@ -540,7 +561,14 @@ export const detectCommunities = <N extends Node, E extends Edge>(graph: Graph<N
 	console.log(`[spec-027] Adaptive threshold: ${adaptiveMinModularityIncrease.toExponential(1)}`);
 	console.log(`[spec-027] Neighbor selection mode: ${resolvedMode} (requested: ${mode})`);
 
-	return buildCommunityResults(graph, finalNodeToCommunity, m, nodeDegrees);
+	return {
+		communities: buildCommunityResults(graph, finalNodeToCommunity, m, nodeDegrees),
+		stats: {
+			totalIterations,
+			hierarchyLevels: hierarchyLevel,
+			runtimeMs: runtime,
+		},
+	};
 };
 
 /**
