@@ -137,7 +137,7 @@ export const executeGenerate = (options: GenerateOptions): void => {
 			// Print to stdout
 			console.log(output);
 		} else {
-			writeFileSync(options.output, output, "utf-8");
+			writeFileSync(options.output, output, "utf8");
 			console.log(`Graph generated and saved to ${options.output}`);
 		}
 	} catch (error) {

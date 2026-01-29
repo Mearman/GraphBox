@@ -132,7 +132,7 @@ export const executeAnalyze = (options: AnalyzeOptions): void => {
 			// Print to stdout
 			console.log(output);
 		} else {
-			writeFileSync(options.output, output, "utf-8");
+			writeFileSync(options.output, output, "utf8");
 			if (options.verbose) {
 				console.error(`Analysis saved to ${options.output}`);
 			}

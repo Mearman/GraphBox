@@ -14,7 +14,7 @@ import { makeGraphSpec } from "../generation/spec";
  * @param filepath
  */
 export const loadSpecFromFile = (filepath: string): GraphSpec => {
-	const content = readFileSync(filepath, "utf-8");
+	const content = readFileSync(filepath, "utf8");
 	return loadSpecFromString(content);
 };
 

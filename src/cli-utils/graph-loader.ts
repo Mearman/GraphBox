@@ -39,7 +39,7 @@ export const loadGraphFromFile = (
 	filepath: string,
 	options: LoadGraphOptions = {}
 ): LoadGraphResult => {
-	const content = readFileSync(filepath, "utf-8");
+	const content = readFileSync(filepath, "utf8");
 	return loadGraphFromString(content, filepath, options);
 };
 
