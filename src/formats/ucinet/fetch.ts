@@ -141,7 +141,7 @@ const main = async (): Promise<void> => {
 	console.error(`Fetching ${url}...`);
 
 	const urlPath = new URL(url).pathname;
-	const basename = urlPath.split("/").pop()?.replace(/\.(dl|zip|gz)$/i, "") ?? "graph";
+	const basename = urlPath.split("/").pop()?.replace(/\.(?:dl|zip|gz)$/i, "") ?? "graph";
 
 	const result = await fetchDlDataset(url, {
 		meta: {

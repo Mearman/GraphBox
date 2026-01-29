@@ -122,7 +122,7 @@ const tokenize = (input: string): Token[] => {
 				index++;
 			}
 			// Only treat as number if it's actually a valid number
-			if (/^[-+]?(?:\d+(?:\.\d+)?|\.\d+)(e[-+]?\d+)?$/i.test(numberString)) {
+			if (/^[-+]?(?:\d+(?:\.\d+)?|\.\d+)(?:e[-+]?\d+)?$/i.test(numberString)) {
 				const number_ = Number.parseFloat(numberString);
 				tokens.push({ type: "NUMBER", value: number_ });
 				continue;

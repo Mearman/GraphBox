@@ -162,7 +162,7 @@ const main = async (): Promise<void> => {
 	const content = fs.readFileSync(inputPath, "utf8");
 	const document = parseSnap(content);
 
-	const basename = path.basename(inputPath).replace(/\.(txt|edges?)$/i, "");
+	const basename = path.basename(inputPath).replace(/\.(?:txt|edges?)$/i, "");
 	const absolutePath = path.resolve(inputPath);
 
 	const json = snapToJson(document, {
