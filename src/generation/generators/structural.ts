@@ -7,5 +7,7 @@
  * @generated 2026-01-18T16:10:41.828Z
  */
 
+/** Sentinel constant indicating this module is loaded. */
+export const STRUCTURAL_MODULE = true;
 
 // Skipped: WeaklyChordal (property already exists or was renamed)
