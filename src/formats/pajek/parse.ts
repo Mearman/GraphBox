@@ -164,7 +164,7 @@ const parseEdge = (line: string): PajekEdge | null => {
 	const source = Number.parseInt(parts[0], 10);
 	const target = Number.parseInt(parts[1], 10);
 
-	if (isNaN(source) || isNaN(target)) {
+	if (Number.isNaN(source) || Number.isNaN(target)) {
 		return null;
 	}
 
@@ -172,7 +172,7 @@ const parseEdge = (line: string): PajekEdge | null => {
 
 	if (parts.length >= 3) {
 		const weight = Number.parseFloat(parts[2]);
-		if (!isNaN(weight)) {
+		if (!Number.isNaN(weight)) {
 			edge.weight = weight;
 		}
 	}

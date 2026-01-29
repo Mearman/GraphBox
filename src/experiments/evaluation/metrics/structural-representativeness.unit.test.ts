@@ -376,7 +376,7 @@ describe("computeStructuralRepresentativeness", () => {
 		//   KL(gtDist || {}) = comparing {5:1.0} vs empty
 		//   This would be much smaller (~5, just the smoothing term)
 		expect(result.degreeKL).toBeGreaterThan(20);
-		expect(isFinite(result.degreeKL)).toBe(true);
+		expect(Number.isFinite(result.degreeKL)).toBe(true);
 	});
 
 	it("should correctly identify intersection vs false positives (validates has() check)", () => {

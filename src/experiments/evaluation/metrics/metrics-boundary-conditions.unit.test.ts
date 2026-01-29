@@ -32,7 +32,7 @@ describe("Boundary Conditions - Path Diversity", () => {
 			// Single path = 0 pairs = pairCount = 0, validates ternary guard
 			const result = meanPairwiseJaccardDistance([["1", "2"]]);
 			expect(result).toBe(0);
-			expect(isNaN(result)).toBe(false); // Not NaN from division by zero
+			expect(Number.isNaN(result)).toBe(false); // Not NaN from division by zero
 		});
 
 		it("meanPairwiseEdgeJaccardDistance returns 0 for empty paths", () => {
@@ -43,7 +43,7 @@ describe("Boundary Conditions - Path Diversity", () => {
 			// Single path = 0 pairs = pairCount = 0, validates ternary guard
 			const result = meanPairwiseEdgeJaccardDistance([["1", "2"]]);
 			expect(result).toBe(0);
-			expect(isNaN(result)).toBe(false); // Not NaN from division by zero
+			expect(Number.isNaN(result)).toBe(false); // Not NaN from division by zero
 		});
 
 		it("computePathDiversityMetrics handles empty paths", () => {
@@ -88,7 +88,7 @@ describe("Boundary Conditions - Path Diversity", () => {
 			]);
 			expect(result).toBeCloseTo(0.6, 5);
 			// Validates loop bounds are correct (no out-of-bounds access)
-			expect(isNaN(result)).toBe(false);
+			expect(Number.isNaN(result)).toBe(false);
 		});
 
 		it("meanPairwiseEdgeJaccardDistance works with exactly 2 paths", () => {
@@ -114,7 +114,7 @@ describe("Boundary Conditions - Path Diversity", () => {
 				["C", "D", "E"],
 			]);
 			expect(result).toBeCloseTo(0.778, 2);
-			expect(isNaN(result)).toBe(false);
+			expect(Number.isNaN(result)).toBe(false);
 		});
 
 		it("handles single-element paths without crash", () => {
@@ -177,7 +177,7 @@ describe("Boundary Conditions - Degree Distribution", () => {
 			const distribution2 = new Map([[2, 1]]);
 			const result = earthMoversDistance(distribution1, distribution2);
 			expect(result).toBeGreaterThan(0);
-			expect(isFinite(result)).toBe(true);
+			expect(Number.isFinite(result)).toBe(true);
 		});
 
 		it("earthMoversDistance computes exact value for simple case", () => {
@@ -188,8 +188,8 @@ describe("Boundary Conditions - Degree Distribution", () => {
 			const result = earthMoversDistance(distribution1, distribution2);
 			expect(result).toBeCloseTo(2, 5);
 			// Validates loop doesn't access out-of-bounds
-			expect(isFinite(result)).toBe(true);
-			expect(isNaN(result)).toBe(false);
+			expect(Number.isFinite(result)).toBe(true);
+			expect(Number.isNaN(result)).toBe(false);
 		});
 
 		it("klDivergence handles identical single-degree distributions", () => {

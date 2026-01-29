@@ -159,7 +159,7 @@ export const loadEdgeList = (content: string, config: EdgeListConfig = {}): Load
 		let weight: number | undefined;
 		if (weightColumn !== undefined && fields[weightColumn] !== undefined) {
 			weight = Number.parseFloat(fields[weightColumn]);
-			if (isNaN(weight)) {
+			if (Number.isNaN(weight)) {
 				warnings.push(`Line ${lineNumber}: invalid weight "${fields[weightColumn]}"`);
 				weight = undefined;
 			}
@@ -338,7 +338,7 @@ export const loadGraph = (content: string, hint?: "edge-list" | "triples" | "wei
 	// If 3 fields and middle field doesn't look numeric, assume triples
 	if (fields.length >= 3) {
 		const middleField = fields[1];
-		const isNumeric = !isNaN(Number.parseFloat(middleField));
+		const isNumeric = !Number.isNaN(Number.parseFloat(middleField));
 
 		if (!isNumeric) {
 			// Middle field looks like a relation name

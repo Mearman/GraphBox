@@ -123,7 +123,7 @@ describe("klDivergence", () => {
 		// With smoothing: KL should be finite and > 0
 		const result = klDivergence(p, q);
 		expect(result).toBeGreaterThan(0);
-		expect(isFinite(result)).toBe(true);
+		expect(Number.isFinite(result)).toBe(true);
 	});
 
 	it("should produce different results for different distributions with smoothing", () => {
