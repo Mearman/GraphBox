@@ -15,7 +15,7 @@
 
 import { existsSync, mkdirSync, readFileSync, renameSync, unlinkSync, writeFileSync } from "node:fs";
 import { cpus } from "node:os";
-import { resolve } from "node:path";
+import path from "node:path";
 
 import { aggregateResults, type AggregationPipelineOptions, createAggregationOutput } from "ppef/aggregation";
 // Framework imports
@@ -34,7 +34,7 @@ import type { OverlapBasedExpansionResult } from "../algorithms/traversal/overla
 import type { ParsedArguments } from "../cli-utils/arg-parser";
 import { getBoolean, getNumber, getOptional } from "../cli-utils/arg-parser";
 import { formatError } from "../cli-utils/error-formatter";
-// TODO: Migrate to new ClaimsEvaluator API
+// ClaimsEvaluator API not yet available
 // import { ClaimsEvaluator } from "ppef/evaluators";
 // import { getClaimsByTag, getCoreClaims, THESIS_CLAIMS } from "../domain/claims.js";
 import { TABLE_SPECS } from "../domain/tables.js";
@@ -179,10 +179,10 @@ const pathStorage = {
 
 		// Generate unique identifier: timestamp + random string
 		const uniqueId = `${timestamp}-${Math.random().toString(36).slice(2)}`;
-		const temporaryFile = resolve(this.pathsDir, `tmp-${uniqueId}.json`);
+		const temporaryFile = path.resolve(this.pathsDir, `tmp-${uniqueId}.json`);
 
 		try {
-			writeFileSync(temporaryFile, JSON.stringify(paths), "utf-8");
+			writeFileSync(temporaryFile, JSON.stringify(paths), "utf8");
 			// Store mapping from timestamp to unique ID
 			this.pendingPathIds.set(timestamp, uniqueId);
 		} catch {
@@ -204,8 +204,8 @@ const pathStorage = {
 			return;
 		}
 
-		const temporaryFile = resolve(this.pathsDir, `tmp-${uniqueId}.json`);
-		const finalFile = resolve(this.pathsDir, `${runId}.json`);
+		const temporaryFile = path.resolve(this.pathsDir, `tmp-${uniqueId}.json`);
+		const finalFile = path.resolve(this.pathsDir, `${runId}.json`);
 
 		try {
 			if (existsSync(temporaryFile)) {
@@ -214,8 +214,8 @@ const pathStorage = {
 		} catch {
 			// If rename fails, try copying as fallback
 			try {
-				const content = readFileSync(temporaryFile, "utf-8");
-				writeFileSync(finalFile, content, "utf-8");
+				const content = readFileSync(temporaryFile, "utf8");
+				writeFileSync(finalFile, content, "utf8");
 				unlinkSync(temporaryFile);
 			} catch {
 				// Silently fail - file will be cleaned up later
@@ -232,10 +232,10 @@ const pathStorage = {
 	 */
 	loadPathsFromFile(runId: string): string[][] | null {
 		if (this.pathsDir) {
-			const pathFile = resolve(this.pathsDir, `${runId}.json`);
+			const pathFile = path.resolve(this.pathsDir, `${runId}.json`);
 			if (existsSync(pathFile)) {
 				try {
-					const content = readFileSync(pathFile, "utf-8");
+					const content = readFileSync(pathFile, "utf8");
 					return JSON.parse(content) as string[][];
 				} catch {
 					return null;
@@ -272,7 +272,7 @@ const parseRunFilter = (filter: string, totalRuns: number): Set<number> => {
 		if (trimmed.includes("-")) {
 			// Range: "0-40"
 			const [start, end] = trimmed.split("-").map((s) => Number.parseInt(s, 10));
-			if (isNaN(start) || isNaN(end)) {
+			if (Number.isNaN(start) || Number.isNaN(end)) {
 				throw new TypeError(`Invalid range in run-filter: ${trimmed}`);
 			}
 			for (let index = start; index <= end; index++) {
@@ -283,7 +283,7 @@ const parseRunFilter = (filter: string, totalRuns: number): Set<number> => {
 		} else {
 			// Single index: "0" or "42"
 			const index = Number.parseInt(trimmed, 10);
-			if (isNaN(index)) {
+			if (Number.isNaN(index)) {
 				throw new TypeError(`Invalid run index in run-filter: ${trimmed}`);
 			}
 			if (index >= 0 && index < totalRuns) {
@@ -319,7 +319,7 @@ const parseParallelWorkers = (argument: string | number | undefined): number => 
 	// Check for percentage format (e.g., "80%")
 	if (argumentString.endsWith("%")) {
 		const percentage = Number.parseFloat(argumentString.slice(0, -1));
-		if (isNaN(percentage) || percentage <= 0 || percentage > 100) {
+		if (Number.isNaN(percentage) || percentage <= 0 || percentage > 100) {
 			throw new Error(`Invalid worker percentage: ${argumentString}. Must be 1-100%`);
 		}
 		return Math.max(1, Math.floor((percentage / 100) * totalCores));
@@ -327,7 +327,7 @@ const parseParallelWorkers = (argument: string | number | undefined): number => 
 
 	// Exact number
 	const count = Number.parseInt(argumentString, 10);
-	if (isNaN(count) || count <= 0) {
+	if (Number.isNaN(count) || count <= 0) {
 		throw new Error(`Invalid worker count: ${argumentString}. Must be a positive number`);
 	}
 	return Math.min(count, totalCores);
@@ -990,13 +990,13 @@ const runExecutePhase = async (options: EvaluateOptions, sutRegistry: SUTRegistr
 	}
 
 	// Create checkpoint manager for resumable execution
-	const executeDir = resolve(options.outputDir, "execute");
+	const executeDir = path.resolve(options.outputDir, "execute");
 	if (!existsSync(executeDir)) {
 		mkdirSync(executeDir, { recursive: true });
 	}
 
 	// Create paths storage directory for salience coverage computation
-	const pathsDir = resolve(executeDir, "paths");
+	const pathsDir = path.resolve(executeDir, "paths");
 	if (!existsSync(pathsDir)) {
 		mkdirSync(pathsDir, { recursive: true });
 	}
@@ -1013,9 +1013,9 @@ const runExecutePhase = async (options: EvaluateOptions, sutRegistry: SUTRegistr
 	// Determine checkpoint path based on worker identity
 	const checkpointPath = (isWorker && workerIndex !== undefined)
 		// Worker mode: use sharded checkpoint path
-		? resolve(executeDir, `checkpoint-worker-${String(workerIndex).padStart(2, "0")}.json`)
+		? path.resolve(executeDir, `checkpoint-worker-${String(workerIndex).padStart(2, "0")}.json`)
 		// Main process: use main checkpoint path
-		: resolve(executeDir, "checkpoint.json");
+		: path.resolve(executeDir, "checkpoint.json");
 
 	// Create checkpoint storage
 	const storage = new FileStorage(checkpointPath);
@@ -1321,12 +1321,12 @@ const runExecutePhase = async (options: EvaluateOptions, sutRegistry: SUTRegistr
 	console.log("\nComputing salience coverage metrics...");
 
 	// Store ground truth for use in aggregate phase
-	const groundTruthFile = resolve(executeDir, "salience-ground-truth.json");
+	const groundTruthFile = path.resolve(executeDir, "salience-ground-truth.json");
 	const groundTruthData: Record<string, string[]> = {};
 	for (const [caseId, paths] of salienceGroundTruthByCaseId) {
 		groundTruthData[caseId] = [...paths];
 	}
-	writeFileSync(groundTruthFile, JSON.stringify(groundTruthData), "utf-8");
+	writeFileSync(groundTruthFile, JSON.stringify(groundTruthData), "utf8");
 
 	let computedCount = 0;
 	for (const result of allResults) {
@@ -1355,7 +1355,7 @@ const runExecutePhase = async (options: EvaluateOptions, sutRegistry: SUTRegistr
 	console.log(`Ground truth saved to: ${groundTruthFile}\n`);
 
 	// Write results to file
-	const resultsFile = resolve(executeDir, "evaluation-results.json");
+	const resultsFile = path.resolve(executeDir, "evaluation-results.json");
 	const finalSummary = {
 		totalRuns: allResults.length,
 		successfulRuns: allResults.length,
@@ -1363,7 +1363,7 @@ const runExecutePhase = async (options: EvaluateOptions, sutRegistry: SUTRegistr
 		elapsedMs: 0, // Would need to track across runs
 		results: allResults,
 	};
-	writeFileSync(resultsFile, JSON.stringify(finalSummary, null, 2), "utf-8");
+	writeFileSync(resultsFile, JSON.stringify(finalSummary, null, 2), "utf8");
 
 	console.log(`\n\nResults written to: ${resultsFile}`);
 	console.log(`  Total runs: ${allResults.length}`);
@@ -1382,8 +1382,8 @@ const runAggregatePhase = async (options: EvaluateOptions): Promise<void> => {
 	console.log("╚════════════════════════════════════════════════════════════╝\n");
 
 	// Read execution results
-	const executeDir = resolve(options.outputDir, "execute");
-	const resultsFile = resolve(executeDir, "evaluation-results.json");
+	const executeDir = path.resolve(options.outputDir, "execute");
+	const resultsFile = path.resolve(executeDir, "evaluation-results.json");
 
 	if (!existsSync(resultsFile)) {
 		throw new Error("Execution results not found. Run --phase=execute first.");
@@ -1399,13 +1399,13 @@ const runAggregatePhase = async (options: EvaluateOptions): Promise<void> => {
 	console.log("\nComputing salience coverage metrics...");
 
 	// Initialize pathStorage with paths directory for loading stored paths
-	const aggregatePathsDir = resolve(executeDir, "paths");
+	const aggregatePathsDir = path.resolve(executeDir, "paths");
 	pathStorage.init(aggregatePathsDir);
 
 	// Load ground truth from file (saved during execute phase)
-	const groundTruthFile = resolve(executeDir, "salience-ground-truth.json");
+	const groundTruthFile = path.resolve(executeDir, "salience-ground-truth.json");
 	if (existsSync(groundTruthFile)) {
-		const groundTruthText = readFileSync(groundTruthFile, "utf-8");
+		const groundTruthText = readFileSync(groundTruthFile, "utf8");
 		const groundTruthData = JSON.parse(groundTruthText) as Record<string, string[]>;
 		const salienceGroundTruthByCaseId = new Map<string, Set<string>>();
 		for (const [caseId, paths] of Object.entries(groundTruthData)) {
@@ -1451,34 +1451,31 @@ const runAggregatePhase = async (options: EvaluateOptions): Promise<void> => {
 	const aggregationOutput = createAggregationOutput(aggregates, summary.results);
 
 	// Write aggregated results
-	const aggregateDir = resolve(options.outputDir, "aggregate");
+	const aggregateDir = path.resolve(options.outputDir, "aggregate");
 	if (!existsSync(aggregateDir)) {
 		mkdirSync(aggregateDir, { recursive: true });
 	}
 
-	const aggregatedFile = resolve(aggregateDir, "aggregated-results.json");
-	writeFileSync(aggregatedFile, JSON.stringify(aggregationOutput, null, 2), "utf-8");
+	const aggregatedFile = path.resolve(aggregateDir, "aggregated-results.json");
+	writeFileSync(aggregatedFile, JSON.stringify(aggregationOutput, null, 2), "utf8");
 
 	console.log(`\nAggregated ${aggregates.length} groups.`);
 	console.log(`Results written to: ${aggregatedFile}`);
 
-	// TODO: Evaluate claims using new ClaimsEvaluator API
+	// Claims evaluation deferred until ClaimsEvaluator API is available
 	// await evaluateClaimsInternal(options, aggregates);
 };
 
 /**
  * Evaluate claims against aggregated results.
- * @param options
- * @param aggregates
  *
- * TODO: Migrate to new ClaimsEvaluator API
+ * Pending migration to new ClaimsEvaluator API.
  * This function is intentionally unused pending migration.
  * @param _options
  * @param _aggregates
  */
 const _evaluateClaimsInternal = async (_options: EvaluateOptions, _aggregates: unknown[]): Promise<void> => {
-	// Placeholder for claims evaluation functionality
-	// TODO: Migrate to new ClaimsEvaluator API when available
+	// Placeholder for claims evaluation functionality pending ClaimsEvaluator API
 	console.log("\n  Claims evaluation not yet implemented.");
 };
 
@@ -1492,8 +1489,8 @@ const runRenderPhase = async (options: EvaluateOptions): Promise<void> => {
 	console.log("╚════════════════════════════════════════════════════════════╝\n");
 
 	// Read aggregated results
-	const aggregateDir = resolve(options.outputDir, "aggregate");
-	const aggregatedFile = resolve(aggregateDir, "aggregated-results.json");
+	const aggregateDir = path.resolve(options.outputDir, "aggregate");
+	const aggregatedFile = path.resolve(aggregateDir, "aggregated-results.json");
 
 	if (!existsSync(aggregatedFile)) {
 		throw new Error("Aggregated results not found. Run --phase=aggregate first.");
@@ -1526,7 +1523,7 @@ const runRenderPhase = async (options: EvaluateOptions): Promise<void> => {
 	const renderer = createLatexRenderer();
 
 	// Render tables
-	const renderDir = resolve(options.outputDir, "render", "latex");
+	const renderDir = path.resolve(options.outputDir, "render", "latex");
 	if (!existsSync(renderDir)) {
 		mkdirSync(renderDir, { recursive: true });
 	}
@@ -1534,15 +1531,15 @@ const runRenderPhase = async (options: EvaluateOptions): Promise<void> => {
 	const outputs = renderer.renderAll(aggregates, tableSpecs);
 
 	for (const output of outputs) {
-		const outputFile = resolve(renderDir, output.filename);
-		writeFileSync(outputFile, output.content, "utf-8");
+		const outputFile = path.resolve(renderDir, output.filename);
+		writeFileSync(outputFile, output.content, "utf8");
 		console.log(`  - ${output.filename}`);
 	}
 
 	console.log(`\nTables written to: ${renderDir}`);
 
 	// Render claim summary if available
-	const claimsFile = resolve(aggregateDir, "claim-evaluation.json");
+	const claimsFile = path.resolve(aggregateDir, "claim-evaluation.json");
 	if (existsSync(claimsFile)) {
 		console.log("\nRendering claim summary...");
 
@@ -1555,8 +1552,8 @@ const runRenderPhase = async (options: EvaluateOptions): Promise<void> => {
 
 		const evaluations = claimSummary.evaluations.filter(isClaimEvaluation);
 		const claimOutput = renderer.renderClaimSummary(evaluations);
-		const claimSummaryFile = resolve(renderDir, claimOutput.filename);
-		writeFileSync(claimSummaryFile, claimOutput.content, "utf-8");
+		const claimSummaryFile = path.resolve(renderDir, claimOutput.filename);
+		writeFileSync(claimSummaryFile, claimOutput.content, "utf8");
 
 		console.log(`  - ${claimOutput.filename}`);
 	}
@@ -1571,12 +1568,12 @@ const runRenderPhase = async (options: EvaluateOptions): Promise<void> => {
  * @param options
  */
 const showProgress = async (options: EvaluateOptions): Promise<void> => {
-	const checkpointPath = resolve(options.outputDir, "execute/checkpoint.json");
+	const checkpointPath = path.resolve(options.outputDir, "execute/checkpoint.json");
 
 	// Check if checkpoint exists
 	try {
 		const { readFile } = await import("node:fs/promises");
-		const content = await readFile(checkpointPath, "utf-8");
+		const content = await readFile(checkpointPath, "utf8");
 		const checkpoint = JSON.parse(content);
 
 		if (!isCheckpointData(checkpoint)) {
@@ -1599,7 +1596,7 @@ const showProgress = async (options: EvaluateOptions): Promise<void> => {
 		// Show active workers
 		const { execSync } = await import("node:child_process");
 		try {
-			const workerCount = execSync("ps aux | grep 'cli.js evaluate' | grep -v grep | wc -l", { encoding: "utf-8" }).trim();
+			const workerCount = execSync("ps aux | grep 'cli.js evaluate' | grep -v grep | wc -l", { encoding: "utf8" }).trim();
 			const workers = Number.parseInt(workerCount, 10);
 			if (workers > 0) {
 				console.log(`  Active workers: ${workers}`);
@@ -1730,7 +1727,7 @@ export const executeEvaluate = async (options: EvaluateOptions): Promise<void> =
 const read = async (path: string): Promise<string> => {
 	// Use dynamic import to avoid bundling issues
 	const { readFile } = await import("node:fs/promises");
-	return readFile(path, "utf-8");
+	return readFile(path, "utf8");
 };
 
 /**
