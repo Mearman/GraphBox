@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "timestamp": "2026-01-28T22:36:14.105Z",
+  "timestamp": "2026-01-29T09:39:07.590Z",
   "metrics": {
     "hub-traversal-comparison": [
       {
@@ -361,25 +361,32 @@
     ],
     "ranking-benchmarks": [
       {
-        "dataset": "Karate Club",
-        "method": "Path Salience",
-        "meanMI": 0.02,
-        "nodeCoverage": 0.18,
+        "dataset": "karate",
+        "method": "path-salience",
+        "meanMI": 0.0177,
+        "nodeCoverage": 0.1765,
         "pathDiversity": 1
       },
       {
-        "dataset": "Karate Club",
-        "method": "Shortest Path",
-        "meanMI": 0,
-        "nodeCoverage": 0.18,
-        "pathDiversity": 1
+        "dataset": "lesmis",
+        "method": "path-salience",
+        "meanMI": 0.4324,
+        "nodeCoverage": 0.026,
+        "pathDiversity": 0
       },
       {
-        "dataset": "Karate Club",
-        "method": "Random",
+        "dataset": "cora",
+        "method": "path-salience",
         "meanMI": 0,
-        "nodeCoverage": 0.18,
-        "pathDiversity": 1
+        "nodeCoverage": 0.0007,
+        "pathDiversity": 0
+      },
+      {
+        "dataset": "facebook",
+        "method": "path-salience",
+        "meanMI": 0.023,
+        "nodeCoverage": 0.0005,
+        "pathDiversity": 0
       }
     ],
     "salience-coverage-comparison": [
@@ -909,6 +916,32 @@
         "baselineMI": 0,
         "improvement": "0.0163",
         "relative": "4/4"
+      }
+    ],
+    "k-core-decomposition": [
+      {
+        "dataset": "Facebook",
+        "degeneracy": 115,
+        "coreCount": 116,
+        "maxCoreSize": 4039,
+        "nodes": 4039,
+        "edges": 88234
+      },
+      {
+        "dataset": "Cora",
+        "degeneracy": 4,
+        "coreCount": 5,
+        "maxCoreSize": 2708,
+        "nodes": 2708,
+        "edges": 5429
+      },
+      {
+        "dataset": "Karate Club",
+        "degeneracy": 4,
+        "coreCount": 5,
+        "maxCoreSize": 34,
+        "nodes": 34,
+        "edges": 78
       }
     ]
   }
