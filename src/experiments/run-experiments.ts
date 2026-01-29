@@ -16,7 +16,7 @@
  *   4. Salience Coverage Comparison (Novel algorithms vs baselines)
  */
 
-import {resolve } from "node:path";
+import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { runBidirectionalBFSExperiments } from "./experiments/bidirectional-bfs.js";
@@ -27,7 +27,7 @@ import { metrics } from "./metrics/collector.js";
 import { resolveOutputPath,writeMetrics } from "./metrics/storage.js";
 
 const __filename = fileURLToPath(import.meta.url);
-const __dirname = resolve(__filename, "..");
+const __dirname = path.resolve(__filename, "..");
 
 interface Options {
 	output?: string;
@@ -58,7 +58,7 @@ const main = async (options: Options = {}): Promise<void> => {
 
 	// Determine output path
 	const outputPath = output
-		? resolve(__dirname, output)
+		? path.resolve(__dirname, output)
 		: resolveOutputPath(__dirname, "test-metrics.json");
 
 	// Write to file
