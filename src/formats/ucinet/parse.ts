@@ -206,7 +206,7 @@ export const parseDl = (content: string): DlDocument => {
  */
 const parseLabels = (line: string, labels: string[]): void => {
 	// Handle quoted labels
-	const quoted = line.match(/"([^"]+)"/g);
+	const quoted = line.match(/"[^"]+"/g);
 	if (quoted) {
 		for (const q of quoted) {
 			labels.push(q.slice(1, -1));
@@ -341,7 +341,7 @@ const parseEdgeList1 = (dataLines: string[], edges: DlEdge[]): void => {
 		const target = Number.parseInt(parts[1], 10) - 1;
 		const weight = parts.length > 2 ? Number.parseFloat(parts[2]) : 1;
 
-		if (!isNaN(source) && !isNaN(target)) {
+		if (!Number.isNaN(source) && !Number.isNaN(target)) {
 			edges.push({ source, target, weight });
 		}
 	}
@@ -362,7 +362,7 @@ const parseEdgeList2 = (dataLines: string[], edges: DlEdge[]): void => {
 		const target = Number.parseInt(parts[1], 10);
 		const weight = parts.length > 2 ? Number.parseFloat(parts[2]) : 1;
 
-		if (!isNaN(source) && !isNaN(target)) {
+		if (!Number.isNaN(source) && !Number.isNaN(target)) {
 			edges.push({ source, target, weight });
 		}
 	}
@@ -381,11 +381,11 @@ const parseNodeList1 = (dataLines: string[], edges: DlEdge[]): void => {
 		if (parts.length < 2) continue;
 
 		const source = Number.parseInt(parts[0], 10) - 1;
-		if (isNaN(source)) continue;
+		if (Number.isNaN(source)) continue;
 
 		for (let index = 1; index < parts.length; index++) {
 			const target = Number.parseInt(parts[index], 10) - 1;
-			if (!isNaN(target)) {
+			if (!Number.isNaN(target)) {
 				edges.push({ source, target, weight: 1 });
 			}
 		}
@@ -404,11 +404,11 @@ const parseNodeList2 = (dataLines: string[], edges: DlEdge[]): void => {
 		if (parts.length < 2) continue;
 
 		const source = Number.parseInt(parts[0], 10);
-		if (isNaN(source)) continue;
+		if (Number.isNaN(source)) continue;
 
 		for (let index = 1; index < parts.length; index++) {
 			const target = Number.parseInt(parts[index], 10);
-			if (!isNaN(target)) {
+			if (!Number.isNaN(target)) {
 				edges.push({ source, target, weight: 1 });
 			}
 		}

@@ -5,7 +5,7 @@
  */
 
 import { existsSync,mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import { dirname, resolve } from "node:path";
+import path from "node:path";
 
 import type { Metric, MetricCategory,MetricsOutput } from "./types.js";
 
@@ -23,7 +23,7 @@ export const writeMetrics = (metrics: MetricsOutput, options: StorageOptions): v
 	const { outputPath, pretty = true } = options;
 
 	// Ensure directory exists
-	const dir = dirname(outputPath);
+	const dir = path.dirname(outputPath);
 	if (!existsSync(dir)) {
 		mkdirSync(dir, { recursive: true });
 	}
@@ -32,7 +32,7 @@ export const writeMetrics = (metrics: MetricsOutput, options: StorageOptions): v
 		? JSON.stringify(metrics, null, 2)
 		: JSON.stringify(metrics);
 
-	writeFileSync(outputPath, content, "utf-8");
+	writeFileSync(outputPath, content, "utf8");
 };
 
 /**
@@ -45,7 +45,7 @@ export const readMetrics = (inputPath: string): MetricsOutput | null => {
 	}
 
 	try {
-		const content = readFileSync(inputPath, "utf-8");
+		const content = readFileSync(inputPath, "utf8");
 		return JSON.parse(content) as MetricsOutput;
 	} catch {
 		return null;
@@ -57,7 +57,7 @@ export const readMetrics = (inputPath: string): MetricsOutput | null => {
  * @param fromPath
  * @param outputPath
  */
-export const resolveOutputPath = (fromPath: string, outputPath: string = "test-metrics.json"): string => resolve(fromPath, "..", outputPath);
+export const resolveOutputPath = (fromPath: string, outputPath: string = "test-metrics.json"): string => path.resolve(fromPath, "..", outputPath);
 
 /**
  * Merge multiple metrics outputs into one.

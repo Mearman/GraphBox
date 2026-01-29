@@ -9,7 +9,7 @@
  */
 
 import { readFile } from "node:fs/promises";
-import { dirname,resolve } from "node:path";
+import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { Graph } from "../../../algorithms/graph/graph";
@@ -355,14 +355,14 @@ export const DATASETS_BY_ID: Map<string, BenchmarkDatasetMeta> = new Map(
  */
 export const resolveBenchmarkPath = (meta: BenchmarkDatasetMeta, benchmarksRoot?: string): string => {
 	if (benchmarksRoot) {
-		return resolve(benchmarksRoot, meta.relativePath);
+		return path.resolve(benchmarksRoot, meta.relativePath);
 	}
 
 	// Default: assume we're in packages/evaluation, go up to repo root
 	const __filename = fileURLToPath(import.meta.url);
-	const __dirname = dirname(__filename);
-	const repoRoot = resolve(__dirname, "..", "..", "..", "..");
-	return resolve(repoRoot, "data", "benchmarks", meta.relativePath);
+	const __dirname = path.dirname(__filename);
+	const repoRoot = path.resolve(__dirname, "..", "..", "..", "..");
+	return path.resolve(repoRoot, "data", "benchmarks", meta.relativePath);
 };
 
 /**
@@ -383,7 +383,7 @@ export const loadBenchmark = async (meta: BenchmarkDatasetMeta, benchmarksRoot?:
 
 	// Fall back to local file
 	const filePath = resolveBenchmarkPath(meta, benchmarksRoot);
-	const content = await readFile(filePath, "utf-8");
+	const content = await readFile(filePath, "utf8");
 
 	const result = loadEdgeList(content, {
 		directed: meta.directed,
