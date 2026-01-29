@@ -3,7 +3,7 @@
  * PPEF Execution Results to LaTeX Metrics Converter
  *
  * Converts PPEF evaluation-results.json to the format expected by
- * generate-latex-tables.ts for LaTeX table generation.
+ * export-csv.ts for CSV/LaTeX table generation.
  *
  * Usage:
  *   npx tsx scripts/convert-ppef-to-latex-metrics.ts
@@ -43,7 +43,7 @@ interface PPEFEvaluationResult {
 }
 
 /**
- * LaTeX metrics format expected by generate-latex-tables.ts
+ * LaTeX metrics format expected by export-csv.ts
  */
 interface LatexMetricsOutput {
 	version: string;
@@ -54,7 +54,7 @@ interface LatexMetricsOutput {
 /**
  * Dataset case specifications matching the ranking registry
  */
-const DATASET_CASES = [
+const _DATASET_CASES = [
 	{ id: "karate", name: "Karate Club", source: "1", target: "34" },
 	{ id: "lesmis", name: "Les Misérables", source: "Myriel", target: "Marius" },
 	{ id: "cora", name: "Cora", source: "35", target: "1033" },
@@ -64,17 +64,19 @@ const DATASET_CASES = [
 
 /**
  * Generate case ID using same logic as register-ranking-cases.ts
+ * @param name
+ * @param inputs
  */
-function generateCaseId(name: string, inputs: Record<string, unknown>): string {
+const _generateCaseId = (name: string, inputs: Record<string, unknown>): string => {
 	const canonical = JSON.stringify({ name, inputs });
 	return createHash("sha256").update(canonical).digest("hex").slice(0, 16);
-}
+};
 
 /**
  * Build case ID to dataset name mapping
  * Uses the exact same logic as register-ranking-cases.ts
  */
-function buildCaseIdMapping(): Map<string, string> {
+const buildCaseIdMapping = (): Map<string, string> => {
 	const mapping = new Map<string, string>();
 
 	// Import BenchmarkGraphExpander and loadBenchmarkByIdFromUrl dynamically
@@ -96,12 +98,13 @@ function buildCaseIdMapping(): Map<string, string> {
 	}
 
 	return mapping;
-}
+};
 
 /**
  * Convert PPEF evaluation results to LaTeX metrics format
+ * @param ppefResults
  */
-function convertPPEFToLatexMetrics(ppefResults: PPEFEvaluationResult): LatexMetricsOutput {
+const convertPPEFToLatexMetrics = (ppefResults: PPEFEvaluationResult): LatexMetricsOutput => {
 	const caseIdMapping = buildCaseIdMapping();
 	const metrics: Record<string, Array<Record<string, string | number>>> = {};
 
@@ -118,12 +121,14 @@ function convertPPEFToLatexMetrics(ppefResults: PPEFEvaluationResult): LatexMetr
 			resultsBySutAndCase.set(sut, new Map());
 		}
 
-		const sutMap = resultsBySutAndCase.get(sut)!;
+		const sutMap = resultsBySutAndCase.get(sut);
+		if (!sutMap) continue;
 		if (!sutMap.has(caseId)) {
 			sutMap.set(caseId, []);
 		}
 
-		sutMap.get(caseId)!.push({ metrics: result.metrics.numeric });
+		const caseResults = sutMap.get(caseId);
+		if (caseResults) caseResults.push({ metrics: result.metrics.numeric });
 	}
 
 	// Process each SUT's results
@@ -178,12 +183,12 @@ function convertPPEFToLatexMetrics(ppefResults: PPEFEvaluationResult): LatexMetr
 		timestamp: new Date().toISOString(),
 		metrics,
 	};
-}
+};
 
 /**
  * Main function
  */
-function main(): void {
+const main = (): void => {
 	const evaluationResultsPath = join(projectRoot, "results/execute/evaluation-results.json");
 	const outputPath = join(projectRoot, "src/test-metrics-from-ppef.json");
 
@@ -211,6 +216,6 @@ function main(): void {
 			console.log(`  ${row.dataset}: meanMI=${(row.meanMI as number).toFixed(4)}, paths=${row.paths}`);
 		}
 	}
-}
+};
 
 main();
