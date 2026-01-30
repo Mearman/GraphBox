@@ -287,14 +287,19 @@ export const detectCommunities = <N extends Node, E extends Edge>(graph: Graph<N
 		superNodes.set(node.id, new Set([node.id]));
 	}
 
-	// Adaptive strategy: Use hierarchical optimization only for larger graphs
-	// Very small graphs (<= 50 nodes) get sufficient quality with single-level optimization
+	// Adaptive strategy: Use hierarchical optimization only for larger graphs.
+	// Small graphs (≤200 nodes) get sufficient quality with single-level optimization.
+	// Hierarchical aggregation on small graphs risks over-merging: with few
+	// communities (e.g., 5), Phase 1 at the next level can collapse them all into 1.
 	const nodeCount = allNodes.length;
-	const useHierarchicalOptimization = nodeCount > 50;
+	const useHierarchicalOptimization = nodeCount > 200;
 
 	// T010: Adaptive modularity threshold using helper function (spec-027 Phase 1)
+	// Cap the threshold at 1/(4m) to ensure individual node moves are detectable.
+	// For dense graphs (high m), per-node ΔQ ≈ 1/(2m), so a threshold above that
+	// blocks all moves and produces degenerate singleton communities.
 	const adaptiveMinModularityIncrease = minModularityIncrease ??
-    getAdaptiveThreshold(nodeCount);
+    Math.min(getAdaptiveThreshold(nodeCount), 1 / (4 * m));
 
 	// Multi-level optimization: Phase 1 + Phase 2 repeated
 	let hierarchyLevel = 0;
@@ -509,8 +514,18 @@ export const detectCommunities = <N extends Node, E extends Edge>(graph: Graph<N
 
 		// Phase 2: Aggregate communities into new super-nodes
 		const numberCommunities = communities.size;
-		if (numberCommunities <= 1 || numberCommunities >= superNodes.size) {
-			// Converged - only 1 community or no merging happened
+		if (numberCommunities <= 2 || numberCommunities >= superNodes.size) {
+			// Converged: ≤2 communities leaves too few super-nodes for meaningful
+			// hierarchical refinement (the next Phase 1 would likely over-merge),
+			// or no merging happened at all.
+			break;
+		}
+
+		// Skip aggregation on last level: the next iteration would rebuild
+		// nodeToCommunity for new super-node IDs, but there is no next iteration.
+		// Without this, finalNodeToCommunity finds no matching keys and returns
+		// zero communities.
+		if (hierarchyLevel >= MAX_HIERARCHY_LEVELS) {
 			break;
 		}
 
