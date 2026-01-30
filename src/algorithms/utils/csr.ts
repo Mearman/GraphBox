@@ -137,7 +137,11 @@ export const convertToCSR = <N extends Node, E extends Edge>(graph: Graph<N, E>)
 	const allNodes = graph.getAllNodes();
 	const allEdges = graph.getAllEdges();
 	const nodeCount = allNodes.length;
-	const edgeCount = allEdges.length;
+	const rawEdgeCount = allEdges.length;
+	// For undirected graphs, each edge is stored once but needs both directions
+	// in CSR so that neighbor iteration from either endpoint works correctly.
+	const isUndirected = !graph.isDirected();
+	const csrEdgeCount = isUndirected ? rawEdgeCount * 2 : rawEdgeCount;
 
 	// Validate graph size fits in typed arrays (Uint32Array max value is 2^32 - 1)
 	if (nodeCount > 0xFF_FF_FF_FF) {
@@ -145,9 +149,9 @@ export const convertToCSR = <N extends Node, E extends Edge>(graph: Graph<N, E>)
 			`Graph has ${nodeCount} nodes, exceeding Uint32Array limit (4,294,967,295)`
 		);
 	}
-	if (edgeCount > 0xFF_FF_FF_FF) {
+	if (csrEdgeCount > 0xFF_FF_FF_FF) {
 		throw new RangeError(
-			`Graph has ${edgeCount} edges, exceeding Uint32Array limit (4,294,967,295)`
+			`Graph has ${csrEdgeCount} CSR edges, exceeding Uint32Array limit (4,294,967,295)`
 		);
 	}
 
@@ -165,6 +169,13 @@ export const convertToCSR = <N extends Node, E extends Edge>(graph: Graph<N, E>)
 		if (sourceIndex !== undefined) {
 			edgeCounts[sourceIndex]++;
 		}
+		// For undirected graphs, also count the reverse direction
+		if (isUndirected) {
+			const targetIndex = nodeIndex.get(edge.target);
+			if (targetIndex !== undefined && edge.source !== edge.target) {
+				edgeCounts[targetIndex]++;
+			}
+		}
 	}
 
 	// Step 3: Compute cumulative offsets (prefix sum)
@@ -175,8 +186,8 @@ export const convertToCSR = <N extends Node, E extends Edge>(graph: Graph<N, E>)
 	}
 
 	// Step 4: Allocate edges and weights arrays
-	const edges = new Uint32Array(edgeCount);
-	const weights = new Float64Array(edgeCount);
+	const edges = new Uint32Array(csrEdgeCount);
+	const weights = new Float64Array(csrEdgeCount);
 
 	// Step 5: Populate edges and weights arrays
 	// Use temporary counters to track current position for each node
@@ -194,10 +205,19 @@ export const convertToCSR = <N extends Node, E extends Edge>(graph: Graph<N, E>)
 			continue;
 		}
 
+		const edgeWeight = (edge as { weight?: number }).weight ?? 1;
+
+		// Store source → target
 		const pos = currentPos[sourceIndex]++;
 		edges[pos] = targetIndex;
-		// Edge may not have weight property, default to 1.0
-		weights[pos] = (edge as { weight?: number }).weight ?? 1;
+		weights[pos] = edgeWeight;
+
+		// For undirected graphs, also store target → source (skip self-loops)
+		if (isUndirected && edge.source !== edge.target) {
+			const reversePos = currentPos[targetIndex]++;
+			edges[reversePos] = sourceIndex;
+			weights[reversePos] = edgeWeight;
+		}
 	}
 
 	return {
