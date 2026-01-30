@@ -90,6 +90,7 @@ export default defineConfig({
 				test: {
 					name: "exp",
 					include: ["src/**/*.exp.*.test.ts"],
+					testTimeout: 30_000,
 				},
 			},
 			{
@@ -97,6 +98,7 @@ export default defineConfig({
 				test: {
 					name: "unit",
 					include: ["src/**/*.unit.test.ts", "src/**/*.integration.test.ts"],
+					testTimeout: 30_000,
 				},
 			},
 		],

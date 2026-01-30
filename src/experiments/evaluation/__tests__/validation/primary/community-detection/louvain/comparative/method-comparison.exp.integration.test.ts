@@ -6,7 +6,7 @@ import { describe, expect, it } from "vitest";
 
 const BENCHMARKS = [
 	{ id: "karate", name: "Karate Club" },
-	{ id: "les-mis", name: "Les Miserables" },
+	{ id: "lesmis", name: "Les Miserables" },
 ] as const;
 
 describe("Community Detection: Method Comparison", () => {

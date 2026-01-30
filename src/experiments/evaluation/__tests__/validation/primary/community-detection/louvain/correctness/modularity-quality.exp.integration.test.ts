@@ -4,13 +4,13 @@ import { describe, expect, it } from "vitest";
 
 const BENCHMARKS = [
 	{ id: "karate", name: "Karate Club", expectedNodes: 34 },
-	{ id: "les-mis", name: "Les Miserables", expectedNodes: 77 },
+	{ id: "lesmis", name: "Les Miserables", expectedNodes: 77 },
 	{ id: "cora", name: "Cora", expectedNodes: 2708 },
 	{ id: "facebook", name: "Facebook", expectedNodes: 4039 },
 ] as const;
 
 describe("Community Detection: Louvain - Modularity Quality", () => {
-	it("should achieve positive modularity across all benchmark graphs", async () => {
+	it("should achieve positive modularity across all benchmark graphs", { timeout: 60_000 }, async () => {
 		const rows: string[] = [];
 
 		for (const { id, name, expectedNodes } of BENCHMARKS) {

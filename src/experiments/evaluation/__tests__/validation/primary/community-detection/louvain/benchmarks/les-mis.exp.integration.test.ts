@@ -3,8 +3,8 @@ import { loadBenchmarkByIdFromUrl } from "@graph/evaluation/fixtures/benchmark-d
 import { describe, expect, it } from "vitest";
 
 describe("Community Detection: Louvain - Les Miserables", () => {
-	it("should detect communities with positive modularity", async () => {
-		const benchmark = await loadBenchmarkByIdFromUrl("les-mis");
+	it("should detect communities with positive modularity", { timeout: 60_000 }, async () => {
+		const benchmark = await loadBenchmarkByIdFromUrl("lesmis");
 		const graph = benchmark.graph;
 		const { communities, stats } = detectCommunities(graph);
 

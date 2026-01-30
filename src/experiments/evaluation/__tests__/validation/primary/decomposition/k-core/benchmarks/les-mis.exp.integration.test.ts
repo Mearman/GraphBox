@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 
 describe("K-Core Decomposition: Les Miserables", () => {
 	it("should identify hierarchical core structure", async () => {
-		const benchmark = await loadBenchmarkByIdFromUrl("les-mis");
+		const benchmark = await loadBenchmarkByIdFromUrl("lesmis");
 		const graph = benchmark.graph;
 		const result = kCoreDecomposition(graph);
 
