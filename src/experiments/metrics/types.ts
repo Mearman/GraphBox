@@ -406,6 +406,38 @@ export interface KCoreDecompositionMetric {
 }
 
 /**
+ * MI variant comparison metric.
+ *
+ * Compares different MI formulations (Jaccard, Adamic-Adar, Density-Normalized,
+ * IDF-Weighted, Clustering-Penalized) across benchmark datasets.
+ */
+export interface MIVariantComparisonMetric {
+	/** Dataset identifier */
+	dataset: string;
+
+	/** MI variant name (e.g., "Jaccard", "Adamic-Adar") */
+	variant: string;
+
+	/** Mean MI score across paths */
+	meanMI: number;
+
+	/** Standard deviation of MI scores */
+	stdMI: number;
+
+	/** Node coverage (fraction of graph nodes in paths) */
+	nodeCoverage: number;
+
+	/** Path diversity (Jaccard distance between paths) */
+	pathDiversity: number;
+
+	/** Hub avoidance score (1 - mean hub ratio) */
+	hubAvoidance: number;
+
+	/** Number of paths found */
+	pathsFound: number;
+}
+
+/**
  * Union of all metric types for internal handling
  */
 export type Metric =
@@ -439,7 +471,8 @@ export type Metric =
 	| RankingCorrectnessMetric
 	| RankingSignificanceMetric
 	| CommunityDetectionMetric
-	| KCoreDecompositionMetric;
+	| KCoreDecompositionMetric
+	| MIVariantComparisonMetric;
 
 /**
  * Metric category - groups related metrics for table generation
@@ -475,7 +508,8 @@ export type MetricCategory =
 	| "ranking-correctness"
 	| "ranking-significance"
 	| "community-detection"
-	| "k-core-decomposition";
+	| "k-core-decomposition"
+	| "mi-variant-comparison";
 
 /**
  * Typed metric record with category
