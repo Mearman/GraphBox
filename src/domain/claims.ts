@@ -248,6 +248,30 @@ export const THESIS_CLAIMS: EvaluationClaim[] = [
 		tags: ["core", "statistical"],
 	},
 
+	// Budget-Constrained Claims
+	{
+		claimId: "dp-budget-higher-coverage",
+		description: "Degree-prioritised achieves higher salience coverage than BFS at 25% node budget",
+		sut: "degree-prioritised-v1.0.0",
+		baseline: "standard-bfs-v1.0.0",
+		metric: "salience-coverage-budget",
+		direction: "greater",
+		scope: "caseClass",
+		scopeConstraints: { caseClass: ["citation", "social"] },
+		tags: ["core", "budget-constrained"],
+	},
+	{
+		claimId: "dp-budget-lower-jsd",
+		description: "Degree-prioritised samples have lower degree distribution JSD than BFS at 25% node budget",
+		sut: "degree-prioritised-v1.0.0",
+		baseline: "standard-bfs-v1.0.0",
+		metric: "degree-distribution-jsd",
+		direction: "less",
+		scope: "caseClass",
+		scopeConstraints: { caseClass: ["citation", "social"] },
+		tags: ["budget-constrained", "representativeness"],
+	},
+
 	// Robustness Claims
 	{
 		claimId: "dp-robust-edge-removal",
