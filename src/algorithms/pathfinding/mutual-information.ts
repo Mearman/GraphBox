@@ -186,6 +186,19 @@ export interface MutualInformationConfig<N extends Node, E extends Edge = Edge> 
 	 * @default false
 	 */
 	useClusteringPenalty?: boolean;
+
+	/**
+	 * Estimated total nodes for IDF weighting in streaming/incremental contexts.
+	 * When provided, uses this value instead of computing from graph.
+	 * Enables IDF-Weighted MI without full graph awareness.
+	 *
+	 * Example values:
+	 * - OpenAlex: ~250,000,000 works
+	 * - Local subgraph: use maxSeenNodes during exploration
+	 *
+	 * @default undefined (compute from graph)
+	 */
+	estimatedTotalNodes?: number;
 }
 
 /**
@@ -683,6 +696,7 @@ export const precomputeMutualInformation = <N extends Node, E extends Edge>(
 		useDensityNormalization = false,
 		graphDensity: providedDensity,
 		useClusteringPenalty = false,
+		estimatedTotalNodes,
 	} = config;
 
 	const cache = new Map<string, number>();
@@ -749,6 +763,10 @@ export const precomputeMutualInformation = <N extends Node, E extends Edge>(
 	// Pre-compute node degrees for degree-based penalties and Adamic-Adar
 	const nodeDegrees = new Map<string, number>();
 	const totalNodes = graph.getNodeCount();
+
+	// For IDF weighting, use estimated total if provided (streaming context)
+	// This allows IDF to work without full graph awareness
+	const effectiveTotalNodes = estimatedTotalNodes ?? totalNodes;
 
 	if (useDegreeBasedPenalty || useIDFWeighting || useAdamicAdar) {
 		for (const edge of edges) {
@@ -924,11 +942,12 @@ export const precomputeMutualInformation = <N extends Node, E extends Edge>(
 
 		// Option 2: IDF-style weighting
 		// MI_adjusted = MI_base × log(N/(deg(u)+1)) × log(N/(deg(v)+1))
+		// Uses effectiveTotalNodes to support streaming contexts with estimated N
 		if (useIDFWeighting) {
 			const sourceDegree = nodeDegrees.get(edge.source) ?? 0;
 			const targetDegree = nodeDegrees.get(edge.target) ?? 0;
-			const sourceIDF = Math.log((totalNodes / (sourceDegree + 1)) + epsilon);
-			const targetIDF = Math.log((totalNodes / (targetDegree + 1)) + epsilon);
+			const sourceIDF = Math.log((effectiveTotalNodes / (sourceDegree + 1)) + epsilon);
+			const targetIDF = Math.log((effectiveTotalNodes / (targetDegree + 1)) + epsilon);
 			modifier *= sourceIDF * targetIDF;
 		}
 
