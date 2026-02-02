@@ -55,6 +55,103 @@ const RANKING_CLAIMS: EvaluationClaim[] = [
 ];
 
 /**
+ * MI Variant Comparison Claims.
+ * Tests whether alternative MI formulations improve upon baseline Jaccard-based MI.
+ */
+const MI_VARIANT_CLAIMS: EvaluationClaim[] = [
+	// Adamic-Adar Claims
+	{
+		claimId: "aa-higher-mi-than-random",
+		description: "Adamic-Adar MI achieves higher mean MI than random ranking",
+		sut: "mi-adamic-adar-v1.0.0",
+		baseline: "random-ranking-v1.0.0",
+		metric: "meanMI",
+		direction: "greater",
+		scope: "global",
+		tags: ["ranking", "mi-variant"],
+	},
+	{
+		claimId: "aa-higher-mi-on-dense",
+		description: "Adamic-Adar MI outperforms Jaccard MI on dense social networks",
+		sut: "mi-adamic-adar-v1.0.0",
+		baseline: "path-salience-v1.0.0",
+		metric: "meanMI",
+		direction: "greater",
+		scope: "caseClass",
+		scopeConstraints: { caseClass: "dense-social" },
+		tags: ["ranking", "mi-variant", "dense-graphs"],
+	},
+
+	// Density-Normalized Claims
+	{
+		claimId: "dn-higher-mi-than-random",
+		description: "Density-Normalized MI achieves higher mean MI than random ranking",
+		sut: "mi-density-normalized-v1.0.0",
+		baseline: "random-ranking-v1.0.0",
+		metric: "meanMI",
+		direction: "greater",
+		scope: "global",
+		tags: ["ranking", "mi-variant"],
+	},
+	{
+		claimId: "dn-higher-mi-on-dense",
+		description: "Density-Normalized MI outperforms Jaccard MI on dense social networks",
+		sut: "mi-density-normalized-v1.0.0",
+		baseline: "path-salience-v1.0.0",
+		metric: "meanMI",
+		direction: "greater",
+		scope: "caseClass",
+		scopeConstraints: { caseClass: "dense-social" },
+		tags: ["ranking", "mi-variant", "dense-graphs"],
+	},
+
+	// IDF-Weighted Claims
+	{
+		claimId: "idf-higher-mi-than-random",
+		description: "IDF-Weighted MI achieves higher mean MI than random ranking",
+		sut: "mi-idf-weighted-v1.0.0",
+		baseline: "random-ranking-v1.0.0",
+		metric: "meanMI",
+		direction: "greater",
+		scope: "global",
+		tags: ["ranking", "mi-variant"],
+	},
+	{
+		claimId: "idf-better-hub-avoidance",
+		description: "IDF-Weighted MI achieves better hub avoidance than Jaccard MI",
+		sut: "mi-idf-weighted-v1.0.0",
+		baseline: "path-salience-v1.0.0",
+		metric: "hubAvoidance",
+		direction: "greater",
+		scope: "caseClass",
+		scopeConstraints: { caseClass: "scale-free" },
+		tags: ["ranking", "mi-variant", "hub-avoidance"],
+	},
+
+	// Clustering-Penalized Claims
+	{
+		claimId: "cc-higher-mi-than-random",
+		description: "Clustering-Penalized MI achieves higher mean MI than random ranking",
+		sut: "mi-clustering-penalized-v1.0.0",
+		baseline: "random-ranking-v1.0.0",
+		metric: "meanMI",
+		direction: "greater",
+		scope: "global",
+		tags: ["ranking", "mi-variant"],
+	},
+	{
+		claimId: "cc-higher-diversity",
+		description: "Clustering-Penalized MI achieves higher path diversity than Jaccard MI",
+		sut: "mi-clustering-penalized-v1.0.0",
+		baseline: "path-salience-v1.0.0",
+		metric: "pathDiversity",
+		direction: "greater",
+		scope: "global",
+		tags: ["ranking", "mi-variant", "bridges"],
+	},
+];
+
+/**
  * Community Detection Claims for Louvain evaluation.
  * Tests structural decomposition quality on benchmark graphs.
  */
@@ -118,6 +215,7 @@ const KCORE_CLAIMS: EvaluationClaim[] = [
  * Each claim represents a testable hypothesis about algorithm performance.
  */
 export const THESIS_CLAIMS: EvaluationClaim[] = [
+	...MI_VARIANT_CLAIMS,
 	// Path Diversity Claims
 	{
 		claimId: "dp-higher-diversity",
@@ -339,4 +437,4 @@ export const getClaimsByBaseline = (baselineId: string): EvaluationClaim[] => TH
 export const getClaim = (claimId: string): EvaluationClaim | undefined => THESIS_CLAIMS.find((c) => c.claimId === claimId);
 
 // Re-export claim arrays
-export { COMMUNITY_DETECTION_CLAIMS, KCORE_CLAIMS,RANKING_CLAIMS };
+export { COMMUNITY_DETECTION_CLAIMS, KCORE_CLAIMS, MI_VARIANT_CLAIMS, RANKING_CLAIMS };
