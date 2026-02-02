@@ -14,6 +14,26 @@ import type { BenchmarkGraphExpander } from "../experiments/evaluation/__tests__
 import { type PathSalienceConfig, type PathSalienceResult,PathSalienceSUT } from "../experiments/suts/path-salience-sut.js";
 import { type RandomRankingConfig, type RandomRankingResult,RandomRankingSUT } from "../experiments/suts/random-ranking-sut.js";
 import { type ShortestRankingConfig, type ShortestRankingResult,ShortestRankingSUT } from "../experiments/suts/shortest-ranking-sut.js";
+import {
+	createSut as createMIAdamicAdarSut,
+	type MIAdamicAdarResult,
+	registration as miAdamicAdarRegistration,
+} from "../suts/mi-adamic-adar-v1.0.0.js";
+import {
+	createSut as createMIClusteringPenalizedSut,
+	type MIClusteringPenalizedResult,
+	registration as miClusteringPenalizedRegistration,
+} from "../suts/mi-clustering-penalized-v1.0.0.js";
+import {
+	createSut as createMIDensityNormalizedSut,
+	type MIDensityNormalizedResult,
+	registration as miDensityNormalizedRegistration,
+} from "../suts/mi-density-normalized-v1.0.0.js";
+import {
+	createSut as createMIIDFWeightedSut,
+	type MIIDFWeightedResult,
+	registration as miIDFWeightedRegistration,
+} from "../suts/mi-idf-weighted-v1.0.0.js";
 
 /**
  * Domain-specific input type for ranking algorithms.
@@ -38,7 +58,14 @@ export interface RankingInputs {
  * Union type for all ranking SUT results.
  * Each SUT returns its own specific result type.
  */
-export type RankingResult = PathSalienceResult | RandomRankingResult | ShortestRankingResult;
+export type RankingResult =
+	| PathSalienceResult
+	| RandomRankingResult
+	| ShortestRankingResult
+	| MIAdamicAdarResult
+	| MIDensityNormalizedResult
+	| MIIDFWeightedResult
+	| MIClusteringPenalizedResult;
 
 /**
  * Common fields shared by all ranking results.
@@ -136,6 +163,11 @@ export const RANKING_SUT_REGISTRATIONS: Record<string, SutRegistration> = {
 		tags: ["ranking", "baseline", "conventional"],
 		description: "Shortest-path-first ranking (conventional baseline)",
 	},
+	// MI Variant SUTs (for comparison experiment)
+	[miAdamicAdarRegistration.id]: miAdamicAdarRegistration,
+	[miDensityNormalizedRegistration.id]: miDensityNormalizedRegistration,
+	[miIDFWeightedRegistration.id]: miIDFWeightedRegistration,
+	[miClusteringPenalizedRegistration.id]: miClusteringPenalizedRegistration,
 };
 
 /**
@@ -248,6 +280,12 @@ export const registerRankingSuts = (
 		RANKING_SUT_REGISTRATIONS["shortest-ranking-v1.0.0"],
 		(config?: Record<string, unknown>) => new ShortestRankingSUTWrapper(config)
 	);
+
+	// MI Variants (Alternative Primary SUTs for comparison experiment)
+	registry.register(miAdamicAdarRegistration, createMIAdamicAdarSut);
+	registry.register(miDensityNormalizedRegistration, createMIDensityNormalizedSut);
+	registry.register(miIDFWeightedRegistration, createMIIDFWeightedSut);
+	registry.register(miClusteringPenalizedRegistration, createMIClusteringPenalizedSut);
 
 	return registry;
 };
