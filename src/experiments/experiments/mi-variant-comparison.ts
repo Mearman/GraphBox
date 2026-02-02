@@ -103,8 +103,9 @@ const runVariantComparisonOnDataset = async (
 			metrics.record("mi-variant-comparison", {
 				dataset: dataset.name,
 				variant: variant.name,
-				meanMI: Math.round(rankingMetrics.meanMI * 1000) / 1000,
-				stdMI: Math.round(rankingMetrics.stdMI * 1000) / 1000,
+				// Store full precision for MI values (sparse graphs have very small values)
+				meanMI: rankingMetrics.meanMI,
+				stdMI: rankingMetrics.stdMI,
 				nodeCoverage: Math.round(rankingMetrics.nodeCoverage * 1000) / 1000,
 				pathDiversity: Math.round(rankingMetrics.pathDiversity * 1000) / 1000,
 				hubAvoidance: Math.round(rankingMetrics.hubAvoidance * 1000) / 1000,
@@ -166,22 +167,29 @@ export const printMIVariantSummary = async (): Promise<void> => {
 
 	for (const [dataset, variantResults] of byDataset) {
 		console.log(`\n${dataset}:`);
-		console.log("─".repeat(80));
+		console.log("─".repeat(90));
 		console.log(
 			"Variant".padEnd(22),
-			"Mean MI".padStart(10),
-			"Std MI".padStart(10),
+			"Mean MI".padStart(12),
+			"Std MI".padStart(12),
 			"Coverage".padStart(10),
 			"Diversity".padStart(10),
 			"Hub Avoid".padStart(10),
 		);
-		console.log("─".repeat(80));
+		console.log("─".repeat(90));
 
 		for (const v of variantResults) {
+			// Use scientific notation for very small values
+			const formatMI = (val: number): string => {
+				if (val === 0) return "0".padStart(12);
+				if (val < 0.001) return val.toExponential(2).padStart(12);
+				return val.toFixed(4).padStart(12);
+			};
+
 			console.log(
 				v.variant.padEnd(22),
-				v.meanMI.toFixed(3).padStart(10),
-				v.stdMI.toFixed(3).padStart(10),
+				formatMI(v.meanMI),
+				formatMI(v.stdMI),
 				v.nodeCoverage.toFixed(3).padStart(10),
 				v.pathDiversity.toFixed(3).padStart(10),
 				v.hubAvoidance.toFixed(3).padStart(10),
