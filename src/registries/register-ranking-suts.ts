@@ -30,6 +30,11 @@ import {
 	registration as miDensityNormalizedRegistration,
 } from "../suts/mi-density-normalized-v1.0.0.js";
 import {
+	createSut as createMIIDFWeightedEstimatedSut,
+	type MIIDFWeightedEstimatedResult,
+	registration as miIDFWeightedEstimatedRegistration,
+} from "../suts/mi-idf-weighted-estimated-v1.0.0.js";
+import {
 	createSut as createMIIDFWeightedSut,
 	type MIIDFWeightedResult,
 	registration as miIDFWeightedRegistration,
@@ -65,6 +70,7 @@ export type RankingResult =
 	| MIAdamicAdarResult
 	| MIDensityNormalizedResult
 	| MIIDFWeightedResult
+	| MIIDFWeightedEstimatedResult
 	| MIClusteringPenalizedResult;
 
 /**
@@ -167,6 +173,7 @@ export const RANKING_SUT_REGISTRATIONS: Record<string, SutRegistration> = {
 	[miAdamicAdarRegistration.id]: miAdamicAdarRegistration,
 	[miDensityNormalizedRegistration.id]: miDensityNormalizedRegistration,
 	[miIDFWeightedRegistration.id]: miIDFWeightedRegistration,
+	[miIDFWeightedEstimatedRegistration.id]: miIDFWeightedEstimatedRegistration,
 	[miClusteringPenalizedRegistration.id]: miClusteringPenalizedRegistration,
 };
 
@@ -285,6 +292,7 @@ export const registerRankingSuts = (
 	registry.register(miAdamicAdarRegistration, createMIAdamicAdarSut);
 	registry.register(miDensityNormalizedRegistration, createMIDensityNormalizedSut);
 	registry.register(miIDFWeightedRegistration, createMIIDFWeightedSut);
+	registry.register(miIDFWeightedEstimatedRegistration, createMIIDFWeightedEstimatedSut);
 	registry.register(miClusteringPenalizedRegistration, createMIClusteringPenalizedSut);
 
 	return registry;

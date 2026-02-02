@@ -26,6 +26,8 @@ interface MIConfigOptions {
 	useDensityNormalization?: boolean;
 	useIDFWeighting?: boolean;
 	useClusteringPenalty?: boolean;
+	/** Estimated total nodes for IDF weighting (streaming context) */
+	estimatedTotalNodes?: number;
 }
 
 /**
@@ -57,6 +59,10 @@ const MI_VARIANTS: MIVariantConfig[] = [
 	{
 		name: "IDF-Weighted",
 		miConfig: { useIDFWeighting: true },
+	},
+	{
+		name: "IDF-Weighted (N=250M)",
+		miConfig: { useIDFWeighting: true, estimatedTotalNodes: 250_000_000 },
 	},
 	{
 		name: "Clustering-Penalized",
@@ -167,16 +173,16 @@ export const printMIVariantSummary = async (): Promise<void> => {
 
 	for (const [dataset, variantResults] of byDataset) {
 		console.log(`\n${dataset}:`);
-		console.log("─".repeat(90));
+		console.log("─".repeat(100));
 		console.log(
-			"Variant".padEnd(22),
+			"Variant".padEnd(26),
 			"Mean MI".padStart(12),
 			"Std MI".padStart(12),
 			"Coverage".padStart(10),
 			"Diversity".padStart(10),
 			"Hub Avoid".padStart(10),
 		);
-		console.log("─".repeat(90));
+		console.log("─".repeat(100));
 
 		for (const v of variantResults) {
 			// Use scientific notation for very small values
@@ -187,7 +193,7 @@ export const printMIVariantSummary = async (): Promise<void> => {
 			};
 
 			console.log(
-				v.variant.padEnd(22),
+				v.variant.padEnd(26),
 				formatMI(v.meanMI),
 				formatMI(v.stdMI),
 				v.nodeCoverage.toFixed(3).padStart(10),
