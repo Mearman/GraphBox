@@ -33,6 +33,36 @@ const RANKING_CLAIMS: EvaluationClaim[] = [
 		tags: ["ranking", "core"],
 	},
 	{
+		claimId: "mi-higher-mi-than-betweenness",
+		description: "Path Salience achieves higher mean MI than Betweenness Centrality ranking",
+		sut: "path-salience-v1.0.0",
+		baseline: "betweenness-ranking-v1.0.0",
+		metric: "meanMI",
+		direction: "greater",
+		scope: "global",
+		tags: ["ranking", "core", "baseline-comparison", "established"],
+	},
+	{
+		claimId: "mi-higher-mi-than-pagerank",
+		description: "Path Salience achieves higher mean MI than PageRank ranking",
+		sut: "path-salience-v1.0.0",
+		baseline: "pagerank-sum-ranking-v1.0.0",
+		metric: "meanMI",
+		direction: "greater",
+		scope: "global",
+		tags: ["ranking", "core", "baseline-comparison", "established"],
+	},
+	{
+		claimId: "mi-higher-coverage-than-betweenness",
+		description: "Path Salience achieves higher node coverage than Betweenness Centrality ranking",
+		sut: "path-salience-v1.0.0",
+		baseline: "betweenness-ranking-v1.0.0",
+		metric: "nodeCoverage",
+		direction: "greater",
+		scope: "global",
+		tags: ["ranking", "baseline-comparison", "established"],
+	},
+	{
 		claimId: "better-node-coverage-than-random",
 		description: "Path Salience achieves higher node coverage than random ranking",
 		sut: "path-salience-v1.0.0",
@@ -61,6 +91,26 @@ const RANKING_CLAIMS: EvaluationClaim[] = [
 const MI_VARIANT_CLAIMS: EvaluationClaim[] = [
 	// Adamic-Adar Claims
 	{
+		claimId: "aa-higher-mi-than-betweenness",
+		description: "Adamic-Adar MI achieves higher mean MI than Betweenness Centrality ranking",
+		sut: "mi-adamic-adar-v1.0.0",
+		baseline: "betweenness-ranking-v1.0.0",
+		metric: "meanMI",
+		direction: "greater",
+		scope: "global",
+		tags: ["ranking", "mi-variant", "baseline-comparison", "established"],
+	},
+	{
+		claimId: "aa-higher-mi-than-pagerank",
+		description: "Adamic-Adar MI achieves higher mean MI than PageRank ranking",
+		sut: "mi-adamic-adar-v1.0.0",
+		baseline: "pagerank-sum-ranking-v1.0.0",
+		metric: "meanMI",
+		direction: "greater",
+		scope: "global",
+		tags: ["ranking", "mi-variant", "baseline-comparison", "established"],
+	},
+	{
 		claimId: "aa-higher-mi-than-random",
 		description: "Adamic-Adar MI achieves higher mean MI than random ranking",
 		sut: "mi-adamic-adar-v1.0.0",
@@ -83,6 +133,16 @@ const MI_VARIANT_CLAIMS: EvaluationClaim[] = [
 	},
 
 	// Density-Normalized Claims
+	{
+		claimId: "dn-higher-mi-than-betweenness",
+		description: "Density-Normalized MI achieves higher mean MI than Betweenness Centrality ranking",
+		sut: "mi-density-normalized-v1.0.0",
+		baseline: "betweenness-ranking-v1.0.0",
+		metric: "meanMI",
+		direction: "greater",
+		scope: "global",
+		tags: ["ranking", "mi-variant", "baseline-comparison", "established"],
+	},
 	{
 		claimId: "dn-higher-mi-than-random",
 		description: "Density-Normalized MI achieves higher mean MI than random ranking",
@@ -107,6 +167,26 @@ const MI_VARIANT_CLAIMS: EvaluationClaim[] = [
 
 	// IDF-Weighted Claims
 	{
+		claimId: "idf-higher-mi-than-betweenness",
+		description: "IDF-Weighted MI achieves higher mean MI than Betweenness Centrality ranking",
+		sut: "mi-idf-weighted-v1.0.0",
+		baseline: "betweenness-ranking-v1.0.0",
+		metric: "meanMI",
+		direction: "greater",
+		scope: "global",
+		tags: ["ranking", "mi-variant", "baseline-comparison", "established"],
+	},
+	{
+		claimId: "idf-higher-mi-than-pagerank",
+		description: "IDF-Weighted MI achieves higher mean MI than PageRank ranking",
+		sut: "mi-idf-weighted-v1.0.0",
+		baseline: "pagerank-sum-ranking-v1.0.0",
+		metric: "meanMI",
+		direction: "greater",
+		scope: "global",
+		tags: ["ranking", "mi-variant", "baseline-comparison", "established"],
+	},
+	{
 		claimId: "idf-higher-mi-than-random",
 		description: "IDF-Weighted MI achieves higher mean MI than random ranking",
 		sut: "mi-idf-weighted-v1.0.0",
@@ -129,6 +209,16 @@ const MI_VARIANT_CLAIMS: EvaluationClaim[] = [
 	},
 
 	// Clustering-Penalized Claims
+	{
+		claimId: "cc-higher-mi-than-betweenness",
+		description: "Clustering-Penalized MI achieves higher mean MI than Betweenness Centrality ranking",
+		sut: "mi-clustering-penalized-v1.0.0",
+		baseline: "betweenness-ranking-v1.0.0",
+		metric: "meanMI",
+		direction: "greater",
+		scope: "global",
+		tags: ["ranking", "mi-variant", "baseline-comparison", "established"],
+	},
 	{
 		claimId: "cc-higher-mi-than-random",
 		description: "Clustering-Penalized MI achieves higher mean MI than random ranking",
