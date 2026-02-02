@@ -30,6 +30,10 @@ import { FrontierBalancedExpansion } from "@graph/experiments/baselines/frontier
 import { RandomPriorityExpansion } from "@graph/experiments/baselines/random-priority.js";
 import { retroactivePathEnumeration } from "@graph/experiments/baselines/retroactive-path-enum.js";
 import { StandardBfsExpansion } from "@graph/experiments/baselines/standard-bfs.js";
+import {
+	degreeDistributionJSD,
+	extractDegrees,
+} from "@graph/experiments/metrics/degree-distribution-jsd.js";
 import { metrics } from "@graph/experiments/metrics/index.js";
 
 /**
@@ -426,8 +430,137 @@ export const runSalienceCoverageExperiments = async (): Promise<void> => {
 };
 
 /**
+ * Budget-constrained expansion experiments.
+ *
+ * On benchmark graphs (Cora, CiteSeer, Facebook), run each of the 4 core
+ * methods with a node cap at 25% and 50% of graph size. Record salience
+ * coverage via retroactive enumeration and degree distribution JSD to measure
+ * structural representativeness.
+ *
+ * Purpose: Address the examiner concern that all methods achieve 100% coverage
+ * on small benchmarks by introducing budget constraints that force differentiation.
+ */
+export const runBudgetConstrainedExperiments = async (): Promise<void> => {
+	console.log("\nBudget-Constrained Expansion");
+	console.log("═══════════════════════════════════════════════════════════\n");
+
+	// Only run on graphs large enough for budget constraints to matter
+	const budgetTestCases = getTestCases().filter((tc) =>
+		["cora", "citeseer", "facebook"].includes(tc.name),
+	);
+	const budgetFractions = [0.25, 0.5];
+
+	for (const testCase of budgetTestCases) {
+		const { graph, directed } = await testCase.getGraph();
+		const graphNodeCount = graph.getAllNodes().length;
+		const fullGraphDegrees = extractDegrees(graph);
+		const expander = new BenchmarkGraphExpander(graph, directed);
+
+		console.log(`\nBudget Test: ${testCase.name} (${graphNodeCount} nodes)`);
+
+		// Compute ground truth (unconstrained)
+		const groundTruth = computeSalienceGroundTruth(graph, testCase.seeds, {
+			topK: testCase.topK,
+			lambda: 0,
+			traversalMode: directed ? "directed" : "undirected",
+		});
+
+		if (groundTruth.size === 0) {
+			console.log("   WARNING: No ground truth paths, skipping\n");
+			continue;
+		}
+
+		for (const fraction of budgetFractions) {
+			const nodeBudget = Math.floor(graphNodeCount * fraction);
+			console.log(
+				`\n   Budget: ${(fraction * 100).toFixed(0)}% = ${nodeBudget} nodes`,
+			);
+
+			// Only use the 4 core methods (indices 0-3 in createMethods)
+			const allMethods = createMethods(expander, testCase.seeds);
+			const coreMethods = allMethods.slice(0, 4); // BFS, DP, FB, Random
+
+			for (const method of coreMethods) {
+				try {
+					const algo = method.create();
+					const expansionResult = await algo.run();
+
+					// Truncate sampled nodes to budget
+					const sampledNodesArray = [...expansionResult.sampledNodes];
+					const budgetNodes = new Set(
+						sampledNodesArray.slice(0, nodeBudget),
+					);
+
+					// Retroactive path enumeration on budget-constrained subgraph
+					const budgetResult = {
+						...expansionResult,
+						sampledNodes: budgetNodes,
+						sampledEdges: new Set(
+							[...expansionResult.sampledEdges].filter((edge) => {
+								const parts = edge.split("->");
+								return (
+									parts.length === 2 &&
+									budgetNodes.has(parts[0]) &&
+									budgetNodes.has(parts[1])
+								);
+							}),
+						),
+					};
+
+					const enumResult = await retroactivePathEnumeration(
+						budgetResult,
+						expander,
+						testCase.seeds,
+						7,
+					);
+
+					const coverage = computeSalienceCoverage(
+						enumResult.paths,
+						groundTruth,
+					);
+
+					// Compute JSD
+					const sampledDegrees = extractDegrees(graph, budgetNodes);
+					const jsd = degreeDistributionJSD(
+						sampledDegrees,
+						fullGraphDegrees,
+					);
+
+					metrics.record("salience-coverage-budget", {
+						dataset: testCase.name,
+						method: method.name,
+						budgetFraction: fraction,
+						budgetNodes: nodeBudget,
+						salienceCoverage:
+							Math.round(coverage["salience-coverage"] * 1000) /
+							1000,
+						topKFound: coverage["top-k-found"],
+						topKTotal: coverage["top-k-total"],
+						pathsDiscovered: enumResult.paths.length,
+						nodesUsed: budgetNodes.size,
+						degreeDistributionJSD: Math.round(jsd * 10_000) / 10_000,
+					});
+
+					console.log(
+						`      ${method.name.padEnd(25)} Coverage: ${(coverage["salience-coverage"] * 100).toFixed(1)}% | JSD: ${jsd.toFixed(4)} | Paths: ${enumResult.paths.length}`,
+					);
+				} catch (error) {
+					console.error(
+						`      ✗ ${method.name} failed:`,
+						error,
+					);
+				}
+			}
+		}
+	}
+
+	console.log("\nBudget-constrained experiments complete\n");
+};
+
+/**
  * Main entry point for running all experiments
  */
 export const runAllSalienceCoverageExperiments = async (): Promise<void> => {
 	await runSalienceCoverageExperiments();
+	await runBudgetConstrainedExperiments();
 };
