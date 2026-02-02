@@ -438,6 +438,38 @@ export interface MIVariantComparisonMetric {
 }
 
 /**
+ * Baseline comparison metric.
+ *
+ * Compares MI ranking variants against established baselines from the literature
+ * (Betweenness Centrality, PageRank, Degree Sum, Shortest Path, Random).
+ */
+export interface BaselineComparisonMetric {
+	/** Dataset identifier */
+	dataset: string;
+
+	/** Method name (e.g., "Jaccard MI", "Betweenness Centrality") */
+	method: string;
+
+	/** Method category: "ours" for MI variants, "baseline" for established methods */
+	category: "ours" | "baseline";
+
+	/** Mean MI score across paths */
+	meanMI: number;
+
+	/** Node coverage (fraction of graph nodes in paths) */
+	nodeCoverage: number;
+
+	/** Path diversity (Jaccard distance between paths) */
+	pathDiversity: number;
+
+	/** Hub avoidance score (1 - mean hub ratio) */
+	hubAvoidance: number;
+
+	/** Number of paths found */
+	pathsFound: number;
+}
+
+/**
  * Union of all metric types for internal handling
  */
 export type Metric =
@@ -472,7 +504,8 @@ export type Metric =
 	| RankingSignificanceMetric
 	| CommunityDetectionMetric
 	| KCoreDecompositionMetric
-	| MIVariantComparisonMetric;
+	| MIVariantComparisonMetric
+	| BaselineComparisonMetric;
 
 /**
  * Metric category - groups related metrics for table generation
@@ -509,7 +542,8 @@ export type MetricCategory =
 	| "ranking-significance"
 	| "community-detection"
 	| "k-core-decomposition"
-	| "mi-variant-comparison";
+	| "mi-variant-comparison"
+	| "baseline-comparison";
 
 /**
  * Typed metric record with category
