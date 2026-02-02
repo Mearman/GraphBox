@@ -122,6 +122,29 @@ for (const [category, entries] of Object.entries(metrics.metrics)) {
 	// Special case: salience-coverage-comparison splits by dataset
 	// Pre-multiply salienceCoverage by 100 so LaTeX can display it directly
 	// (avoids pgfplotstable `multiply with` which conflicts with global `string type`)
+	// Budget-constrained salience coverage: split by dataset (matching unbounded pattern)
+	if (category === "salience-coverage-budget") {
+		const byDataset: Record<string, Array<Record<string, unknown>>> = {};
+		for (const entry of entries) {
+			const record = { ...(entry as unknown as Record<string, unknown>) };
+			if (typeof record.salienceCoverage === "number") {
+				record.salienceCoverage = Math.round(record.salienceCoverage * 100);
+			}
+			const dataset = String(record.dataset ?? "unknown");
+			byDataset[dataset] ??= [];
+			byDataset[dataset].push(record);
+		}
+
+		for (const [dataset, datasetEntries] of Object.entries(byDataset)) {
+			const filename = `salience-coverage-budget-${dataset}.csv`;
+			const csv = toCSV(datasetEntries);
+			writeFileSync(path.join(outputDir, filename), csv, "utf-8");
+			fileCount++;
+			console.log(`  ${filename} (${datasetEntries.length} rows)`);
+		}
+		continue;
+	}
+
 	if (category === "salience-coverage-comparison") {
 		const byDataset: Record<string, Array<Record<string, unknown>>> = {};
 		for (const entry of entries) {
