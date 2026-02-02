@@ -152,6 +152,40 @@ export interface MutualInformationConfig<N extends Node, E extends Edge = Edge> 
 	 * @default false
 	 */
 	useEdgeTypeRarity?: boolean;
+
+	/**
+	 * Use Adamic-Adar instead of Jaccard for structural MI.
+	 * AA(u,v) = Σ_{w ∈ N(u) ∩ N(v)} 1/log(deg(w))
+	 * Naturally downweights common neighbors with high degree.
+	 * Better for dense social networks where Jaccard is less discriminative.
+	 * @default false
+	 */
+	useAdamicAdar?: boolean;
+
+	/**
+	 * Normalize Jaccard by expected overlap given graph density.
+	 * normalized = (observed - expected) / (1 - expected)
+	 * where expected ≈ density² (random graph baseline).
+	 * Adjusts structural MI for graph density effects.
+	 * @default false
+	 */
+	useDensityNormalization?: boolean;
+
+	/**
+	 * Graph density for density normalization (edges / max_possible_edges).
+	 * If not provided, computed automatically from the graph.
+	 * @default undefined (auto-computed)
+	 */
+	graphDensity?: number;
+
+	/**
+	 * Penalize MI for nodes with high local clustering coefficient.
+	 * MI_adjusted = MI × (1 - max(cc(u), cc(v)))
+	 * Favors paths through structural holes (bridges) over clustered regions.
+	 * Useful for finding diverse, non-redundant paths.
+	 * @default false
+	 */
+	useClusteringPenalty?: boolean;
 }
 
 /**
@@ -308,6 +342,119 @@ const computeStructuralMI = (
 	}
 
 	return intersectionSize / unionSize + epsilon;
+};
+
+/**
+ * Compute Adamic-Adar similarity between two nodes.
+ *
+ * AA(u,v) = Σ_{w ∈ N(u) ∩ N(v)} 1/log(deg(w))
+ * Naturally downweights common neighbors with high degree (hubs).
+ * Better than Jaccard for dense graphs where most nodes have high overlap.
+ *
+ * @param neighbours1 - Set of neighbour IDs for first node
+ * @param neighbours2 - Set of neighbour IDs for second node
+ * @param nodeDegrees - Map of node ID to degree
+ * @param epsilon - Small constant for normalization
+ * @returns Normalized Adamic-Adar score in range [0, 1]
+ * @internal
+ */
+const computeAdamicAdar = (
+	neighbours1: Set<string>,
+	neighbours2: Set<string>,
+	nodeDegrees: Map<string, number>,
+	epsilon: number,
+): number => {
+	if (neighbours1.size === 0 || neighbours2.size === 0) {
+		return epsilon;
+	}
+
+	let aa = 0;
+	for (const n of neighbours1) {
+		if (neighbours2.has(n)) {
+			const degree = nodeDegrees.get(n) ?? 1;
+			// Avoid log(1) = 0 which would cause division by zero
+			aa += 1 / Math.log(degree + 2);
+		}
+	}
+
+	// Normalize to approximately [0, 1]
+	// Max AA occurs when all neighbors overlap and have degree 2
+	const maxOverlap = Math.min(neighbours1.size, neighbours2.size);
+	const maxAA = maxOverlap / Math.log(4); // log(2+2) for degree-2 common neighbors
+	return maxAA > 0 ? Math.min(1, aa / maxAA) + epsilon : epsilon;
+};
+
+/**
+ * Normalize Jaccard similarity by expected overlap given graph density.
+ *
+ * In dense graphs, high Jaccard is expected by random chance.
+ * This function adjusts for that: normalized = (observed - expected) / (1 - expected)
+ *
+ * @param jaccard - Observed Jaccard similarity
+ * @param density - Graph density (edges / max_possible_edges)
+ * @param epsilon - Small constant
+ * @returns Density-normalized Jaccard in range [0, 1]
+ * @internal
+ */
+const computeDensityNormalizedJaccard = (
+	jaccard: number,
+	density: number,
+	epsilon: number,
+): number => {
+	// Expected Jaccard under random graph model ≈ density²
+	// (probability two nodes share a random neighbor)
+	const expected = density * density;
+
+	if (expected >= 1 - epsilon) {
+		// Graph is nearly complete; normalization undefined
+		return epsilon;
+	}
+
+	// Normalize: how much better than random?
+	const normalized = (jaccard - expected) / (1 - expected);
+	return Math.max(epsilon, Math.min(1, normalized + epsilon));
+};
+
+/**
+ * Compute local clustering coefficient for a node.
+ *
+ * CC(v) = (triangles around v) / (possible triangles around v)
+ *       = (edges among neighbours) / (k × (k-1) / 2)
+ * where k = |N(v)| (number of neighbours)
+ *
+ * @param nodeId - Node ID to compute clustering for
+ * @param neighbourCache - Pre-computed neighbor sets
+ * @returns Local clustering coefficient in range [0, 1]
+ * @internal
+ */
+const computeClusteringCoefficient = (
+	nodeId: string,
+	neighbourCache: Map<string, Set<string>>,
+): number => {
+	const neighbours = neighbourCache.get(nodeId);
+	if (!neighbours || neighbours.size < 2) {
+		// Need at least 2 neighbors to form a triangle
+		return 0;
+	}
+
+	// Count triangles: edges between pairs of neighbours
+	let triangles = 0;
+	const neighbourList = [...neighbours];
+	for (let i = 0; i < neighbourList.length; i++) {
+		const niNeighbours = neighbourCache.get(neighbourList[i]);
+		if (!niNeighbours) continue;
+
+		for (let j = i + 1; j < neighbourList.length; j++) {
+			if (niNeighbours.has(neighbourList[j])) {
+				triangles++;
+			}
+		}
+	}
+
+	// Max possible triangles = k(k-1)/2
+	const k = neighbours.size;
+	const possibleTriangles = (k * (k - 1)) / 2;
+	return possibleTriangles > 0 ? triangles / possibleTriangles : 0;
 };
 
 /**
@@ -532,6 +679,10 @@ export const precomputeMutualInformation = <N extends Node, E extends Edge>(
 		degreeBasedPenaltyFactor = 0.5,
 		useIDFWeighting = false,
 		useEdgeTypeRarity = false,
+		useAdamicAdar = false,
+		useDensityNormalization = false,
+		graphDensity: providedDensity,
+		useClusteringPenalty = false,
 	} = config;
 
 	const cache = new Map<string, number>();
@@ -595,11 +746,11 @@ export const precomputeMutualInformation = <N extends Node, E extends Edge>(
 		}
 	}
 
-	// Pre-compute node degrees for degree-based penalties
+	// Pre-compute node degrees for degree-based penalties and Adamic-Adar
 	const nodeDegrees = new Map<string, number>();
 	const totalNodes = graph.getNodeCount();
 
-	if (useDegreeBasedPenalty || useIDFWeighting) {
+	if (useDegreeBasedPenalty || useIDFWeighting || useAdamicAdar) {
 		for (const edge of edges) {
 			nodeDegrees.set(edge.source, (nodeDegrees.get(edge.source) ?? 0) + 1);
 			nodeDegrees.set(edge.target, (nodeDegrees.get(edge.target) ?? 0) + 1);
@@ -608,6 +759,18 @@ export const precomputeMutualInformation = <N extends Node, E extends Edge>(
 
 	// Pre-compute edge type rarity for edge type penalty
 	const totalEdges = edges.length;
+
+	// Compute graph density for density normalization
+	let graphDensity = providedDensity;
+	if (useDensityNormalization && graphDensity === undefined) {
+		// density = |E| / (|V| * (|V| - 1) / 2) for undirected
+		// density = |E| / (|V| * (|V| - 1)) for directed
+		const maxEdges = totalNodes * (totalNodes - 1) / 2; // assuming undirected
+		graphDensity = maxEdges > 0 ? totalEdges / maxEdges : 0;
+	}
+
+	// Pre-compute clustering coefficients for clustering penalty
+	const clusteringCoefficients = new Map<string, number>();
 	const edgeTypeRarity = new Map<string, number>();
 
 	if (useEdgeTypeRarity && edgeTypeCounts) {
@@ -693,9 +856,22 @@ export const precomputeMutualInformation = <N extends Node, E extends Edge>(
 			return computeEdgeTypeMI(edge.type, edgeTypeCounts, edges.length, epsilon);
 		}
 
-		// Strategy 5: Structural MI (Jaccard similarity)
+		// Strategy 5: Structural MI (Jaccard, Adamic-Adar, or density-normalized)
 		const n1 = getOrCacheNeighbourSet(edge.source);
 		const n2 = getOrCacheNeighbourSet(edge.target);
+
+		// Option A: Adamic-Adar (better for dense graphs)
+		if (useAdamicAdar) {
+			return computeAdamicAdar(n1, n2, nodeDegrees, epsilon);
+		}
+
+		// Option B: Density-normalized Jaccard
+		if (useDensityNormalization && graphDensity !== undefined) {
+			const jaccard = computeStructuralMI(n1, n2, epsilon);
+			return computeDensityNormalizedJaccard(jaccard, graphDensity, epsilon);
+		}
+
+		// Default: Standard Jaccard
 		return computeStructuralMI(n1, n2, epsilon);
 	};
 
@@ -761,6 +937,31 @@ export const precomputeMutualInformation = <N extends Node, E extends Edge>(
 		if (useEdgeTypeRarity) {
 			const rarity = edgeTypeRarity.get(edge.type) ?? 1;
 			modifier *= rarity;
+		}
+
+		// Option 4: Clustering coefficient penalty
+		// MI_adjusted = MI_base × (1 - max(cc(source), cc(target)))
+		// Favors paths through structural holes (bridges) over clustered regions
+		if (useClusteringPenalty) {
+			// Compute or retrieve clustering coefficients
+			let ccSource = clusteringCoefficients.get(edge.source);
+			if (ccSource === undefined) {
+				// Ensure neighbor cache is populated
+				getOrCacheNeighbourSet(edge.source);
+				ccSource = computeClusteringCoefficient(edge.source, neighbourCache);
+				clusteringCoefficients.set(edge.source, ccSource);
+			}
+
+			let ccTarget = clusteringCoefficients.get(edge.target);
+			if (ccTarget === undefined) {
+				getOrCacheNeighbourSet(edge.target);
+				ccTarget = computeClusteringCoefficient(edge.target, neighbourCache);
+				clusteringCoefficients.set(edge.target, ccTarget);
+			}
+
+			// Penalize highly clustered regions; favor bridges
+			const maxCC = Math.max(ccSource, ccTarget);
+			modifier *= (1 - maxCC + epsilon);
 		}
 
 		return modifier;
