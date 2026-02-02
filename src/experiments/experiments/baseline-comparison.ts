@@ -126,7 +126,7 @@ const runBaselineComparisonOnDataset = async (dataset: typeof DATASETS[number]):
 			const paths = result.value.value;
 			const rankingMetrics = computeRankingMetrics(paths, graph);
 
-			metrics.record("baseline-comparison", {
+			metrics.record("ranking-method-comparison", {
 				dataset: dataset.name,
 				method: method.name,
 				category: method.category,
@@ -138,7 +138,7 @@ const runBaselineComparisonOnDataset = async (dataset: typeof DATASETS[number]):
 			} satisfies BaselineComparisonMetric);
 		} else {
 			// Record empty result for failed ranking
-			metrics.record("baseline-comparison", {
+			metrics.record("ranking-method-comparison", {
 				dataset: dataset.name,
 				method: method.name,
 				category: method.category,
@@ -173,7 +173,7 @@ export const runBaselineComparison = async (): Promise<void> => {
  */
 export const printBaselineSummary = async (): Promise<void> => {
 	const allMetrics = metrics.getAll();
-	const baselineMetrics = allMetrics["baseline-comparison"] as BaselineComparisonMetric[] | undefined;
+	const baselineMetrics = allMetrics["ranking-method-comparison"] as BaselineComparisonMetric[] | undefined;
 
 	if (!baselineMetrics || baselineMetrics.length === 0) {
 		console.log("No baseline comparison data available. Run experiments first.");

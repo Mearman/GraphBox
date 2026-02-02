@@ -40,7 +40,7 @@ const RANKING_CLAIMS: EvaluationClaim[] = [
 		metric: "meanMI",
 		direction: "greater",
 		scope: "global",
-		tags: ["ranking", "core", "baseline-comparison", "established"],
+		tags: ["ranking", "core", "ranking-method-comparison", "established"],
 	},
 	{
 		claimId: "mi-higher-mi-than-pagerank",
@@ -50,7 +50,7 @@ const RANKING_CLAIMS: EvaluationClaim[] = [
 		metric: "meanMI",
 		direction: "greater",
 		scope: "global",
-		tags: ["ranking", "core", "baseline-comparison", "established"],
+		tags: ["ranking", "core", "ranking-method-comparison", "established"],
 	},
 	{
 		claimId: "mi-higher-coverage-than-betweenness",
@@ -60,7 +60,7 @@ const RANKING_CLAIMS: EvaluationClaim[] = [
 		metric: "nodeCoverage",
 		direction: "greater",
 		scope: "global",
-		tags: ["ranking", "baseline-comparison", "established"],
+		tags: ["ranking", "ranking-method-comparison", "established"],
 	},
 	{
 		claimId: "better-node-coverage-than-random",

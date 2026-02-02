@@ -543,7 +543,7 @@ export type MetricCategory =
 	| "community-detection"
 	| "k-core-decomposition"
 	| "mi-variant-comparison"
-	| "baseline-comparison";
+	| "ranking-method-comparison";
 
 /**
  * Typed metric record with category
