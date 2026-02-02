@@ -299,6 +299,23 @@ export interface SalienceCoverageComparisonMetric {
 	runtimeMs: number;
 }
 
+/**
+ * Budget-constrained salience coverage metric.
+ * Records coverage achieved under a node expansion budget.
+ */
+export interface SalienceCoverageBudgetMetric {
+	dataset: string;
+	method: string;
+	budgetFraction: number;
+	budgetNodes: number;
+	salienceCoverage: number;
+	topKFound: number;
+	topKTotal: number;
+	pathsDiscovered: number;
+	nodesUsed: number;
+	degreeDistributionJSD: number;
+}
+
 // ---------------------------------------------------------------------------
 // OCS (Operational Correctness / Significance) scenario metrics
 // ---------------------------------------------------------------------------
@@ -414,6 +431,7 @@ export type Metric =
 	| MultiHubEfficiencyMetric
 	| HubAvoidanceMetric
 	| SalienceCoverageComparisonMetric
+	| SalienceCoverageBudgetMetric
 	| ClassificationCorrectnessMetric
 	| ClassificationSignificanceMetric
 	| GenerationCorrectnessMetric
@@ -449,6 +467,7 @@ export type MetricCategory =
 	| "hub-mitigation"
 	| "multi-hub-efficiency"
 	| "salience-coverage-comparison"
+	| "salience-coverage-budget"
 	| "classification-correctness"
 	| "classification-significance"
 	| "generation-correctness"
