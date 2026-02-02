@@ -11,6 +11,21 @@ import { SUTRegistry } from "ppef/registry";
 import type { SUT, SutRegistration } from "ppef/types/sut";
 
 import type { BenchmarkGraphExpander } from "../experiments/evaluation/__tests__/validation/common/benchmark-graph-expander.js";
+import {
+	type BetweennessRankingConfig,
+	type BetweennessRankingResult,
+	BetweennessRankingSUT,
+} from "../experiments/suts/betweenness-ranking-sut.js";
+import {
+	type DegreeSumRankingConfig,
+	type DegreeSumRankingResult,
+	DegreeSumRankingSUT,
+} from "../experiments/suts/degree-sum-ranking-sut.js";
+import {
+	type PageRankSumRankingConfig,
+	type PageRankSumRankingResult,
+	PageRankSumRankingSUT,
+} from "../experiments/suts/pagerank-sum-ranking-sut.js";
 import { type PathSalienceConfig, type PathSalienceResult,PathSalienceSUT } from "../experiments/suts/path-salience-sut.js";
 import { type RandomRankingConfig, type RandomRankingResult,RandomRankingSUT } from "../experiments/suts/random-ranking-sut.js";
 import { type ShortestRankingConfig, type ShortestRankingResult,ShortestRankingSUT } from "../experiments/suts/shortest-ranking-sut.js";
@@ -67,6 +82,9 @@ export type RankingResult =
 	| PathSalienceResult
 	| RandomRankingResult
 	| ShortestRankingResult
+	| BetweennessRankingResult
+	| PageRankSumRankingResult
+	| DegreeSumRankingResult
 	| MIAdamicAdarResult
 	| MIDensityNormalizedResult
 	| MIIDFWeightedResult
@@ -169,6 +187,34 @@ export const RANKING_SUT_REGISTRATIONS: Record<string, SutRegistration> = {
 		tags: ["ranking", "baseline", "conventional"],
 		description: "Shortest-path-first ranking (conventional baseline)",
 	},
+	// Established baseline SUTs (from literature)
+	"betweenness-ranking-v1.0.0": {
+		id: "betweenness-ranking-v1.0.0",
+		name: "Betweenness Centrality Ranking",
+		version: "1.0.0",
+		role: "baseline",
+		config: {} satisfies BetweennessRankingConfig,
+		tags: ["ranking", "baseline", "centrality", "established"],
+		description: "Path ranking by sum of node betweenness centrality (Brandes' algorithm)",
+	},
+	"pagerank-sum-ranking-v1.0.0": {
+		id: "pagerank-sum-ranking-v1.0.0",
+		name: "PageRank Sum Ranking",
+		version: "1.0.0",
+		role: "baseline",
+		config: {} satisfies PageRankSumRankingConfig,
+		tags: ["ranking", "baseline", "centrality", "established"],
+		description: "Path ranking by sum of node PageRank scores (power iteration)",
+	},
+	"degree-sum-ranking-v1.0.0": {
+		id: "degree-sum-ranking-v1.0.0",
+		name: "Degree Sum Ranking",
+		version: "1.0.0",
+		role: "baseline",
+		config: {} satisfies DegreeSumRankingConfig,
+		tags: ["ranking", "baseline", "centrality", "established"],
+		description: "Path ranking by sum of node degrees",
+	},
 	// MI Variant SUTs (for comparison experiment)
 	[miAdamicAdarRegistration.id]: miAdamicAdarRegistration,
 	[miDensityNormalizedRegistration.id]: miDensityNormalizedRegistration,
@@ -259,6 +305,87 @@ class ShortestRankingSUTWrapper implements SUT<RankingInputs, ShortestRankingRes
 }
 
 /**
+ * SUT wrapper for Betweenness Centrality Ranking.
+ *
+ * Returns BetweennessRankingResult directly.
+ */
+class BetweennessRankingSUTWrapper implements SUT<RankingInputs, BetweennessRankingResult> {
+	readonly id = "betweenness-ranking-v1.0.0";
+	readonly config: Readonly<Record<string, unknown>>;
+
+	constructor(config?: Record<string, unknown>) {
+		this.config = { ...config };
+	}
+
+	async run(inputs: RankingInputs): Promise<BetweennessRankingResult> {
+		const { input: expander, source, target } = inputs;
+		const inputsArray = [source, target] as const;
+
+		const sut = new BetweennessRankingSUT(expander, inputsArray, this.config as BetweennessRankingConfig);
+		const result = await sut.run();
+
+		if (!result.ok) {
+			throw result.error;
+		}
+		return result.value;
+	}
+}
+
+/**
+ * SUT wrapper for PageRank Sum Ranking.
+ *
+ * Returns PageRankSumRankingResult directly.
+ */
+class PageRankSumRankingSUTWrapper implements SUT<RankingInputs, PageRankSumRankingResult> {
+	readonly id = "pagerank-sum-ranking-v1.0.0";
+	readonly config: Readonly<Record<string, unknown>>;
+
+	constructor(config?: Record<string, unknown>) {
+		this.config = { ...config };
+	}
+
+	async run(inputs: RankingInputs): Promise<PageRankSumRankingResult> {
+		const { input: expander, source, target } = inputs;
+		const inputsArray = [source, target] as const;
+
+		const sut = new PageRankSumRankingSUT(expander, inputsArray, this.config as PageRankSumRankingConfig);
+		const result = await sut.run();
+
+		if (!result.ok) {
+			throw result.error;
+		}
+		return result.value;
+	}
+}
+
+/**
+ * SUT wrapper for Degree Sum Ranking.
+ *
+ * Returns DegreeSumRankingResult directly.
+ */
+class DegreeSumRankingSUTWrapper implements SUT<RankingInputs, DegreeSumRankingResult> {
+	readonly id = "degree-sum-ranking-v1.0.0";
+	readonly config: Readonly<Record<string, unknown>>;
+
+	constructor(config?: Record<string, unknown>) {
+		this.config = { ...config };
+	}
+
+	async run(inputs: RankingInputs): Promise<DegreeSumRankingResult> {
+		const { input: expander, source, target } = inputs;
+		const inputsArray = [source, target] as const;
+
+		const sut = new DegreeSumRankingSUT(expander, inputsArray, this.config as DegreeSumRankingConfig);
+		const result = await sut.run();
+
+		if (!result.ok) {
+			throw result.error;
+		}
+		return result.value;
+	}
+}
+
+/**
  * Register all ranking SUTs with a registry.
  *
  * Each SUT is registered with its specific result type.
@@ -286,6 +413,22 @@ export const registerRankingSuts = (
 	registry.register(
 		RANKING_SUT_REGISTRATIONS["shortest-ranking-v1.0.0"],
 		(config?: Record<string, unknown>) => new ShortestRankingSUTWrapper(config)
+	);
+
+	// Established Baseline SUTs (from literature)
+	registry.register(
+		RANKING_SUT_REGISTRATIONS["betweenness-ranking-v1.0.0"],
+		(config?: Record<string, unknown>) => new BetweennessRankingSUTWrapper(config)
+	);
+
+	registry.register(
+		RANKING_SUT_REGISTRATIONS["pagerank-sum-ranking-v1.0.0"],
+		(config?: Record<string, unknown>) => new PageRankSumRankingSUTWrapper(config)
+	);
+
+	registry.register(
+		RANKING_SUT_REGISTRATIONS["degree-sum-ranking-v1.0.0"],
+		(config?: Record<string, unknown>) => new DegreeSumRankingSUTWrapper(config)
 	);
 
 	// MI Variants (Alternative Primary SUTs for comparison experiment)
