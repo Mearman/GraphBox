@@ -6,5 +6,6 @@
  */
 
 export * from "./bidirectional-bfs.js";
+export * from "./mi-variant-comparison.js";
 export * from "./path-ranking.js";
 export * from "./seeded-expansion.js";
