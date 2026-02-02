@@ -75,14 +75,26 @@ const MI_VARIANTS: MIVariantConfig[] = [
  *
  * Includes:
  * - Small social networks (Karate, Les Mis)
- * - Citation networks (Cora, CiteSeer)
+ * - Citation networks (Cora, CiteSeer, Cit-HepTH)
+ * - Collaboration networks (CA-CondMat, CA-HepPh, CA-Astroph)
  * - Dense social network (Facebook) - key for addressing negative correlation issue
  */
 const DATASETS = [
+	// Small social networks
 	{ id: "karate", name: "Karate Club", source: "1", target: "34", maxPaths: 15, category: "social" },
 	{ id: "lesmis", name: "Les Misérables", source: "Myriel", target: "Marius", maxPaths: 18, category: "social" },
+
+	// Citation networks
 	{ id: "cora", name: "Cora", source: "11342", target: "379288", maxPaths: 10, category: "citation" },
 	{ id: "citeseer", name: "CiteSeer", source: "527452", target: "tzitzikas01democratic", maxPaths: 10, category: "citation" },
+	{ id: "cit-hepth", name: "Cit-HepTH", source: "9711083", target: "9903207", maxPaths: 10, category: "citation" },
+
+	// Collaboration networks
+	{ id: "ca-astroph", name: "CA-Astroph", source: "34890", target: "8744", maxPaths: 10, category: "collaboration" },
+	{ id: "ca-condmat", name: "CA-CondMat", source: "12648", target: "27230", maxPaths: 10, category: "collaboration" },
+	{ id: "ca-hepph", name: "CA-HepPh", source: "50500", target: "82081", maxPaths: 10, category: "collaboration" },
+
+	// Dense social network (key for addressing examiner concern)
 	{ id: "facebook", name: "Facebook", source: "0", target: "4000", maxPaths: 15, category: "dense-social" },
 ];
 
