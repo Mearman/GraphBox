@@ -66,10 +66,18 @@ const MI_VARIANTS: MIVariantConfig[] = [
 
 /**
  * Benchmark datasets for comparison.
+ *
+ * Includes:
+ * - Small social networks (Karate, Les Mis)
+ * - Citation networks (Cora, CiteSeer)
+ * - Dense social network (Facebook) - key for addressing negative correlation issue
  */
 const DATASETS = [
 	{ id: "karate", name: "Karate Club", source: "1", target: "34", maxPaths: 15, category: "social" },
 	{ id: "lesmis", name: "Les Misérables", source: "Myriel", target: "Marius", maxPaths: 18, category: "social" },
+	{ id: "cora", name: "Cora", source: "11342", target: "379288", maxPaths: 10, category: "citation" },
+	{ id: "citeseer", name: "CiteSeer", source: "527452", target: "tzitzikas01democratic", maxPaths: 10, category: "citation" },
+	{ id: "facebook", name: "Facebook", source: "0", target: "4000", maxPaths: 15, category: "dense-social" },
 ];
 
 /**
