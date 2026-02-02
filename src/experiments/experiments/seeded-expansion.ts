@@ -14,6 +14,10 @@ import { FrontierBalancedExpansion } from "@graph/experiments/baselines/frontier
 import { RandomPriorityExpansion } from "@graph/experiments/baselines/random-priority.js";
 import { retroactivePathEnumeration } from "@graph/experiments/baselines/retroactive-path-enum.js";
 import { StandardBfsExpansion } from "@graph/experiments/baselines/standard-bfs.js";
+import {
+	degreeDistributionJSD,
+	extractDegrees,
+} from "@graph/experiments/metrics/degree-distribution-jsd.js";
 import { metrics } from "@graph/experiments/metrics/index.js";
 
 /**
@@ -368,6 +372,11 @@ export const runStructuralRepresentativenessExperiments = async (): Promise<void
 		totalNodes: groundTruth.size,
 	});
 
+	// JSD: structural representativeness via degree distribution divergence
+	const fullGraphDegrees = extractDegrees(graph);
+	const sampledDegrees = extractDegrees(graph, result.sampledNodes);
+	const jsd = degreeDistributionJSD(sampledDegrees, fullGraphDegrees);
+
 	// Additional metrics
 	const hubThreshold = 5;
 	const totalSampled = result.sampledNodes.size;
@@ -379,6 +388,7 @@ export const runStructuralRepresentativenessExperiments = async (): Promise<void
 		hubCoverage: Math.round(hubCoverage * 10) / 10,
 		bucketsCovered: 2,
 		totalBuckets: 3,
+		degreeDistributionJSD: Math.round(jsd * 10_000) / 10_000,
 	});
 };
 
