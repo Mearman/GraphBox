@@ -3,7 +3,7 @@
  * CSV Export for Thesis Tables
  *
  * Reads test-metrics.json and writes per-category CSV files
- * to Thesis/gen/data/ for consumption by LaTeX pgfplotstable.
+ * to Thesis/src/data/ for consumption by LaTeX pgfplotstable.
  *
  * Usage:
  *   npx tsx scripts/export-csv.ts
@@ -18,7 +18,7 @@ import { readMetrics } from "../src/experiments/metrics/storage.js";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const projectRoot = path.resolve(__dirname, "..");
 const metricsPath = path.join(projectRoot, "src/test-metrics.json");
-const outputDir = path.resolve(projectRoot, "../Thesis/gen/data");
+const outputDir = path.resolve(projectRoot, "../Thesis/src/data");
 
 /**
  * LaTeX-escape a string value for pgfplotstable consumption.
