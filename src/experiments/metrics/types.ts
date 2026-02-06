@@ -70,9 +70,12 @@ export interface ScalabilityMetric {
 export interface CrossDatasetMetric {
 	dataset: string;
 	nodes: number;
-	dpDiversity: number;
-	bfsDiversity: number;
-	improvement: number;
+	method: string;
+	onlinePaths: number;
+	retroactivePaths: number;
+	onlineDiversity: number;
+	retroactiveDiversity: number;
+	nodesExpanded: number;
 }
 
 /**
@@ -470,6 +473,64 @@ export interface BaselineComparisonMetric {
 }
 
 /**
+ * Hub encounter order metric.
+ *
+ * Records when hub nodes are first encountered during expansion,
+ * directly evidencing the "when not whether" framing of hub deferral.
+ */
+export interface HubEncounterOrderMetric {
+	/** Dataset identifier */
+	dataset: string;
+
+	/** Algorithm method name */
+	method: string;
+
+	/** Degree threshold used for hub classification (90th percentile) */
+	hubThreshold: number;
+
+	/** Total hub nodes in the graph (degree >= threshold) */
+	totalHubs: number;
+
+	/** Total nodes expanded */
+	nodesExpanded: number;
+
+	/** Fraction of expansion complete when first hub is expanded (0-1). -1 if no hubs. */
+	firstHubFraction: number;
+
+	/** Mean fraction of expansion complete across all hub encounters */
+	meanHubFraction: number;
+
+	/** Number of hub nodes encountered during expansion */
+	hubsEncountered: number;
+}
+
+/**
+ * Ranking order comparison metric.
+ *
+ * Compares path-level rankings between MI-based methods and centrality baselines
+ * using Kendall's tau-b and geometric mean path scores.
+ */
+export interface RankingOrderComparisonMetric {
+	/** Dataset identifier */
+	dataset: string;
+
+	/** Baseline method name (e.g., "Betweenness Centrality", "PageRank") */
+	method: string;
+
+	/** Kendall's tau-b correlation with MI ranking order */
+	kendallTau: number;
+
+	/** Geometric mean path score from the baseline's node-level scores */
+	pathScore: number;
+
+	/** Mean MI from the MI-ranked paths (reference) */
+	meanMI: number;
+
+	/** Number of paths compared */
+	pathsCompared: number;
+}
+
+/**
  * Union of all metric types for internal handling
  */
 export type Metric =
@@ -505,7 +566,9 @@ export type Metric =
 	| CommunityDetectionMetric
 	| KCoreDecompositionMetric
 	| MIVariantComparisonMetric
-	| BaselineComparisonMetric;
+	| BaselineComparisonMetric
+	| RankingOrderComparisonMetric
+	| HubEncounterOrderMetric;
 
 /**
  * Metric category - groups related metrics for table generation
@@ -543,7 +606,9 @@ export type MetricCategory =
 	| "community-detection"
 	| "k-core-decomposition"
 	| "mi-variant-comparison"
-	| "ranking-method-comparison";
+	| "ranking-method-comparison"
+	| "ranking-order-comparison"
+	| "hub-encounter-order";
 
 /**
  * Typed metric record with category
