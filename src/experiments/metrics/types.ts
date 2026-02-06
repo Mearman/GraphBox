@@ -54,6 +54,17 @@ export interface RuntimePerformanceMetric {
 }
 
 /**
+ * Runtime performance metric for all methods
+ */
+export interface RuntimePerformanceAllMetric {
+	dataset: string;
+	nodes: number;
+	method: string;
+	timeMs: number;
+	nodesPerSec: number;
+}
+
+/**
  * Scalability metric across graph sizes
  */
 export interface ScalabilityMetric {
@@ -544,6 +555,7 @@ export type Metric =
 	| HubTraversalMetric
 	| PathLengthMetric
 	| RuntimePerformanceMetric
+	| RuntimePerformanceAllMetric
 	| ScalabilityMetric
 	| CrossDatasetMetric
 	| MethodRankingMetric
@@ -585,6 +597,7 @@ export type MetricCategory =
 	| "hub-avoidance"
 	| "path-lengths"
 	| "runtime-performance"
+	| "runtime-performance-all"
 	| "scalability"
 	| "cross-dataset"
 	| "method-ranking"

@@ -6,13 +6,49 @@
  */
 
 import { DegreePrioritisedExpansion } from "@graph/algorithms/traversal/degree-prioritised-expansion.js";
+import { EntropyGuidedExpansion } from "@graph/algorithms/traversal/entropy-guided-expansion.js";
+import { IntelligentDelayedTermination } from "@graph/algorithms/traversal/intelligent-delayed-termination.js";
+import { PathPreservingExpansion } from "@graph/algorithms/traversal/path-preserving-expansion.js";
+import { RetrospectiveSalienceExpansion } from "@graph/algorithms/traversal/retrospective-salience-expansion.js";
 import { BenchmarkGraphExpander } from "@graph/evaluation/__tests__/validation/common/benchmark-graph-expander.js";
 import { loadBenchmarkByIdFromUrl } from "@graph/evaluation/fixtures/index.js";
+import { CrossSeedAffinityExpansion } from "@graph/experiments/baselines/cross-seed-affinity.js";
+import { DegreeSurpriseExpansion } from "@graph/experiments/baselines/degree-surprise.js";
+import { DelayedTerminationExpansion } from "@graph/experiments/baselines/delayed-termination.js";
+import { EnsembleExpansion } from "@graph/experiments/baselines/ensemble-expansion.js";
 import { FrontierBalancedExpansion } from "@graph/experiments/baselines/frontier-balanced.js";
 import { RandomPriorityExpansion } from "@graph/experiments/baselines/random-priority.js";
 import { retroactivePathEnumeration } from "@graph/experiments/baselines/retroactive-path-enum.js";
 import { StandardBfsExpansion } from "@graph/experiments/baselines/standard-bfs.js";
 import { metrics } from "@graph/experiments/metrics/index.js";
+
+/**
+ * Create all expansion methods for a given expander and seeds.
+ * Matches the method list from salience-coverage-comparison.ts for consistency.
+ * @param expander - Graph expander providing neighbour access
+ * @param seeds - Array of seed node IDs
+ */
+const createAllMethods = (expander: BenchmarkGraphExpander, seeds: readonly string[]) => [
+	// Baselines
+	{ name: "Standard BFS", create: () => new StandardBfsExpansion(expander, seeds) },
+	{ name: "Degree-Prioritised", create: () => new DegreePrioritisedExpansion(expander, seeds) },
+	{ name: "Frontier-Balanced", create: () => new FrontierBalancedExpansion(expander, seeds) },
+	{ name: "Random Priority", create: () => new RandomPriorityExpansion(expander, seeds, 42) },
+	// Novel algorithms
+	{ name: "Entropy-Guided (EGE)", create: () => new EntropyGuidedExpansion(expander, seeds) },
+	{ name: "Path-Preserving (PPME)", create: () => new PathPreservingExpansion(expander, seeds) },
+	{ name: "Retrospective Salience (RSGE)", create: () => new RetrospectiveSalienceExpansion(expander, seeds) },
+	// Baseline variants
+	{ name: "Delayed Termination +50", create: () => new DelayedTerminationExpansion(expander, seeds, { delayIterations: 50 }) },
+	{ name: "Delayed Termination +100", create: () => new DelayedTerminationExpansion(expander, seeds, { delayIterations: 100 }) },
+	{ name: "Degree Surprise", create: () => new DegreeSurpriseExpansion(expander, seeds) },
+	{ name: "Ensemble (BFS∪DFS∪DP)", create: () => new EnsembleExpansion(expander, seeds) },
+	{ name: "Cross-Seed Affinity", create: () => new CrossSeedAffinityExpansion(expander, seeds) },
+	// Intelligent termination strategies
+	{ name: "Intelligent Delayed +50", create: () => new IntelligentDelayedTermination(expander, seeds, { delayIterations: 50 }) },
+	{ name: "Intelligent Delayed +100", create: () => new IntelligentDelayedTermination(expander, seeds, { delayIterations: 100 }) },
+];
+
 
 const DATASET_NAMES: Record<string, string> = {
 	"karate": "Karate Club",
@@ -45,15 +81,10 @@ export const runHubTraversalExperiments = async (): Promise<void> => {
 		const seeds: [string, string] = [allNodes[0], allNodes.at(-1) ?? allNodes[0]];
 
 		// Run each method
-		const methods = [
-			{ name: "Degree-Prioritised", algo: new DegreePrioritisedExpansion(expander, seeds) },
-			{ name: "Standard BFS", algo: new StandardBfsExpansion(expander, seeds) },
-			{ name: "Frontier-Balanced", algo: new FrontierBalancedExpansion(expander, seeds) },
-			{ name: "Random Priority", algo: new RandomPriorityExpansion(expander, seeds, 42) },
-		];
+		const methods = createAllMethods(expander, seeds);
 
 		for (const method of methods) {
-			const result = await method.algo.run();
+			const result = await method.create().run();
 
 			// Calculate hub traversal: % of nodes with degree > threshold that were visited
 			const threshold = 5;
@@ -97,37 +128,50 @@ export const runRuntimeExperiments = async (): Promise<void> => {
 		const allNodes = expander.getAllNodeIds();
 		const seeds: [string, string] = [allNodes[0], allNodes.at(-1) ?? allNodes[0]];
 
-		// Time DP
-		const dpStart = performance.now();
-		const dp = new DegreePrioritisedExpansion(expander, seeds);
-		const dpResult = await dp.run();
-		const dpTime = performance.now() - dpStart;
+		const allMethods = createAllMethods(expander, seeds);
 
-		// Time BFS
-		const bfsStart = performance.now();
-		const bfs = new StandardBfsExpansion(expander, seeds);
-		const bfsResult = await bfs.run();
-		const bfsTime = performance.now() - bfsStart;
+		// Collect timing data for all methods
+		const timings: Array<{ name: string; timeMs: number; nodesExpanded: number }> = [];
 
-		const dpNodesPerSec = Math.round(dpResult.sampledNodes.size / (dpTime / 1000));
-		const bfsNodesPerSec = Math.round(bfsResult.sampledNodes.size / (bfsTime / 1000));
+		for (const method of allMethods) {
+			const start = performance.now();
+			const result = await method.create().run();
+			const elapsed = performance.now() - start;
+			const nodesExpanded = result.sampledNodes.size;
 
-		metrics.record("runtime-performance", {
-			dataset: DATASET_NAMES[id] ?? id,
-			nodes: expectedNodes,
-			dpTime: Math.round(dpTime * 100) / 100,
-			bfsTime: Math.round(bfsTime * 100) / 100,
-			dpNodesPerSec,
-			bfsNodesPerSec,
-		});
+			timings.push({ name: method.name, timeMs: elapsed, nodesExpanded });
 
-		metrics.record("scalability", {
-			dataset: id,
-			nodes: expectedNodes,
-			dpTime: Math.round(dpTime * 10) / 10,
-			bfsTime: Math.round(bfsTime * 10) / 10,
-			ratio: Math.round((bfsTime / dpTime) * 100) / 100,
-		});
+			metrics.record("runtime-performance-all", {
+				dataset: DATASET_NAMES[id] ?? id,
+				nodes: expectedNodes,
+				method: method.name,
+				timeMs: Math.round(elapsed * 100) / 100,
+				nodesPerSec: Math.round(nodesExpanded / (elapsed / 1000)),
+			});
+		}
+
+		// Preserve legacy DP-vs-BFS metrics for backward compatibility
+		const dpTiming = timings.find((t) => t.name === "Degree-Prioritised");
+		const bfsTiming = timings.find((t) => t.name === "Standard BFS");
+
+		if (dpTiming && bfsTiming) {
+			metrics.record("runtime-performance", {
+				dataset: DATASET_NAMES[id] ?? id,
+				nodes: expectedNodes,
+				dpTime: Math.round(dpTiming.timeMs * 100) / 100,
+				bfsTime: Math.round(bfsTiming.timeMs * 100) / 100,
+				dpNodesPerSec: Math.round(dpTiming.nodesExpanded / (dpTiming.timeMs / 1000)),
+				bfsNodesPerSec: Math.round(bfsTiming.nodesExpanded / (bfsTiming.timeMs / 1000)),
+			});
+
+			metrics.record("scalability", {
+				dataset: id,
+				nodes: expectedNodes,
+				dpTime: Math.round(dpTiming.timeMs * 10) / 10,
+				bfsTime: Math.round(bfsTiming.timeMs * 10) / 10,
+				ratio: Math.round((bfsTiming.timeMs / dpTiming.timeMs) * 100) / 100,
+			});
+		}
 	}
 };
 
@@ -143,55 +187,31 @@ export const runPathDiversityExperiments = async (): Promise<void> => {
 	const allNodes = expander.getAllNodeIds();
 	const seeds: [string, string] = [allNodes[0], allNodes.at(-1) ?? allNodes[0]];
 
-	// Run DP
-	const dp = new DegreePrioritisedExpansion(expander, seeds);
-	const dpResult = await dp.run();
+	const allMethods = createAllMethods(expander, seeds);
 
-	// Use retroactive path enumeration for fair comparison (maxLength=5 for tractability)
-	const dpRetroPaths = await retroactivePathEnumeration(dpResult, expander, seeds, 5);
+	for (const method of allMethods) {
+		const result = await method.create().run();
 
-	// Calculate path length distribution from retroactive paths
-	const pathLengths = dpRetroPaths.paths.map((p) => p.nodes.length);
-	if (pathLengths.length > 0) {
-		const minLength = Math.min(...pathLengths);
-		const maxLength = Math.max(...pathLengths);
-		const meanLength = pathLengths.reduce((a, b) => a + b, 0) / pathLengths.length;
-		const sortedLengths = [...pathLengths].sort((a, b) => a - b);
-		const medianLength = sortedLengths[Math.floor(sortedLengths.length / 2)];
+		// Use retroactive path enumeration for fair comparison (maxLength=5 for tractability)
+		const retroPaths = await retroactivePathEnumeration(result, expander, seeds, 5);
 
-		metrics.record("path-lengths", {
-			dataset: "Les Misérables",
-			method: "Degree-Prioritised",
-			min: minLength,
-			max: maxLength,
-			mean: Math.round(meanLength * 100) / 100,
-			median: medianLength,
-		});
-	}
+		const pathLengths = retroPaths.paths.map((p) => p.nodes.length);
+		if (pathLengths.length > 0) {
+			const minLength = Math.min(...pathLengths);
+			const maxLength = Math.max(...pathLengths);
+			const meanLength = pathLengths.reduce((a, b) => a + b, 0) / pathLengths.length;
+			const sortedLengths = [...pathLengths].sort((a, b) => a - b);
+			const medianLength = sortedLengths[Math.floor(sortedLengths.length / 2)];
 
-	// Run BFS for comparison
-	const bfs = new StandardBfsExpansion(expander, seeds);
-	const bfsResult = await bfs.run();
-
-	// Use retroactive path enumeration for fair comparison (maxLength=5 for tractability)
-	const bfsRetroPaths = await retroactivePathEnumeration(bfsResult, expander, seeds, 5);
-
-	const bfsPathLengths = bfsRetroPaths.paths.map((p) => p.nodes.length);
-	if (bfsPathLengths.length > 0) {
-		const bfsMinLength = Math.min(...bfsPathLengths);
-		const bsfMaxLength = Math.max(...bfsPathLengths);
-		const bfsMeanLength = bfsPathLengths.reduce((a, b) => a + b, 0) / bfsPathLengths.length;
-		const bfsSortedLengths = [...bfsPathLengths].sort((a, b) => a - b);
-		const bfsMedianLength = bfsSortedLengths[Math.floor(bfsSortedLengths.length / 2)];
-
-		metrics.record("path-lengths", {
-			dataset: "Les Misérables",
-			method: "Standard BFS",
-			min: bfsMinLength,
-			max: bsfMaxLength,
-			mean: Math.round(bfsMeanLength * 100) / 100,
-			median: bfsMedianLength,
-		});
+			metrics.record("path-lengths", {
+				dataset: "Les Misérables",
+				method: method.name,
+				min: minLength,
+				max: maxLength,
+				mean: Math.round(meanLength * 100) / 100,
+				median: medianLength,
+			});
+		}
 	}
 };
 
@@ -223,17 +243,12 @@ export const runMethodRankingExperiments = async (): Promise<void> => {
 		return totalNodes > 0 ? allNodes.size / totalNodes : 0;
 	};
 
-	const methods = [
-		{ name: "Degree-Prioritised (Thesis)", algo: new DegreePrioritisedExpansion(expander, seeds) },
-		{ name: "Random Priority", algo: new RandomPriorityExpansion(expander, seeds, 42) },
-		{ name: "Standard BFS", algo: new StandardBfsExpansion(expander, seeds) },
-		{ name: "Frontier-Balanced", algo: new FrontierBalancedExpansion(expander, seeds) },
-	];
+	const allMethods = createAllMethods(expander, seeds);
 
 	const rankings: Array<{ method: string; diversity: number; paths: number; onlinePaths: number }> = [];
 
-	for (const method of methods) {
-		const result = await method.algo.run();
+	for (const method of allMethods) {
+		const result = await method.create().run();
 
 		// Use retroactive path enumeration for fair comparison (maxLength=5 for tractability)
 		const retroactivePaths = await retroactivePathEnumeration(result, expander, seeds, 5);
@@ -296,18 +311,19 @@ export const runCrossDatasetExperiments = async (): Promise<void> => {
 		const allNodes = expander.getAllNodeIds();
 		const seeds: [string, string] = [allNodes[0], allNodes.at(-1) ?? allNodes[0]];
 
-		const methods = [
-			{ name: "Degree-Prioritised", algo: new DegreePrioritisedExpansion(expander, seeds) },
-			{ name: "Standard BFS", algo: new StandardBfsExpansion(expander, seeds) },
-			{ name: "Frontier-Balanced", algo: new FrontierBalancedExpansion(expander, seeds) },
-			{ name: "Random Priority", algo: new RandomPriorityExpansion(expander, seeds, 42) },
-		];
+		const allMethods = createAllMethods(expander, seeds);
 
-		for (const method of methods) {
-			const result = await method.algo.run();
+		for (const method of allMethods) {
+			const result = await method.create().run();
 			const retroPaths = await retroactivePathEnumeration(result, expander, seeds, 5);
 			const retroDiversity = calculateDiversity(retroPaths.paths);
 			const onlineDiversity = calculateDiversity(result.paths);
+
+			// Extract nodesExpanded from stats, handling different result types
+			const nodesExpanded =
+				"nodesExpanded" in result.stats
+					? (result.stats as { nodesExpanded: number }).nodesExpanded
+					: result.sampledNodes.size;
 
 			metrics.record("cross-dataset", {
 				dataset: dataset.name,
@@ -317,7 +333,7 @@ export const runCrossDatasetExperiments = async (): Promise<void> => {
 				retroactivePaths: retroPaths.paths.length,
 				onlineDiversity: Math.round(onlineDiversity * 1000) / 1000,
 				retroactiveDiversity: Math.round(retroDiversity * 1000) / 1000,
-				nodesExpanded: result.stats.nodesExpanded,
+				nodesExpanded,
 			});
 		}
 	}

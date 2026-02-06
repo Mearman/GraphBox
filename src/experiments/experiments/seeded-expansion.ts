@@ -8,8 +8,16 @@
  */
 
 import { DegreePrioritisedExpansion } from "@graph/algorithms/traversal/degree-prioritised-expansion.js";
+import { EntropyGuidedExpansion } from "@graph/algorithms/traversal/entropy-guided-expansion.js";
+import { IntelligentDelayedTermination } from "@graph/algorithms/traversal/intelligent-delayed-termination.js";
+import { PathPreservingExpansion } from "@graph/algorithms/traversal/path-preserving-expansion.js";
+import { RetrospectiveSalienceExpansion } from "@graph/algorithms/traversal/retrospective-salience-expansion.js";
 import { BenchmarkGraphExpander } from "@graph/evaluation/__tests__/validation/common/benchmark-graph-expander.js";
 import { loadBenchmarkByIdFromUrl } from "@graph/evaluation/fixtures/index.js";
+import { CrossSeedAffinityExpansion } from "@graph/experiments/baselines/cross-seed-affinity.js";
+import { DegreeSurpriseExpansion } from "@graph/experiments/baselines/degree-surprise.js";
+import { DelayedTerminationExpansion } from "@graph/experiments/baselines/delayed-termination.js";
+import { EnsembleExpansion } from "@graph/experiments/baselines/ensemble-expansion.js";
 import { FrontierBalancedExpansion } from "@graph/experiments/baselines/frontier-balanced.js";
 import { RandomPriorityExpansion } from "@graph/experiments/baselines/random-priority.js";
 import { retroactivePathEnumeration } from "@graph/experiments/baselines/retroactive-path-enum.js";
@@ -19,6 +27,60 @@ import {
 	extractDegrees,
 } from "@graph/experiments/metrics/degree-distribution-jsd.js";
 import { metrics } from "@graph/experiments/metrics/index.js";
+
+/**
+ * Create all expansion methods for a given expander and seeds.
+ * Matches the method list from salience-coverage-comparison.ts for consistency.
+ * @param expander - Graph expander providing neighbour access
+ * @param seeds - Array of seed node IDs
+ */
+const createAllMethods = (expander: BenchmarkGraphExpander, seeds: readonly string[]) => [
+	// Baselines
+	{ name: "Standard BFS", create: () => new StandardBfsExpansion(expander, seeds) },
+	{ name: "Degree-Prioritised", create: () => new DegreePrioritisedExpansion(expander, seeds) },
+	{ name: "Frontier-Balanced", create: () => new FrontierBalancedExpansion(expander, seeds) },
+	{ name: "Random Priority", create: () => new RandomPriorityExpansion(expander, seeds, 42) },
+	// Novel algorithms
+	{ name: "Entropy-Guided (EGE)", create: () => new EntropyGuidedExpansion(expander, seeds) },
+	{ name: "Path-Preserving (PPME)", create: () => new PathPreservingExpansion(expander, seeds) },
+	{ name: "Retrospective Salience (RSGE)", create: () => new RetrospectiveSalienceExpansion(expander, seeds) },
+	// Baseline variants
+	{ name: "Delayed Termination +50", create: () => new DelayedTerminationExpansion(expander, seeds, { delayIterations: 50 }) },
+	{ name: "Delayed Termination +100", create: () => new DelayedTerminationExpansion(expander, seeds, { delayIterations: 100 }) },
+	{ name: "Degree Surprise", create: () => new DegreeSurpriseExpansion(expander, seeds) },
+	{ name: "Ensemble (BFS∪DFS∪DP)", create: () => new EnsembleExpansion(expander, seeds) },
+	{ name: "Cross-Seed Affinity", create: () => new CrossSeedAffinityExpansion(expander, seeds) },
+	// Intelligent termination strategies
+	{ name: "Intelligent Delayed +50", create: () => new IntelligentDelayedTermination(expander, seeds, { delayIterations: 50 }) },
+	{ name: "Intelligent Delayed +100", create: () => new IntelligentDelayedTermination(expander, seeds, { delayIterations: 100 }) },
+];
+
+/**
+ * Create all expansion methods with hub threshold support.
+ * @param expander - Graph expander providing neighbour access
+ * @param seeds - Array of seed node IDs
+ * @param hubThreshold - Degree threshold for hub tracking
+ */
+const createAllMethodsWithHubThreshold = (expander: BenchmarkGraphExpander, seeds: readonly string[], hubThreshold: number) => [
+	// Core baselines (support hubThreshold)
+	{ name: "Standard BFS", create: () => new StandardBfsExpansion(expander, seeds, undefined, hubThreshold) },
+	{ name: "Degree-Prioritised", create: () => new DegreePrioritisedExpansion(expander, seeds, undefined, hubThreshold) },
+	{ name: "Frontier-Balanced", create: () => new FrontierBalancedExpansion(expander, seeds, undefined, hubThreshold) },
+	{ name: "Random Priority", create: () => new RandomPriorityExpansion(expander, seeds, 42, undefined, hubThreshold) },
+	// Novel algorithms (no hubThreshold parameter)
+	{ name: "Entropy-Guided (EGE)", create: () => new EntropyGuidedExpansion(expander, seeds) },
+	{ name: "Path-Preserving (PPME)", create: () => new PathPreservingExpansion(expander, seeds) },
+	{ name: "Retrospective Salience (RSGE)", create: () => new RetrospectiveSalienceExpansion(expander, seeds) },
+	// Baseline variants (no hubThreshold parameter)
+	{ name: "Delayed Termination +50", create: () => new DelayedTerminationExpansion(expander, seeds, { delayIterations: 50 }) },
+	{ name: "Delayed Termination +100", create: () => new DelayedTerminationExpansion(expander, seeds, { delayIterations: 100 }) },
+	{ name: "Degree Surprise", create: () => new DegreeSurpriseExpansion(expander, seeds) },
+	{ name: "Ensemble (BFS∪DFS∪DP)", create: () => new EnsembleExpansion(expander, seeds) },
+	{ name: "Cross-Seed Affinity", create: () => new CrossSeedAffinityExpansion(expander, seeds) },
+	// Intelligent termination strategies (no hubThreshold parameter)
+	{ name: "Intelligent Delayed +50", create: () => new IntelligentDelayedTermination(expander, seeds, { delayIterations: 50 }) },
+	{ name: "Intelligent Delayed +100", create: () => new IntelligentDelayedTermination(expander, seeds, { delayIterations: 100 }) },
+];
 
 /**
  * Run N-seed comparison experiments.
@@ -189,15 +251,10 @@ export const runN2HubTraversalExperiments = async (): Promise<void> => {
 	const allDegrees = allNodes.map((id) => expander.getDegree(id)).sort((a, b) => b - a);
 	const hubThreshold = allDegrees[Math.floor(allDegrees.length * 0.2)] || 5;
 
-	const methods = [
-		{ name: "Degree-Prioritised", algo: new DegreePrioritisedExpansion(expander, seeds) },
-		{ name: "Standard BFS", algo: new StandardBfsExpansion(expander, seeds) },
-		{ name: "Frontier-Balanced", algo: new FrontierBalancedExpansion(expander, seeds) },
-		{ name: "Random Priority", algo: new RandomPriorityExpansion(expander, seeds, 42) },
-	];
+	const allMethods = createAllMethods(expander, seeds);
 
-	for (const method of methods) {
-		const result = await method.algo.run();
+	for (const method of allMethods) {
+		const result = await method.create().run();
 
 		// Count hubs in sampled nodes
 		const sampledHubs = [...result.sampledNodes].filter(
@@ -244,15 +301,10 @@ export const runN2PathDiversityExperiments = async (): Promise<void> => {
 		return totalNodes > 0 ? allNodes.size / totalNodes : 0;
 	};
 
-	const methods = [
-		{ name: "Degree-Prioritised", algo: new DegreePrioritisedExpansion(expander, seeds) },
-		{ name: "Standard BFS", algo: new StandardBfsExpansion(expander, seeds) },
-		{ name: "Frontier-Balanced", algo: new FrontierBalancedExpansion(expander, seeds) },
-		{ name: "Random Priority", algo: new RandomPriorityExpansion(expander, seeds, 42) },
-	];
+	const allMethods = createAllMethods(expander, seeds);
 
-	for (const method of methods) {
-		const result = await method.algo.run();
+	for (const method of allMethods) {
+		const result = await method.create().run();
 
 		// Use retroactive path enumeration for fair diversity comparison
 		const retroactivePaths = await retroactivePathEnumeration(result, expander, seeds, 5);
@@ -427,22 +479,25 @@ export const runHubEncounterOrderExperiments = async (): Promise<void> => {
 		// Count total hubs in the graph
 		const totalHubs = allNodes.filter((id) => expander.getDegree(id) >= hubThreshold).length;
 
-		const methods = [
-			{ name: "Degree-Prioritised", create: () => new DegreePrioritisedExpansion(expander, seeds, undefined, hubThreshold) },
-			{ name: "Standard BFS", create: () => new StandardBfsExpansion(expander, seeds, undefined, hubThreshold) },
-			{ name: "Frontier-Balanced", create: () => new FrontierBalancedExpansion(expander, seeds, undefined, hubThreshold) },
-			{ name: "Random Priority", create: () => new RandomPriorityExpansion(expander, seeds, 42, undefined, hubThreshold) },
-		];
+		const allMethods = createAllMethodsWithHubThreshold(expander, seeds, hubThreshold);
 
-		for (const method of methods) {
+		for (const method of allMethods) {
 			const algo = method.create();
 			const result = await algo.run();
 
-			const stats = result.stats as {
-				nodesExpanded: number;
-				firstHubEncounterFraction?: number;
-				meanHubEncounterFraction?: number;
-			};
+			const stats = result.stats as unknown as Record<string, unknown>;
+			const nodesExpanded =
+				"nodesExpanded" in stats
+					? (stats.nodesExpanded as number)
+					: result.sampledNodes.size;
+			const firstHubEncounterFraction =
+				"firstHubEncounterFraction" in stats
+					? (stats.firstHubEncounterFraction as number)
+					: -1;
+			const meanHubEncounterFraction =
+				"meanHubEncounterFraction" in stats
+					? (stats.meanHubEncounterFraction as number)
+					: -1;
 			const hubEncounterOrder = (result as { hubEncounterOrder?: Map<string, number> }).hubEncounterOrder;
 
 			metrics.record("hub-encounter-order", {
@@ -450,9 +505,9 @@ export const runHubEncounterOrderExperiments = async (): Promise<void> => {
 				method: method.name,
 				hubThreshold,
 				totalHubs,
-				nodesExpanded: stats.nodesExpanded,
-				firstHubFraction: Math.round((stats.firstHubEncounterFraction ?? -1) * 10_000) / 10_000,
-				meanHubFraction: Math.round((stats.meanHubEncounterFraction ?? -1) * 10_000) / 10_000,
+				nodesExpanded,
+				firstHubFraction: Math.round((firstHubEncounterFraction ?? -1) * 10_000) / 10_000,
+				meanHubFraction: Math.round((meanHubEncounterFraction ?? -1) * 10_000) / 10_000,
 				hubsEncountered: hubEncounterOrder?.size ?? 0,
 			});
 		}
