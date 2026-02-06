@@ -5,6 +5,9 @@
  * Reads test-metrics.json and writes per-category CSV files
  * to Thesis/src/data/ for consumption by LaTeX pgfplotstable.
  *
+ * Outputs clean UTF-8 CSV — no LaTeX escaping. LuaLaTeX/XeTeX
+ * with Tectonic handles UTF-8 natively.
+ *
  * Usage:
  *   npx tsx scripts/export-csv.ts
  */
@@ -21,53 +24,19 @@ const metricsPath = path.join(projectRoot, "src/test-metrics.json");
 const outputDir = path.resolve(projectRoot, "../Thesis/src/data");
 
 /**
- * LaTeX-escape a string value for pgfplotstable consumption.
- * Handles special characters that appear in dataset/method names.
- */
-/**
- * Exact-match display name mappings for kebab-case identifiers.
- * Applied after LaTeX character escaping.
- */
-const displayNames: Record<string, string> = {
-	"Les Misérables": String.raw`Les Mis\'erables`,
-	"Erdős-Rényi": String.raw`Erd\H{o}s-R\'enyi`,
-	"erdos-renyi": String.raw`Erd\H{o}s-R\'enyi`,
-	"Barabási-Albert": String.raw`Barab\'asi-Albert`,
-	"barabasi-albert": String.raw`Barab\'asi-Albert`,
-	"watts-strogatz": "Watts-Strogatz",
-	"real-world": "Real-world (OpenAlex)",
-	"karate": "Karate Club",
-	"lesmis": String.raw`Les Mis\'erables`,
-	"cora": "Cora",
-	"facebook": "Facebook",
-	"path-salience": "MI Ranking (Primary)",
-	"degree-sum": "Degree-sum",
-	"jaccard-arithmetic": "Jaccard-arithmetic",
-	"pagerank-sum": "PageRank-sum",
-	"random": "Random",
-	"shortest-path": "Shortest-path",
-	"Ensemble (BFS∪DFS∪DP)": String.raw`Ensemble (BFS$\cup$DFS$\cup$DP)`,
-};
-
-const latexEscape = (value: string): string =>
-	displayNames[value] ?? value;
-
-/**
  * Format a single cell value for CSV output.
- * - null/undefined → empty string
- * - strings → LaTeX-escaped, quoted if containing commas
- * - numbers → as-is
+ * - null/undefined -> empty string
+ * - strings -> quoted if containing commas/quotes/newlines
+ * - numbers -> as-is
  * @param value
  */
 const formatCell = (value: unknown): string => {
 	if (value === null || value === undefined) return "";
 	if (typeof value === "string") {
-		const escaped = latexEscape(value);
-		// Quote if contains comma, quote, or newline
-		if (escaped.includes(",") || escaped.includes('"') || escaped.includes("\n")) {
-			return `"${escaped.replaceAll('"', '""')}"`;
+		if (value.includes(",") || value.includes('"') || value.includes("\n")) {
+			return `"${value.replaceAll('"', '""')}"`;
 		}
-		return escaped;
+		return value;
 	}
 	return String(value);
 };
@@ -81,7 +50,6 @@ const formatCell = (value: unknown): string => {
 const toCSV = (records: Array<Record<string, unknown>>): string => {
 	if (records.length === 0) return "";
 
-	// Collect all field names preserving first-record order
 	const fieldSet = new Set<string>();
 	for (const record of records) {
 		for (const key of Object.keys(record)) {
@@ -98,6 +66,33 @@ const toCSV = (records: Array<Record<string, unknown>>): string => {
 	return [header, ...rows].join("\n") + "\n";
 };
 
+/**
+ * Split records by a field value and write per-group CSV files.
+ * @param entries
+ * @param splitField
+ * @param filenamePrefix
+ */
+const splitAndWrite = (
+	entries: Array<Record<string, unknown>>,
+	splitField: string,
+	filenamePrefix: string,
+): void => {
+	const groups: Record<string, Array<Record<string, unknown>>> = {};
+	for (const entry of entries) {
+		const key = String((entry)[splitField] ?? "unknown");
+		groups[key] ??= [];
+		groups[key].push(entry);
+	}
+
+	for (const [groupKey, groupEntries] of Object.entries(groups)) {
+		const filename = `${filenamePrefix}-${groupKey}.csv`;
+		const csv = toCSV(groupEntries);
+		writeFileSync(path.join(outputDir, filename), csv, "utf-8");
+		fileCount++;
+		console.log(`  ${filename} (${groupEntries.length} rows)`);
+	}
+};
+
 // ---------------------------------------------------------------------------
 // Main
 // ---------------------------------------------------------------------------
@@ -109,7 +104,6 @@ if (!metrics) {
 	process.exit(1);
 }
 
-// Ensure output directory exists
 if (!existsSync(outputDir)) {
 	mkdirSync(outputDir, { recursive: true });
 }
@@ -119,56 +113,55 @@ let fileCount = 0;
 for (const [category, entries] of Object.entries(metrics.metrics)) {
 	if (!entries || entries.length === 0) continue;
 
-	// Special case: salience-coverage-comparison splits by dataset
-	// Pre-multiply salienceCoverage by 100 so LaTeX can display it directly
-	// (avoids pgfplotstable `multiply with` which conflicts with global `string type`)
-	// Budget-constrained salience coverage: split by dataset (matching unbounded pattern)
-	if (category === "salience-coverage-budget") {
-		const byDataset: Record<string, Array<Record<string, unknown>>> = {};
-		for (const entry of entries) {
-			const record = { ...(entry as unknown as Record<string, unknown>) };
+	const records = entries as unknown as Array<Record<string, unknown>>;
+
+	// Salience coverage: split by dataset, multiply coverage by 100
+	if (category === "salience-coverage-comparison" || category === "salience-coverage-budget") {
+		const adjusted = records.map((entry) => {
+			const record = { ...entry };
 			if (typeof record.salienceCoverage === "number") {
 				record.salienceCoverage = Math.round(record.salienceCoverage * 100);
 			}
-			const dataset = String(record.dataset ?? "unknown");
-			byDataset[dataset] ??= [];
-			byDataset[dataset].push(record);
-		}
-
-		for (const [dataset, datasetEntries] of Object.entries(byDataset)) {
-			const filename = `salience-coverage-budget-${dataset}.csv`;
-			const csv = toCSV(datasetEntries);
-			writeFileSync(path.join(outputDir, filename), csv, "utf-8");
-			fileCount++;
-			console.log(`  ${filename} (${datasetEntries.length} rows)`);
-		}
+			return record;
+		});
+		const prefix = category === "salience-coverage-budget"
+			? "salience-coverage-budget"
+			: "salience-coverage";
+		splitAndWrite(adjusted, "dataset", prefix);
 		continue;
 	}
 
-	if (category === "salience-coverage-comparison") {
-		const byDataset: Record<string, Array<Record<string, unknown>>> = {};
-		for (const entry of entries) {
-			const record = { ...(entry as unknown as Record<string, unknown>) };
-			if (typeof record.salienceCoverage === "number") {
-				record.salienceCoverage = Math.round(record.salienceCoverage * 100);
-			}
-			const dataset = String(record.dataset ?? "unknown");
-			byDataset[dataset] ??= [];
-			byDataset[dataset].push(record);
-		}
+	// Ranking method comparison: split by graphCategory
+	if (category === "ranking-method-comparison") {
+		// Write consolidated file
+		const filename = `${category}.csv`;
+		const csv = toCSV(records);
+		writeFileSync(path.join(outputDir, filename), csv, "utf-8");
+		fileCount++;
+		console.log(`  ${filename} (${records.length} rows)`);
 
-		for (const [dataset, datasetEntries] of Object.entries(byDataset)) {
-			const filename = `salience-coverage-${dataset}.csv`;
-			const csv = toCSV(datasetEntries);
-			writeFileSync(path.join(outputDir, filename), csv, "utf-8");
-			fileCount++;
-			console.log(`  ${filename} (${datasetEntries.length} rows)`);
-		}
+		// Write per-category files
+		splitAndWrite(records, "graphCategory", "ranking-method-comparison");
 		continue;
 	}
 
+	// Ranking order comparison: split by graphCategory
+	if (category === "ranking-order-comparison") {
+		// Write consolidated file
+		const filename = `${category}.csv`;
+		const csv = toCSV(records);
+		writeFileSync(path.join(outputDir, filename), csv, "utf-8");
+		fileCount++;
+		console.log(`  ${filename} (${records.length} rows)`);
+
+		// Write per-category files
+		splitAndWrite(records, "graphCategory", "ranking-order-comparison");
+		continue;
+	}
+
+	// Default: single file per category
 	const filename = `${category}.csv`;
-	const csv = toCSV(entries as unknown as Array<Record<string, unknown>>);
+	const csv = toCSV(records);
 	writeFileSync(path.join(outputDir, filename), csv, "utf-8");
 	fileCount++;
 	console.log(`  ${filename} (${entries.length} rows)`);
