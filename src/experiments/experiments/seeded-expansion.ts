@@ -393,6 +393,68 @@ export const runStructuralRepresentativenessExperiments = async (): Promise<void
 };
 
 /**
+ * Run hub encounter order experiments.
+ *
+ * Records when hub nodes (degree >= 90th percentile) are first expanded
+ * by each method, directly evidencing the "when not whether" framing.
+ * Generates hub-encounter-order.csv for thesis tables.
+ */
+export const runHubEncounterOrderExperiments = async (): Promise<void> => {
+	const datasets = [
+		{ id: "karate", name: "Karate Club" },
+		{ id: "lesmis", name: "Les Misérables" },
+		{ id: "cora", name: "Cora" },
+		{ id: "facebook", name: "Facebook" },
+	];
+
+	for (const dataset of datasets) {
+		const benchmark = await loadBenchmarkByIdFromUrl(dataset.id);
+		const graph = benchmark.graph;
+		const expander = new BenchmarkGraphExpander(graph, benchmark.meta.directed);
+		const allNodes = expander.getAllNodeIds();
+		const seeds: [string, string] = [allNodes[0], allNodes.at(-1) ?? allNodes[0]];
+
+		// Compute 90th percentile degree as hub threshold
+		const allDegrees = allNodes.map((id) => expander.getDegree(id)).sort((a, b) => a - b);
+		const p90Index = Math.floor(allDegrees.length * 0.9);
+		const hubThreshold = allDegrees[p90Index] || 1;
+
+		// Count total hubs in the graph
+		const totalHubs = allNodes.filter((id) => expander.getDegree(id) >= hubThreshold).length;
+
+		const methods = [
+			{ name: "Degree-Prioritised", create: () => new DegreePrioritisedExpansion(expander, seeds, undefined, hubThreshold) },
+			{ name: "Standard BFS", create: () => new StandardBfsExpansion(expander, seeds, undefined, hubThreshold) },
+			{ name: "Frontier-Balanced", create: () => new FrontierBalancedExpansion(expander, seeds, undefined, hubThreshold) },
+			{ name: "Random Priority", create: () => new RandomPriorityExpansion(expander, seeds, 42, undefined, hubThreshold) },
+		];
+
+		for (const method of methods) {
+			const algo = method.create();
+			const result = await algo.run();
+
+			const stats = result.stats as {
+				nodesExpanded: number;
+				firstHubEncounterFraction?: number;
+				meanHubEncounterFraction?: number;
+			};
+			const hubEncounterOrder = (result as { hubEncounterOrder?: Map<string, number> }).hubEncounterOrder;
+
+			metrics.record("hub-encounter-order", {
+				dataset: dataset.name,
+				method: method.name,
+				hubThreshold,
+				totalHubs,
+				nodesExpanded: stats.nodesExpanded,
+				firstHubFraction: Math.round((stats.firstHubEncounterFraction ?? -1) * 10_000) / 10_000,
+				meanHubFraction: Math.round((stats.meanHubEncounterFraction ?? -1) * 10_000) / 10_000,
+				hubsEncountered: hubEncounterOrder?.size ?? 0,
+			});
+		}
+	}
+};
+
+/**
  * Run all seeded expansion experiments.
  */
 export const runSeededExpansionExperiments = async (): Promise<void> => {
@@ -412,6 +474,9 @@ export const runSeededExpansionExperiments = async (): Promise<void> => {
 
 	await runStructuralRepresentativenessExperiments();
 	console.log("  ✓ Structural representativeness experiments complete");
+
+	await runHubEncounterOrderExperiments();
+	console.log("  ✓ Hub encounter order experiments complete");
 
 	console.log("Seeded Expansion experiments complete!");
 };
