@@ -198,6 +198,42 @@ const getTestCases = (): TestCase[] => [
 		topK: 20,
 	},
 	{
+		name: "cit-hepth",
+		getGraph: async () => {
+			const benchmark = await loadBenchmarkByIdFromUrl("cit-hepth");
+			return { graph: benchmark.graph, directed: benchmark.meta.directed };
+		},
+		seeds: ["9711083", "9903207"],
+		topK: 20,
+	},
+	{
+		name: "ca-astroph",
+		getGraph: async () => {
+			const benchmark = await loadBenchmarkByIdFromUrl("ca-astroph");
+			return { graph: benchmark.graph, directed: benchmark.meta.directed };
+		},
+		seeds: ["34890", "8744"],
+		topK: 20,
+	},
+	{
+		name: "ca-condmat",
+		getGraph: async () => {
+			const benchmark = await loadBenchmarkByIdFromUrl("ca-condmat");
+			return { graph: benchmark.graph, directed: benchmark.meta.directed };
+		},
+		seeds: ["12648", "27230"],
+		topK: 20,
+	},
+	{
+		name: "ca-hepph",
+		getGraph: async () => {
+			const benchmark = await loadBenchmarkByIdFromUrl("ca-hepph");
+			return { graph: benchmark.graph, directed: benchmark.meta.directed };
+		},
+		seeds: ["50500", "82081"],
+		topK: 20,
+	},
+	{
 		name: "facebook",
 		getGraph: async () => {
 			const benchmark = await loadBenchmarkByIdFromUrl("facebook");
@@ -446,7 +482,7 @@ export const runBudgetConstrainedExperiments = async (): Promise<void> => {
 
 	// Only run on graphs large enough for budget constraints to matter
 	const budgetTestCases = getTestCases().filter((tc) =>
-		["cora", "citeseer", "facebook"].includes(tc.name),
+		["cora", "citeseer", "cit-hepth", "ca-astroph", "ca-condmat", "ca-hepph", "facebook"].includes(tc.name),
 	);
 	const budgetFractions = [0.25, 0.5];
 
