@@ -66,6 +66,21 @@ const METHODS: MethodConfig[] = [
 ];
 
 /**
+ * Dataset→category mapping for per-category table splitting.
+ */
+const GRAPH_CATEGORIES: Record<string, string> = {
+	"Karate Club": "small",
+	"Les Misérables": "small",
+	"Cora": "citation",
+	"CiteSeer": "citation",
+	"Cit-HepTH": "citation",
+	"CA-Astroph": "collaboration",
+	"CA-CondMat": "collaboration",
+	"CA-HepPh": "collaboration",
+	"Facebook": "social",
+};
+
+/**
  * Benchmark datasets (same 9 datasets from MI variant comparison).
  */
 const DATASETS = [
@@ -134,6 +149,7 @@ const runBaselineComparisonOnDataset = async (dataset: typeof DATASETS[number]):
 				dataset: dataset.name,
 				method: method.name,
 				category: method.category,
+				graphCategory: GRAPH_CATEGORIES[dataset.name] ?? "unknown",
 				meanMI: rankingMetrics.meanMI,
 				nodeCoverage: Math.round(rankingMetrics.nodeCoverage * 10_000) / 10_000,
 				pathDiversity: Math.round(rankingMetrics.pathDiversity * 10_000) / 10_000,
@@ -146,6 +162,7 @@ const runBaselineComparisonOnDataset = async (dataset: typeof DATASETS[number]):
 				dataset: dataset.name,
 				method: method.name,
 				category: method.category,
+				graphCategory: GRAPH_CATEGORIES[dataset.name] ?? "unknown",
 				meanMI: 0,
 				nodeCoverage: 0,
 				pathDiversity: 0,
@@ -231,6 +248,7 @@ const runRankingOrderComparisonOnDataset = async (dataset: typeof DATASETS[numbe
 		metrics.record("ranking-order-comparison", {
 			dataset: dataset.name,
 			method: baseline.name,
+			graphCategory: GRAPH_CATEGORIES[dataset.name] ?? "unknown",
 			kendallTau: Math.round(tau * 10_000) / 10_000,
 			pathScore: Math.round(meanPathScore * 10_000) / 10_000,
 			meanMI: Math.round(miMean * 10_000) / 10_000,

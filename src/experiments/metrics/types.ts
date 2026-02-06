@@ -456,6 +456,9 @@ export interface BaselineComparisonMetric {
 	/** Method category: "ours" for MI variants, "baseline" for established methods */
 	category: "ours" | "baseline";
 
+	/** Graph category for per-category table splitting (e.g., "small", "citation", "collaboration", "social") */
+	graphCategory: string;
+
 	/** Mean MI score across paths */
 	meanMI: number;
 
@@ -516,6 +519,9 @@ export interface RankingOrderComparisonMetric {
 
 	/** Baseline method name (e.g., "Betweenness Centrality", "PageRank") */
 	method: string;
+
+	/** Graph category for per-category table splitting (e.g., "small", "citation", "collaboration", "social") */
+	graphCategory: string;
 
 	/** Kendall's tau-b correlation with MI ranking order */
 	kendallTau: number;
