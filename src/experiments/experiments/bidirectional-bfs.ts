@@ -240,12 +240,16 @@ export const runMethodRankingExperiments = async (): Promise<void> => {
 /**
  * Run cross-dataset diversity experiments.
  *
- * Compares DP vs BFS across multiple datasets.
+ * Compares all 4 methods across multiple datasets, recording both online and
+ * retroactive path counts. This resolves the online paths contradiction between
+ * method-ranking (per-graph) and cross-dataset-generalisation (aggregated) data.
  */
 export const runCrossDatasetExperiments = async (): Promise<void> => {
 	const datasets = [
 		{ id: "karate", name: "Karate Club", nodes: 34 },
 		{ id: "lesmis", name: "Les Misérables", nodes: 77 },
+		{ id: "cora", name: "Cora", nodes: 2708 },
+		{ id: "facebook", name: "Facebook", nodes: 4039 },
 	];
 
 	const calculateDiversity = (paths: Array<{ nodes: string[] }>): number => {
@@ -269,33 +273,30 @@ export const runCrossDatasetExperiments = async (): Promise<void> => {
 		const allNodes = expander.getAllNodeIds();
 		const seeds: [string, string] = [allNodes[0], allNodes.at(-1) ?? allNodes[0]];
 
-		const dp = new DegreePrioritisedExpansion(expander, seeds);
-		const dpResult = await dp.run();
+		const methods = [
+			{ name: "Degree-Prioritised", algo: new DegreePrioritisedExpansion(expander, seeds) },
+			{ name: "Standard BFS", algo: new StandardBfsExpansion(expander, seeds) },
+			{ name: "Frontier-Balanced", algo: new FrontierBalancedExpansion(expander, seeds) },
+			{ name: "Random Priority", algo: new RandomPriorityExpansion(expander, seeds, 42) },
+		];
 
-		// Use retroactive path enumeration for fair comparison
-		const dpRetroPaths = await retroactivePathEnumeration(dpResult, expander, seeds, 5);
-		const dpDiversity = calculateDiversity(dpRetroPaths.paths);
+		for (const method of methods) {
+			const result = await method.algo.run();
+			const retroPaths = await retroactivePathEnumeration(result, expander, seeds, 5);
+			const retroDiversity = calculateDiversity(retroPaths.paths);
+			const onlineDiversity = calculateDiversity(result.paths);
 
-		const bfs = new StandardBfsExpansion(expander, seeds);
-		const bfsResult = await bfs.run();
-
-		// Use retroactive path enumeration for fair comparison
-		const bfsRetroPaths = await retroactivePathEnumeration(bfsResult, expander, seeds, 5);
-		const bfsDiversity = calculateDiversity(bfsRetroPaths.paths);
-
-		const improvement = bfsDiversity > 0
-			? ((dpDiversity - bfsDiversity) / bfsDiversity) * 100
-			: 0;
-
-		metrics.record("cross-dataset", {
-			dataset: dataset.name,
-			nodes: dataset.nodes,
-			dpDiversity: Math.round(dpDiversity * 1000) / 1000,
-			bfsDiversity: Math.round(bfsDiversity * 1000) / 1000,
-			improvement: Math.round(improvement * 10) / 10,
-			dpPaths: dpRetroPaths.paths.length,
-			bfsPaths: bfsRetroPaths.paths.length,
-		});
+			metrics.record("cross-dataset", {
+				dataset: dataset.name,
+				nodes: dataset.nodes,
+				method: method.name,
+				onlinePaths: result.paths.length,
+				retroactivePaths: retroPaths.paths.length,
+				onlineDiversity: Math.round(onlineDiversity * 1000) / 1000,
+				retroactiveDiversity: Math.round(retroDiversity * 1000) / 1000,
+				nodesExpanded: result.stats.nodesExpanded,
+			});
+		}
 	}
 };
 
