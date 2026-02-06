@@ -55,7 +55,7 @@ export interface PageRankRankingConfig {
  * @param damping - Damping factor (probability of following a link)
  * @param maxIterations - Maximum number of iterations
  */
-const computePageRank = <N extends Node, E extends Edge>(
+export const computePageRank = <N extends Node, E extends Edge>(
 	graph: Graph<N, E>,
 	damping: number,
 	maxIterations: number,

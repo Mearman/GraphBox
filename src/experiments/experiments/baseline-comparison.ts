@@ -12,16 +12,20 @@
  * established methods, not just narrow margin vs random.
  */
 
+import type { Graph } from "@graph/algorithms/graph/graph.js";
 import { rankPaths } from "@graph/algorithms/pathfinding/path-ranking.js";
+import type { Edge, Node } from "@graph/algorithms/types/graph.js";
 import { computeRankingMetrics } from "@graph/evaluation/__tests__/validation/common/path-ranking-helpers.js";
 import { loadBenchmarkByIdFromUrl } from "@graph/evaluation/fixtures/index.js";
-import { betweennessRanking } from "@graph/experiments/baselines/betweenness-ranking.js";
+import { betweennessRanking, computeBetweennessCentrality } from "@graph/experiments/baselines/betweenness-ranking.js";
 import { degreeSumRanking } from "@graph/experiments/baselines/degree-sum-ranking.js";
-import { pageRankSumRanking } from "@graph/experiments/baselines/pagerank-sum-ranking.js";
+import { computePageRank, pageRankSumRanking } from "@graph/experiments/baselines/pagerank-sum-ranking.js";
 import { randomPathRanking } from "@graph/experiments/baselines/random-path-ranking.js";
 import { shortestPathRanking } from "@graph/experiments/baselines/shortest-path-ranking.js";
 import { metrics } from "@graph/experiments/metrics/index.js";
-import type { BaselineComparisonMetric } from "@graph/experiments/metrics/types.js";
+import { kendallTauB } from "@graph/experiments/metrics/kendall-tau.js";
+import { geometricMeanPathScore } from "@graph/experiments/metrics/path-level-scoring.js";
+import type { BaselineComparisonMetric, RankingOrderComparisonMetric } from "@graph/experiments/metrics/types.js";
 
 /**
  * Method configuration for ranking algorithms.
@@ -153,6 +157,89 @@ const runBaselineComparisonOnDataset = async (dataset: typeof DATASETS[number]):
 };
 
 /**
+ * Centrality baselines for ranking order comparison.
+ * Each entry specifies how to compute node-level scores for a baseline.
+ */
+const CENTRALITY_BASELINES: Array<{
+	name: string;
+	computeScores: <N extends Node, E extends Edge>(graph: Graph<N, E>) => Map<string, number>;
+}> = [
+	{
+		name: "Betweenness Centrality",
+		computeScores: (graph) => computeBetweennessCentrality(graph, "undirected"),
+	},
+	{
+		name: "PageRank",
+		computeScores: (graph) => computePageRank(graph, 0.85, 100),
+	},
+	{
+		name: "Degree Sum",
+		computeScores: (graph) => {
+			const scores = new Map<string, number>();
+			for (const node of graph.getAllNodes()) {
+				const neighbours = graph.getNeighbors(node.id);
+				scores.set(node.id, neighbours.ok ? neighbours.value.length : 0);
+			}
+			return scores;
+		},
+	},
+];
+
+/**
+ * Run ranking order comparison on a single dataset.
+ *
+ * Computes MI-ranked paths, then scores the SAME paths using each
+ * centrality baseline's geometric mean. Records Kendall's tau-b
+ * between MI ranking order and each baseline's ranking order.
+ * @param dataset
+ */
+const runRankingOrderComparisonOnDataset = async (dataset: typeof DATASETS[number]): Promise<void> => {
+	const benchmark = await loadBenchmarkByIdFromUrl(dataset.id);
+	const graph = benchmark.graph;
+
+	// Get MI-ranked paths (Jaccard MI as reference)
+	const miResult = rankPaths(graph, dataset.source, dataset.target, {
+		maxPaths: dataset.maxPaths,
+		miConfig: {},
+	});
+
+	if (!miResult.ok || !miResult.value.some || miResult.value.value.length < 2) {
+		return;
+	}
+
+	const miPaths = miResult.value.value;
+	const miScores = miPaths.map((p) => p.geometricMeanMI);
+	const miMean = miScores.reduce((a, b) => a + b, 0) / miScores.length;
+
+	// Extract node IDs for each path (used for geometric mean scoring)
+	const pathNodeIds = miPaths.map((p) => p.path.nodes.map((n) => n.id));
+
+	for (const baseline of CENTRALITY_BASELINES) {
+		const nodeScores = baseline.computeScores(graph);
+
+		// Score each MI-ranked path using baseline's geometric mean
+		const baselineScores = pathNodeIds.map(
+			(nodes) => geometricMeanPathScore(nodeScores, nodes),
+		);
+
+		// Mean geometric mean path score for this baseline
+		const meanPathScore = baselineScores.reduce((a, b) => a + b, 0) / baselineScores.length;
+
+		// Kendall's tau-b between MI scores and baseline scores
+		const tau = kendallTauB(miScores, baselineScores);
+
+		metrics.record("ranking-order-comparison", {
+			dataset: dataset.name,
+			method: baseline.name,
+			kendallTau: Math.round(tau * 10_000) / 10_000,
+			pathScore: Math.round(meanPathScore * 10_000) / 10_000,
+			meanMI: Math.round(miMean * 10_000) / 10_000,
+			pathsCompared: miPaths.length,
+		} satisfies RankingOrderComparisonMetric);
+	}
+};
+
+/**
  * Run all baseline comparison experiments.
  *
  * Generates data for thesis table comparing all methods against established baselines.
@@ -163,6 +250,13 @@ export const runBaselineComparison = async (): Promise<void> => {
 	for (const dataset of DATASETS) {
 		await runBaselineComparisonOnDataset(dataset);
 		console.log(`  ✓ ${dataset.name} complete`);
+	}
+
+	console.log("Running Ranking Order Comparison experiments...");
+
+	for (const dataset of DATASETS) {
+		await runRankingOrderComparisonOnDataset(dataset);
+		console.log(`  ✓ ${dataset.name} ranking order complete`);
 	}
 
 	console.log("Baseline Comparison experiments complete!");
@@ -229,3 +323,8 @@ export const printBaselineSummary = async (): Promise<void> => {
 		}
 	}
 };
+
+// Run experiments if this file is executed directly
+if (import.meta.url === `file://${process.argv[1]}`) {
+	runBaselineComparison().catch(console.error);
+}

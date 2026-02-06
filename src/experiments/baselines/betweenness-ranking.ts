@@ -43,7 +43,7 @@ export interface BetweennessConfig {
  * @param graph
  * @param traversalMode
  */
-const computeBetweennessCentrality = <N extends Node, E extends Edge>(
+export const computeBetweennessCentrality = <N extends Node, E extends Edge>(
 	graph: Graph<N, E>,
 	traversalMode: "directed" | "undirected",
 ): Map<string, number> => {
