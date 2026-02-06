@@ -24,6 +24,9 @@ export interface StandardBfsResult {
 	 * Used for computing coverage efficiency metrics.
 	 */
 	nodeDiscoveryIteration: Map<string, number>;
+
+	/** Maps hub node IDs to the expansion step when first expanded. Hub = degree >= hubThreshold */
+	hubEncounterOrder: Map<string, number>;
 }
 
 /**
@@ -41,6 +44,12 @@ export interface BfsExpansionStats {
 
 	/** Breakdown of nodes by degree ranges */
 	degreeDistribution: Map<string, number>;
+
+	/** Fraction of total expansion complete when first hub is expanded (0-1). -1 if no hubs. */
+	firstHubEncounterFraction: number;
+
+	/** Mean fraction of expansion complete across all hub encounters */
+	meanHubEncounterFraction: number;
 }
 
 /**
@@ -86,17 +95,23 @@ export class StandardBfsExpansion<T> {
 	private stats: BfsExpansionStats;
 	/** Tracks when each node was first discovered (iteration number) */
 	private readonly nodeDiscoveryIteration = new Map<string, number>();
+	/** Maps hub node IDs to the expansion step when first expanded */
+	private readonly hubEncounterOrder = new Map<string, number>();
 
 	/**
 	 * Create a new standard BFS expansion.
 	 *
 	 * @param expander - Graph expander providing neighbour access
 	 * @param seeds - Array of seed node IDs (N >= 1)
+	 * @param maxNodes - Optional maximum nodes to expand
+	 * @param hubThreshold - Degree threshold for hub tracking (default: Infinity = no tracking)
 	 * @throws Error if no seeds provided
 	 */
 	constructor(
 		private readonly expander: GraphExpander<T>,
-		private readonly seeds: readonly string[]
+		private readonly seeds: readonly string[],
+		private readonly maxNodes?: number,
+		private readonly hubThreshold: number = Infinity
 	) {
 		if (seeds.length === 0) {
 			throw new Error("At least one seed node is required");
@@ -120,6 +135,8 @@ export class StandardBfsExpansion<T> {
 			edgesTraversed: 0,
 			iterations: 0,
 			degreeDistribution: new Map(),
+			firstHubEncounterFraction: -1,
+			meanHubEncounterFraction: -1,
 		};
 	}
 
@@ -148,7 +165,12 @@ export class StandardBfsExpansion<T> {
 			if (!node) continue;
 
 			this.stats.nodesExpanded++;
-			this.recordDegree(this.expander.getDegree(node));
+			if (this.maxNodes !== undefined && this.stats.nodesExpanded >= this.maxNodes) break;
+			const degree = this.expander.getDegree(node);
+			this.recordDegree(degree);
+			if (degree >= this.hubThreshold && !this.hubEncounterOrder.has(node)) {
+				this.hubEncounterOrder.set(node, this.stats.nodesExpanded);
+			}
 
 			// Expand this node's neighbours
 			const neighbors = await this.expander.getNeighbors(node);
@@ -195,6 +217,16 @@ export class StandardBfsExpansion<T> {
 			}
 		}
 
+		// Compute hub encounter summary stats
+		const hubEntries = [...this.hubEncounterOrder.values()];
+		const totalExpansions = this.stats.nodesExpanded;
+		this.stats.firstHubEncounterFraction = hubEntries.length > 0
+			? Math.min(...hubEntries) / totalExpansions
+			: -1;
+		this.stats.meanHubEncounterFraction = hubEntries.length > 0
+			? hubEntries.reduce((a, b) => a + b, 0) / hubEntries.length / totalExpansions
+			: -1;
+
 		// Compute union of all visited sets
 		const sampledNodes = new Set<string>();
 		const visitedPerFrontier: Array<Set<string>> = [];
@@ -212,6 +244,7 @@ export class StandardBfsExpansion<T> {
 			visitedPerFrontier,
 			stats: this.stats,
 			nodeDiscoveryIteration: this.nodeDiscoveryIteration,
+			hubEncounterOrder: this.hubEncounterOrder,
 		};
 	}
 
