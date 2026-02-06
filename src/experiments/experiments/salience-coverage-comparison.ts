@@ -476,39 +476,33 @@ export const runBudgetConstrainedExperiments = async (): Promise<void> => {
 				`\n   Budget: ${(fraction * 100).toFixed(0)}% = ${nodeBudget} nodes`,
 			);
 
-			// Only use the 4 core methods (indices 0-3 in createMethods)
-			const allMethods = createMethods(expander, testCase.seeds);
-			const coreMethods = allMethods.slice(0, 4); // BFS, DP, FB, Random
+			// Create each algorithm with maxNodes for true early stopping
+			const coreMethods = [
+				{
+					name: "Standard BFS",
+					create: () => new StandardBfsExpansion(expander, testCase.seeds, nodeBudget),
+				},
+				{
+					name: "Degree-Prioritised",
+					create: () => new DegreePrioritisedExpansion(expander, testCase.seeds, nodeBudget),
+				},
+				{
+					name: "Frontier-Balanced",
+					create: () => new FrontierBalancedExpansion(expander, testCase.seeds, nodeBudget),
+				},
+				{
+					name: "Random Priority",
+					create: () => new RandomPriorityExpansion(expander, testCase.seeds, 42, nodeBudget),
+				},
+			];
 
 			for (const method of coreMethods) {
 				try {
 					const algo = method.create();
 					const expansionResult = await algo.run();
 
-					// Truncate sampled nodes to budget
-					const sampledNodesArray = [...expansionResult.sampledNodes];
-					const budgetNodes = new Set(
-						sampledNodesArray.slice(0, nodeBudget),
-					);
-
-					// Retroactive path enumeration on budget-constrained subgraph
-					const budgetResult = {
-						...expansionResult,
-						sampledNodes: budgetNodes,
-						sampledEdges: new Set(
-							[...expansionResult.sampledEdges].filter((edge) => {
-								const parts = edge.split("->");
-								return (
-									parts.length === 2 &&
-									budgetNodes.has(parts[0]) &&
-									budgetNodes.has(parts[1])
-								);
-							}),
-						),
-					};
-
 					const enumResult = await retroactivePathEnumeration(
-						budgetResult,
+						expansionResult,
 						expander,
 						testCase.seeds,
 						7,
@@ -519,8 +513,8 @@ export const runBudgetConstrainedExperiments = async (): Promise<void> => {
 						groundTruth,
 					);
 
-					// Compute JSD
-					const sampledDegrees = extractDegrees(graph, budgetNodes);
+					// Compute JSD between budget-constrained sample and full graph
+					const sampledDegrees = extractDegrees(graph, expansionResult.sampledNodes);
 					const jsd = degreeDistributionJSD(
 						sampledDegrees,
 						fullGraphDegrees,
@@ -537,12 +531,12 @@ export const runBudgetConstrainedExperiments = async (): Promise<void> => {
 						topKFound: coverage["top-k-found"],
 						topKTotal: coverage["top-k-total"],
 						pathsDiscovered: enumResult.paths.length,
-						nodesUsed: budgetNodes.size,
+						nodesUsed: expansionResult.sampledNodes.size,
 						degreeDistributionJSD: Math.round(jsd * 10_000) / 10_000,
 					});
 
 					console.log(
-						`      ${method.name.padEnd(25)} Coverage: ${(coverage["salience-coverage"] * 100).toFixed(1)}% | JSD: ${jsd.toFixed(4)} | Paths: ${enumResult.paths.length}`,
+						`      ${method.name.padEnd(25)} Coverage: ${(coverage["salience-coverage"] * 100).toFixed(1)}% | JSD: ${jsd.toFixed(4)} | Paths: ${enumResult.paths.length} | Nodes: ${expansionResult.sampledNodes.size}/${nodeBudget}`,
 					);
 				} catch (error) {
 					console.error(
