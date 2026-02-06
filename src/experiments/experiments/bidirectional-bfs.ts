@@ -14,6 +14,18 @@ import { retroactivePathEnumeration } from "@graph/experiments/baselines/retroac
 import { StandardBfsExpansion } from "@graph/experiments/baselines/standard-bfs.js";
 import { metrics } from "@graph/experiments/metrics/index.js";
 
+const DATASET_NAMES: Record<string, string> = {
+	"karate": "Karate Club",
+	"lesmis": "Les Misérables",
+	"cora": "Cora",
+	"citeseer": "CiteSeer",
+	"cit-hepth": "Cit-HepTH",
+	"ca-astroph": "CA-Astroph",
+	"ca-condmat": "CA-CondMat",
+	"ca-hepph": "CA-HepPh",
+	"facebook": "Facebook",
+};
+
 /**
  * Run hub traversal experiments on scale-free graphs.
  *
@@ -21,7 +33,7 @@ import { metrics } from "@graph/experiments/metrics/index.js";
  * during path finding. Degree-prioritised expansion should avoid hubs.
  */
 export const runHubTraversalExperiments = async (): Promise<void> => {
-	const datasets = ["karate", "lesmis"];
+	const datasets = ["karate", "lesmis", "cora", "citeseer", "cit-hepth", "ca-astroph", "ca-condmat", "ca-hepph", "facebook"];
 
 	for (const datasetId of datasets) {
 		const benchmark = await loadBenchmarkByIdFromUrl(datasetId);
@@ -69,6 +81,12 @@ export const runRuntimeExperiments = async (): Promise<void> => {
 	const datasets = [
 		{ id: "karate", expectedNodes: 34 },
 		{ id: "lesmis", expectedNodes: 77 },
+		{ id: "cora", expectedNodes: 2708 },
+		{ id: "citeseer", expectedNodes: 3312 },
+		{ id: "cit-hepth", expectedNodes: 27_770 },
+		{ id: "ca-astroph", expectedNodes: 18_772 },
+		{ id: "ca-condmat", expectedNodes: 23_133 },
+		{ id: "ca-hepph", expectedNodes: 12_008 },
 		{ id: "facebook", expectedNodes: 4039 },
 	];
 
@@ -95,7 +113,7 @@ export const runRuntimeExperiments = async (): Promise<void> => {
 		const bfsNodesPerSec = Math.round(bfsResult.sampledNodes.size / (bfsTime / 1000));
 
 		metrics.record("runtime-performance", {
-			dataset: id === "karate" ? "Karate Club" : (id === "lesmis" ? "Les Misérables" : "Facebook"),
+			dataset: DATASET_NAMES[id] ?? id,
 			nodes: expectedNodes,
 			dpTime: Math.round(dpTime * 100) / 100,
 			bfsTime: Math.round(bfsTime * 100) / 100,
@@ -249,6 +267,11 @@ export const runCrossDatasetExperiments = async (): Promise<void> => {
 		{ id: "karate", name: "Karate Club", nodes: 34 },
 		{ id: "lesmis", name: "Les Misérables", nodes: 77 },
 		{ id: "cora", name: "Cora", nodes: 2708 },
+		{ id: "citeseer", name: "CiteSeer", nodes: 3312 },
+		{ id: "cit-hepth", name: "Cit-HepTH", nodes: 27_770 },
+		{ id: "ca-astroph", name: "CA-Astroph", nodes: 18_772 },
+		{ id: "ca-condmat", name: "CA-CondMat", nodes: 23_133 },
+		{ id: "ca-hepph", name: "CA-HepPh", nodes: 12_008 },
 		{ id: "facebook", name: "Facebook", nodes: 4039 },
 	];
 

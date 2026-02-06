@@ -404,6 +404,11 @@ export const runHubEncounterOrderExperiments = async (): Promise<void> => {
 		{ id: "karate", name: "Karate Club" },
 		{ id: "lesmis", name: "Les Misérables" },
 		{ id: "cora", name: "Cora" },
+		{ id: "citeseer", name: "CiteSeer" },
+		{ id: "cit-hepth", name: "Cit-HepTH" },
+		{ id: "ca-astroph", name: "CA-Astroph" },
+		{ id: "ca-condmat", name: "CA-CondMat" },
+		{ id: "ca-hepph", name: "CA-HepPh" },
 		{ id: "facebook", name: "Facebook" },
 	];
 
