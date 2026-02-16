@@ -9,6 +9,7 @@
  * - Vertex lines: id "label" [x y z] [attributes...]
  * - *Edges: Undirected edges section
  * - *Arcs: Directed arcs section
+ * - *2Mode N: Bipartite (two-mode) edges — first N vertices are mode 1
  * - Edge/Arc lines: source target [weight]
  */
 
@@ -18,7 +19,7 @@ import type { PajekDocument, PajekEdge, PajekVertex } from "./types";
 /**
  * Parse state machine states.
  */
-type ParseState = "initial" | "vertices" | "edges" | "arcs";
+type ParseState = "initial" | "vertices" | "edges" | "arcs" | "matrix";
 
 /**
  * Parse a Pajek .net format string into a structured document.
@@ -30,6 +31,8 @@ export const parsePajek = (content: string): PajekDocument => {
 	const lines = content.split(/\r?\n/);
 
 	let vertexCount = 0;
+	let mode1Count = 0; // bipartite: first N vertices are mode-1
+	let matrixRow = 0; // current row index during *matrix parsing
 	const vertices: PajekVertex[] = [];
 	const edges: PajekEdge[] = [];
 	const arcs: PajekEdge[] = [];
@@ -48,10 +51,14 @@ export const parsePajek = (content: string): PajekDocument => {
 		const lowerLine = trimmed.toLowerCase();
 
 		if (lowerLine.startsWith("*vertices")) {
-			// Extract vertex count
-			const match = trimmed.match(/\*vertices\s+(\d+)/i);
+			// Extract vertex count and optional mode-1 count
+			// Format: *Vertices N [M] where M = mode-1 count for bipartite
+			const match = trimmed.match(/\*vertices\s+(\d+)(?:\s+(\d+))?/i);
 			if (match) {
 				vertexCount = Number.parseInt(match[1], 10);
+				if (match[2] !== undefined) {
+					mode1Count = Number.parseInt(match[2], 10);
+				}
 			}
 			state = "vertices";
 			continue;
@@ -67,7 +74,24 @@ export const parsePajek = (content: string): PajekDocument => {
 			continue;
 		}
 
-		// Skip other section headers we don't handle
+		// Bipartite (two-mode) networks: *2Mode N declares edges between
+		// two vertex partitions. Data lines use the same format as *Edges.
+		if (lowerLine.startsWith("*2mode")) {
+			state = "edges";
+			continue;
+		}
+
+		// Adjacency matrix: *Matrix section where each row i has values
+		// for connections. For bipartite graphs with mode1Count > 0,
+		// row i (1-indexed) maps to mode-1 vertex i, and column j maps
+		// to mode-2 vertex (mode1Count + j).
+		if (lowerLine.startsWith("*matrix")) {
+			state = "matrix";
+			matrixRow = 0;
+			continue;
+		}
+
+		// Skip other section headers we don't handle (e.g. *net, *partition)
 		if (lowerLine.startsWith("*")) {
 			state = "initial";
 			continue;
@@ -93,6 +117,26 @@ export const parsePajek = (content: string): PajekDocument => {
 				const arc = parseEdge(trimmed);
 				if (arc) {
 					arcs.push(arc);
+				}
+				break;
+			}
+			case "matrix": {
+				matrixRow++;
+				const values = trimmed.split(/\s+/);
+				for (const [col, value] of values.entries()) {
+					const val = Number.parseFloat(value);
+					if (val !== 0 && !Number.isNaN(val)) {
+						// For bipartite: row→mode-1 vertex, col→mode-2 vertex
+						const source = matrixRow;
+						const target = mode1Count > 0
+							? mode1Count + col + 1
+							: col + 1;
+						const edge: PajekEdge = { source, target };
+						if (val !== 1) {
+							edge.weight = val;
+						}
+						edges.push(edge);
+					}
 				}
 				break;
 			}

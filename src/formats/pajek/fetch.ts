@@ -1,7 +1,9 @@
 /**
  * Pajek Dataset Fetcher - Download and convert Pajek datasets in memory.
  *
- * Handles .net files, optionally compressed as .zip or .gz.
+ * Handles .net and .paj files, optionally compressed as .zip or .gz.
+ * The .paj (Pajek project) format uses the same syntax as .net with
+ * additional sections (*Network, *Partition, *Vector) that the parser skips.
  *
  * @example CLI usage:
  * ```bash
@@ -72,13 +74,15 @@ export const fetchPajekDataset = async (
 		const zipData = new Uint8Array(arrayBuffer);
 		const unzipped = unzipSync(zipData);
 
-		// Find the .net file in the archive
+		// Find the .net or .paj file in the archive
 		const netFile = Object.keys(unzipped).find(
-			(name) => name.toLowerCase().endsWith(".net") && !name.startsWith("__MACOSX")
+			(name) =>
+				(name.toLowerCase().endsWith(".net") || name.toLowerCase().endsWith(".paj")) &&
+				!name.startsWith("__MACOSX"),
 		);
 
 		if (!netFile) {
-			throw new Error("No .net file found in ZIP archive");
+			throw new Error("No .net or .paj file found in ZIP archive");
 		}
 
 		const netData = unzipped[netFile];
@@ -100,7 +104,7 @@ export const fetchPajekDataset = async (
 		const urlPath = new URL(url).pathname;
 		filename = urlPath.split("/").pop()?.replace(/\.gz$/i, "") ?? "network.net";
 	} else {
-		// Plain .net file
+		// Plain .net or .paj file
 		const decoder = new TextDecoder("utf-8");
 		content = decoder.decode(arrayBuffer);
 		contentSize = arrayBuffer.byteLength;
