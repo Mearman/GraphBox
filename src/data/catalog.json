@@ -1,6 +1,6 @@
 {
-	"version": "1.0.0",
-	"generated": "2026-02-16T11:36:38.474Z",
+	"version": "2.0.0",
+	"generated": "2026-02-16T11:36:50.234Z",
 	"sources": {
 		"newman": {
 			"name": "Mark Newman's Network Data",
@@ -51,8 +51,6 @@
 			"id": "adjnoun",
 			"name": "Word Adjacencies",
 			"description": "Adjacency network of common adjectives and nouns in the novel David Copperfield by Charles Dickens. Nodes represent words and edges connect words that appear adjacent to each other. The 'value' property indicates word type: 0 for adjective, 1 for noun.",
-			"source": "newman",
-			"url": "https://websites.umich.edu/~mejn/netdata/adjnoun.zip",
 			"citation": {
 				"authors": [
 					"M. E. J. Newman"
@@ -73,14 +71,23 @@
 			"weighted": false,
 			"hasNodeAttributes": true,
 			"hasEdgeAttributes": false,
-			"labeled": true
+			"labeled": true,
+			"sources": [
+				{
+					"source": "newman",
+					"downloads": [
+						{
+							"url": "https://websites.umich.edu/~mejn/netdata/adjnoun.zip",
+							"format": "gml"
+						}
+					]
+				}
+			]
 		},
 		"amazon0302": {
 			"id": "amazon0302",
 			"name": "Amazon Co-Purchasing Mar 2003",
 			"description": "Amazon product co-purchasing network from March 2 2003.",
-			"source": "snap",
-			"url": "https://snap.stanford.edu/data/amazon0302.txt.gz",
 			"citation": {
 				"authors": [
 					"J. Leskovec",
@@ -100,14 +107,23 @@
 			"weighted": false,
 			"hasNodeAttributes": false,
 			"hasEdgeAttributes": false,
-			"labeled": false
+			"labeled": false,
+			"sources": [
+				{
+					"source": "snap",
+					"downloads": [
+						{
+							"url": "https://snap.stanford.edu/data/amazon0302.txt.gz",
+							"format": "various"
+						}
+					]
+				}
+			]
 		},
 		"arenas-celegans-metabolic": {
 			"id": "arenas-celegans-metabolic",
 			"name": "C. elegans Metabolic Network",
 			"description": "Metabolic network of the nematode C. elegans.",
-			"source": "arenas",
-			"url": "http://deim.urv.cat/~aarenas/data/xarxes/celegans_metabolic.zip",
 			"citation": {
 				"authors": [
 					"J. Duch",
@@ -128,14 +144,23 @@
 			"weighted": true,
 			"hasNodeAttributes": false,
 			"hasEdgeAttributes": true,
-			"labeled": true
+			"labeled": true,
+			"sources": [
+				{
+					"source": "arenas",
+					"downloads": [
+						{
+							"url": "http://deim.urv.cat/~aarenas/data/xarxes/celegans_metabolic.zip",
+							"format": "various"
+						}
+					]
+				}
+			]
 		},
 		"arenas-email": {
 			"id": "arenas-email",
 			"name": "Email Network URV",
 			"description": "E-mail interchanges between members of the University Rovira i Virgili (Tarragona).",
-			"source": "arenas",
-			"url": "http://deim.urv.cat/~aarenas/data/xarxes/email.zip",
 			"citation": {
 				"authors": [
 					"R. Guimera",
@@ -159,14 +184,23 @@
 			"weighted": true,
 			"hasNodeAttributes": false,
 			"hasEdgeAttributes": true,
-			"labeled": false
+			"labeled": false,
+			"sources": [
+				{
+					"source": "arenas",
+					"downloads": [
+						{
+							"url": "http://deim.urv.cat/~aarenas/data/xarxes/email.zip",
+							"format": "various"
+						}
+					]
+				}
+			]
 		},
 		"arenas-jazz": {
 			"id": "arenas-jazz",
 			"name": "Jazz Musicians Network",
 			"description": "Collaboration network of jazz musicians. Nodes are musicians and edges represent playing together in a band.",
-			"source": "arenas",
-			"url": "http://deim.urv.cat/~aarenas/data/xarxes/jazz.zip",
 			"citation": {
 				"authors": [
 					"P. Gleiser",
@@ -187,14 +221,23 @@
 			"weighted": true,
 			"hasNodeAttributes": false,
 			"hasEdgeAttributes": true,
-			"labeled": true
+			"labeled": true,
+			"sources": [
+				{
+					"source": "arenas",
+					"downloads": [
+						{
+							"url": "http://deim.urv.cat/~aarenas/data/xarxes/jazz.zip",
+							"format": "various"
+						}
+					]
+				}
+			]
 		},
 		"arenas-pgp": {
 			"id": "arenas-pgp",
 			"name": "PGP Network",
 			"description": "Giant component of the network of users of the Pretty-Good-Privacy algorithm for secure information interchange.",
-			"source": "arenas",
-			"url": "http://deim.urv.cat/~aarenas/data/xarxes/PGP.zip",
 			"citation": {
 				"authors": [
 					"M. Boguña",
@@ -217,14 +260,23 @@
 			"weighted": true,
 			"hasNodeAttributes": false,
 			"hasEdgeAttributes": true,
-			"labeled": true
+			"labeled": true,
+			"sources": [
+				{
+					"source": "arenas",
+					"downloads": [
+						{
+							"url": "http://deim.urv.cat/~aarenas/data/xarxes/PGP.zip",
+							"format": "various"
+						}
+					]
+				}
+			]
 		},
 		"astro-ph": {
 			"id": "astro-ph",
 			"name": "Astrophysics Collaborations",
 			"description": "Weighted network of coauthorships between scientists posting preprints on the Astrophysics E-Print Archive between Jan 1, 1995 and December 31, 1999.",
-			"source": "newman",
-			"url": "https://websites.umich.edu/~mejn/netdata/astro-ph.zip",
 			"citation": {
 				"authors": [
 					"M. E. J. Newman"
@@ -245,14 +297,23 @@
 			"weighted": true,
 			"hasNodeAttributes": false,
 			"hasEdgeAttributes": true,
-			"labeled": true
+			"labeled": true,
+			"sources": [
+				{
+					"source": "newman",
+					"downloads": [
+						{
+							"url": "https://websites.umich.edu/~mejn/netdata/astro-ph.zip",
+							"format": "gml"
+						}
+					]
+				}
+			]
 		},
 		"barabasi-actor": {
 			"id": "barabasi-actor",
 			"name": "Actor Collaboration Network",
 			"description": "Collaboration network of film actors from IMDB. Nodes are actors, edges connect actors who appeared in the same movie.",
-			"source": "barabasi",
-			"url": "http://www.nd.edu/~networks/resources/actor/actor.dat.gz",
 			"citation": {
 				"authors": [
 					"A.-L. Barabási",
@@ -273,14 +334,23 @@
 			"weighted": true,
 			"hasNodeAttributes": false,
 			"hasEdgeAttributes": true,
-			"labeled": false
+			"labeled": false,
+			"sources": [
+				{
+					"source": "barabasi",
+					"downloads": [
+						{
+							"url": "http://www.nd.edu/~networks/resources/actor/actor.dat.gz",
+							"format": "various"
+						}
+					]
+				}
+			]
 		},
 		"barabasi-protein-yeast": {
 			"id": "barabasi-protein-yeast",
 			"name": "Yeast Protein Interaction Network",
 			"description": "Protein-protein interaction network for Saccharomyces cerevisiae (yeast).",
-			"source": "barabasi",
-			"url": "http://www.nd.edu/~networks/resources/protein/bo.dat.gz",
 			"citation": {
 				"authors": [
 					"H. Jeong",
@@ -303,14 +373,23 @@
 			"weighted": false,
 			"hasNodeAttributes": false,
 			"hasEdgeAttributes": false,
-			"labeled": false
+			"labeled": false,
+			"sources": [
+				{
+					"source": "barabasi",
+					"downloads": [
+						{
+							"url": "http://www.nd.edu/~networks/resources/protein/bo.dat.gz",
+							"format": "various"
+						}
+					]
+				}
+			]
 		},
 		"barabasi-www": {
 			"id": "barabasi-www",
 			"name": "World-Wide-Web",
 			"description": "Hyperlink network of web pages from a 1999 crawl of the nd.edu domain.",
-			"source": "barabasi",
-			"url": "http://www.nd.edu/~networks/resources/www/www.dat.gz",
 			"citation": {
 				"authors": [
 					"R. Albert",
@@ -332,14 +411,23 @@
 			"weighted": false,
 			"hasNodeAttributes": false,
 			"hasEdgeAttributes": false,
-			"labeled": false
+			"labeled": false,
+			"sources": [
+				{
+					"source": "barabasi",
+					"downloads": [
+						{
+							"url": "http://www.nd.edu/~networks/resources/www/www.dat.gz",
+							"format": "various"
+						}
+					]
+				}
+			]
 		},
 		"ca-astroph": {
 			"id": "ca-astroph",
 			"name": "Arxiv Astro Physics Collaborations",
 			"description": "Collaboration network of Arxiv Astro Physics category.",
-			"source": "snap",
-			"url": "https://snap.stanford.edu/data/ca-AstroPh.txt.gz",
 			"citation": {
 				"authors": [
 					"J. Leskovec",
@@ -359,14 +447,23 @@
 			"weighted": false,
 			"hasNodeAttributes": false,
 			"hasEdgeAttributes": false,
-			"labeled": false
+			"labeled": false,
+			"sources": [
+				{
+					"source": "snap",
+					"downloads": [
+						{
+							"url": "https://snap.stanford.edu/data/ca-AstroPh.txt.gz",
+							"format": "various"
+						}
+					]
+				}
+			]
 		},
 		"ca-condmat": {
 			"id": "ca-condmat",
 			"name": "Arxiv Condensed Matter Collaborations",
 			"description": "Collaboration network of Arxiv Condensed Matter category.",
-			"source": "snap",
-			"url": "https://snap.stanford.edu/data/ca-CondMat.txt.gz",
 			"citation": {
 				"authors": [
 					"J. Leskovec",
@@ -386,14 +483,23 @@
 			"weighted": false,
 			"hasNodeAttributes": false,
 			"hasEdgeAttributes": false,
-			"labeled": false
+			"labeled": false,
+			"sources": [
+				{
+					"source": "snap",
+					"downloads": [
+						{
+							"url": "https://snap.stanford.edu/data/ca-CondMat.txt.gz",
+							"format": "various"
+						}
+					]
+				}
+			]
 		},
 		"ca-grqc": {
 			"id": "ca-grqc",
 			"name": "Arxiv General Relativity Collaborations",
 			"description": "Collaboration network of Arxiv General Relativity category.",
-			"source": "snap",
-			"url": "https://snap.stanford.edu/data/ca-GrQc.txt.gz",
 			"citation": {
 				"authors": [
 					"J. Leskovec",
@@ -413,14 +519,23 @@
 			"weighted": false,
 			"hasNodeAttributes": false,
 			"hasEdgeAttributes": false,
-			"labeled": false
+			"labeled": false,
+			"sources": [
+				{
+					"source": "snap",
+					"downloads": [
+						{
+							"url": "https://snap.stanford.edu/data/ca-GrQc.txt.gz",
+							"format": "various"
+						}
+					]
+				}
+			]
 		},
 		"ca-hepph": {
 			"id": "ca-hepph",
 			"name": "Arxiv High Energy Physics Collaborations",
 			"description": "Collaboration network of Arxiv High Energy Physics category.",
-			"source": "snap",
-			"url": "https://snap.stanford.edu/data/ca-HepPh.txt.gz",
 			"citation": {
 				"authors": [
 					"J. Leskovec",
@@ -440,14 +555,23 @@
 			"weighted": false,
 			"hasNodeAttributes": false,
 			"hasEdgeAttributes": false,
-			"labeled": false
+			"labeled": false,
+			"sources": [
+				{
+					"source": "snap",
+					"downloads": [
+						{
+							"url": "https://snap.stanford.edu/data/ca-HepPh.txt.gz",
+							"format": "various"
+						}
+					]
+				}
+			]
 		},
 		"ca-hepth": {
 			"id": "ca-hepth",
 			"name": "Arxiv High Energy Physics Theory Collaborations",
 			"description": "Collaboration network of Arxiv High Energy Physics Theory category.",
-			"source": "snap",
-			"url": "https://snap.stanford.edu/data/ca-HepTh.txt.gz",
 			"citation": {
 				"authors": [
 					"J. Leskovec",
@@ -467,14 +591,23 @@
 			"weighted": false,
 			"hasNodeAttributes": false,
 			"hasEdgeAttributes": false,
-			"labeled": false
+			"labeled": false,
+			"sources": [
+				{
+					"source": "snap",
+					"downloads": [
+						{
+							"url": "https://snap.stanford.edu/data/ca-HepTh.txt.gz",
+							"format": "various"
+						}
+					]
+				}
+			]
 		},
 		"celegans": {
 			"id": "celegans",
 			"name": "C. Elegans Neural Network",
 			"description": "Directed, weighted network representing the neural network of the nematode C. Elegans. Nodes are neurons and edges represent synaptic connections.",
-			"source": "newman",
-			"url": "https://websites.umich.edu/~mejn/netdata/celegansneural.zip",
 			"citation": {
 				"authors": [
 					"D. J. Watts",
@@ -496,14 +629,23 @@
 			"weighted": true,
 			"hasNodeAttributes": false,
 			"hasEdgeAttributes": true,
-			"labeled": false
+			"labeled": false,
+			"sources": [
+				{
+					"source": "newman",
+					"downloads": [
+						{
+							"url": "https://websites.umich.edu/~mejn/netdata/celegansneural.zip",
+							"format": "gml"
+						}
+					]
+				}
+			]
 		},
 		"cit-hepph": {
 			"id": "cit-hepph",
 			"name": "HEP-PH Citation Network",
 			"description": "Arxiv High Energy Physics paper citation network.",
-			"source": "snap",
-			"url": "https://snap.stanford.edu/data/cit-HepPh.txt.gz",
 			"citation": {
 				"authors": [
 					"J. Leskovec",
@@ -523,14 +665,23 @@
 			"weighted": false,
 			"hasNodeAttributes": false,
 			"hasEdgeAttributes": false,
-			"labeled": false
+			"labeled": false,
+			"sources": [
+				{
+					"source": "snap",
+					"downloads": [
+						{
+							"url": "https://snap.stanford.edu/data/cit-HepPh.txt.gz",
+							"format": "various"
+						}
+					]
+				}
+			]
 		},
 		"cit-hepth": {
 			"id": "cit-hepth",
 			"name": "HEP-TH Citation Network",
 			"description": "Arxiv High Energy Physics Theory paper citation network.",
-			"source": "snap",
-			"url": "https://snap.stanford.edu/data/cit-HepTh.txt.gz",
 			"citation": {
 				"authors": [
 					"J. Leskovec",
@@ -550,14 +701,23 @@
 			"weighted": false,
 			"hasNodeAttributes": false,
 			"hasEdgeAttributes": false,
-			"labeled": false
+			"labeled": false,
+			"sources": [
+				{
+					"source": "snap",
+					"downloads": [
+						{
+							"url": "https://snap.stanford.edu/data/cit-HepTh.txt.gz",
+							"format": "various"
+						}
+					]
+				}
+			]
 		},
 		"cities": {
 			"id": "cities",
 			"name": "Cities and Services",
 			"description": "Two-mode network of cities and the services they provide.",
-			"source": "pajek",
-			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/2mode/cities.zip",
 			"citation": {
 				"authors": [
 					"Vladimir Batagelj",
@@ -575,14 +735,23 @@
 			"weighted": true,
 			"hasNodeAttributes": true,
 			"hasEdgeAttributes": true,
-			"labeled": false
+			"labeled": false,
+			"sources": [
+				{
+					"source": "pajek",
+					"downloads": [
+						{
+							"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/2mode/cities.zip",
+							"format": "pajek"
+						}
+					]
+				}
+			]
 		},
 		"cond-mat-2003": {
 			"id": "cond-mat-2003",
 			"name": "Condensed Matter Collaborations 2003",
 			"description": "Weighted network of coauthorships between scientists posting preprints on the Condensed Matter E-Print Archive between Jan 1, 1995 and June 30, 2003.",
-			"source": "newman",
-			"url": "https://websites.umich.edu/~mejn/netdata/cond-mat-2003.zip",
 			"citation": {
 				"authors": [
 					"M. E. J. Newman"
@@ -603,14 +772,23 @@
 			"weighted": true,
 			"hasNodeAttributes": false,
 			"hasEdgeAttributes": true,
-			"labeled": true
+			"labeled": true,
+			"sources": [
+				{
+					"source": "newman",
+					"downloads": [
+						{
+							"url": "https://websites.umich.edu/~mejn/netdata/cond-mat-2003.zip",
+							"format": "gml"
+						}
+					]
+				}
+			]
 		},
 		"cond-mat-2005": {
 			"id": "cond-mat-2005",
 			"name": "Condensed Matter Collaborations 2005",
 			"description": "Weighted network of coauthorships between scientists posting preprints on the Condensed Matter E-Print Archive between Jan 1, 1995 and March 31, 2005.",
-			"source": "newman",
-			"url": "https://websites.umich.edu/~mejn/netdata/cond-mat-2005.zip",
 			"citation": {
 				"authors": [
 					"M. E. J. Newman"
@@ -631,14 +809,23 @@
 			"weighted": true,
 			"hasNodeAttributes": false,
 			"hasEdgeAttributes": true,
-			"labeled": true
+			"labeled": true,
+			"sources": [
+				{
+					"source": "newman",
+					"downloads": [
+						{
+							"url": "https://websites.umich.edu/~mejn/netdata/cond-mat-2005.zip",
+							"format": "gml"
+						}
+					]
+				}
+			]
 		},
 		"cond-mat": {
 			"id": "cond-mat",
 			"name": "Condensed Matter Collaborations 1999",
 			"description": "Weighted network of coauthorships between scientists posting preprints on the Condensed Matter E-Print Archive between Jan 1, 1995 and December 31, 1999.",
-			"source": "newman",
-			"url": "https://websites.umich.edu/~mejn/netdata/cond-mat.zip",
 			"citation": {
 				"authors": [
 					"M. E. J. Newman"
@@ -659,14 +846,23 @@
 			"weighted": true,
 			"hasNodeAttributes": false,
 			"hasEdgeAttributes": true,
-			"labeled": true
+			"labeled": true,
+			"sources": [
+				{
+					"source": "newman",
+					"downloads": [
+						{
+							"url": "https://websites.umich.edu/~mejn/netdata/cond-mat.zip",
+							"format": "gml"
+						}
+					]
+				}
+			]
 		},
 		"csphd": {
 			"id": "csphd",
 			"name": "CS PhD Genealogy",
 			"description": "Computer Science PhD advisor-student relationships.",
-			"source": "pajek",
-			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/GED/CSphd.ZIP",
 			"citation": {
 				"authors": [
 					"Vladimir Batagelj",
@@ -685,12 +881,32 @@
 			"hasNodeAttributes": true,
 			"hasEdgeAttributes": true,
 			"labeled": false,
-			"alternateUrls": [
+			"sources": [
 				{
-					"url": "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/CSphd.tar.gz",
+					"source": "pajek",
+					"downloads": [
+						{
+							"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/GED/CSphd.ZIP",
+							"format": "pajek"
+						}
+					]
+				},
+				{
 					"source": "suitesparse",
-					"format": "matrix-market",
-					"description": "SuiteSparse Matrix Collection (Pajek/CSphd)"
+					"downloads": [
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/CSphd.tar.gz",
+							"format": "matrix-market"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/RB/Pajek/CSphd.tar.gz",
+							"format": "rutherford-boeing"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/mat/Pajek/CSphd.tar.gz",
+							"format": "matlab"
+						}
+					]
 				}
 			]
 		},
@@ -698,8 +914,6 @@
 			"id": "dic28",
 			"name": "Words 2-8",
 			"description": "Network of English words of length 2-8, connected if they differ by one letter.",
-			"source": "pajek",
-			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/dic/knuth/dic28.zip",
 			"citation": {
 				"authors": [
 					"Donald Knuth"
@@ -716,14 +930,23 @@
 			"weighted": true,
 			"hasNodeAttributes": false,
 			"hasEdgeAttributes": true,
-			"labeled": false
+			"labeled": false,
+			"sources": [
+				{
+					"source": "pajek",
+					"downloads": [
+						{
+							"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/dic/knuth/dic28.zip",
+							"format": "pajek"
+						}
+					]
+				}
+			]
 		},
 		"divorce": {
 			"id": "divorce",
 			"name": "Divorce in US",
 			"description": "Two-mode network of US states and grounds for divorce.",
-			"source": "pajek",
-			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/2mode/divorce.net",
 			"citation": {
 				"authors": [
 					"Vladimir Batagelj",
@@ -741,14 +964,23 @@
 			"weighted": false,
 			"hasNodeAttributes": true,
 			"hasEdgeAttributes": false,
-			"labeled": false
+			"labeled": false,
+			"sources": [
+				{
+					"source": "pajek",
+					"downloads": [
+						{
+							"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/2mode/divorce.net",
+							"format": "pajek"
+						}
+					]
+				}
+			]
 		},
 		"dolphins": {
 			"id": "dolphins",
 			"name": "Dolphin Social Network",
 			"description": "Undirected social network of frequent associations between 62 dolphins in a community living off Doubtful Sound, New Zealand.",
-			"source": "newman",
-			"url": "https://websites.umich.edu/~mejn/netdata/dolphins.zip",
 			"citation": {
 				"authors": [
 					"D. Lusseau",
@@ -774,14 +1006,23 @@
 			"weighted": false,
 			"hasNodeAttributes": false,
 			"hasEdgeAttributes": false,
-			"labeled": true
+			"labeled": true,
+			"sources": [
+				{
+					"source": "newman",
+					"downloads": [
+						{
+							"url": "https://websites.umich.edu/~mejn/netdata/dolphins.zip",
+							"format": "gml"
+						}
+					]
+				}
+			]
 		},
 		"ego-facebook": {
 			"id": "ego-facebook",
 			"name": "Facebook Social Circles",
 			"description": "Social circles from Facebook (anonymized). Nodes are users and edges are friendships.",
-			"source": "snap",
-			"url": "https://snap.stanford.edu/data/facebook_combined.txt.gz",
 			"citation": {
 				"authors": [
 					"J. McAuley",
@@ -800,14 +1041,23 @@
 			"weighted": false,
 			"hasNodeAttributes": false,
 			"hasEdgeAttributes": false,
-			"labeled": false
+			"labeled": false,
+			"sources": [
+				{
+					"source": "snap",
+					"downloads": [
+						{
+							"url": "https://snap.stanford.edu/data/facebook_combined.txt.gz",
+							"format": "various"
+						}
+					]
+				}
+			]
 		},
 		"ego-twitter": {
 			"id": "ego-twitter",
 			"name": "Twitter Social Circles",
 			"description": "Social circles from Twitter. Nodes are users and edges represent following relationships.",
-			"source": "snap",
-			"url": "https://snap.stanford.edu/data/twitter_combined.txt.gz",
 			"citation": {
 				"authors": [
 					"J. McAuley",
@@ -826,14 +1076,23 @@
 			"weighted": false,
 			"hasNodeAttributes": false,
 			"hasEdgeAttributes": false,
-			"labeled": false
+			"labeled": false,
+			"sources": [
+				{
+					"source": "snap",
+					"downloads": [
+						{
+							"url": "https://snap.stanford.edu/data/twitter_combined.txt.gz",
+							"format": "various"
+						}
+					]
+				}
+			]
 		},
 		"email-enron": {
 			"id": "email-enron",
 			"name": "Enron Email Network",
 			"description": "Email communication network from Enron.",
-			"source": "snap",
-			"url": "https://snap.stanford.edu/data/email-Enron.txt.gz",
 			"citation": {
 				"authors": [
 					"J. Leskovec",
@@ -853,14 +1112,23 @@
 			"weighted": false,
 			"hasNodeAttributes": false,
 			"hasEdgeAttributes": false,
-			"labeled": false
+			"labeled": false,
+			"sources": [
+				{
+					"source": "snap",
+					"downloads": [
+						{
+							"url": "https://snap.stanford.edu/data/email-Enron.txt.gz",
+							"format": "various"
+						}
+					]
+				}
+			]
 		},
 		"email-euall": {
 			"id": "email-euall",
 			"name": "EU Email Network",
 			"description": "Email network from a European research institution.",
-			"source": "snap",
-			"url": "https://snap.stanford.edu/data/email-EuAll.txt.gz",
 			"citation": {
 				"authors": [
 					"J. Leskovec",
@@ -880,14 +1148,23 @@
 			"weighted": false,
 			"hasNodeAttributes": false,
 			"hasEdgeAttributes": false,
-			"labeled": false
+			"labeled": false,
+			"sources": [
+				{
+					"source": "snap",
+					"downloads": [
+						{
+							"url": "https://snap.stanford.edu/data/email-EuAll.txt.gz",
+							"format": "various"
+						}
+					]
+				}
+			]
 		},
 		"erdos02": {
 			"id": "erdos02",
 			"name": "Erdos Collaboration 2002",
 			"description": "Collaboration network centered on Paul Erdos. Nodes are mathematicians who collaborated with Erdos or his collaborators.",
-			"source": "pajek",
-			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/Erdos/Erdos02.net",
 			"citation": {
 				"authors": [
 					"Vladimir Batagelj",
@@ -906,12 +1183,32 @@
 			"hasNodeAttributes": true,
 			"hasEdgeAttributes": true,
 			"labeled": false,
-			"alternateUrls": [
+			"sources": [
 				{
-					"url": "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/Erdos02.tar.gz",
+					"source": "pajek",
+					"downloads": [
+						{
+							"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/Erdos/Erdos02.net",
+							"format": "pajek"
+						}
+					]
+				},
+				{
 					"source": "suitesparse",
-					"format": "matrix-market",
-					"description": "SuiteSparse Matrix Collection (Pajek/Erdos02)"
+					"downloads": [
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/Erdos02.tar.gz",
+							"format": "matrix-market"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/RB/Pajek/Erdos02.tar.gz",
+							"format": "rutherford-boeing"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/mat/Pajek/Erdos02.tar.gz",
+							"format": "matlab"
+						}
+					]
 				}
 			]
 		},
@@ -919,8 +1216,6 @@
 			"id": "football",
 			"name": "American College Football",
 			"description": "Network of American football games between Division IA colleges during regular season Fall 2000. Nodes represent teams and edges connect teams that played each other. The 'value' property indicates conference membership.",
-			"source": "newman",
-			"url": "https://websites.umich.edu/~mejn/netdata/football.zip",
 			"citation": {
 				"authors": [
 					"M. Girvan",
@@ -942,14 +1237,23 @@
 			"weighted": false,
 			"hasNodeAttributes": true,
 			"hasEdgeAttributes": false,
-			"labeled": true
+			"labeled": true,
+			"sources": [
+				{
+					"source": "newman",
+					"downloads": [
+						{
+							"url": "https://websites.umich.edu/~mejn/netdata/football.zip",
+							"format": "gml"
+						}
+					]
+				}
+			]
 		},
 		"gd01-citations": {
 			"id": "gd01-citations",
 			"name": "GD01 Graph Drawing Citations",
 			"description": "Citation network from Graph Drawing proceedings, from GD 2001 contest.",
-			"source": "pajek",
-			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/GD/a01.zip",
 			"citation": {
 				"authors": [
 					"Vladimir Batagelj",
@@ -968,12 +1272,32 @@
 			"hasNodeAttributes": true,
 			"hasEdgeAttributes": true,
 			"labeled": false,
-			"alternateUrls": [
+			"sources": [
 				{
-					"url": "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/GD01_a.tar.gz",
+					"source": "pajek",
+					"downloads": [
+						{
+							"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/GD/a01.zip",
+							"format": "pajek"
+						}
+					]
+				},
+				{
 					"source": "suitesparse",
-					"format": "matrix-market",
-					"description": "SuiteSparse Matrix Collection (Pajek/GD01_a)"
+					"downloads": [
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/GD01_a.tar.gz",
+							"format": "matrix-market"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/RB/Pajek/GD01_a.tar.gz",
+							"format": "rutherford-boeing"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/mat/Pajek/GD01_a.tar.gz",
+							"format": "matlab"
+						}
+					]
 				}
 			]
 		},
@@ -981,8 +1305,6 @@
 			"id": "gd99-linden",
 			"name": "GD99 Lindenstrasse",
 			"description": "Social network from German TV series Lindenstrasse, from Graph Drawing 1999 contest.",
-			"source": "pajek",
-			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/GD/a99m.zip",
 			"citation": {
 				"authors": [
 					"Vladimir Batagelj",
@@ -1000,14 +1322,23 @@
 			"weighted": true,
 			"hasNodeAttributes": true,
 			"hasEdgeAttributes": true,
-			"labeled": false
+			"labeled": false,
+			"sources": [
+				{
+					"source": "pajek",
+					"downloads": [
+						{
+							"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/GD/a99m.zip",
+							"format": "pajek"
+						}
+					]
+				}
+			]
 		},
 		"geom": {
 			"id": "geom",
 			"name": "Computational Geometry Collaboration",
 			"description": "Collaboration network of computational geometry researchers.",
-			"source": "pajek",
-			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/collab/geom.zip",
 			"citation": {
 				"authors": [
 					"Vladimir Batagelj",
@@ -1026,12 +1357,32 @@
 			"hasNodeAttributes": true,
 			"hasEdgeAttributes": true,
 			"labeled": false,
-			"alternateUrls": [
+			"sources": [
 				{
-					"url": "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/geom.tar.gz",
+					"source": "pajek",
+					"downloads": [
+						{
+							"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/collab/geom.zip",
+							"format": "pajek"
+						}
+					]
+				},
+				{
 					"source": "suitesparse",
-					"format": "matrix-market",
-					"description": "SuiteSparse Matrix Collection (Pajek/geom)"
+					"downloads": [
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/geom.tar.gz",
+							"format": "matrix-market"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/RB/Pajek/geom.tar.gz",
+							"format": "rutherford-boeing"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/mat/Pajek/geom.tar.gz",
+							"format": "matlab"
+						}
+					]
 				}
 			]
 		},
@@ -1039,8 +1390,6 @@
 			"id": "hep-th",
 			"name": "High-Energy Theory Collaborations",
 			"description": "Weighted network of coauthorships between scientists posting preprints on the High-Energy Theory E-Print Archive between Jan 1, 1995 and December 31, 1999.",
-			"source": "newman",
-			"url": "https://websites.umich.edu/~mejn/netdata/hep-th.zip",
 			"citation": {
 				"authors": [
 					"M. E. J. Newman"
@@ -1061,14 +1410,23 @@
 			"weighted": true,
 			"hasNodeAttributes": false,
 			"hasEdgeAttributes": true,
-			"labeled": true
+			"labeled": true,
+			"sources": [
+				{
+					"source": "newman",
+					"downloads": [
+						{
+							"url": "https://websites.umich.edu/~mejn/netdata/hep-th.zip",
+							"format": "gml"
+						}
+					]
+				}
+			]
 		},
 		"internet": {
 			"id": "internet",
 			"name": "Internet Autonomous Systems",
 			"description": "Symmetrized snapshot of the structure of the Internet at the level of autonomous systems, reconstructed from BGP tables posted by the University of Oregon Route Views Project. Snapshot from July 22, 2006.",
-			"source": "newman",
-			"url": "https://websites.umich.edu/~mejn/netdata/as-22july06.zip",
 			"citation": {
 				"authors": [
 					"M. E. J. Newman"
@@ -1086,14 +1444,23 @@
 			"weighted": false,
 			"hasNodeAttributes": false,
 			"hasEdgeAttributes": false,
-			"labeled": false
+			"labeled": false,
+			"sources": [
+				{
+					"source": "newman",
+					"downloads": [
+						{
+							"url": "https://websites.umich.edu/~mejn/netdata/as-22july06.zip",
+							"format": "gml"
+						}
+					]
+				}
+			]
 		},
 		"karate": {
 			"id": "karate",
 			"name": "Zachary's Karate Club",
 			"description": "Social network of friendships between 34 members of a karate club at a US university in the 1970s.",
-			"source": "newman",
-			"url": "https://websites.umich.edu/~mejn/netdata/karate.zip",
 			"citation": {
 				"authors": [
 					"W. W. Zachary"
@@ -1114,14 +1481,23 @@
 			"weighted": false,
 			"hasNodeAttributes": false,
 			"hasEdgeAttributes": false,
-			"labeled": false
+			"labeled": false,
+			"sources": [
+				{
+					"source": "newman",
+					"downloads": [
+						{
+							"url": "https://websites.umich.edu/~mejn/netdata/karate.zip",
+							"format": "gml"
+						}
+					]
+				}
+			]
 		},
 		"lesmiserables": {
 			"id": "lesmiserables",
 			"name": "Les Miserables",
 			"description": "Co-appearance network of characters in Victor Hugo's novel Les Miserables. Edges connect characters that appear in the same chapter.",
-			"source": "newman",
-			"url": "https://websites.umich.edu/~mejn/netdata/lesmis.zip",
 			"citation": {
 				"authors": [
 					"D. E. Knuth"
@@ -1141,14 +1517,23 @@
 			"weighted": true,
 			"hasNodeAttributes": false,
 			"hasEdgeAttributes": true,
-			"labeled": true
+			"labeled": true,
+			"sources": [
+				{
+					"source": "newman",
+					"downloads": [
+						{
+							"url": "https://websites.umich.edu/~mejn/netdata/lesmis.zip",
+							"format": "gml"
+						}
+					]
+				}
+			]
 		},
 		"loc-brightkite": {
 			"id": "loc-brightkite",
 			"name": "Brightkite Location Network",
 			"description": "Brightkite location based online social network.",
-			"source": "snap",
-			"url": "https://snap.stanford.edu/data/loc-brightkite_edges.txt.gz",
 			"citation": {
 				"authors": [
 					"E. Cho",
@@ -1168,14 +1553,23 @@
 			"weighted": false,
 			"hasNodeAttributes": false,
 			"hasEdgeAttributes": false,
-			"labeled": false
+			"labeled": false,
+			"sources": [
+				{
+					"source": "snap",
+					"downloads": [
+						{
+							"url": "https://snap.stanford.edu/data/loc-brightkite_edges.txt.gz",
+							"format": "various"
+						}
+					]
+				}
+			]
 		},
 		"loc-gowalla": {
 			"id": "loc-gowalla",
 			"name": "Gowalla Location Network",
 			"description": "Gowalla location based online social network.",
-			"source": "snap",
-			"url": "https://snap.stanford.edu/data/loc-gowalla_edges.txt.gz",
 			"citation": {
 				"authors": [
 					"E. Cho",
@@ -1195,14 +1589,23 @@
 			"weighted": false,
 			"hasNodeAttributes": false,
 			"hasEdgeAttributes": false,
-			"labeled": false
+			"labeled": false,
+			"sources": [
+				{
+					"source": "snap",
+					"downloads": [
+						{
+							"url": "https://snap.stanford.edu/data/loc-gowalla_edges.txt.gz",
+							"format": "various"
+						}
+					]
+				}
+			]
 		},
 		"netscience": {
 			"id": "netscience",
 			"name": "Network Science Coauthorships",
 			"description": "Coauthorship network of scientists working on network theory and experiment, compiled by M. Newman in May 2006.",
-			"source": "newman",
-			"url": "https://websites.umich.edu/~mejn/netdata/netscience.zip",
 			"citation": {
 				"authors": [
 					"M. E. J. Newman"
@@ -1223,14 +1626,23 @@
 			"weighted": true,
 			"hasNodeAttributes": false,
 			"hasEdgeAttributes": true,
-			"labeled": true
+			"labeled": true,
+			"sources": [
+				{
+					"source": "newman",
+					"downloads": [
+						{
+							"url": "https://websites.umich.edu/~mejn/netdata/netscience.zip",
+							"format": "gml"
+						}
+					]
+				}
+			]
 		},
 		"p2p-gnutella05": {
 			"id": "p2p-gnutella05",
 			"name": "Gnutella P2P Aug 5 2002",
 			"description": "Gnutella peer to peer network from August 5 2002.",
-			"source": "snap",
-			"url": "https://snap.stanford.edu/data/p2p-Gnutella05.txt.gz",
 			"citation": {
 				"authors": [
 					"M. Ripeanu",
@@ -1250,14 +1662,23 @@
 			"weighted": false,
 			"hasNodeAttributes": false,
 			"hasEdgeAttributes": false,
-			"labeled": false
+			"labeled": false,
+			"sources": [
+				{
+					"source": "snap",
+					"downloads": [
+						{
+							"url": "https://snap.stanford.edu/data/p2p-Gnutella05.txt.gz",
+							"format": "various"
+						}
+					]
+				}
+			]
 		},
 		"p2p-gnutella06": {
 			"id": "p2p-gnutella06",
 			"name": "Gnutella P2P Aug 6 2002",
 			"description": "Gnutella peer to peer network from August 6 2002.",
-			"source": "snap",
-			"url": "https://snap.stanford.edu/data/p2p-Gnutella06.txt.gz",
 			"citation": {
 				"authors": [
 					"M. Ripeanu",
@@ -1277,14 +1698,23 @@
 			"weighted": false,
 			"hasNodeAttributes": false,
 			"hasEdgeAttributes": false,
-			"labeled": false
+			"labeled": false,
+			"sources": [
+				{
+					"source": "snap",
+					"downloads": [
+						{
+							"url": "https://snap.stanford.edu/data/p2p-Gnutella06.txt.gz",
+							"format": "various"
+						}
+					]
+				}
+			]
 		},
 		"p2p-gnutella08": {
 			"id": "p2p-gnutella08",
 			"name": "Gnutella P2P Aug 8 2002",
 			"description": "Gnutella peer to peer network from August 8 2002.",
-			"source": "snap",
-			"url": "https://snap.stanford.edu/data/p2p-Gnutella08.txt.gz",
 			"citation": {
 				"authors": [
 					"M. Ripeanu",
@@ -1304,14 +1734,23 @@
 			"weighted": false,
 			"hasNodeAttributes": false,
 			"hasEdgeAttributes": false,
-			"labeled": false
+			"labeled": false,
+			"sources": [
+				{
+					"source": "snap",
+					"downloads": [
+						{
+							"url": "https://snap.stanford.edu/data/p2p-Gnutella08.txt.gz",
+							"format": "various"
+						}
+					]
+				}
+			]
 		},
 		"p2p-gnutella09": {
 			"id": "p2p-gnutella09",
 			"name": "Gnutella P2P Aug 9 2002",
 			"description": "Gnutella peer to peer network from August 9 2002.",
-			"source": "snap",
-			"url": "https://snap.stanford.edu/data/p2p-Gnutella09.txt.gz",
 			"citation": {
 				"authors": [
 					"M. Ripeanu",
@@ -1331,14 +1770,23 @@
 			"weighted": false,
 			"hasNodeAttributes": false,
 			"hasEdgeAttributes": false,
-			"labeled": false
+			"labeled": false,
+			"sources": [
+				{
+					"source": "snap",
+					"downloads": [
+						{
+							"url": "https://snap.stanford.edu/data/p2p-Gnutella09.txt.gz",
+							"format": "various"
+						}
+					]
+				}
+			]
 		},
 		"p2p-gnutella24": {
 			"id": "p2p-gnutella24",
 			"name": "Gnutella P2P Aug 24 2002",
 			"description": "Gnutella peer to peer network from August 24 2002.",
-			"source": "snap",
-			"url": "https://snap.stanford.edu/data/p2p-Gnutella24.txt.gz",
 			"citation": {
 				"authors": [
 					"M. Ripeanu",
@@ -1358,14 +1806,23 @@
 			"weighted": false,
 			"hasNodeAttributes": false,
 			"hasEdgeAttributes": false,
-			"labeled": false
+			"labeled": false,
+			"sources": [
+				{
+					"source": "snap",
+					"downloads": [
+						{
+							"url": "https://snap.stanford.edu/data/p2p-Gnutella24.txt.gz",
+							"format": "various"
+						}
+					]
+				}
+			]
 		},
 		"p2p-gnutella25": {
 			"id": "p2p-gnutella25",
 			"name": "Gnutella P2P Aug 25 2002",
 			"description": "Gnutella peer to peer network from August 25 2002.",
-			"source": "snap",
-			"url": "https://snap.stanford.edu/data/p2p-Gnutella25.txt.gz",
 			"citation": {
 				"authors": [
 					"M. Ripeanu",
@@ -1385,14 +1842,23 @@
 			"weighted": false,
 			"hasNodeAttributes": false,
 			"hasEdgeAttributes": false,
-			"labeled": false
+			"labeled": false,
+			"sources": [
+				{
+					"source": "snap",
+					"downloads": [
+						{
+							"url": "https://snap.stanford.edu/data/p2p-Gnutella25.txt.gz",
+							"format": "various"
+						}
+					]
+				}
+			]
 		},
 		"p2p-gnutella30": {
 			"id": "p2p-gnutella30",
 			"name": "Gnutella P2P Aug 30 2002",
 			"description": "Gnutella peer to peer network from August 30 2002.",
-			"source": "snap",
-			"url": "https://snap.stanford.edu/data/p2p-Gnutella30.txt.gz",
 			"citation": {
 				"authors": [
 					"M. Ripeanu",
@@ -1412,14 +1878,23 @@
 			"weighted": false,
 			"hasNodeAttributes": false,
 			"hasEdgeAttributes": false,
-			"labeled": false
+			"labeled": false,
+			"sources": [
+				{
+					"source": "snap",
+					"downloads": [
+						{
+							"url": "https://snap.stanford.edu/data/p2p-Gnutella30.txt.gz",
+							"format": "various"
+						}
+					]
+				}
+			]
 		},
 		"p2p-gnutella31": {
 			"id": "p2p-gnutella31",
 			"name": "Gnutella P2P Aug 31 2002",
 			"description": "Gnutella peer to peer network from August 31 2002.",
-			"source": "snap",
-			"url": "https://snap.stanford.edu/data/p2p-Gnutella31.txt.gz",
 			"citation": {
 				"authors": [
 					"M. Ripeanu",
@@ -1439,14 +1914,23 @@
 			"weighted": false,
 			"hasNodeAttributes": false,
 			"hasEdgeAttributes": false,
-			"labeled": false
+			"labeled": false,
+			"sources": [
+				{
+					"source": "snap",
+					"downloads": [
+						{
+							"url": "https://snap.stanford.edu/data/p2p-Gnutella31.txt.gz",
+							"format": "various"
+						}
+					]
+				}
+			]
 		},
 		"pajek-california": {
 			"id": "pajek-california",
 			"name": "Pages matching the query 'California'",
 			"description": "Pages matching the query 'California'. Constructed by expanding a 200-page search engine response set.",
-			"source": "suitesparse",
-			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
 			"citation": {
 				"authors": [
 					"J. Kleinberg"
@@ -1463,14 +1947,40 @@
 			"weighted": false,
 			"hasNodeAttributes": true,
 			"hasEdgeAttributes": false,
-			"labeled": false
+			"labeled": false,
+			"sources": [
+				{
+					"source": "pajek",
+					"downloads": [
+						{
+							"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
+							"format": "pajek"
+						}
+					]
+				},
+				{
+					"source": "suitesparse",
+					"downloads": [
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/California.tar.gz",
+							"format": "matrix-market"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/RB/Pajek/California.tar.gz",
+							"format": "rutherford-boeing"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/mat/Pajek/California.tar.gz",
+							"format": "matlab"
+						}
+					]
+				}
+			]
 		},
 		"pajek-dutch-elite": {
 			"id": "pajek-dutch-elite",
 			"name": "Dutch Elite Network",
 			"description": "Interlocking directorates of the top 200 Dutch companies. Two-mode network of directors and boards.",
-			"source": "pajek",
-			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/2mode/dutchelite.zip",
 			"citation": {
 				"authors": [
 					"Vladimir Batagelj",
@@ -1488,14 +1998,23 @@
 			"weighted": false,
 			"hasNodeAttributes": true,
 			"hasEdgeAttributes": false,
-			"labeled": false
+			"labeled": false,
+			"sources": [
+				{
+					"source": "pajek",
+					"downloads": [
+						{
+							"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/2mode/dutchelite.zip",
+							"format": "pajek"
+						}
+					]
+				}
+			]
 		},
 		"pajek-eat": {
 			"id": "pajek-eat",
 			"name": "Edinburgh Associative Thesaurus",
 			"description": "Word association network from the Edinburgh Associative Thesaurus. 23,219 words, 325,624 associations.",
-			"source": "pajek",
-			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/dic/eat/EATnew.zip",
 			"citation": {
 				"authors": [
 					"G. R. Kiss",
@@ -1516,12 +2035,32 @@
 			"hasNodeAttributes": true,
 			"hasEdgeAttributes": true,
 			"labeled": false,
-			"alternateUrls": [
+			"sources": [
 				{
-					"url": "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/EAT_RS.tar.gz",
+					"source": "pajek",
+					"downloads": [
+						{
+							"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/dic/eat/EATnew.zip",
+							"format": "pajek"
+						}
+					]
+				},
+				{
 					"source": "suitesparse",
-					"format": "matrix-market",
-					"description": "SuiteSparse Matrix Collection (Pajek/EAT_RS)"
+					"downloads": [
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/EAT_RS.tar.gz",
+							"format": "matrix-market"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/RB/Pajek/EAT_RS.tar.gz",
+							"format": "rutherford-boeing"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/mat/Pajek/EAT_RS.tar.gz",
+							"format": "matlab"
+						}
+					]
 				}
 			]
 		},
@@ -1529,8 +2068,6 @@
 			"id": "pajek-epa",
 			"name": "Web pages from the US Environmental Protection Agency site",
 			"description": "Web pages from the US Environmental Protection Agency site.",
-			"source": "suitesparse",
-			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
 			"citation": {
 				"authors": [
 					"V. Batagelj",
@@ -1548,14 +2085,40 @@
 			"weighted": false,
 			"hasNodeAttributes": true,
 			"hasEdgeAttributes": false,
-			"labeled": false
+			"labeled": false,
+			"sources": [
+				{
+					"source": "pajek",
+					"downloads": [
+						{
+							"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
+							"format": "pajek"
+						}
+					]
+				},
+				{
+					"source": "suitesparse",
+					"downloads": [
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/EPA.tar.gz",
+							"format": "matrix-market"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/RB/Pajek/EPA.tar.gz",
+							"format": "rutherford-boeing"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/mat/Pajek/EPA.tar.gz",
+							"format": "matlab"
+						}
+					]
+				}
+			]
 		},
 		"pajek-erdos-971": {
 			"id": "pajek-erdos-971",
 			"name": "Erdos Collaboration 1997 (Core)",
 			"description": "Core Erdos collaboration network, 1997 version. Direct collaborators only.",
-			"source": "pajek",
-			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/erdos/ERDOS971.NET",
 			"citation": {
 				"authors": [
 					"Vladimir Batagelj",
@@ -1574,12 +2137,32 @@
 			"hasNodeAttributes": true,
 			"hasEdgeAttributes": true,
 			"labeled": false,
-			"alternateUrls": [
+			"sources": [
 				{
-					"url": "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/Erdos971.tar.gz",
+					"source": "pajek",
+					"downloads": [
+						{
+							"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/erdos/ERDOS971.NET",
+							"format": "pajek"
+						}
+					]
+				},
+				{
 					"source": "suitesparse",
-					"format": "matrix-market",
-					"description": "SuiteSparse Matrix Collection (Pajek/Erdos971)"
+					"downloads": [
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/Erdos971.tar.gz",
+							"format": "matrix-market"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/RB/Pajek/Erdos971.tar.gz",
+							"format": "rutherford-boeing"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/mat/Pajek/Erdos971.tar.gz",
+							"format": "matlab"
+						}
+					]
 				}
 			]
 		},
@@ -1587,8 +2170,6 @@
 			"id": "pajek-erdos-972",
 			"name": "Erdos Collaboration 1997 (Extended)",
 			"description": "Extended Erdos collaboration network, 1997 version. Includes second-order collaborators.",
-			"source": "pajek",
-			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/erdos/ERDOS972.NET",
 			"citation": {
 				"authors": [
 					"Vladimir Batagelj",
@@ -1607,12 +2188,32 @@
 			"hasNodeAttributes": true,
 			"hasEdgeAttributes": true,
 			"labeled": false,
-			"alternateUrls": [
+			"sources": [
 				{
-					"url": "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/Erdos972.tar.gz",
+					"source": "pajek",
+					"downloads": [
+						{
+							"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/erdos/ERDOS972.NET",
+							"format": "pajek"
+						}
+					]
+				},
+				{
 					"source": "suitesparse",
-					"format": "matrix-market",
-					"description": "SuiteSparse Matrix Collection (Pajek/Erdos972)"
+					"downloads": [
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/Erdos972.tar.gz",
+							"format": "matrix-market"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/RB/Pajek/Erdos972.tar.gz",
+							"format": "rutherford-boeing"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/mat/Pajek/Erdos972.tar.gz",
+							"format": "matlab"
+						}
+					]
 				}
 			]
 		},
@@ -1620,8 +2221,6 @@
 			"id": "pajek-erdos-981",
 			"name": "Erdos Collaboration 1998 (Core)",
 			"description": "Core Erdos collaboration network, 1998 version.",
-			"source": "pajek",
-			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/erdos/ERDOS981.NET",
 			"citation": {
 				"authors": [
 					"Vladimir Batagelj",
@@ -1640,12 +2239,32 @@
 			"hasNodeAttributes": true,
 			"hasEdgeAttributes": true,
 			"labeled": false,
-			"alternateUrls": [
+			"sources": [
 				{
-					"url": "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/Erdos981.tar.gz",
+					"source": "pajek",
+					"downloads": [
+						{
+							"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/erdos/ERDOS981.NET",
+							"format": "pajek"
+						}
+					]
+				},
+				{
 					"source": "suitesparse",
-					"format": "matrix-market",
-					"description": "SuiteSparse Matrix Collection (Pajek/Erdos981)"
+					"downloads": [
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/Erdos981.tar.gz",
+							"format": "matrix-market"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/RB/Pajek/Erdos981.tar.gz",
+							"format": "rutherford-boeing"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/mat/Pajek/Erdos981.tar.gz",
+							"format": "matlab"
+						}
+					]
 				}
 			]
 		},
@@ -1653,8 +2272,6 @@
 			"id": "pajek-erdos-982",
 			"name": "Erdos Collaboration 1998 (Extended)",
 			"description": "Extended Erdos collaboration network, 1998 version.",
-			"source": "pajek",
-			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/erdos/ERDOS982.NET",
 			"citation": {
 				"authors": [
 					"Vladimir Batagelj",
@@ -1673,12 +2290,32 @@
 			"hasNodeAttributes": true,
 			"hasEdgeAttributes": true,
 			"labeled": false,
-			"alternateUrls": [
+			"sources": [
 				{
-					"url": "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/Erdos982.tar.gz",
+					"source": "pajek",
+					"downloads": [
+						{
+							"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/erdos/ERDOS982.NET",
+							"format": "pajek"
+						}
+					]
+				},
+				{
 					"source": "suitesparse",
-					"format": "matrix-market",
-					"description": "SuiteSparse Matrix Collection (Pajek/Erdos982)"
+					"downloads": [
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/Erdos982.tar.gz",
+							"format": "matrix-market"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/RB/Pajek/Erdos982.tar.gz",
+							"format": "rutherford-boeing"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/mat/Pajek/Erdos982.tar.gz",
+							"format": "matlab"
+						}
+					]
 				}
 			]
 		},
@@ -1686,8 +2323,6 @@
 			"id": "pajek-erdos-991",
 			"name": "Erdos Collaboration 1999 (Core)",
 			"description": "Core Erdos collaboration network, 1999 version.",
-			"source": "pajek",
-			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/erdos/ERDOS991.NET",
 			"citation": {
 				"authors": [
 					"Vladimir Batagelj",
@@ -1706,12 +2341,32 @@
 			"hasNodeAttributes": true,
 			"hasEdgeAttributes": true,
 			"labeled": false,
-			"alternateUrls": [
+			"sources": [
 				{
-					"url": "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/Erdos991.tar.gz",
+					"source": "pajek",
+					"downloads": [
+						{
+							"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/erdos/ERDOS991.NET",
+							"format": "pajek"
+						}
+					]
+				},
+				{
 					"source": "suitesparse",
-					"format": "matrix-market",
-					"description": "SuiteSparse Matrix Collection (Pajek/Erdos991)"
+					"downloads": [
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/Erdos991.tar.gz",
+							"format": "matrix-market"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/RB/Pajek/Erdos991.tar.gz",
+							"format": "rutherford-boeing"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/mat/Pajek/Erdos991.tar.gz",
+							"format": "matlab"
+						}
+					]
 				}
 			]
 		},
@@ -1719,8 +2374,6 @@
 			"id": "pajek-erdos-992",
 			"name": "Erdos Collaboration 1999 (Extended)",
 			"description": "Extended Erdos collaboration network, 1999 version.",
-			"source": "pajek",
-			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/erdos/ERDOS992.NET",
 			"citation": {
 				"authors": [
 					"Vladimir Batagelj",
@@ -1739,12 +2392,32 @@
 			"hasNodeAttributes": true,
 			"hasEdgeAttributes": true,
 			"labeled": false,
-			"alternateUrls": [
+			"sources": [
 				{
-					"url": "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/Erdos992.tar.gz",
+					"source": "pajek",
+					"downloads": [
+						{
+							"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/erdos/ERDOS992.NET",
+							"format": "pajek"
+						}
+					]
+				},
+				{
 					"source": "suitesparse",
-					"format": "matrix-market",
-					"description": "SuiteSparse Matrix Collection (Pajek/Erdos992)"
+					"downloads": [
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/Erdos992.tar.gz",
+							"format": "matrix-market"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/RB/Pajek/Erdos992.tar.gz",
+							"format": "rutherford-boeing"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/mat/Pajek/Erdos992.tar.gz",
+							"format": "matlab"
+						}
+					]
 				}
 			]
 		},
@@ -1752,8 +2425,6 @@
 			"id": "pajek-eva",
 			"name": "EVA Ownership Network",
 			"description": "Corporate ownership network from EVA database. 8,343 entities, 6,726 ownership links.",
-			"source": "pajek",
-			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/econ/Eva/EVA.zip",
 			"citation": {
 				"authors": [
 					"Vladimir Batagelj",
@@ -1771,14 +2442,23 @@
 			"weighted": false,
 			"hasNodeAttributes": true,
 			"hasEdgeAttributes": false,
-			"labeled": false
+			"labeled": false,
+			"sources": [
+				{
+					"source": "pajek",
+					"downloads": [
+						{
+							"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/econ/Eva/EVA.zip",
+							"format": "pajek"
+						}
+					]
+				}
+			]
 		},
 		"pajek-foldoc": {
 			"id": "pajek-foldoc",
 			"name": "FOLDOC Dictionary",
 			"description": "Cross-reference network from the Free On-Line Dictionary of Computing.",
-			"source": "pajek",
-			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/dic/foldoc/foldoc.zip",
 			"citation": {
 				"authors": [
 					"Vladimir Batagelj",
@@ -1797,12 +2477,32 @@
 			"hasNodeAttributes": true,
 			"hasEdgeAttributes": true,
 			"labeled": false,
-			"alternateUrls": [
+			"sources": [
 				{
-					"url": "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/foldoc.tar.gz",
+					"source": "pajek",
+					"downloads": [
+						{
+							"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/dic/foldoc/foldoc.zip",
+							"format": "pajek"
+						}
+					]
+				},
+				{
 					"source": "suitesparse",
-					"format": "matrix-market",
-					"description": "SuiteSparse Matrix Collection (Pajek/foldoc)"
+					"downloads": [
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/foldoc.tar.gz",
+							"format": "matrix-market"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/RB/Pajek/foldoc.tar.gz",
+							"format": "rutherford-boeing"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/mat/Pajek/foldoc.tar.gz",
+							"format": "matlab"
+						}
+					]
 				}
 			]
 		},
@@ -1810,8 +2510,6 @@
 			"id": "pajek-football",
 			"name": "World Soccer 1998",
 			"description": "World Cup 1998 match network. 35 teams, 118 matches.",
-			"source": "pajek",
-			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/sport/football.net",
 			"citation": {
 				"authors": [
 					"Vladimir Batagelj",
@@ -1830,12 +2528,32 @@
 			"hasNodeAttributes": true,
 			"hasEdgeAttributes": true,
 			"labeled": false,
-			"alternateUrls": [
+			"sources": [
 				{
-					"url": "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/football.tar.gz",
+					"source": "pajek",
+					"downloads": [
+						{
+							"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/sport/football.net",
+							"format": "pajek"
+						}
+					]
+				},
+				{
 					"source": "suitesparse",
-					"format": "matrix-market",
-					"description": "SuiteSparse Matrix Collection (Pajek/football)"
+					"downloads": [
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/football.tar.gz",
+							"format": "matrix-market"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/RB/Pajek/football.tar.gz",
+							"format": "rutherford-boeing"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/mat/Pajek/football.tar.gz",
+							"format": "matlab"
+						}
+					]
 				}
 			]
 		},
@@ -1843,8 +2561,6 @@
 			"id": "pajek-freeassoc",
 			"name": "USF Free Association Norms",
 			"description": "Word association network from the University of South Florida Free Association Norms.",
-			"source": "pajek",
-			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/dic/fa/Pairs.zip",
 			"citation": {
 				"authors": [
 					"D. L. Nelson",
@@ -1863,14 +2579,23 @@
 			"weighted": true,
 			"hasNodeAttributes": true,
 			"hasEdgeAttributes": true,
-			"labeled": false
+			"labeled": false,
+			"sources": [
+				{
+					"source": "pajek",
+					"downloads": [
+						{
+							"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/dic/fa/Pairs.zip",
+							"format": "pajek"
+						}
+					]
+				}
+			]
 		},
 		"pajek-gd00": {
 			"id": "pajek-gd00",
 			"name": "GD00 Contest Graph A",
 			"description": "Graph Drawing 2000 contest, Problem A. 352 vertices, 458 arcs.",
-			"source": "pajek",
-			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/GD/gd00/A00.net",
 			"citation": {
 				"authors": [
 					"Vladimir Batagelj",
@@ -1888,14 +2613,23 @@
 			"weighted": true,
 			"hasNodeAttributes": true,
 			"hasEdgeAttributes": true,
-			"labeled": false
+			"labeled": false,
+			"sources": [
+				{
+					"source": "pajek",
+					"downloads": [
+						{
+							"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/GD/gd00/A00.net",
+							"format": "pajek"
+						}
+					]
+				}
+			]
 		},
 		"pajek-gd02": {
 			"id": "pajek-gd02",
 			"name": "GD02 Contest Graph A",
 			"description": "Graph Drawing 2002 contest, Problem A. 23 vertices, 87 arcs.",
-			"source": "pajek",
-			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/GD/gd02/A02.net",
 			"citation": {
 				"authors": [
 					"Vladimir Batagelj",
@@ -1914,12 +2648,32 @@
 			"hasNodeAttributes": true,
 			"hasEdgeAttributes": true,
 			"labeled": false,
-			"alternateUrls": [
+			"sources": [
 				{
-					"url": "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/GD02_a.tar.gz",
+					"source": "pajek",
+					"downloads": [
+						{
+							"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/GD/gd02/A02.net",
+							"format": "pajek"
+						}
+					]
+				},
+				{
 					"source": "suitesparse",
-					"format": "matrix-market",
-					"description": "SuiteSparse Matrix Collection (Pajek/GD02_a)"
+					"downloads": [
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/GD02_a.tar.gz",
+							"format": "matrix-market"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/RB/Pajek/GD02_a.tar.gz",
+							"format": "rutherford-boeing"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/mat/Pajek/GD02_a.tar.gz",
+							"format": "matlab"
+						}
+					]
 				}
 			]
 		},
@@ -1927,8 +2681,6 @@
 			"id": "pajek-gd03",
 			"name": "GD03 Contest Graph A",
 			"description": "Graph Drawing 2003 contest, Problem A. 423 vertices, 578 arcs.",
-			"source": "pajek",
-			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/GD/gd03/A03.net",
 			"citation": {
 				"authors": [
 					"Vladimir Batagelj",
@@ -1947,12 +2699,32 @@
 			"hasNodeAttributes": true,
 			"hasEdgeAttributes": false,
 			"labeled": false,
-			"alternateUrls": [
+			"sources": [
 				{
-					"url": "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/GD99_c.tar.gz",
+					"source": "pajek",
+					"downloads": [
+						{
+							"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/GD/gd03/A03.net",
+							"format": "pajek"
+						}
+					]
+				},
+				{
 					"source": "suitesparse",
-					"format": "matrix-market",
-					"description": "SuiteSparse Matrix Collection (Pajek/GD99_c)"
+					"downloads": [
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/GD99_c.tar.gz",
+							"format": "matrix-market"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/RB/Pajek/GD99_c.tar.gz",
+							"format": "rutherford-boeing"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/mat/Pajek/GD99_c.tar.gz",
+							"format": "matlab"
+						}
+					]
 				}
 			]
 		},
@@ -1960,8 +2732,6 @@
 			"id": "pajek-gd04-prob1",
 			"name": "GD04 Contest Problem 1",
 			"description": "Graph Drawing 2004 crossing minimisation contest, Problem 1. 69 nodes, 151 edges.",
-			"source": "pajek",
-			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/GD/gd04/gd04.zip",
 			"citation": {
 				"authors": [
 					"S. Kobourov"
@@ -1978,14 +2748,23 @@
 			"weighted": false,
 			"hasNodeAttributes": true,
 			"hasEdgeAttributes": false,
-			"labeled": false
+			"labeled": false,
+			"sources": [
+				{
+					"source": "pajek",
+					"downloads": [
+						{
+							"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/GD/gd04/gd04.zip",
+							"format": "pajek"
+						}
+					]
+				}
+			]
 		},
 		"pajek-gd04-prob10": {
 			"id": "pajek-gd04-prob10",
 			"name": "GD04 Contest Problem 10",
 			"description": "Graph Drawing 2004 crossing minimisation contest, Problem 10. 64 nodes, 125 edges.",
-			"source": "pajek",
-			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/GD/gd04/gd04.zip",
 			"citation": {
 				"authors": [
 					"S. Kobourov"
@@ -2002,14 +2781,23 @@
 			"weighted": false,
 			"hasNodeAttributes": true,
 			"hasEdgeAttributes": false,
-			"labeled": false
+			"labeled": false,
+			"sources": [
+				{
+					"source": "pajek",
+					"downloads": [
+						{
+							"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/GD/gd04/gd04.zip",
+							"format": "pajek"
+						}
+					]
+				}
+			]
 		},
 		"pajek-gd04-prob2": {
 			"id": "pajek-gd04-prob2",
 			"name": "GD04 Contest Problem 2",
 			"description": "Graph Drawing 2004 crossing minimisation contest, Problem 2. 96 nodes, 214 edges.",
-			"source": "pajek",
-			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/GD/gd04/gd04.zip",
 			"citation": {
 				"authors": [
 					"S. Kobourov"
@@ -2026,14 +2814,23 @@
 			"weighted": false,
 			"hasNodeAttributes": true,
 			"hasEdgeAttributes": false,
-			"labeled": false
+			"labeled": false,
+			"sources": [
+				{
+					"source": "pajek",
+					"downloads": [
+						{
+							"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/GD/gd04/gd04.zip",
+							"format": "pajek"
+						}
+					]
+				}
+			]
 		},
 		"pajek-gd04-prob3": {
 			"id": "pajek-gd04-prob3",
 			"name": "GD04 Contest Problem 3",
 			"description": "Graph Drawing 2004 crossing minimisation contest, Problem 3. 102 nodes, 224 edges.",
-			"source": "pajek",
-			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/GD/gd04/gd04.zip",
 			"citation": {
 				"authors": [
 					"S. Kobourov"
@@ -2050,14 +2847,23 @@
 			"weighted": false,
 			"hasNodeAttributes": true,
 			"hasEdgeAttributes": false,
-			"labeled": false
+			"labeled": false,
+			"sources": [
+				{
+					"source": "pajek",
+					"downloads": [
+						{
+							"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/GD/gd04/gd04.zip",
+							"format": "pajek"
+						}
+					]
+				}
+			]
 		},
 		"pajek-gd04-prob4": {
 			"id": "pajek-gd04-prob4",
 			"name": "GD04 Contest Problem 4",
 			"description": "Graph Drawing 2004 crossing minimisation contest, Problem 4. 20 nodes, 36 edges.",
-			"source": "pajek",
-			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/GD/gd04/gd04.zip",
 			"citation": {
 				"authors": [
 					"S. Kobourov"
@@ -2074,14 +2880,23 @@
 			"weighted": false,
 			"hasNodeAttributes": true,
 			"hasEdgeAttributes": false,
-			"labeled": false
+			"labeled": false,
+			"sources": [
+				{
+					"source": "pajek",
+					"downloads": [
+						{
+							"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/GD/gd04/gd04.zip",
+							"format": "pajek"
+						}
+					]
+				}
+			]
 		},
 		"pajek-gd04-prob5": {
 			"id": "pajek-gd04-prob5",
 			"name": "GD04 Contest Problem 5",
 			"description": "Graph Drawing 2004 crossing minimisation contest, Problem 5. 40 nodes, 115 edges.",
-			"source": "pajek",
-			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/GD/gd04/gd04.zip",
 			"citation": {
 				"authors": [
 					"S. Kobourov"
@@ -2098,14 +2913,23 @@
 			"weighted": false,
 			"hasNodeAttributes": true,
 			"hasEdgeAttributes": false,
-			"labeled": false
+			"labeled": false,
+			"sources": [
+				{
+					"source": "pajek",
+					"downloads": [
+						{
+							"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/GD/gd04/gd04.zip",
+							"format": "pajek"
+						}
+					]
+				}
+			]
 		},
 		"pajek-gd04-prob6": {
 			"id": "pajek-gd04-prob6",
 			"name": "GD04 Contest Problem 6",
 			"description": "Graph Drawing 2004 crossing minimisation contest, Problem 6. 80 nodes, 312 edges.",
-			"source": "pajek",
-			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/GD/gd04/gd04.zip",
 			"citation": {
 				"authors": [
 					"S. Kobourov"
@@ -2122,14 +2946,23 @@
 			"weighted": false,
 			"hasNodeAttributes": true,
 			"hasEdgeAttributes": false,
-			"labeled": false
+			"labeled": false,
+			"sources": [
+				{
+					"source": "pajek",
+					"downloads": [
+						{
+							"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/GD/gd04/gd04.zip",
+							"format": "pajek"
+						}
+					]
+				}
+			]
 		},
 		"pajek-gd04-prob7": {
 			"id": "pajek-gd04-prob7",
 			"name": "GD04 Contest Problem 7",
 			"description": "Graph Drawing 2004 crossing minimisation contest, Problem 7. 40 nodes, 143 edges.",
-			"source": "pajek",
-			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/GD/gd04/gd04.zip",
 			"citation": {
 				"authors": [
 					"S. Kobourov"
@@ -2146,14 +2979,23 @@
 			"weighted": false,
 			"hasNodeAttributes": true,
 			"hasEdgeAttributes": false,
-			"labeled": false
+			"labeled": false,
+			"sources": [
+				{
+					"source": "pajek",
+					"downloads": [
+						{
+							"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/GD/gd04/gd04.zip",
+							"format": "pajek"
+						}
+					]
+				}
+			]
 		},
 		"pajek-gd04-prob8": {
 			"id": "pajek-gd04-prob8",
 			"name": "GD04 Contest Problem 8",
 			"description": "Graph Drawing 2004 crossing minimisation contest, Problem 8. 100 nodes, 477 edges.",
-			"source": "pajek",
-			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/GD/gd04/gd04.zip",
 			"citation": {
 				"authors": [
 					"S. Kobourov"
@@ -2170,14 +3012,23 @@
 			"weighted": false,
 			"hasNodeAttributes": true,
 			"hasEdgeAttributes": false,
-			"labeled": false
+			"labeled": false,
+			"sources": [
+				{
+					"source": "pajek",
+					"downloads": [
+						{
+							"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/GD/gd04/gd04.zip",
+							"format": "pajek"
+						}
+					]
+				}
+			]
 		},
 		"pajek-gd04-prob9": {
 			"id": "pajek-gd04-prob9",
 			"name": "GD04 Contest Problem 9",
 			"description": "Graph Drawing 2004 crossing minimisation contest, Problem 9. 112 nodes, 168 edges.",
-			"source": "pajek",
-			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/GD/gd04/gd04.zip",
 			"citation": {
 				"authors": [
 					"S. Kobourov"
@@ -2194,14 +3045,23 @@
 			"weighted": false,
 			"hasNodeAttributes": true,
 			"hasEdgeAttributes": false,
-			"labeled": false
+			"labeled": false,
+			"sources": [
+				{
+					"source": "pajek",
+					"downloads": [
+						{
+							"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/GD/gd04/gd04.zip",
+							"format": "pajek"
+						}
+					]
+				}
+			]
 		},
 		"pajek-gd06": {
 			"id": "pajek-gd06",
 			"name": "GD06 World Cup Network",
 			"description": "World Cup network from Graph Drawing 2006 contest. 79 vertices, 1,460 arcs.",
-			"source": "pajek",
-			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/GD/GD06/WC.net.zip",
 			"citation": {
 				"authors": [
 					"Vladimir Batagelj",
@@ -2219,14 +3079,23 @@
 			"weighted": true,
 			"hasNodeAttributes": true,
 			"hasEdgeAttributes": true,
-			"labeled": false
+			"labeled": false,
+			"sources": [
+				{
+					"source": "pajek",
+					"downloads": [
+						{
+							"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/GD/GD06/WC.net.zip",
+							"format": "pajek"
+						}
+					]
+				}
+			]
 		},
 		"pajek-gd95": {
 			"id": "pajek-gd95",
 			"name": "GD95 Contest Graph A",
 			"description": "Graph Drawing 1995 contest, Problem A. 36 vertices, 57 arcs.",
-			"source": "pajek",
-			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/GD/gd95/A95.net",
 			"citation": {
 				"authors": [
 					"Vladimir Batagelj",
@@ -2244,14 +3113,23 @@
 			"weighted": true,
 			"hasNodeAttributes": true,
 			"hasEdgeAttributes": true,
-			"labeled": false
+			"labeled": false,
+			"sources": [
+				{
+					"source": "pajek",
+					"downloads": [
+						{
+							"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/GD/gd95/A95.net",
+							"format": "pajek"
+						}
+					]
+				}
+			]
 		},
 		"pajek-gd96": {
 			"id": "pajek-gd96",
 			"name": "GD96 Contest Graph A",
 			"description": "Graph Drawing 1996 contest, Problem A. 1,096 vertices, 1,691 arcs.",
-			"source": "pajek",
-			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/GD/gd96/A96.net",
 			"citation": {
 				"authors": [
 					"Vladimir Batagelj",
@@ -2269,14 +3147,23 @@
 			"weighted": true,
 			"hasNodeAttributes": true,
 			"hasEdgeAttributes": true,
-			"labeled": false
+			"labeled": false,
+			"sources": [
+				{
+					"source": "pajek",
+					"downloads": [
+						{
+							"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/GD/gd96/A96.net",
+							"format": "pajek"
+						}
+					]
+				}
+			]
 		},
 		"pajek-gd97": {
 			"id": "pajek-gd97",
 			"name": "GD97 Contest Graph A",
 			"description": "Graph Drawing 1997 contest, Problem A. 84 vertices, 332 arcs.",
-			"source": "pajek",
-			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/GD/gd97/A97.net",
 			"citation": {
 				"authors": [
 					"Vladimir Batagelj",
@@ -2294,14 +3181,23 @@
 			"weighted": true,
 			"hasNodeAttributes": true,
 			"hasEdgeAttributes": true,
-			"labeled": false
+			"labeled": false,
+			"sources": [
+				{
+					"source": "pajek",
+					"downloads": [
+						{
+							"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/GD/gd97/A97.net",
+							"format": "pajek"
+						}
+					]
+				}
+			]
 		},
 		"pajek-gd98": {
 			"id": "pajek-gd98",
 			"name": "GD98 Contest Graph A",
 			"description": "Graph Drawing 1998 contest, Problem A. 38 vertices, 50 arcs.",
-			"source": "pajek",
-			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/GD/gd98/A98.net",
 			"citation": {
 				"authors": [
 					"Vladimir Batagelj",
@@ -2319,14 +3215,23 @@
 			"weighted": true,
 			"hasNodeAttributes": true,
 			"hasEdgeAttributes": true,
-			"labeled": false
+			"labeled": false,
+			"sources": [
+				{
+					"source": "pajek",
+					"downloads": [
+						{
+							"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/GD/gd98/A98.net",
+							"format": "pajek"
+						}
+					]
+				}
+			]
 		},
 		"pajek-glosstg": {
 			"id": "pajek-glosstg",
 			"name": "Glossary of graph theory terms and their cross-references",
 			"description": "Glossary of graph theory terms and their cross-references.",
-			"source": "suitesparse",
-			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
 			"citation": {
 				"authors": [
 					"V. Batagelj",
@@ -2345,12 +3250,37 @@
 			"hasNodeAttributes": true,
 			"hasEdgeAttributes": false,
 			"labeled": false,
-			"alternateUrls": [
+			"sources": [
 				{
-					"url": "https://web.archive.org/web/20041222052810/http://vlado.fmf.uni-lj.si/pub/networks/data/DIC/TG/glossTG.paj",
 					"source": "pajek",
-					"format": "pajek",
-					"description": "Wayback Machine archive of original Pajek dataset"
+					"downloads": [
+						{
+							"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
+							"format": "pajek"
+						},
+						{
+							"url": "https://web.archive.org/web/20041222052810/http://vlado.fmf.uni-lj.si/pub/networks/data/DIC/TG/glossTG.paj",
+							"format": "pajek",
+							"description": "Wayback Machine archive of original Pajek dataset"
+						}
+					]
+				},
+				{
+					"source": "suitesparse",
+					"downloads": [
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/GlossGT.tar.gz",
+							"format": "matrix-market"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/RB/Pajek/GlossGT.tar.gz",
+							"format": "rutherford-boeing"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/mat/Pajek/GlossGT.tar.gz",
+							"format": "matlab"
+						}
+					]
 				}
 			]
 		},
@@ -2358,8 +3288,6 @@
 			"id": "pajek-hep-th",
 			"name": "HEP-TH Citations",
 			"description": "High-energy physics theory citation network (KDD Cup 2003). 27,770 papers, 352,807 citations.",
-			"source": "pajek",
-			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/hep-th/hep-th.zip",
 			"citation": {
 				"authors": [
 					"J. Gehrke",
@@ -2379,12 +3307,32 @@
 			"hasNodeAttributes": true,
 			"hasEdgeAttributes": false,
 			"labeled": false,
-			"alternateUrls": [
+			"sources": [
 				{
-					"url": "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/HEP-th.tar.gz",
+					"source": "pajek",
+					"downloads": [
+						{
+							"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/hep-th/hep-th.zip",
+							"format": "pajek"
+						}
+					]
+				},
+				{
 					"source": "suitesparse",
-					"format": "matrix-market",
-					"description": "SuiteSparse Matrix Collection (Pajek/HEP-th)"
+					"downloads": [
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/HEP-th.tar.gz",
+							"format": "matrix-market"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/RB/Pajek/HEP-th.tar.gz",
+							"format": "rutherford-boeing"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/mat/Pajek/HEP-th.tar.gz",
+							"format": "matlab"
+						}
+					]
 				}
 			]
 		},
@@ -2392,8 +3340,6 @@
 			"id": "pajek-journals",
 			"name": "Citation network between 124 computational journals",
 			"description": "Citation network between 124 computational journals.",
-			"source": "suitesparse",
-			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
 			"citation": {
 				"authors": [
 					"V. Batagelj",
@@ -2412,12 +3358,37 @@
 			"hasNodeAttributes": true,
 			"hasEdgeAttributes": true,
 			"labeled": false,
-			"alternateUrls": [
+			"sources": [
 				{
-					"url": "https://web.archive.org/web/20130507053929/http://vlado.fmf.uni-lj.si/pub/networks/data/2mode/revije.zip",
 					"source": "pajek",
-					"format": "pajek",
-					"description": "Wayback Machine archive of original Pajek dataset"
+					"downloads": [
+						{
+							"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
+							"format": "pajek"
+						},
+						{
+							"url": "https://web.archive.org/web/20130507053929/http://vlado.fmf.uni-lj.si/pub/networks/data/2mode/revije.zip",
+							"format": "pajek",
+							"description": "Wayback Machine archive of original Pajek dataset"
+						}
+					]
+				},
+				{
+					"source": "suitesparse",
+					"downloads": [
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/Journals.tar.gz",
+							"format": "matrix-market"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/RB/Pajek/Journals.tar.gz",
+							"format": "rutherford-boeing"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/mat/Pajek/Journals.tar.gz",
+							"format": "matlab"
+						}
+					]
 				}
 			]
 		},
@@ -2425,8 +3396,6 @@
 			"id": "pajek-keds",
 			"name": "KEDS Gulf War Political Events",
 			"description": "Political event network from the Kansas Event Data System (Gulf War, daily aggregation).",
-			"source": "pajek",
-			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/KEDS/GulfLDays.zip",
 			"citation": {
 				"authors": [
 					"Philip Schrodt"
@@ -2443,14 +3412,23 @@
 			"weighted": true,
 			"hasNodeAttributes": true,
 			"hasEdgeAttributes": true,
-			"labeled": false
+			"labeled": false,
+			"sources": [
+				{
+					"source": "pajek",
+					"downloads": [
+						{
+							"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/KEDS/GulfLDays.zip",
+							"format": "pajek"
+						}
+					]
+				}
+			]
 		},
 		"pajek-kohonen": {
 			"id": "pajek-kohonen",
 			"name": "Kohonen Citations",
 			"description": "Citation network around self-organising maps research (Teuvo Kohonen).",
-			"source": "pajek",
-			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/cite/Kohonen.zip",
 			"citation": {
 				"authors": [
 					"Vladimir Batagelj",
@@ -2468,14 +3446,23 @@
 			"weighted": true,
 			"hasNodeAttributes": true,
 			"hasEdgeAttributes": true,
-			"labeled": false
+			"labeled": false,
+			"sources": [
+				{
+					"source": "pajek",
+					"downloads": [
+						{
+							"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/cite/Kohonen.zip",
+							"format": "pajek"
+						}
+					]
+				}
+			]
 		},
 		"pajek-lederberg": {
 			"id": "pajek-lederberg",
 			"name": "Lederberg Citations",
 			"description": "Citation network around Joshua Lederberg's genetics research.",
-			"source": "pajek",
-			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/cite/Lederberg.zip",
 			"citation": {
 				"authors": [
 					"Vladimir Batagelj",
@@ -2493,14 +3480,23 @@
 			"weighted": true,
 			"hasNodeAttributes": true,
 			"hasEdgeAttributes": true,
-			"labeled": false
+			"labeled": false,
+			"sources": [
+				{
+					"source": "pajek",
+					"downloads": [
+						{
+							"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/cite/Lederberg.zip",
+							"format": "pajek"
+						}
+					]
+				}
+			]
 		},
 		"pajek-nd-actors": {
 			"id": "pajek-nd-actors",
 			"name": "Notre Dame Actors",
 			"description": "Two-mode network of actors and films. 392,400 actors, 127,823 films, 1,470,418 appearances.",
-			"source": "pajek",
-			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/ND/NDactors.zip",
 			"citation": {
 				"authors": [
 					"Vladimir Batagelj",
@@ -2519,12 +3515,32 @@
 			"hasNodeAttributes": false,
 			"hasEdgeAttributes": true,
 			"labeled": false,
-			"alternateUrls": [
+			"sources": [
 				{
-					"url": "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/NotreDame_actors.tar.gz",
+					"source": "pajek",
+					"downloads": [
+						{
+							"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/ND/NDactors.zip",
+							"format": "pajek"
+						}
+					]
+				},
+				{
 					"source": "suitesparse",
-					"format": "matrix-market",
-					"description": "SuiteSparse Matrix Collection (Pajek/NotreDame_actors)"
+					"downloads": [
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/NotreDame_actors.tar.gz",
+							"format": "matrix-market"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/RB/Pajek/NotreDame_actors.tar.gz",
+							"format": "rutherford-boeing"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/mat/Pajek/NotreDame_actors.tar.gz",
+							"format": "matlab"
+						}
+					]
 				}
 			]
 		},
@@ -2532,8 +3548,6 @@
 			"id": "pajek-nd-www",
 			"name": "Notre Dame WWW",
 			"description": "Web graph of the University of Notre Dame domain. 325,729 pages, 1,497,135 hyperlinks.",
-			"source": "pajek",
-			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/ND/NDwww.zip",
 			"citation": {
 				"authors": [
 					"R. Albert",
@@ -2554,12 +3568,32 @@
 			"hasNodeAttributes": false,
 			"hasEdgeAttributes": true,
 			"labeled": false,
-			"alternateUrls": [
+			"sources": [
 				{
-					"url": "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/NotreDame_www.tar.gz",
+					"source": "pajek",
+					"downloads": [
+						{
+							"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/ND/NDwww.zip",
+							"format": "pajek"
+						}
+					]
+				},
+				{
 					"source": "suitesparse",
-					"format": "matrix-market",
-					"description": "SuiteSparse Matrix Collection (Pajek/NotreDame_www)"
+					"downloads": [
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/NotreDame_www.tar.gz",
+							"format": "matrix-market"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/RB/Pajek/NotreDame_www.tar.gz",
+							"format": "rutherford-boeing"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/mat/Pajek/NotreDame_www.tar.gz",
+							"format": "matlab"
+						}
+					]
 				}
 			]
 		},
@@ -2567,8 +3601,6 @@
 			"id": "pajek-netscience",
 			"name": "Network Science Collaboration",
 			"description": "Collaboration network of network science researchers. 1,589 authors.",
-			"source": "pajek",
-			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/collab/NetScience.zip",
 			"citation": {
 				"authors": [
 					"M. E. J. Newman"
@@ -2585,14 +3617,23 @@
 			"weighted": true,
 			"hasNodeAttributes": true,
 			"hasEdgeAttributes": true,
-			"labeled": false
+			"labeled": false,
+			"sources": [
+				{
+					"source": "pajek",
+					"downloads": [
+						{
+							"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/collab/NetScience.zip",
+							"format": "pajek"
+						}
+					]
+				}
+			]
 		},
 		"pajek-odlis": {
 			"id": "pajek-odlis",
 			"name": "ODLIS Dictionary",
 			"description": "Cross-reference network from the Online Dictionary for Library and Information Science.",
-			"source": "pajek",
-			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/dic/odlis/odlis.zip",
 			"citation": {
 				"authors": [
 					"Vladimir Batagelj",
@@ -2610,14 +3651,23 @@
 			"weighted": true,
 			"hasNodeAttributes": true,
 			"hasEdgeAttributes": true,
-			"labeled": false
+			"labeled": false,
+			"sources": [
+				{
+					"source": "pajek",
+					"downloads": [
+						{
+							"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/dic/odlis/odlis.zip",
+							"format": "pajek"
+						}
+					]
+				}
+			]
 		},
 		"pajek-sandi": {
 			"id": "pajek-sandi",
 			"name": "Graph Products Collaboration",
 			"description": "Two-mode network of authors and papers on graph products. 674 authors, 314 papers.",
-			"source": "pajek",
-			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/2mode/Sandi/sandi.net",
 			"citation": {
 				"authors": [
 					"Vladimir Batagelj",
@@ -2636,12 +3686,32 @@
 			"hasNodeAttributes": true,
 			"hasEdgeAttributes": true,
 			"labeled": false,
-			"alternateUrls": [
+			"sources": [
 				{
-					"url": "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/Sandi_sandi.tar.gz",
+					"source": "pajek",
+					"downloads": [
+						{
+							"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/2mode/Sandi/sandi.net",
+							"format": "pajek"
+						}
+					]
+				},
+				{
 					"source": "suitesparse",
-					"format": "matrix-market",
-					"description": "SuiteSparse Matrix Collection (Pajek/Sandi_sandi)"
+					"downloads": [
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/Sandi_sandi.tar.gz",
+							"format": "matrix-market"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/RB/Pajek/Sandi_sandi.tar.gz",
+							"format": "rutherford-boeing"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/mat/Pajek/Sandi_sandi.tar.gz",
+							"format": "matlab"
+						}
+					]
 				}
 			]
 		},
@@ -2649,8 +3719,6 @@
 			"id": "pajek-scimet",
 			"name": "Science of Science Citations",
 			"description": "Citation network from science of science research.",
-			"source": "pajek",
-			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/cite/SciMet.zip",
 			"citation": {
 				"authors": [
 					"Vladimir Batagelj",
@@ -2668,14 +3736,23 @@
 			"weighted": true,
 			"hasNodeAttributes": true,
 			"hasEdgeAttributes": true,
-			"labeled": false
+			"labeled": false,
+			"sources": [
+				{
+					"source": "pajek",
+					"downloads": [
+						{
+							"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/cite/SciMet.zip",
+							"format": "pajek"
+						}
+					]
+				}
+			]
 		},
 		"pajek-sept11": {
 			"id": "pajek-sept11",
 			"name": "September 11 News Network",
 			"description": "Daily network of September 11 news connections. 13,332 nodes, 243,447 links.",
-			"source": "pajek",
-			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/CRA/Days.zip",
 			"citation": {
 				"authors": [
 					"Vladimir Batagelj",
@@ -2694,12 +3771,32 @@
 			"hasNodeAttributes": true,
 			"hasEdgeAttributes": true,
 			"labeled": false,
-			"alternateUrls": [
+			"sources": [
 				{
-					"url": "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/Reuters911.tar.gz",
+					"source": "pajek",
+					"downloads": [
+						{
+							"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/CRA/Days.zip",
+							"format": "pajek"
+						}
+					]
+				},
+				{
 					"source": "suitesparse",
-					"format": "matrix-market",
-					"description": "SuiteSparse Matrix Collection (Pajek/Reuters911)"
+					"downloads": [
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/Reuters911.tar.gz",
+							"format": "matrix-market"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/RB/Pajek/Reuters911.tar.gz",
+							"format": "rutherford-boeing"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/mat/Pajek/Reuters911.tar.gz",
+							"format": "matlab"
+						}
+					]
 				}
 			]
 		},
@@ -2707,8 +3804,6 @@
 			"id": "pajek-smagri",
 			"name": "Scientometrics Citations",
 			"description": "Citation network from Scientometrics literature.",
-			"source": "pajek",
-			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/cite/SmaGri.zip",
 			"citation": {
 				"authors": [
 					"Vladimir Batagelj",
@@ -2726,14 +3821,23 @@
 			"weighted": true,
 			"hasNodeAttributes": true,
 			"hasEdgeAttributes": true,
-			"labeled": false
+			"labeled": false,
+			"sources": [
+				{
+					"source": "pajek",
+					"downloads": [
+						{
+							"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/cite/SmaGri.zip",
+							"format": "pajek"
+						}
+					]
+				}
+			]
 		},
 		"pajek-smallw": {
 			"id": "pajek-smallw",
 			"name": "Small World Citations",
 			"description": "Citation network around small-world research papers.",
-			"source": "pajek",
-			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/cite/SmallW.zip",
 			"citation": {
 				"authors": [
 					"Vladimir Batagelj",
@@ -2751,14 +3855,23 @@
 			"weighted": true,
 			"hasNodeAttributes": true,
 			"hasEdgeAttributes": true,
-			"labeled": false
+			"labeled": false,
+			"sources": [
+				{
+					"source": "pajek",
+					"downloads": [
+						{
+							"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/cite/SmallW.zip",
+							"format": "pajek"
+						}
+					]
+				}
+			]
 		},
 		"pajek-stranke94": {
 			"id": "pajek-stranke94",
 			"name": "Slovene Political Parties 1994",
 			"description": "Perceived closeness between Slovenian political parties, 1994.",
-			"source": "pajek",
-			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/soc/Samo/Stranke94.net",
 			"citation": {
 				"authors": [
 					"Vladimir Batagelj",
@@ -2776,14 +3889,23 @@
 			"weighted": true,
 			"hasNodeAttributes": false,
 			"hasEdgeAttributes": true,
-			"labeled": false
+			"labeled": false,
+			"sources": [
+				{
+					"source": "pajek",
+					"downloads": [
+						{
+							"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/soc/Samo/Stranke94.net",
+							"format": "pajek"
+						}
+					]
+				}
+			]
 		},
 		"pajek-tina": {
 			"id": "pajek-tina",
 			"name": "Tina Social Network",
 			"description": "Multi-relational social network study (discussion/cognitive agreement).",
-			"source": "pajek",
-			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/soc/Tina/tina.zip",
 			"citation": {
 				"authors": [
 					"Vladimir Batagelj",
@@ -2801,14 +3923,23 @@
 			"weighted": true,
 			"hasNodeAttributes": true,
 			"hasEdgeAttributes": true,
-			"labeled": false
+			"labeled": false,
+			"sources": [
+				{
+					"source": "pajek",
+					"downloads": [
+						{
+							"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/soc/Tina/tina.zip",
+							"format": "pajek"
+						}
+					]
+				}
+			]
 		},
 		"pajek-uspowergrid": {
 			"id": "pajek-uspowergrid",
 			"name": "Western US power grid topology",
 			"description": "Western US power grid topology.",
-			"source": "suitesparse",
-			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
 			"citation": {
 				"authors": [
 					"D. Watts",
@@ -2826,14 +3957,40 @@
 			"weighted": false,
 			"hasNodeAttributes": false,
 			"hasEdgeAttributes": false,
-			"labeled": false
+			"labeled": false,
+			"sources": [
+				{
+					"source": "pajek",
+					"downloads": [
+						{
+							"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
+							"format": "pajek"
+						}
+					]
+				},
+				{
+					"source": "suitesparse",
+					"downloads": [
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/USpowerGrid.tar.gz",
+							"format": "matrix-market"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/RB/Pajek/USpowerGrid.tar.gz",
+							"format": "rutherford-boeing"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/mat/Pajek/USpowerGrid.tar.gz",
+							"format": "matlab"
+						}
+					]
+				}
+			]
 		},
 		"pajek-wordnet": {
 			"id": "pajek-wordnet",
 			"name": "WordNet",
 			"description": "Lexical reference network from Princeton WordNet. 82,670 synsets, 133,445 relations.",
-			"source": "pajek",
-			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/dic/Wordnet/wordNet.zip",
 			"citation": {
 				"authors": [
 					"G. A. Miller"
@@ -2852,12 +4009,32 @@
 			"hasNodeAttributes": true,
 			"hasEdgeAttributes": true,
 			"labeled": false,
-			"alternateUrls": [
+			"sources": [
 				{
-					"url": "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/Wordnet3.tar.gz",
+					"source": "pajek",
+					"downloads": [
+						{
+							"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/dic/Wordnet/wordNet.zip",
+							"format": "pajek"
+						}
+					]
+				},
+				{
 					"source": "suitesparse",
-					"format": "matrix-market",
-					"description": "SuiteSparse Matrix Collection (Pajek/Wordnet3)"
+					"downloads": [
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/Wordnet3.tar.gz",
+							"format": "matrix-market"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/RB/Pajek/Wordnet3.tar.gz",
+							"format": "rutherford-boeing"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/mat/Pajek/Wordnet3.tar.gz",
+							"format": "matlab"
+						}
+					]
 				}
 			]
 		},
@@ -2865,8 +4042,6 @@
 			"id": "pajek-worldcities",
 			"name": "Two-mode network of world cities and their attributes",
 			"description": "Two-mode network of world cities and their attributes.",
-			"source": "suitesparse",
-			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
 			"citation": {
 				"authors": [
 					"V. Batagelj",
@@ -2884,14 +4059,40 @@
 			"weighted": true,
 			"hasNodeAttributes": false,
 			"hasEdgeAttributes": true,
-			"labeled": false
+			"labeled": false,
+			"sources": [
+				{
+					"source": "pajek",
+					"downloads": [
+						{
+							"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
+							"format": "pajek"
+						}
+					]
+				},
+				{
+					"source": "suitesparse",
+					"downloads": [
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/WorldCities.tar.gz",
+							"format": "matrix-market"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/RB/Pajek/WorldCities.tar.gz",
+							"format": "rutherford-boeing"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/mat/Pajek/WorldCities.tar.gz",
+							"format": "matlab"
+						}
+					]
+				}
+			]
 		},
 		"pajek-zewail": {
 			"id": "pajek-zewail",
 			"name": "Zewail Citations",
 			"description": "Citation network around Ahmed Zewail's femtochemistry research.",
-			"source": "pajek",
-			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/cite/Zewail.zip",
 			"citation": {
 				"authors": [
 					"Vladimir Batagelj",
@@ -2909,14 +4110,23 @@
 			"weighted": true,
 			"hasNodeAttributes": true,
 			"hasEdgeAttributes": true,
-			"labeled": false
+			"labeled": false,
+			"sources": [
+				{
+					"source": "pajek",
+					"downloads": [
+						{
+							"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/cite/Zewail.zip",
+							"format": "pajek"
+						}
+					]
+				}
+			]
 		},
 		"polblogs": {
 			"id": "polblogs",
 			"name": "Political Blogs",
 			"description": "Directed network of hyperlinks between weblogs on US politics, recorded in 2005. The 'value' property indicates political leaning: 0 for left/liberal, 1 for right/conservative.",
-			"source": "newman",
-			"url": "https://websites.umich.edu/~mejn/netdata/polblogs.zip",
 			"citation": {
 				"authors": [
 					"L. A. Adamic",
@@ -2937,14 +4147,23 @@
 			"weighted": false,
 			"hasNodeAttributes": true,
 			"hasEdgeAttributes": false,
-			"labeled": true
+			"labeled": true,
+			"sources": [
+				{
+					"source": "newman",
+					"downloads": [
+						{
+							"url": "https://websites.umich.edu/~mejn/netdata/polblogs.zip",
+							"format": "gml"
+						}
+					]
+				}
+			]
 		},
 		"polbooks": {
 			"id": "polbooks",
 			"name": "Books about US Politics",
 			"description": "Network of books about US politics published around the time of the 2004 presidential election, sold by Amazon.com. Edges connect books frequently co-purchased by the same buyers. The 'value' property indicates political alignment: 'l' for liberal, 'n' for neutral, 'c' for conservative.",
-			"source": "newman",
-			"url": "https://websites.umich.edu/~mejn/netdata/polbooks.zip",
 			"citation": {
 				"authors": [
 					"V. Krebs"
@@ -2962,14 +4181,23 @@
 			"weighted": false,
 			"hasNodeAttributes": true,
 			"hasEdgeAttributes": false,
-			"labeled": true
+			"labeled": true,
+			"sources": [
+				{
+					"source": "newman",
+					"downloads": [
+						{
+							"url": "https://websites.umich.edu/~mejn/netdata/polbooks.zip",
+							"format": "gml"
+						}
+					]
+				}
+			]
 		},
 		"power": {
 			"id": "power",
 			"name": "Western States Power Grid",
 			"description": "Undirected, unweighted network representing the topology of the Western States Power Grid of the United States. Nodes represent generators, transformers, and substations.",
-			"source": "newman",
-			"url": "https://websites.umich.edu/~mejn/netdata/power.zip",
 			"citation": {
 				"authors": [
 					"D. J. Watts",
@@ -2991,14 +4219,23 @@
 			"weighted": false,
 			"hasNodeAttributes": false,
 			"hasEdgeAttributes": false,
-			"labeled": false
+			"labeled": false,
+			"sources": [
+				{
+					"source": "newman",
+					"downloads": [
+						{
+							"url": "https://websites.umich.edu/~mejn/netdata/power.zip",
+							"format": "gml"
+						}
+					]
+				}
+			]
 		},
 		"roadnet-tx": {
 			"id": "roadnet-tx",
 			"name": "Texas Road Network",
 			"description": "Road network of Texas.",
-			"source": "snap",
-			"url": "https://snap.stanford.edu/data/roadNet-TX.txt.gz",
 			"citation": {
 				"authors": [
 					"J. Leskovec",
@@ -3019,14 +4256,23 @@
 			"weighted": false,
 			"hasNodeAttributes": false,
 			"hasEdgeAttributes": false,
-			"labeled": false
+			"labeled": false,
+			"sources": [
+				{
+					"source": "snap",
+					"downloads": [
+						{
+							"url": "https://snap.stanford.edu/data/roadNet-TX.txt.gz",
+							"format": "various"
+						}
+					]
+				}
+			]
 		},
 		"roget": {
 			"id": "roget",
 			"name": "Roget's Thesaurus",
 			"description": "Network of cross-references in Roget's Thesaurus.",
-			"source": "pajek",
-			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/dic/roget/Roget.zip",
 			"citation": {
 				"authors": [
 					"Vladimir Batagelj",
@@ -3045,12 +4291,32 @@
 			"hasNodeAttributes": true,
 			"hasEdgeAttributes": true,
 			"labeled": false,
-			"alternateUrls": [
+			"sources": [
 				{
-					"url": "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/Roget.tar.gz",
+					"source": "pajek",
+					"downloads": [
+						{
+							"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/dic/roget/Roget.zip",
+							"format": "pajek"
+						}
+					]
+				},
+				{
 					"source": "suitesparse",
-					"format": "matrix-market",
-					"description": "SuiteSparse Matrix Collection (Pajek/Roget)"
+					"downloads": [
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/Roget.tar.gz",
+							"format": "matrix-market"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/RB/Pajek/Roget.tar.gz",
+							"format": "rutherford-boeing"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/mat/Pajek/Roget.tar.gz",
+							"format": "matlab"
+						}
+					]
 				}
 			]
 		},
@@ -3058,8 +4324,6 @@
 			"id": "soc-epinions",
 			"name": "Epinions Trust Network",
 			"description": "Who-trusts-whom network of Epinions.com.",
-			"source": "snap",
-			"url": "https://snap.stanford.edu/data/soc-Epinions1.txt.gz",
 			"citation": {
 				"authors": [
 					"M. Richardson",
@@ -3079,14 +4343,23 @@
 			"weighted": false,
 			"hasNodeAttributes": false,
 			"hasEdgeAttributes": false,
-			"labeled": false
+			"labeled": false,
+			"sources": [
+				{
+					"source": "snap",
+					"downloads": [
+						{
+							"url": "https://snap.stanford.edu/data/soc-Epinions1.txt.gz",
+							"format": "various"
+						}
+					]
+				}
+			]
 		},
 		"soc-slashdot0811": {
 			"id": "soc-slashdot0811",
 			"name": "Slashdot Network Nov 2008",
 			"description": "Slashdot social network from November 2008.",
-			"source": "snap",
-			"url": "https://snap.stanford.edu/data/soc-Slashdot0811.txt.gz",
 			"citation": {
 				"authors": [
 					"Jure Leskovec",
@@ -3104,14 +4377,23 @@
 			"weighted": false,
 			"hasNodeAttributes": false,
 			"hasEdgeAttributes": false,
-			"labeled": false
+			"labeled": false,
+			"sources": [
+				{
+					"source": "snap",
+					"downloads": [
+						{
+							"url": "https://snap.stanford.edu/data/soc-Slashdot0811.txt.gz",
+							"format": "various"
+						}
+					]
+				}
+			]
 		},
 		"soc-slashdot0902": {
 			"id": "soc-slashdot0902",
 			"name": "Slashdot Network Feb 2009",
 			"description": "Slashdot social network from February 2009.",
-			"source": "snap",
-			"url": "https://snap.stanford.edu/data/soc-Slashdot0902.txt.gz",
 			"citation": {
 				"authors": [
 					"Jure Leskovec",
@@ -3129,14 +4411,23 @@
 			"weighted": false,
 			"hasNodeAttributes": false,
 			"hasEdgeAttributes": false,
-			"labeled": false
+			"labeled": false,
+			"sources": [
+				{
+					"source": "snap",
+					"downloads": [
+						{
+							"url": "https://snap.stanford.edu/data/soc-Slashdot0902.txt.gz",
+							"format": "various"
+						}
+					]
+				}
+			]
 		},
 		"ss-pajek-cities": {
 			"id": "ss-pajek-cities",
 			"name": "Two-mode network of cities and their features",
 			"description": "Two-mode network of cities and their features.",
-			"source": "suitesparse",
-			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
 			"citation": {
 				"authors": [
 					"V. Batagelj",
@@ -3154,14 +4445,40 @@
 			"weighted": true,
 			"hasNodeAttributes": false,
 			"hasEdgeAttributes": true,
-			"labeled": false
+			"labeled": false,
+			"sources": [
+				{
+					"source": "pajek",
+					"downloads": [
+						{
+							"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
+							"format": "pajek"
+						}
+					]
+				},
+				{
+					"source": "suitesparse",
+					"downloads": [
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/Cities.tar.gz",
+							"format": "matrix-market"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/RB/Pajek/Cities.tar.gz",
+							"format": "rutherford-boeing"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/mat/Pajek/Cities.tar.gz",
+							"format": "matlab"
+						}
+					]
+				}
+			]
 		},
 		"ss-pajek-dictionary28": {
 			"id": "ss-pajek-dictionary28",
 			"name": "Word adjacency network from a dictionary",
 			"description": "Word adjacency network from a dictionary. Edges connect words differing by one letter.",
-			"source": "suitesparse",
-			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
 			"citation": {
 				"authors": [
 					"V. Batagelj",
@@ -3179,14 +4496,40 @@
 			"weighted": false,
 			"hasNodeAttributes": true,
 			"hasEdgeAttributes": false,
-			"labeled": false
+			"labeled": false,
+			"sources": [
+				{
+					"source": "pajek",
+					"downloads": [
+						{
+							"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
+							"format": "pajek"
+						}
+					]
+				},
+				{
+					"source": "suitesparse",
+					"downloads": [
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/dictionary28.tar.gz",
+							"format": "matrix-market"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/RB/Pajek/dictionary28.tar.gz",
+							"format": "rutherford-boeing"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/mat/Pajek/dictionary28.tar.gz",
+							"format": "matlab"
+						}
+					]
+				}
+			]
 		},
 		"ss-pajek-divorce": {
 			"id": "ss-pajek-divorce",
 			"name": "Two-mode network of 50 divorce cases and 9 predictor variables",
 			"description": "Two-mode network of 50 divorce cases and 9 predictor variables.",
-			"source": "suitesparse",
-			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
 			"citation": {
 				"authors": [
 					"V. Batagelj",
@@ -3204,14 +4547,40 @@
 			"weighted": false,
 			"hasNodeAttributes": false,
 			"hasEdgeAttributes": false,
-			"labeled": false
+			"labeled": false,
+			"sources": [
+				{
+					"source": "pajek",
+					"downloads": [
+						{
+							"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
+							"format": "pajek"
+						}
+					]
+				},
+				{
+					"source": "suitesparse",
+					"downloads": [
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/divorce.tar.gz",
+							"format": "matrix-market"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/RB/Pajek/divorce.tar.gz",
+							"format": "rutherford-boeing"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/mat/Pajek/divorce.tar.gz",
+							"format": "matlab"
+						}
+					]
+				}
+			]
 		},
 		"ss-pajek-eat-sr": {
 			"id": "ss-pajek-eat-sr",
 			"name": "Edinburgh Associative Thesaurus, response-stimulus direction",
 			"description": "Edinburgh Associative Thesaurus, response-stimulus direction.",
-			"source": "suitesparse",
-			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
 			"citation": {
 				"authors": [
 					"G. Kiss",
@@ -3231,14 +4600,40 @@
 			"weighted": true,
 			"hasNodeAttributes": true,
 			"hasEdgeAttributes": true,
-			"labeled": false
+			"labeled": false,
+			"sources": [
+				{
+					"source": "pajek",
+					"downloads": [
+						{
+							"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
+							"format": "pajek"
+						}
+					]
+				},
+				{
+					"source": "suitesparse",
+					"downloads": [
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/EAT_SR.tar.gz",
+							"format": "matrix-market"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/RB/Pajek/EAT_SR.tar.gz",
+							"format": "rutherford-boeing"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/mat/Pajek/EAT_SR.tar.gz",
+							"format": "matlab"
+						}
+					]
+				}
+			]
 		},
 		"ss-pajek-eva": {
 			"id": "ss-pajek-eva",
 			"name": "Citation network from EVA (Electronic Visualisation and the Arts) conference proceedings",
 			"description": "Citation network from EVA (Electronic Visualisation and the Arts) conference proceedings.",
-			"source": "suitesparse",
-			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
 			"citation": {
 				"authors": [
 					"V. Batagelj",
@@ -3256,14 +4651,40 @@
 			"weighted": false,
 			"hasNodeAttributes": true,
 			"hasEdgeAttributes": false,
-			"labeled": false
+			"labeled": false,
+			"sources": [
+				{
+					"source": "pajek",
+					"downloads": [
+						{
+							"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
+							"format": "pajek"
+						}
+					]
+				},
+				{
+					"source": "suitesparse",
+					"downloads": [
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/EVA.tar.gz",
+							"format": "matrix-market"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/RB/Pajek/EVA.tar.gz",
+							"format": "rutherford-boeing"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/mat/Pajek/EVA.tar.gz",
+							"format": "matlab"
+						}
+					]
+				}
+			]
 		},
 		"ss-pajek-fa": {
 			"id": "ss-pajek-fa",
 			"name": "Web graph of Slovenian research agency (ARRS) pages",
 			"description": "Web graph of Slovenian research agency (ARRS) pages.",
-			"source": "suitesparse",
-			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
 			"citation": {
 				"authors": [
 					"V. Batagelj",
@@ -3281,14 +4702,40 @@
 			"weighted": true,
 			"hasNodeAttributes": true,
 			"hasEdgeAttributes": true,
-			"labeled": false
+			"labeled": false,
+			"sources": [
+				{
+					"source": "pajek",
+					"downloads": [
+						{
+							"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
+							"format": "pajek"
+						}
+					]
+				},
+				{
+					"source": "suitesparse",
+					"downloads": [
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/FA.tar.gz",
+							"format": "matrix-market"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/RB/Pajek/FA.tar.gz",
+							"format": "rutherford-boeing"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/mat/Pajek/FA.tar.gz",
+							"format": "matlab"
+						}
+					]
+				}
+			]
 		},
 		"ss-pajek-gd00-a": {
 			"id": "ss-pajek-gd00-a",
 			"name": "Graph Drawing Contest 2000, graph A",
 			"description": "Graph Drawing Contest 2000, graph A.",
-			"source": "suitesparse",
-			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
 			"citation": {
 				"authors": [
 					"Graph Drawing"
@@ -3305,14 +4752,40 @@
 			"weighted": false,
 			"hasNodeAttributes": true,
 			"hasEdgeAttributes": false,
-			"labeled": false
+			"labeled": false,
+			"sources": [
+				{
+					"source": "pajek",
+					"downloads": [
+						{
+							"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
+							"format": "pajek"
+						}
+					]
+				},
+				{
+					"source": "suitesparse",
+					"downloads": [
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/GD00_a.tar.gz",
+							"format": "matrix-market"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/RB/Pajek/GD00_a.tar.gz",
+							"format": "rutherford-boeing"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/mat/Pajek/GD00_a.tar.gz",
+							"format": "matlab"
+						}
+					]
+				}
+			]
 		},
 		"ss-pajek-gd00-c": {
 			"id": "ss-pajek-gd00-c",
 			"name": "Graph Drawing Contest 2000, graph C",
 			"description": "Graph Drawing Contest 2000, graph C.",
-			"source": "suitesparse",
-			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
 			"citation": {
 				"authors": [
 					"Graph Drawing"
@@ -3329,14 +4802,40 @@
 			"weighted": true,
 			"hasNodeAttributes": true,
 			"hasEdgeAttributes": true,
-			"labeled": false
+			"labeled": false,
+			"sources": [
+				{
+					"source": "pajek",
+					"downloads": [
+						{
+							"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
+							"format": "pajek"
+						}
+					]
+				},
+				{
+					"source": "suitesparse",
+					"downloads": [
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/GD00_c.tar.gz",
+							"format": "matrix-market"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/RB/Pajek/GD00_c.tar.gz",
+							"format": "rutherford-boeing"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/mat/Pajek/GD00_c.tar.gz",
+							"format": "matlab"
+						}
+					]
+				}
+			]
 		},
 		"ss-pajek-gd01-a": {
 			"id": "ss-pajek-gd01-a",
 			"name": "Graph Drawing Contest 2001, graph A",
 			"description": "Graph Drawing Contest 2001, graph A.",
-			"source": "suitesparse",
-			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
 			"citation": {
 				"authors": [
 					"Graph Drawing"
@@ -3353,14 +4852,40 @@
 			"weighted": true,
 			"hasNodeAttributes": true,
 			"hasEdgeAttributes": true,
-			"labeled": false
+			"labeled": false,
+			"sources": [
+				{
+					"source": "pajek",
+					"downloads": [
+						{
+							"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
+							"format": "pajek"
+						}
+					]
+				},
+				{
+					"source": "suitesparse",
+					"downloads": [
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/GD01_a.tar.gz",
+							"format": "matrix-market"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/RB/Pajek/GD01_a.tar.gz",
+							"format": "rutherford-boeing"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/mat/Pajek/GD01_a.tar.gz",
+							"format": "matlab"
+						}
+					]
+				}
+			]
 		},
 		"ss-pajek-gd01-acap": {
 			"id": "ss-pajek-gd01-acap",
 			"name": "Graph Drawing Contest 2001, graph A capacities",
 			"description": "Graph Drawing Contest 2001, graph A capacities.",
-			"source": "suitesparse",
-			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
 			"citation": {
 				"authors": [
 					"Graph Drawing"
@@ -3377,14 +4902,40 @@
 			"weighted": true,
 			"hasNodeAttributes": true,
 			"hasEdgeAttributes": true,
-			"labeled": false
+			"labeled": false,
+			"sources": [
+				{
+					"source": "pajek",
+					"downloads": [
+						{
+							"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
+							"format": "pajek"
+						}
+					]
+				},
+				{
+					"source": "suitesparse",
+					"downloads": [
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/GD01_Acap.tar.gz",
+							"format": "matrix-market"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/RB/Pajek/GD01_Acap.tar.gz",
+							"format": "rutherford-boeing"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/mat/Pajek/GD01_Acap.tar.gz",
+							"format": "matlab"
+						}
+					]
+				}
+			]
 		},
 		"ss-pajek-gd01-b": {
 			"id": "ss-pajek-gd01-b",
 			"name": "Graph Drawing Contest 2001, graph B",
 			"description": "Graph Drawing Contest 2001, graph B.",
-			"source": "suitesparse",
-			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
 			"citation": {
 				"authors": [
 					"Graph Drawing"
@@ -3401,14 +4952,40 @@
 			"weighted": false,
 			"hasNodeAttributes": true,
 			"hasEdgeAttributes": false,
-			"labeled": false
+			"labeled": false,
+			"sources": [
+				{
+					"source": "pajek",
+					"downloads": [
+						{
+							"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
+							"format": "pajek"
+						}
+					]
+				},
+				{
+					"source": "suitesparse",
+					"downloads": [
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/GD01_b.tar.gz",
+							"format": "matrix-market"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/RB/Pajek/GD01_b.tar.gz",
+							"format": "rutherford-boeing"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/mat/Pajek/GD01_b.tar.gz",
+							"format": "matlab"
+						}
+					]
+				}
+			]
 		},
 		"ss-pajek-gd01-c": {
 			"id": "ss-pajek-gd01-c",
 			"name": "Graph Drawing Contest 2001, graph C",
 			"description": "Graph Drawing Contest 2001, graph C.",
-			"source": "suitesparse",
-			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
 			"citation": {
 				"authors": [
 					"Graph Drawing"
@@ -3425,14 +5002,40 @@
 			"weighted": true,
 			"hasNodeAttributes": true,
 			"hasEdgeAttributes": true,
-			"labeled": false
+			"labeled": false,
+			"sources": [
+				{
+					"source": "pajek",
+					"downloads": [
+						{
+							"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
+							"format": "pajek"
+						}
+					]
+				},
+				{
+					"source": "suitesparse",
+					"downloads": [
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/GD01_c.tar.gz",
+							"format": "matrix-market"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/RB/Pajek/GD01_c.tar.gz",
+							"format": "rutherford-boeing"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/mat/Pajek/GD01_c.tar.gz",
+							"format": "matlab"
+						}
+					]
+				}
+			]
 		},
 		"ss-pajek-gd02-a": {
 			"id": "ss-pajek-gd02-a",
 			"name": "Graph Drawing Contest 2002, graph A",
 			"description": "Graph Drawing Contest 2002, graph A.",
-			"source": "suitesparse",
-			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
 			"citation": {
 				"authors": [
 					"Graph Drawing"
@@ -3449,14 +5052,40 @@
 			"weighted": false,
 			"hasNodeAttributes": true,
 			"hasEdgeAttributes": false,
-			"labeled": false
+			"labeled": false,
+			"sources": [
+				{
+					"source": "pajek",
+					"downloads": [
+						{
+							"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
+							"format": "pajek"
+						}
+					]
+				},
+				{
+					"source": "suitesparse",
+					"downloads": [
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/GD02_a.tar.gz",
+							"format": "matrix-market"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/RB/Pajek/GD02_a.tar.gz",
+							"format": "rutherford-boeing"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/mat/Pajek/GD02_a.tar.gz",
+							"format": "matlab"
+						}
+					]
+				}
+			]
 		},
 		"ss-pajek-gd02-b": {
 			"id": "ss-pajek-gd02-b",
 			"name": "Graph Drawing Contest 2002, graph B",
 			"description": "Graph Drawing Contest 2002, graph B.",
-			"source": "suitesparse",
-			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
 			"citation": {
 				"authors": [
 					"Graph Drawing"
@@ -3473,14 +5102,40 @@
 			"weighted": false,
 			"hasNodeAttributes": true,
 			"hasEdgeAttributes": false,
-			"labeled": false
+			"labeled": false,
+			"sources": [
+				{
+					"source": "pajek",
+					"downloads": [
+						{
+							"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
+							"format": "pajek"
+						}
+					]
+				},
+				{
+					"source": "suitesparse",
+					"downloads": [
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/GD02_b.tar.gz",
+							"format": "matrix-market"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/RB/Pajek/GD02_b.tar.gz",
+							"format": "rutherford-boeing"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/mat/Pajek/GD02_b.tar.gz",
+							"format": "matlab"
+						}
+					]
+				}
+			]
 		},
 		"ss-pajek-gd06-java": {
 			"id": "ss-pajek-gd06-java",
 			"name": "Graph Drawing Contest 2006, Java class dependency graph",
 			"description": "Graph Drawing Contest 2006, Java class dependency graph.",
-			"source": "suitesparse",
-			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
 			"citation": {
 				"authors": [
 					"Graph Drawing"
@@ -3497,14 +5152,40 @@
 			"weighted": false,
 			"hasNodeAttributes": true,
 			"hasEdgeAttributes": false,
-			"labeled": false
+			"labeled": false,
+			"sources": [
+				{
+					"source": "pajek",
+					"downloads": [
+						{
+							"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
+							"format": "pajek"
+						}
+					]
+				},
+				{
+					"source": "suitesparse",
+					"downloads": [
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/GD06_Java.tar.gz",
+							"format": "matrix-market"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/RB/Pajek/GD06_Java.tar.gz",
+							"format": "rutherford-boeing"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/mat/Pajek/GD06_Java.tar.gz",
+							"format": "matlab"
+						}
+					]
+				}
+			]
 		},
 		"ss-pajek-gd06-theory": {
 			"id": "ss-pajek-gd06-theory",
 			"name": "Graph Drawing Contest 2006, theory graph",
 			"description": "Graph Drawing Contest 2006, theory graph.",
-			"source": "suitesparse",
-			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
 			"citation": {
 				"authors": [
 					"Graph Drawing"
@@ -3521,14 +5202,40 @@
 			"weighted": false,
 			"hasNodeAttributes": false,
 			"hasEdgeAttributes": false,
-			"labeled": false
+			"labeled": false,
+			"sources": [
+				{
+					"source": "pajek",
+					"downloads": [
+						{
+							"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
+							"format": "pajek"
+						}
+					]
+				},
+				{
+					"source": "suitesparse",
+					"downloads": [
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/GD06_theory.tar.gz",
+							"format": "matrix-market"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/RB/Pajek/GD06_theory.tar.gz",
+							"format": "rutherford-boeing"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/mat/Pajek/GD06_theory.tar.gz",
+							"format": "matlab"
+						}
+					]
+				}
+			]
 		},
 		"ss-pajek-gd95-a": {
 			"id": "ss-pajek-gd95-a",
 			"name": "Graph Drawing Contest 1995, graph A",
 			"description": "Graph Drawing Contest 1995, graph A.",
-			"source": "suitesparse",
-			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
 			"citation": {
 				"authors": [
 					"Graph Drawing"
@@ -3545,14 +5252,40 @@
 			"weighted": false,
 			"hasNodeAttributes": true,
 			"hasEdgeAttributes": false,
-			"labeled": false
+			"labeled": false,
+			"sources": [
+				{
+					"source": "pajek",
+					"downloads": [
+						{
+							"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
+							"format": "pajek"
+						}
+					]
+				},
+				{
+					"source": "suitesparse",
+					"downloads": [
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/GD95_a.tar.gz",
+							"format": "matrix-market"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/RB/Pajek/GD95_a.tar.gz",
+							"format": "rutherford-boeing"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/mat/Pajek/GD95_a.tar.gz",
+							"format": "matlab"
+						}
+					]
+				}
+			]
 		},
 		"ss-pajek-gd95-b": {
 			"id": "ss-pajek-gd95-b",
 			"name": "Graph Drawing Contest 1995, graph B",
 			"description": "Graph Drawing Contest 1995, graph B.",
-			"source": "suitesparse",
-			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
 			"citation": {
 				"authors": [
 					"Graph Drawing"
@@ -3569,14 +5302,40 @@
 			"weighted": false,
 			"hasNodeAttributes": true,
 			"hasEdgeAttributes": false,
-			"labeled": false
+			"labeled": false,
+			"sources": [
+				{
+					"source": "pajek",
+					"downloads": [
+						{
+							"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
+							"format": "pajek"
+						}
+					]
+				},
+				{
+					"source": "suitesparse",
+					"downloads": [
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/GD95_b.tar.gz",
+							"format": "matrix-market"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/RB/Pajek/GD95_b.tar.gz",
+							"format": "rutherford-boeing"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/mat/Pajek/GD95_b.tar.gz",
+							"format": "matlab"
+						}
+					]
+				}
+			]
 		},
 		"ss-pajek-gd95-c": {
 			"id": "ss-pajek-gd95-c",
 			"name": "Graph Drawing Contest 1995, graph C",
 			"description": "Graph Drawing Contest 1995, graph C.",
-			"source": "suitesparse",
-			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
 			"citation": {
 				"authors": [
 					"Graph Drawing"
@@ -3593,14 +5352,40 @@
 			"weighted": false,
 			"hasNodeAttributes": true,
 			"hasEdgeAttributes": false,
-			"labeled": false
+			"labeled": false,
+			"sources": [
+				{
+					"source": "pajek",
+					"downloads": [
+						{
+							"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
+							"format": "pajek"
+						}
+					]
+				},
+				{
+					"source": "suitesparse",
+					"downloads": [
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/GD95_c.tar.gz",
+							"format": "matrix-market"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/RB/Pajek/GD95_c.tar.gz",
+							"format": "rutherford-boeing"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/mat/Pajek/GD95_c.tar.gz",
+							"format": "matlab"
+						}
+					]
+				}
+			]
 		},
 		"ss-pajek-gd96-a": {
 			"id": "ss-pajek-gd96-a",
 			"name": "Graph Drawing Contest 1996, graph A",
 			"description": "Graph Drawing Contest 1996, graph A.",
-			"source": "suitesparse",
-			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
 			"citation": {
 				"authors": [
 					"Graph Drawing"
@@ -3617,14 +5402,40 @@
 			"weighted": true,
 			"hasNodeAttributes": true,
 			"hasEdgeAttributes": true,
-			"labeled": false
+			"labeled": false,
+			"sources": [
+				{
+					"source": "pajek",
+					"downloads": [
+						{
+							"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
+							"format": "pajek"
+						}
+					]
+				},
+				{
+					"source": "suitesparse",
+					"downloads": [
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/GD96_a.tar.gz",
+							"format": "matrix-market"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/RB/Pajek/GD96_a.tar.gz",
+							"format": "rutherford-boeing"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/mat/Pajek/GD96_a.tar.gz",
+							"format": "matlab"
+						}
+					]
+				}
+			]
 		},
 		"ss-pajek-gd96-b": {
 			"id": "ss-pajek-gd96-b",
 			"name": "Graph Drawing Contest 1996, graph B",
 			"description": "Graph Drawing Contest 1996, graph B.",
-			"source": "suitesparse",
-			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
 			"citation": {
 				"authors": [
 					"Graph Drawing"
@@ -3641,14 +5452,40 @@
 			"weighted": false,
 			"hasNodeAttributes": true,
 			"hasEdgeAttributes": false,
-			"labeled": false
+			"labeled": false,
+			"sources": [
+				{
+					"source": "pajek",
+					"downloads": [
+						{
+							"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
+							"format": "pajek"
+						}
+					]
+				},
+				{
+					"source": "suitesparse",
+					"downloads": [
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/GD96_b.tar.gz",
+							"format": "matrix-market"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/RB/Pajek/GD96_b.tar.gz",
+							"format": "rutherford-boeing"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/mat/Pajek/GD96_b.tar.gz",
+							"format": "matlab"
+						}
+					]
+				}
+			]
 		},
 		"ss-pajek-gd96-c": {
 			"id": "ss-pajek-gd96-c",
 			"name": "Graph Drawing Contest 1996, graph C",
 			"description": "Graph Drawing Contest 1996, graph C.",
-			"source": "suitesparse",
-			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
 			"citation": {
 				"authors": [
 					"Graph Drawing"
@@ -3665,14 +5502,40 @@
 			"weighted": false,
 			"hasNodeAttributes": true,
 			"hasEdgeAttributes": false,
-			"labeled": false
+			"labeled": false,
+			"sources": [
+				{
+					"source": "pajek",
+					"downloads": [
+						{
+							"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
+							"format": "pajek"
+						}
+					]
+				},
+				{
+					"source": "suitesparse",
+					"downloads": [
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/GD96_c.tar.gz",
+							"format": "matrix-market"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/RB/Pajek/GD96_c.tar.gz",
+							"format": "rutherford-boeing"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/mat/Pajek/GD96_c.tar.gz",
+							"format": "matlab"
+						}
+					]
+				}
+			]
 		},
 		"ss-pajek-gd96-d": {
 			"id": "ss-pajek-gd96-d",
 			"name": "Graph Drawing Contest 1996, graph D",
 			"description": "Graph Drawing Contest 1996, graph D.",
-			"source": "suitesparse",
-			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
 			"citation": {
 				"authors": [
 					"Graph Drawing"
@@ -3689,14 +5552,40 @@
 			"weighted": false,
 			"hasNodeAttributes": true,
 			"hasEdgeAttributes": false,
-			"labeled": false
+			"labeled": false,
+			"sources": [
+				{
+					"source": "pajek",
+					"downloads": [
+						{
+							"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
+							"format": "pajek"
+						}
+					]
+				},
+				{
+					"source": "suitesparse",
+					"downloads": [
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/GD96_d.tar.gz",
+							"format": "matrix-market"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/RB/Pajek/GD96_d.tar.gz",
+							"format": "rutherford-boeing"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/mat/Pajek/GD96_d.tar.gz",
+							"format": "matlab"
+						}
+					]
+				}
+			]
 		},
 		"ss-pajek-gd97-a": {
 			"id": "ss-pajek-gd97-a",
 			"name": "Graph Drawing Contest 1997, graph A",
 			"description": "Graph Drawing Contest 1997, graph A.",
-			"source": "suitesparse",
-			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
 			"citation": {
 				"authors": [
 					"Graph Drawing"
@@ -3713,14 +5602,40 @@
 			"weighted": false,
 			"hasNodeAttributes": false,
 			"hasEdgeAttributes": false,
-			"labeled": false
+			"labeled": false,
+			"sources": [
+				{
+					"source": "pajek",
+					"downloads": [
+						{
+							"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
+							"format": "pajek"
+						}
+					]
+				},
+				{
+					"source": "suitesparse",
+					"downloads": [
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/GD97_a.tar.gz",
+							"format": "matrix-market"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/RB/Pajek/GD97_a.tar.gz",
+							"format": "rutherford-boeing"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/mat/Pajek/GD97_a.tar.gz",
+							"format": "matlab"
+						}
+					]
+				}
+			]
 		},
 		"ss-pajek-gd97-b": {
 			"id": "ss-pajek-gd97-b",
 			"name": "Graph Drawing Contest 1997, graph B",
 			"description": "Graph Drawing Contest 1997, graph B.",
-			"source": "suitesparse",
-			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
 			"citation": {
 				"authors": [
 					"Graph Drawing"
@@ -3737,14 +5652,40 @@
 			"weighted": true,
 			"hasNodeAttributes": true,
 			"hasEdgeAttributes": true,
-			"labeled": false
+			"labeled": false,
+			"sources": [
+				{
+					"source": "pajek",
+					"downloads": [
+						{
+							"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
+							"format": "pajek"
+						}
+					]
+				},
+				{
+					"source": "suitesparse",
+					"downloads": [
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/GD97_b.tar.gz",
+							"format": "matrix-market"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/RB/Pajek/GD97_b.tar.gz",
+							"format": "rutherford-boeing"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/mat/Pajek/GD97_b.tar.gz",
+							"format": "matlab"
+						}
+					]
+				}
+			]
 		},
 		"ss-pajek-gd97-c": {
 			"id": "ss-pajek-gd97-c",
 			"name": "Graph Drawing Contest 1997, graph C",
 			"description": "Graph Drawing Contest 1997, graph C.",
-			"source": "suitesparse",
-			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
 			"citation": {
 				"authors": [
 					"Graph Drawing"
@@ -3761,14 +5702,40 @@
 			"weighted": true,
 			"hasNodeAttributes": false,
 			"hasEdgeAttributes": true,
-			"labeled": false
+			"labeled": false,
+			"sources": [
+				{
+					"source": "pajek",
+					"downloads": [
+						{
+							"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
+							"format": "pajek"
+						}
+					]
+				},
+				{
+					"source": "suitesparse",
+					"downloads": [
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/GD97_c.tar.gz",
+							"format": "matrix-market"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/RB/Pajek/GD97_c.tar.gz",
+							"format": "rutherford-boeing"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/mat/Pajek/GD97_c.tar.gz",
+							"format": "matlab"
+						}
+					]
+				}
+			]
 		},
 		"ss-pajek-gd98-a": {
 			"id": "ss-pajek-gd98-a",
 			"name": "Graph Drawing Contest 1998, graph A",
 			"description": "Graph Drawing Contest 1998, graph A.",
-			"source": "suitesparse",
-			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
 			"citation": {
 				"authors": [
 					"Graph Drawing"
@@ -3785,14 +5752,40 @@
 			"weighted": false,
 			"hasNodeAttributes": true,
 			"hasEdgeAttributes": false,
-			"labeled": false
+			"labeled": false,
+			"sources": [
+				{
+					"source": "pajek",
+					"downloads": [
+						{
+							"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
+							"format": "pajek"
+						}
+					]
+				},
+				{
+					"source": "suitesparse",
+					"downloads": [
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/GD98_a.tar.gz",
+							"format": "matrix-market"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/RB/Pajek/GD98_a.tar.gz",
+							"format": "rutherford-boeing"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/mat/Pajek/GD98_a.tar.gz",
+							"format": "matlab"
+						}
+					]
+				}
+			]
 		},
 		"ss-pajek-gd98-b": {
 			"id": "ss-pajek-gd98-b",
 			"name": "Graph Drawing Contest 1998, graph B",
 			"description": "Graph Drawing Contest 1998, graph B.",
-			"source": "suitesparse",
-			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
 			"citation": {
 				"authors": [
 					"Graph Drawing"
@@ -3809,14 +5802,40 @@
 			"weighted": false,
 			"hasNodeAttributes": true,
 			"hasEdgeAttributes": false,
-			"labeled": false
+			"labeled": false,
+			"sources": [
+				{
+					"source": "pajek",
+					"downloads": [
+						{
+							"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
+							"format": "pajek"
+						}
+					]
+				},
+				{
+					"source": "suitesparse",
+					"downloads": [
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/GD98_b.tar.gz",
+							"format": "matrix-market"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/RB/Pajek/GD98_b.tar.gz",
+							"format": "rutherford-boeing"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/mat/Pajek/GD98_b.tar.gz",
+							"format": "matlab"
+						}
+					]
+				}
+			]
 		},
 		"ss-pajek-gd98-c": {
 			"id": "ss-pajek-gd98-c",
 			"name": "Graph Drawing Contest 1998, graph C",
 			"description": "Graph Drawing Contest 1998, graph C.",
-			"source": "suitesparse",
-			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
 			"citation": {
 				"authors": [
 					"Graph Drawing"
@@ -3833,14 +5852,40 @@
 			"weighted": false,
 			"hasNodeAttributes": false,
 			"hasEdgeAttributes": false,
-			"labeled": false
+			"labeled": false,
+			"sources": [
+				{
+					"source": "pajek",
+					"downloads": [
+						{
+							"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
+							"format": "pajek"
+						}
+					]
+				},
+				{
+					"source": "suitesparse",
+					"downloads": [
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/GD98_c.tar.gz",
+							"format": "matrix-market"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/RB/Pajek/GD98_c.tar.gz",
+							"format": "rutherford-boeing"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/mat/Pajek/GD98_c.tar.gz",
+							"format": "matlab"
+						}
+					]
+				}
+			]
 		},
 		"ss-pajek-gd99-b": {
 			"id": "ss-pajek-gd99-b",
 			"name": "Graph Drawing Contest 1999, graph B",
 			"description": "Graph Drawing Contest 1999, graph B.",
-			"source": "suitesparse",
-			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
 			"citation": {
 				"authors": [
 					"Graph Drawing"
@@ -3857,14 +5902,40 @@
 			"weighted": true,
 			"hasNodeAttributes": true,
 			"hasEdgeAttributes": true,
-			"labeled": false
+			"labeled": false,
+			"sources": [
+				{
+					"source": "pajek",
+					"downloads": [
+						{
+							"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
+							"format": "pajek"
+						}
+					]
+				},
+				{
+					"source": "suitesparse",
+					"downloads": [
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/GD99_b.tar.gz",
+							"format": "matrix-market"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/RB/Pajek/GD99_b.tar.gz",
+							"format": "rutherford-boeing"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/mat/Pajek/GD99_b.tar.gz",
+							"format": "matlab"
+						}
+					]
+				}
+			]
 		},
 		"ss-pajek-gd99-c": {
 			"id": "ss-pajek-gd99-c",
 			"name": "Graph Drawing Contest 1999, graph C",
 			"description": "Graph Drawing Contest 1999, graph C.",
-			"source": "suitesparse",
-			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
 			"citation": {
 				"authors": [
 					"Graph Drawing"
@@ -3881,14 +5952,40 @@
 			"weighted": false,
 			"hasNodeAttributes": true,
 			"hasEdgeAttributes": false,
-			"labeled": false
+			"labeled": false,
+			"sources": [
+				{
+					"source": "pajek",
+					"downloads": [
+						{
+							"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
+							"format": "pajek"
+						}
+					]
+				},
+				{
+					"source": "suitesparse",
+					"downloads": [
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/GD99_c.tar.gz",
+							"format": "matrix-market"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/RB/Pajek/GD99_c.tar.gz",
+							"format": "rutherford-boeing"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/mat/Pajek/GD99_c.tar.gz",
+							"format": "matlab"
+						}
+					]
+				}
+			]
 		},
 		"ss-pajek-hep-th-new": {
 			"id": "ss-pajek-hep-th-new",
 			"name": "Updated citation network from high-energy physics theory papers on arXiv",
 			"description": "Updated citation network from high-energy physics theory papers on arXiv.",
-			"source": "suitesparse",
-			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
 			"citation": {
 				"authors": [
 					"KDD Cup"
@@ -3905,14 +6002,40 @@
 			"weighted": false,
 			"hasNodeAttributes": true,
 			"hasEdgeAttributes": false,
-			"labeled": false
+			"labeled": false,
+			"sources": [
+				{
+					"source": "pajek",
+					"downloads": [
+						{
+							"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
+							"format": "pajek"
+						}
+					]
+				},
+				{
+					"source": "suitesparse",
+					"downloads": [
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/HEP-th-new.tar.gz",
+							"format": "matrix-market"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/RB/Pajek/HEP-th-new.tar.gz",
+							"format": "rutherford-boeing"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/mat/Pajek/HEP-th-new.tar.gz",
+							"format": "matlab"
+						}
+					]
+				}
+			]
 		},
 		"ss-pajek-kohonen": {
 			"id": "ss-pajek-kohonen",
 			"name": "Citation network related to Kohonen self-organising map publications",
 			"description": "Citation network related to Kohonen self-organising map publications.",
-			"source": "suitesparse",
-			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
 			"citation": {
 				"authors": [
 					"V. Batagelj",
@@ -3930,14 +6053,40 @@
 			"weighted": false,
 			"hasNodeAttributes": true,
 			"hasEdgeAttributes": false,
-			"labeled": false
+			"labeled": false,
+			"sources": [
+				{
+					"source": "pajek",
+					"downloads": [
+						{
+							"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
+							"format": "pajek"
+						}
+					]
+				},
+				{
+					"source": "suitesparse",
+					"downloads": [
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/Kohonen.tar.gz",
+							"format": "matrix-market"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/RB/Pajek/Kohonen.tar.gz",
+							"format": "rutherford-boeing"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/mat/Pajek/Kohonen.tar.gz",
+							"format": "matlab"
+						}
+					]
+				}
+			]
 		},
 		"ss-pajek-lederberg": {
 			"id": "ss-pajek-lederberg",
 			"name": "Citation network from Lederberg's Roget thesaurus analysis",
 			"description": "Citation network from Lederberg's Roget thesaurus analysis.",
-			"source": "suitesparse",
-			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
 			"citation": {
 				"authors": [
 					"V. Batagelj",
@@ -3955,14 +6104,40 @@
 			"weighted": true,
 			"hasNodeAttributes": true,
 			"hasEdgeAttributes": true,
-			"labeled": false
+			"labeled": false,
+			"sources": [
+				{
+					"source": "pajek",
+					"downloads": [
+						{
+							"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
+							"format": "pajek"
+						}
+					]
+				},
+				{
+					"source": "suitesparse",
+					"downloads": [
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/Lederberg.tar.gz",
+							"format": "matrix-market"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/RB/Pajek/Lederberg.tar.gz",
+							"format": "rutherford-boeing"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/mat/Pajek/Lederberg.tar.gz",
+							"format": "matlab"
+						}
+					]
+				}
+			]
 		},
 		"ss-pajek-odlis": {
 			"id": "ss-pajek-odlis",
 			"name": "Online Dictionary for Library and Information Science hyperlink network",
 			"description": "Online Dictionary for Library and Information Science hyperlink network.",
-			"source": "suitesparse",
-			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
 			"citation": {
 				"authors": [
 					"V. Batagelj",
@@ -3980,14 +6155,40 @@
 			"weighted": true,
 			"hasNodeAttributes": true,
 			"hasEdgeAttributes": true,
-			"labeled": false
+			"labeled": false,
+			"sources": [
+				{
+					"source": "pajek",
+					"downloads": [
+						{
+							"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
+							"format": "pajek"
+						}
+					]
+				},
+				{
+					"source": "suitesparse",
+					"downloads": [
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/ODLIS.tar.gz",
+							"format": "matrix-market"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/RB/Pajek/ODLIS.tar.gz",
+							"format": "rutherford-boeing"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/mat/Pajek/ODLIS.tar.gz",
+							"format": "matlab"
+						}
+					]
+				}
+			]
 		},
 		"ss-pajek-ragusa16": {
 			"id": "ss-pajek-ragusa16",
 			"name": "Social network from Ragusa study with 16 individuals",
 			"description": "Social network from Ragusa study with 16 individuals.",
-			"source": "suitesparse",
-			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
 			"citation": {
 				"authors": [
 					"V. Batagelj",
@@ -4005,14 +6206,40 @@
 			"weighted": true,
 			"hasNodeAttributes": true,
 			"hasEdgeAttributes": true,
-			"labeled": false
+			"labeled": false,
+			"sources": [
+				{
+					"source": "pajek",
+					"downloads": [
+						{
+							"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
+							"format": "pajek"
+						}
+					]
+				},
+				{
+					"source": "suitesparse",
+					"downloads": [
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/Ragusa16.tar.gz",
+							"format": "matrix-market"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/RB/Pajek/Ragusa16.tar.gz",
+							"format": "rutherford-boeing"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/mat/Pajek/Ragusa16.tar.gz",
+							"format": "matlab"
+						}
+					]
+				}
+			]
 		},
 		"ss-pajek-ragusa18": {
 			"id": "ss-pajek-ragusa18",
 			"name": "Social network from Ragusa study with 18 individuals",
 			"description": "Social network from Ragusa study with 18 individuals.",
-			"source": "suitesparse",
-			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
 			"citation": {
 				"authors": [
 					"V. Batagelj",
@@ -4030,14 +6257,40 @@
 			"weighted": true,
 			"hasNodeAttributes": true,
 			"hasEdgeAttributes": true,
-			"labeled": false
+			"labeled": false,
+			"sources": [
+				{
+					"source": "pajek",
+					"downloads": [
+						{
+							"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
+							"format": "pajek"
+						}
+					]
+				},
+				{
+					"source": "suitesparse",
+					"downloads": [
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/Ragusa18.tar.gz",
+							"format": "matrix-market"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/RB/Pajek/Ragusa18.tar.gz",
+							"format": "rutherford-boeing"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/mat/Pajek/Ragusa18.tar.gz",
+							"format": "matlab"
+						}
+					]
+				}
+			]
 		},
 		"ss-pajek-sandi-authors": {
 			"id": "ss-pajek-sandi-authors",
 			"name": "Collaboration network among Sandi conference authors",
 			"description": "Collaboration network among Sandi conference authors.",
-			"source": "suitesparse",
-			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
 			"citation": {
 				"authors": [
 					"V. Batagelj",
@@ -4055,14 +6308,40 @@
 			"weighted": true,
 			"hasNodeAttributes": true,
 			"hasEdgeAttributes": true,
-			"labeled": false
+			"labeled": false,
+			"sources": [
+				{
+					"source": "pajek",
+					"downloads": [
+						{
+							"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
+							"format": "pajek"
+						}
+					]
+				},
+				{
+					"source": "suitesparse",
+					"downloads": [
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/Sandi_authors.tar.gz",
+							"format": "matrix-market"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/RB/Pajek/Sandi_authors.tar.gz",
+							"format": "rutherford-boeing"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/mat/Pajek/Sandi_authors.tar.gz",
+							"format": "matlab"
+						}
+					]
+				}
+			]
 		},
 		"ss-pajek-scimet": {
 			"id": "ss-pajek-scimet",
 			"name": "Scientometric citation network",
 			"description": "Scientometric citation network.",
-			"source": "suitesparse",
-			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
 			"citation": {
 				"authors": [
 					"V. Batagelj",
@@ -4080,14 +6359,40 @@
 			"weighted": true,
 			"hasNodeAttributes": true,
 			"hasEdgeAttributes": true,
-			"labeled": false
+			"labeled": false,
+			"sources": [
+				{
+					"source": "pajek",
+					"downloads": [
+						{
+							"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
+							"format": "pajek"
+						}
+					]
+				},
+				{
+					"source": "suitesparse",
+					"downloads": [
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/SciMet.tar.gz",
+							"format": "matrix-market"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/RB/Pajek/SciMet.tar.gz",
+							"format": "rutherford-boeing"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/mat/Pajek/SciMet.tar.gz",
+							"format": "matlab"
+						}
+					]
+				}
+			]
 		},
 		"ss-pajek-smagri": {
 			"id": "ss-pajek-smagri",
 			"name": "Small graph drawing contest network",
 			"description": "Small graph drawing contest network.",
-			"source": "suitesparse",
-			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
 			"citation": {
 				"authors": [
 					"V. Batagelj",
@@ -4105,14 +6410,40 @@
 			"weighted": true,
 			"hasNodeAttributes": true,
 			"hasEdgeAttributes": true,
-			"labeled": false
+			"labeled": false,
+			"sources": [
+				{
+					"source": "pajek",
+					"downloads": [
+						{
+							"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
+							"format": "pajek"
+						}
+					]
+				},
+				{
+					"source": "suitesparse",
+					"downloads": [
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/SmaGri.tar.gz",
+							"format": "matrix-market"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/RB/Pajek/SmaGri.tar.gz",
+							"format": "rutherford-boeing"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/mat/Pajek/SmaGri.tar.gz",
+							"format": "matlab"
+						}
+					]
+				}
+			]
 		},
 		"ss-pajek-smallw": {
 			"id": "ss-pajek-smallw",
 			"name": "Small-world network dataset",
 			"description": "Small-world network dataset.",
-			"source": "suitesparse",
-			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
 			"citation": {
 				"authors": [
 					"V. Batagelj",
@@ -4130,14 +6461,40 @@
 			"weighted": true,
 			"hasNodeAttributes": true,
 			"hasEdgeAttributes": true,
-			"labeled": false
+			"labeled": false,
+			"sources": [
+				{
+					"source": "pajek",
+					"downloads": [
+						{
+							"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
+							"format": "pajek"
+						}
+					]
+				},
+				{
+					"source": "suitesparse",
+					"downloads": [
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/SmallW.tar.gz",
+							"format": "matrix-market"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/RB/Pajek/SmallW.tar.gz",
+							"format": "rutherford-boeing"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/mat/Pajek/SmallW.tar.gz",
+							"format": "matlab"
+						}
+					]
+				}
+			]
 		},
 		"ss-pajek-stranke94": {
 			"id": "ss-pajek-stranke94",
 			"name": "Social network from Stranke's 1994 study",
 			"description": "Social network from Stranke's 1994 study.",
-			"source": "suitesparse",
-			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
 			"citation": {
 				"authors": [
 					"V. Batagelj",
@@ -4155,14 +6512,40 @@
 			"weighted": true,
 			"hasNodeAttributes": true,
 			"hasEdgeAttributes": true,
-			"labeled": false
+			"labeled": false,
+			"sources": [
+				{
+					"source": "pajek",
+					"downloads": [
+						{
+							"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
+							"format": "pajek"
+						}
+					]
+				},
+				{
+					"source": "suitesparse",
+					"downloads": [
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/Stranke94.tar.gz",
+							"format": "matrix-market"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/RB/Pajek/Stranke94.tar.gz",
+							"format": "rutherford-boeing"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/mat/Pajek/Stranke94.tar.gz",
+							"format": "matlab"
+						}
+					]
+				}
+			]
 		},
 		"ss-pajek-tina-askcal": {
 			"id": "ss-pajek-tina-askcal",
 			"name": "Tina's network: ask/calendar interactions",
 			"description": "Tina's network: ask/calendar interactions.",
-			"source": "suitesparse",
-			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
 			"citation": {
 				"authors": [
 					"V. Batagelj",
@@ -4180,14 +6563,40 @@
 			"weighted": false,
 			"hasNodeAttributes": true,
 			"hasEdgeAttributes": false,
-			"labeled": false
+			"labeled": false,
+			"sources": [
+				{
+					"source": "pajek",
+					"downloads": [
+						{
+							"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
+							"format": "pajek"
+						}
+					]
+				},
+				{
+					"source": "suitesparse",
+					"downloads": [
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/Tina_AskCal.tar.gz",
+							"format": "matrix-market"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/RB/Pajek/Tina_AskCal.tar.gz",
+							"format": "rutherford-boeing"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/mat/Pajek/Tina_AskCal.tar.gz",
+							"format": "matlab"
+						}
+					]
+				}
+			]
 		},
 		"ss-pajek-tina-askcog": {
 			"id": "ss-pajek-tina-askcog",
 			"name": "Tina's network: ask/cognitive interactions",
 			"description": "Tina's network: ask/cognitive interactions.",
-			"source": "suitesparse",
-			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
 			"citation": {
 				"authors": [
 					"V. Batagelj",
@@ -4205,14 +6614,40 @@
 			"weighted": false,
 			"hasNodeAttributes": true,
 			"hasEdgeAttributes": false,
-			"labeled": false
+			"labeled": false,
+			"sources": [
+				{
+					"source": "pajek",
+					"downloads": [
+						{
+							"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
+							"format": "pajek"
+						}
+					]
+				},
+				{
+					"source": "suitesparse",
+					"downloads": [
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/Tina_AskCog.tar.gz",
+							"format": "matrix-market"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/RB/Pajek/Tina_AskCog.tar.gz",
+							"format": "rutherford-boeing"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/mat/Pajek/Tina_AskCog.tar.gz",
+							"format": "matlab"
+						}
+					]
+				}
+			]
 		},
 		"ss-pajek-tina-discal": {
 			"id": "ss-pajek-tina-discal",
 			"name": "Tina's network: discuss/calendar interactions",
 			"description": "Tina's network: discuss/calendar interactions.",
-			"source": "suitesparse",
-			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
 			"citation": {
 				"authors": [
 					"V. Batagelj",
@@ -4230,14 +6665,40 @@
 			"weighted": false,
 			"hasNodeAttributes": true,
 			"hasEdgeAttributes": false,
-			"labeled": false
+			"labeled": false,
+			"sources": [
+				{
+					"source": "pajek",
+					"downloads": [
+						{
+							"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
+							"format": "pajek"
+						}
+					]
+				},
+				{
+					"source": "suitesparse",
+					"downloads": [
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/Tina_DisCal.tar.gz",
+							"format": "matrix-market"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/RB/Pajek/Tina_DisCal.tar.gz",
+							"format": "rutherford-boeing"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/mat/Pajek/Tina_DisCal.tar.gz",
+							"format": "matlab"
+						}
+					]
+				}
+			]
 		},
 		"ss-pajek-tina-discog": {
 			"id": "ss-pajek-tina-discog",
 			"name": "Tina's network: discuss/cognitive interactions",
 			"description": "Tina's network: discuss/cognitive interactions.",
-			"source": "suitesparse",
-			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
 			"citation": {
 				"authors": [
 					"V. Batagelj",
@@ -4255,14 +6716,40 @@
 			"weighted": false,
 			"hasNodeAttributes": true,
 			"hasEdgeAttributes": false,
-			"labeled": false
+			"labeled": false,
+			"sources": [
+				{
+					"source": "pajek",
+					"downloads": [
+						{
+							"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
+							"format": "pajek"
+						}
+					]
+				},
+				{
+					"source": "suitesparse",
+					"downloads": [
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/Tina_DisCog.tar.gz",
+							"format": "matrix-market"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/RB/Pajek/Tina_DisCog.tar.gz",
+							"format": "rutherford-boeing"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/mat/Pajek/Tina_DisCog.tar.gz",
+							"format": "matlab"
+						}
+					]
+				}
+			]
 		},
 		"ss-pajek-zewail": {
 			"id": "ss-pajek-zewail",
 			"name": "Citation network related to Ahmed Zewail's Nobel Prize publications",
 			"description": "Citation network related to Ahmed Zewail's Nobel Prize publications.",
-			"source": "suitesparse",
-			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
 			"citation": {
 				"authors": [
 					"V. Batagelj",
@@ -4280,14 +6767,40 @@
 			"weighted": true,
 			"hasNodeAttributes": true,
 			"hasEdgeAttributes": true,
-			"labeled": false
+			"labeled": false,
+			"sources": [
+				{
+					"source": "pajek",
+					"downloads": [
+						{
+							"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
+							"format": "pajek"
+						}
+					]
+				},
+				{
+					"source": "suitesparse",
+					"downloads": [
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/Zewail.tar.gz",
+							"format": "matrix-market"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/RB/Pajek/Zewail.tar.gz",
+							"format": "rutherford-boeing"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/mat/Pajek/Zewail.tar.gz",
+							"format": "matlab"
+						}
+					]
+				}
+			]
 		},
 		"ucinet-bkfrat": {
 			"id": "ucinet-bkfrat",
 			"name": "Bernard & Killworth Fraternity",
 			"description": "Interaction data from 58 students in a West Virginia fraternity. Includes observed conversation frequency and recalled interaction rankings.",
-			"source": "ucinet",
-			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/UciNet/bkfrat.dat",
 			"citation": {
 				"authors": [
 					"H. Bernard",
@@ -4309,14 +6822,23 @@
 			"weighted": true,
 			"hasNodeAttributes": false,
 			"hasEdgeAttributes": true,
-			"labeled": false
+			"labeled": false,
+			"sources": [
+				{
+					"source": "ucinet",
+					"downloads": [
+						{
+							"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/UciNet/bkfrat.dat",
+							"format": "ucinet"
+						}
+					]
+				}
+			]
 		},
 		"ucinet-bkham": {
 			"id": "ucinet-bkham",
 			"name": "Bernard & Killworth Ham Radio",
 			"description": "HAM radio calls among 44 operators over one month, with recalled frequency rankings.",
-			"source": "ucinet",
-			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/UciNet/bkham.dat",
 			"citation": {
 				"authors": [
 					"B. Killworth",
@@ -4337,14 +6859,23 @@
 			"weighted": true,
 			"hasNodeAttributes": false,
 			"hasEdgeAttributes": true,
-			"labeled": false
+			"labeled": false,
+			"sources": [
+				{
+					"source": "ucinet",
+					"downloads": [
+						{
+							"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/UciNet/bkham.dat",
+							"format": "ucinet"
+						}
+					]
+				}
+			]
 		},
 		"ucinet-bkoff": {
 			"id": "ucinet-bkoff",
 			"name": "Bernard & Killworth Office",
 			"description": "Interactions in a small business office among 40 employees, observed over two four-day periods.",
-			"source": "ucinet",
-			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/UciNet/bkoff.dat",
 			"citation": {
 				"authors": [
 					"H. Bernard",
@@ -4366,14 +6897,23 @@
 			"weighted": true,
 			"hasNodeAttributes": false,
 			"hasEdgeAttributes": true,
-			"labeled": false
+			"labeled": false,
+			"sources": [
+				{
+					"source": "ucinet",
+					"downloads": [
+						{
+							"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/UciNet/bkoff.dat",
+							"format": "ucinet"
+						}
+					]
+				}
+			]
 		},
 		"ucinet-bktec": {
 			"id": "ucinet-bktec",
 			"name": "Bernard & Killworth Technical",
 			"description": "Interactions in a technical research group of 34 members at a West Virginia university.",
-			"source": "ucinet",
-			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/UciNet/bktec.dat",
 			"citation": {
 				"authors": [
 					"H. Bernard",
@@ -4395,14 +6935,23 @@
 			"weighted": true,
 			"hasNodeAttributes": false,
 			"hasEdgeAttributes": true,
-			"labeled": false
+			"labeled": false,
+			"sources": [
+				{
+					"source": "ucinet",
+					"downloads": [
+						{
+							"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/UciNet/bktec.dat",
+							"format": "ucinet"
+						}
+					]
+				}
+			]
 		},
 		"ucinet-davis": {
 			"id": "ucinet-davis",
 			"name": "Davis Southern Club Women",
 			"description": "Attendance at 14 social events by 18 Southern women in the 1930s. A classic bipartite (two-mode) network.",
-			"source": "ucinet",
-			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/UciNet/davis.dat",
 			"citation": {
 				"authors": [
 					"A. Davis",
@@ -4422,14 +6971,23 @@
 			"weighted": false,
 			"hasNodeAttributes": false,
 			"hasEdgeAttributes": false,
-			"labeled": true
+			"labeled": true,
+			"sources": [
+				{
+					"source": "ucinet",
+					"downloads": [
+						{
+							"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/UciNet/davis.dat",
+							"format": "ucinet"
+						}
+					]
+				}
+			]
 		},
 		"ucinet-gama": {
 			"id": "ucinet-gama",
 			"name": "Gahuku-Gama Highland Tribes",
 			"description": "Alliance and antagonism relations among 16 tribes in the Eastern Central Highlands of New Guinea.",
-			"source": "ucinet",
-			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/UciNet/gama.dat",
 			"citation": {
 				"authors": [
 					"K. Read"
@@ -4449,14 +7007,23 @@
 			"weighted": false,
 			"hasNodeAttributes": false,
 			"hasEdgeAttributes": false,
-			"labeled": true
+			"labeled": true,
+			"sources": [
+				{
+					"source": "ucinet",
+					"downloads": [
+						{
+							"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/UciNet/gama.dat",
+							"format": "ucinet"
+						}
+					]
+				}
+			]
 		},
 		"ucinet-kapmine": {
 			"id": "ucinet-kapmine",
 			"name": "Kapferer Mine",
 			"description": "Multiplex and uniplex ties among 15 workers in a Zambian mining operation.",
-			"source": "ucinet",
-			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/UciNet/kapmine.dat",
 			"citation": {
 				"authors": [
 					"B. Kapferer"
@@ -4474,14 +7041,23 @@
 			"weighted": false,
 			"hasNodeAttributes": false,
 			"hasEdgeAttributes": false,
-			"labeled": true
+			"labeled": true,
+			"sources": [
+				{
+					"source": "ucinet",
+					"downloads": [
+						{
+							"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/UciNet/kapmine.dat",
+							"format": "ucinet"
+						}
+					]
+				}
+			]
 		},
 		"ucinet-kaptail": {
 			"id": "ucinet-kaptail",
 			"name": "Kapferer Tailor Shop",
 			"description": "Instrumental and sociational interactions among 39 workers in a Zambian tailor shop, observed at two time points.",
-			"source": "ucinet",
-			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/UciNet/kaptail.dat",
 			"citation": {
 				"authors": [
 					"B. Kapferer"
@@ -4499,14 +7075,23 @@
 			"weighted": false,
 			"hasNodeAttributes": false,
 			"hasEdgeAttributes": false,
-			"labeled": true
+			"labeled": true,
+			"sources": [
+				{
+					"source": "ucinet",
+					"downloads": [
+						{
+							"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/UciNet/kaptail.dat",
+							"format": "ucinet"
+						}
+					]
+				}
+			]
 		},
 		"ucinet-knokbur": {
 			"id": "ucinet-knokbur",
 			"name": "Knoke Bureaucracies",
 			"description": "Information exchange among 10 organizations in Indianapolis.",
-			"source": "ucinet",
-			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/UciNet/knokbur.dat",
 			"citation": {
 				"authors": [
 					"D. Knoke",
@@ -4525,14 +7110,23 @@
 			"weighted": false,
 			"hasNodeAttributes": false,
 			"hasEdgeAttributes": false,
-			"labeled": true
+			"labeled": true,
+			"sources": [
+				{
+					"source": "ucinet",
+					"downloads": [
+						{
+							"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/UciNet/knokbur.dat",
+							"format": "ucinet"
+						}
+					]
+				}
+			]
 		},
 		"ucinet-krackad": {
 			"id": "ucinet-krackad",
 			"name": "Krackhardt Office Advice",
 			"description": "Cognitive social structure data: 21 managers' perceptions of advice-seeking relationships.",
-			"source": "ucinet",
-			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/UciNet/krackad.dat",
 			"citation": {
 				"authors": [
 					"D. Krackhardt"
@@ -4552,14 +7146,23 @@
 			"weighted": false,
 			"hasNodeAttributes": false,
 			"hasEdgeAttributes": false,
-			"labeled": false
+			"labeled": false,
+			"sources": [
+				{
+					"source": "ucinet",
+					"downloads": [
+						{
+							"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/UciNet/krackad.dat",
+							"format": "ucinet"
+						}
+					]
+				}
+			]
 		},
 		"ucinet-krackfr": {
 			"id": "ucinet-krackfr",
 			"name": "Krackhardt Office Friendship",
 			"description": "Cognitive social structure data: 21 managers' perceptions of friendship relationships.",
-			"source": "ucinet",
-			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/UciNet/krackfr.dat",
 			"citation": {
 				"authors": [
 					"D. Krackhardt"
@@ -4579,14 +7182,23 @@
 			"weighted": false,
 			"hasNodeAttributes": false,
 			"hasEdgeAttributes": false,
-			"labeled": false
+			"labeled": false,
+			"sources": [
+				{
+					"source": "ucinet",
+					"downloads": [
+						{
+							"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/UciNet/krackfr.dat",
+							"format": "ucinet"
+						}
+					]
+				}
+			]
 		},
 		"ucinet-newfrat": {
 			"id": "ucinet-newfrat",
 			"name": "Newcomb Fraternity",
 			"description": "Weekly sociometric preference rankings from 17 men over 15 weeks in a University of Michigan fraternity.",
-			"source": "ucinet",
-			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/UciNet/newfrat.dat",
 			"citation": {
 				"authors": [
 					"T. Newcomb"
@@ -4604,14 +7216,23 @@
 			"weighted": true,
 			"hasNodeAttributes": false,
 			"hasEdgeAttributes": true,
-			"labeled": false
+			"labeled": false,
+			"sources": [
+				{
+					"source": "ucinet",
+					"downloads": [
+						{
+							"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/UciNet/newfrat.dat",
+							"format": "ucinet"
+						}
+					]
+				}
+			]
 		},
 		"ucinet-padgett": {
 			"id": "ucinet-padgett",
 			"name": "Padgett Florentine Families",
 			"description": "Business and marriage ties among Renaissance Florentine families. The Medici vs Strozzi conflict.",
-			"source": "ucinet",
-			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/UciNet/padgett.dat",
 			"citation": {
 				"authors": [
 					"R. Breiger",
@@ -4632,14 +7253,23 @@
 			"weighted": false,
 			"hasNodeAttributes": false,
 			"hasEdgeAttributes": false,
-			"labeled": true
+			"labeled": true,
+			"sources": [
+				{
+					"source": "ucinet",
+					"downloads": [
+						{
+							"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/UciNet/padgett.dat",
+							"format": "ucinet"
+						}
+					]
+				}
+			]
 		},
 		"ucinet-prison": {
 			"id": "ucinet-prison",
 			"name": "Gagnon Prison",
 			"description": "Friendship choices among 67 prison inmates in a 1950s study.",
-			"source": "ucinet",
-			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/UciNet/prison.dat",
 			"citation": {
 				"authors": [
 					"J. MacRae"
@@ -4659,14 +7289,23 @@
 			"weighted": false,
 			"hasNodeAttributes": false,
 			"hasEdgeAttributes": false,
-			"labeled": false
+			"labeled": false,
+			"sources": [
+				{
+					"source": "ucinet",
+					"downloads": [
+						{
+							"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/UciNet/prison.dat",
+							"format": "ucinet"
+						}
+					]
+				}
+			]
 		},
 		"ucinet-sampson": {
 			"id": "ucinet-sampson",
 			"name": "Sampson Monastery",
 			"description": "Social interactions among 18 monks including liking, esteem, influence, and praise, at three time points.",
-			"source": "ucinet",
-			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/UciNet/sampson.dat",
 			"citation": {
 				"authors": [
 					"S. Sampson"
@@ -4683,14 +7322,23 @@
 			"weighted": true,
 			"hasNodeAttributes": false,
 			"hasEdgeAttributes": true,
-			"labeled": true
+			"labeled": true,
+			"sources": [
+				{
+					"source": "ucinet",
+					"downloads": [
+						{
+							"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/UciNet/sampson.dat",
+							"format": "ucinet"
+						}
+					]
+				}
+			]
 		},
 		"ucinet-szcid": {
 			"id": "ucinet-szcid",
 			"name": "Stokman-Ziegler Netherlands Interlocks",
 			"description": "Corporate interlocks among 16 major Dutch business entities.",
-			"source": "ucinet",
-			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/UciNet/szcid.dat",
 			"citation": {
 				"authors": [
 					"F. Stokman",
@@ -4710,14 +7358,23 @@
 			"weighted": true,
 			"hasNodeAttributes": false,
 			"hasEdgeAttributes": true,
-			"labeled": true
+			"labeled": true,
+			"sources": [
+				{
+					"source": "ucinet",
+					"downloads": [
+						{
+							"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/UciNet/szcid.dat",
+							"format": "ucinet"
+						}
+					]
+				}
+			]
 		},
 		"ucinet-szcig": {
 			"id": "ucinet-szcig",
 			"name": "Stokman-Ziegler German Interlocks",
 			"description": "Corporate interlocks among 15 major West German business entities.",
-			"source": "ucinet",
-			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/UciNet/szcig.dat",
 			"citation": {
 				"authors": [
 					"R. Ziegler",
@@ -4737,14 +7394,23 @@
 			"weighted": true,
 			"hasNodeAttributes": false,
 			"hasEdgeAttributes": true,
-			"labeled": true
+			"labeled": true,
+			"sources": [
+				{
+					"source": "ucinet",
+					"downloads": [
+						{
+							"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/UciNet/szcig.dat",
+							"format": "ucinet"
+						}
+					]
+				}
+			]
 		},
 		"ucinet-taro": {
 			"id": "ucinet-taro",
 			"name": "Schwimmer Taro Exchange",
 			"description": "Gift-giving (taro exchange) among 22 households in a Papuan village.",
-			"source": "ucinet",
-			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/UciNet/taro.dat",
 			"citation": {
 				"authors": [
 					"E. Schwimmer"
@@ -4762,14 +7428,23 @@
 			"weighted": false,
 			"hasNodeAttributes": false,
 			"hasEdgeAttributes": false,
-			"labeled": false
+			"labeled": false,
+			"sources": [
+				{
+					"source": "ucinet",
+					"downloads": [
+						{
+							"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/UciNet/taro.dat",
+							"format": "ucinet"
+						}
+					]
+				}
+			]
 		},
 		"ucinet-thuroff": {
 			"id": "ucinet-thuroff",
 			"name": "Thurman Office",
 			"description": "Formal and informal ties among 15 employees in an overseas branch office of a large multinational corporation.",
-			"source": "ucinet",
-			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/UciNet/thuroff.dat",
 			"citation": {
 				"authors": [
 					"B. Thurman"
@@ -4789,14 +7464,23 @@
 			"weighted": false,
 			"hasNodeAttributes": false,
 			"hasEdgeAttributes": false,
-			"labeled": true
+			"labeled": true,
+			"sources": [
+				{
+					"source": "ucinet",
+					"downloads": [
+						{
+							"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/UciNet/thuroff.dat",
+							"format": "ucinet"
+						}
+					]
+				}
+			]
 		},
 		"ucinet-wiring": {
 			"id": "ucinet-wiring",
 			"name": "Hawthorne Bank Wiring Room",
 			"description": "Observational data on 14 Western Electric employees from the famous Hawthorne studies.",
-			"source": "ucinet",
-			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/UciNet/wiring.dat",
 			"citation": {
 				"authors": [
 					"F. Roethlisberger",
@@ -4815,14 +7499,23 @@
 			"weighted": false,
 			"hasNodeAttributes": false,
 			"hasEdgeAttributes": false,
-			"labeled": true
+			"labeled": true,
+			"sources": [
+				{
+					"source": "ucinet",
+					"downloads": [
+						{
+							"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/UciNet/wiring.dat",
+							"format": "ucinet"
+						}
+					]
+				}
+			]
 		},
 		"ucinet-wolf": {
 			"id": "ucinet-wolf",
 			"name": "Wolfe Primates",
 			"description": "Interactions and kin relationships among 20 monkeys observed in Ocala, Florida.",
-			"source": "ucinet",
-			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/UciNet/wolf.dat",
 			"citation": {
 				"authors": [
 					"L. Wolfe"
@@ -4839,14 +7532,23 @@
 			"weighted": false,
 			"hasNodeAttributes": false,
 			"hasEdgeAttributes": false,
-			"labeled": false
+			"labeled": false,
+			"sources": [
+				{
+					"source": "ucinet",
+					"downloads": [
+						{
+							"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/UciNet/wolf.dat",
+							"format": "ucinet"
+						}
+					]
+				}
+			]
 		},
 		"ucinet-zachary": {
 			"id": "ucinet-zachary",
 			"name": "Zachary Karate Club",
 			"description": "Social network of a university karate club. Famous for the split following disputes between members.",
-			"source": "ucinet",
-			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/UciNet/zachary.dat",
 			"citation": {
 				"authors": [
 					"W. Zachary"
@@ -4866,14 +7568,23 @@
 			"weighted": false,
 			"hasNodeAttributes": false,
 			"hasEdgeAttributes": false,
-			"labeled": false
+			"labeled": false,
+			"sources": [
+				{
+					"source": "ucinet",
+					"downloads": [
+						{
+							"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/UciNet/zachary.dat",
+							"format": "ucinet"
+						}
+					]
+				}
+			]
 		},
 		"usair97": {
 			"id": "usair97",
 			"name": "US Airlines 1997",
 			"description": "US airline routes network from 1997. Nodes are airports, edges are flight routes.",
-			"source": "pajek",
-			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/mix/USAir97.net",
 			"citation": {
 				"authors": [
 					"Vladimir Batagelj",
@@ -4892,12 +7603,32 @@
 			"hasNodeAttributes": true,
 			"hasEdgeAttributes": true,
 			"labeled": false,
-			"alternateUrls": [
+			"sources": [
 				{
-					"url": "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/USAir97.tar.gz",
+					"source": "pajek",
+					"downloads": [
+						{
+							"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/mix/USAir97.net",
+							"format": "pajek"
+						}
+					]
+				},
+				{
 					"source": "suitesparse",
-					"format": "matrix-market",
-					"description": "SuiteSparse Matrix Collection (Pajek/USAir97)"
+					"downloads": [
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/USAir97.tar.gz",
+							"format": "matrix-market"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/RB/Pajek/USAir97.tar.gz",
+							"format": "rutherford-boeing"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/mat/Pajek/USAir97.tar.gz",
+							"format": "matlab"
+						}
+					]
 				}
 			]
 		},
@@ -4905,8 +7636,6 @@
 			"id": "web-notredame",
 			"name": "Notre Dame Web Graph",
 			"description": "Web graph of Notre Dame.",
-			"source": "snap",
-			"url": "https://snap.stanford.edu/data/web-NotreDame.txt.gz",
 			"citation": {
 				"authors": [
 					"R. Albert",
@@ -4926,14 +7655,23 @@
 			"weighted": false,
 			"hasNodeAttributes": false,
 			"hasEdgeAttributes": false,
-			"labeled": false
+			"labeled": false,
+			"sources": [
+				{
+					"source": "snap",
+					"downloads": [
+						{
+							"url": "https://snap.stanford.edu/data/web-NotreDame.txt.gz",
+							"format": "various"
+						}
+					]
+				}
+			]
 		},
 		"web-stanford": {
 			"id": "web-stanford",
 			"name": "Stanford Web Graph",
 			"description": "Web graph of Stanford.edu.",
-			"source": "snap",
-			"url": "https://snap.stanford.edu/data/web-Stanford.txt.gz",
 			"citation": {
 				"authors": [
 					"J. Leskovec",
@@ -4954,14 +7692,23 @@
 			"weighted": false,
 			"hasNodeAttributes": false,
 			"hasEdgeAttributes": false,
-			"labeled": false
+			"labeled": false,
+			"sources": [
+				{
+					"source": "snap",
+					"downloads": [
+						{
+							"url": "https://snap.stanford.edu/data/web-Stanford.txt.gz",
+							"format": "various"
+						}
+					]
+				}
+			]
 		},
 		"wiki-talk": {
 			"id": "wiki-talk",
 			"name": "Wikipedia Talk Network",
 			"description": "Wikipedia talk (communication) network.",
-			"source": "snap",
-			"url": "https://snap.stanford.edu/data/wiki-Talk.txt.gz",
 			"citation": {
 				"authors": [
 					"J. Leskovec",
@@ -4981,14 +7728,23 @@
 			"weighted": false,
 			"hasNodeAttributes": false,
 			"hasEdgeAttributes": false,
-			"labeled": false
+			"labeled": false,
+			"sources": [
+				{
+					"source": "snap",
+					"downloads": [
+						{
+							"url": "https://snap.stanford.edu/data/wiki-Talk.txt.gz",
+							"format": "various"
+						}
+					]
+				}
+			]
 		},
 		"wiki-vote": {
 			"id": "wiki-vote",
 			"name": "Wikipedia Vote Network",
 			"description": "Wikipedia who-votes-on-whom network for adminship elections.",
-			"source": "snap",
-			"url": "https://snap.stanford.edu/data/wiki-Vote.txt.gz",
 			"citation": {
 				"authors": [
 					"J. Leskovec",
@@ -5008,14 +7764,23 @@
 			"weighted": false,
 			"hasNodeAttributes": false,
 			"hasEdgeAttributes": false,
-			"labeled": false
+			"labeled": false,
+			"sources": [
+				{
+					"source": "snap",
+					"downloads": [
+						{
+							"url": "https://snap.stanford.edu/data/wiki-Vote.txt.gz",
+							"format": "various"
+						}
+					]
+				}
+			]
 		},
 		"yeast": {
 			"id": "yeast",
 			"name": "Yeast Protein Interactions",
 			"description": "Protein-protein interaction network in yeast (Saccharomyces cerevisiae).",
-			"source": "pajek",
-			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/bio/Yeast/Yeast.zip",
 			"citation": {
 				"authors": [
 					"H. Jeong",
@@ -5037,12 +7802,32 @@
 			"hasNodeAttributes": true,
 			"hasEdgeAttributes": false,
 			"labeled": false,
-			"alternateUrls": [
+			"sources": [
 				{
-					"url": "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/yeast.tar.gz",
+					"source": "pajek",
+					"downloads": [
+						{
+							"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/bio/Yeast/Yeast.zip",
+							"format": "pajek"
+						}
+					]
+				},
+				{
 					"source": "suitesparse",
-					"format": "matrix-market",
-					"description": "SuiteSparse Matrix Collection (Pajek/yeast)"
+					"downloads": [
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/yeast.tar.gz",
+							"format": "matrix-market"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/RB/Pajek/yeast.tar.gz",
+							"format": "rutherford-boeing"
+						},
+						{
+							"url": "https://suitesparse-collection-website.herokuapp.com/mat/Pajek/yeast.tar.gz",
+							"format": "matlab"
+						}
+					]
 				}
 			]
 		}
