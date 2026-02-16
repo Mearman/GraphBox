@@ -1,4 +1,5 @@
 {
+	"$schema": "./catalog.schema.json",
 	"version": "2.0.0",
 	"generated": "2026-02-16T11:37:07.367Z",
 	"sources": {

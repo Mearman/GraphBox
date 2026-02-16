@@ -43,6 +43,7 @@ data/
 !src/data/
 src/data/*
 !src/data/catalog.json
+!src/data/catalog.schema.json
 
 # Test results
 *.tap

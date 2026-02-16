@@ -1,0 +1,236 @@
+{
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"$id": "catalog.schema.json",
+	"title": "Dataset Catalog",
+	"description": "Canonical index of graph/network datasets with multi-source, multi-format downloads.",
+	"type": "object",
+	"required": ["version", "generated", "sources", "datasetCount", "datasets"],
+	"additionalProperties": false,
+	"properties": {
+		"$schema": {
+			"type": "string",
+			"description": "JSON Schema reference."
+		},
+		"version": {
+			"type": "string",
+			"pattern": "^\\d+\\.\\d+\\.\\d+$",
+			"description": "Schema version (semver)."
+		},
+		"generated": {
+			"type": "string",
+			"format": "date-time",
+			"description": "ISO 8601 timestamp of last generation/update."
+		},
+		"sources": {
+			"type": "object",
+			"description": "Known data sources keyed by short identifier.",
+			"additionalProperties": {
+				"$ref": "#/$defs/Source"
+			},
+			"minProperties": 1
+		},
+		"datasetCount": {
+			"type": "integer",
+			"minimum": 0,
+			"description": "Total number of datasets (must equal Object.keys(datasets).length)."
+		},
+		"datasets": {
+			"type": "object",
+			"description": "Datasets keyed by unique ID.",
+			"additionalProperties": {
+				"$ref": "#/$defs/DatasetEntry"
+			}
+		}
+	},
+	"$defs": {
+		"Source": {
+			"type": "object",
+			"required": ["name", "url", "description", "format"],
+			"additionalProperties": false,
+			"properties": {
+				"name": {
+					"type": "string",
+					"description": "Human-readable source name."
+				},
+				"url": {
+					"type": "string",
+					"format": "uri",
+					"description": "Canonical homepage URL."
+				},
+				"description": {
+					"type": "string",
+					"description": "Brief description of the source."
+				},
+				"format": {
+					"type": "string",
+					"description": "Default file format from this source."
+				}
+			}
+		},
+		"DatasetDownload": {
+			"type": "object",
+			"required": ["url", "format"],
+			"additionalProperties": false,
+			"properties": {
+				"url": {
+					"type": "string",
+					"description": "Download URL."
+				},
+				"format": {
+					"type": "string",
+					"description": "File format at this URL (e.g. gml, matrix-market, pajek, matlab)."
+				},
+				"description": {
+					"type": "string",
+					"description": "Optional description of this download."
+				}
+			}
+		},
+		"DatasetSource": {
+			"type": "object",
+			"required": ["source", "downloads"],
+			"additionalProperties": false,
+			"properties": {
+				"source": {
+					"type": "string",
+					"description": "Key into the top-level sources object."
+				},
+				"downloads": {
+					"type": "array",
+					"items": {
+						"$ref": "#/$defs/DatasetDownload"
+					},
+					"minItems": 1,
+					"description": "Available downloads from this source."
+				}
+			}
+		},
+		"Citation": {
+			"type": "object",
+			"required": ["authors", "title", "year", "type"],
+			"additionalProperties": false,
+			"properties": {
+				"authors": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					},
+					"minItems": 1,
+					"description": "Author names."
+				},
+				"title": {
+					"type": "string",
+					"description": "Publication or dataset title."
+				},
+				"journal": {
+					"type": "string",
+					"description": "Journal name (articles)."
+				},
+				"volume": {
+					"type": "integer",
+					"description": "Volume number."
+				},
+				"pages": {
+					"type": "string",
+					"description": "Page range."
+				},
+				"year": {
+					"type": "integer",
+					"description": "Publication year."
+				},
+				"type": {
+					"type": "string",
+					"enum": ["article", "book", "conference", "dataset", "incollection", "other", "thesis"],
+					"description": "Citation type."
+				},
+				"publisher": {
+					"type": "string",
+					"description": "Publisher name (books, proceedings)."
+				},
+				"location": {
+					"type": "string",
+					"description": "Publication location."
+				}
+			}
+		},
+		"DatasetEntry": {
+			"type": "object",
+			"required": [
+				"id", "name", "description", "sources", "citation", "retrieved",
+				"rawBytes", "nodeCount", "edgeCount",
+				"directed", "weighted", "hasNodeAttributes", "hasEdgeAttributes", "labeled"
+			],
+			"additionalProperties": false,
+			"properties": {
+				"id": {
+					"type": "string",
+					"pattern": "^[a-z0-9][a-z0-9-]*$",
+					"description": "Unique lowercase identifier (hyphens allowed, no underscores)."
+				},
+				"name": {
+					"type": "string",
+					"description": "Human-readable name."
+				},
+				"description": {
+					"type": "string",
+					"description": "Description of the dataset."
+				},
+				"sources": {
+					"type": "array",
+					"items": {
+						"$ref": "#/$defs/DatasetSource"
+					},
+					"minItems": 1,
+					"description": "Data sources with their download URLs."
+				},
+				"citation": {
+					"$ref": "#/$defs/Citation"
+				},
+				"retrieved": {
+					"type": "string",
+					"pattern": "^\\d{4}-\\d{2}-\\d{2}",
+					"description": "Date retrieved (ISO 8601 date or datetime)."
+				},
+				"creator": {
+					"type": "string",
+					"description": "Original creator comment (e.g. from GML header)."
+				},
+				"rawBytes": {
+					"type": "integer",
+					"minimum": 0,
+					"description": "Raw download size in bytes (0 if not yet downloaded)."
+				},
+				"nodeCount": {
+					"type": "integer",
+					"minimum": 0,
+					"description": "Number of nodes."
+				},
+				"edgeCount": {
+					"type": "integer",
+					"minimum": 0,
+					"description": "Number of edges (or non-zeros for matrices)."
+				},
+				"directed": {
+					"type": "boolean",
+					"description": "Whether the graph is directed."
+				},
+				"weighted": {
+					"type": "boolean",
+					"description": "Whether edges have weights."
+				},
+				"hasNodeAttributes": {
+					"type": "boolean",
+					"description": "Whether nodes have attributes beyond ID."
+				},
+				"hasEdgeAttributes": {
+					"type": "boolean",
+					"description": "Whether edges have attributes beyond source/target."
+				},
+				"labeled": {
+					"type": "boolean",
+					"description": "Whether nodes have string labels."
+				}
+			}
+		}
+	}
+}
