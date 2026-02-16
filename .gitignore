@@ -40,6 +40,9 @@ pnpm-debug.log*
 
 # Benchmark data (downloaded separately)
 data/
+!src/data/
+src/data/*
+!src/data/catalog.json
 
 # Test results
 *.tap

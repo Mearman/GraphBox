@@ -1,0 +1,5050 @@
+{
+	"version": "1.0.0",
+	"generated": "2026-02-16T11:36:38.474Z",
+	"sources": {
+		"newman": {
+			"name": "Mark Newman's Network Data",
+			"url": "https://websites.umich.edu/~mejn/netdata/",
+			"description": "Network datasets compiled by Mark Newman at the University of Michigan.",
+			"format": "gml"
+		},
+		"snap": {
+			"name": "Stanford Large Network Dataset Collection",
+			"url": "https://snap.stanford.edu/data/",
+			"description": "Large-scale network datasets from Stanford Network Analysis Project.",
+			"format": "various"
+		},
+		"ucinet": {
+			"name": "UCINet Datasets",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/UciNet/UciData.htm",
+			"description": "Social network datasets released with UCINet software.",
+			"format": "ucinet"
+		},
+		"pajek": {
+			"name": "Pajek Datasets",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
+			"description": "Example datasets released with Pajek network analysis software.",
+			"format": "pajek"
+		},
+		"barabasi": {
+			"name": "Barabási Lab Datasets",
+			"url": "http://www.nd.edu/~networks/resources.htm",
+			"description": "Network datasets from Albert-László Barabási's research group.",
+			"format": "various"
+		},
+		"arenas": {
+			"name": "Alex Arenas Datasets",
+			"url": "http://deim.urv.cat/~aarenas/data/welcome.htm",
+			"description": "Network datasets from Alexandre Arenas at Universitat Rovira i Virgili.",
+			"format": "various"
+		},
+		"suitesparse": {
+			"name": "SuiteSparse Matrix Collection",
+			"url": "https://sparse.tamu.edu/",
+			"description": "Sparse matrix benchmarks from diverse applications, formerly the UF Sparse Matrix Collection.",
+			"format": "matrix-market"
+		}
+	},
+	"datasetCount": 186,
+	"datasets": {
+		"adjnoun": {
+			"id": "adjnoun",
+			"name": "Word Adjacencies",
+			"description": "Adjacency network of common adjectives and nouns in the novel David Copperfield by Charles Dickens. Nodes represent words and edges connect words that appear adjacent to each other. The 'value' property indicates word type: 0 for adjective, 1 for noun.",
+			"source": "newman",
+			"url": "https://websites.umich.edu/~mejn/netdata/adjnoun.zip",
+			"citation": {
+				"authors": [
+					"M. E. J. Newman"
+				],
+				"title": "Finding community structure in very large networks",
+				"journal": "Physical Review E",
+				"volume": 74,
+				"pages": "036104",
+				"year": 2006,
+				"type": "article"
+			},
+			"retrieved": "2026-01-17",
+			"creator": "Mark Newman on Fri Jul 21 13:00:02 2006",
+			"rawBytes": 27333,
+			"nodeCount": 112,
+			"edgeCount": 425,
+			"directed": false,
+			"weighted": false,
+			"hasNodeAttributes": true,
+			"hasEdgeAttributes": false,
+			"labeled": true
+		},
+		"amazon0302": {
+			"id": "amazon0302",
+			"name": "Amazon Co-Purchasing Mar 2003",
+			"description": "Amazon product co-purchasing network from March 2 2003.",
+			"source": "snap",
+			"url": "https://snap.stanford.edu/data/amazon0302.txt.gz",
+			"citation": {
+				"authors": [
+					"J. Leskovec",
+					"L. Adamic",
+					"B. Huberman"
+				],
+				"title": "The Dynamics of Viral Marketing",
+				"journal": "ACM TWEB",
+				"year": 2007,
+				"type": "article"
+			},
+			"retrieved": "2026-01-17",
+			"rawBytes": 72370238,
+			"nodeCount": 262111,
+			"edgeCount": 1234877,
+			"directed": true,
+			"weighted": false,
+			"hasNodeAttributes": false,
+			"hasEdgeAttributes": false,
+			"labeled": false
+		},
+		"arenas-celegans-metabolic": {
+			"id": "arenas-celegans-metabolic",
+			"name": "C. elegans Metabolic Network",
+			"description": "Metabolic network of the nematode C. elegans.",
+			"source": "arenas",
+			"url": "http://deim.urv.cat/~aarenas/data/xarxes/celegans_metabolic.zip",
+			"citation": {
+				"authors": [
+					"J. Duch",
+					"A. Arenas"
+				],
+				"title": "Community identification using Extremal Optimization",
+				"journal": "Physical Review E",
+				"volume": 72,
+				"pages": "027104",
+				"year": 2005,
+				"type": "article"
+			},
+			"retrieved": "2026-02-16",
+			"rawBytes": 348431,
+			"nodeCount": 907,
+			"edgeCount": 5050,
+			"directed": true,
+			"weighted": true,
+			"hasNodeAttributes": false,
+			"hasEdgeAttributes": true,
+			"labeled": true
+		},
+		"arenas-email": {
+			"id": "arenas-email",
+			"name": "Email Network URV",
+			"description": "E-mail interchanges between members of the University Rovira i Virgili (Tarragona).",
+			"source": "arenas",
+			"url": "http://deim.urv.cat/~aarenas/data/xarxes/email.zip",
+			"citation": {
+				"authors": [
+					"R. Guimera",
+					"L. Danon",
+					"A. Diaz-Guilera",
+					"F. Giralt",
+					"A. Arenas"
+				],
+				"title": "Self-similar community structure in a network of human interactions",
+				"journal": "Physical Review E",
+				"volume": 68,
+				"pages": "065103(R)",
+				"year": 2003,
+				"type": "article"
+			},
+			"retrieved": "2026-02-16",
+			"rawBytes": 722086,
+			"nodeCount": 1133,
+			"edgeCount": 10903,
+			"directed": true,
+			"weighted": true,
+			"hasNodeAttributes": false,
+			"hasEdgeAttributes": true,
+			"labeled": false
+		},
+		"arenas-jazz": {
+			"id": "arenas-jazz",
+			"name": "Jazz Musicians Network",
+			"description": "Collaboration network of jazz musicians. Nodes are musicians and edges represent playing together in a band.",
+			"source": "arenas",
+			"url": "http://deim.urv.cat/~aarenas/data/xarxes/jazz.zip",
+			"citation": {
+				"authors": [
+					"P. Gleiser",
+					"L. Danon"
+				],
+				"title": "Community Structure in Jazz",
+				"journal": "Advances in Complex Systems",
+				"volume": 6,
+				"pages": "565",
+				"year": 2003,
+				"type": "article"
+			},
+			"retrieved": "2026-02-16",
+			"rawBytes": 350926,
+			"nodeCount": 199,
+			"edgeCount": 5485,
+			"directed": false,
+			"weighted": true,
+			"hasNodeAttributes": false,
+			"hasEdgeAttributes": true,
+			"labeled": true
+		},
+		"arenas-pgp": {
+			"id": "arenas-pgp",
+			"name": "PGP Network",
+			"description": "Giant component of the network of users of the Pretty-Good-Privacy algorithm for secure information interchange.",
+			"source": "arenas",
+			"url": "http://deim.urv.cat/~aarenas/data/xarxes/PGP.zip",
+			"citation": {
+				"authors": [
+					"M. Boguña",
+					"R. Pastor-Satorras",
+					"A. Diaz-Guilera",
+					"A. Arenas"
+				],
+				"title": "Models of social networks based on social distance attachment",
+				"journal": "Physical Review E",
+				"volume": 70,
+				"pages": "056122",
+				"year": 2004,
+				"type": "article"
+			},
+			"retrieved": "2026-02-16",
+			"rawBytes": 2998684,
+			"nodeCount": 21361,
+			"edgeCount": 35021,
+			"directed": false,
+			"weighted": true,
+			"hasNodeAttributes": false,
+			"hasEdgeAttributes": true,
+			"labeled": true
+		},
+		"astro-ph": {
+			"id": "astro-ph",
+			"name": "Astrophysics Collaborations",
+			"description": "Weighted network of coauthorships between scientists posting preprints on the Astrophysics E-Print Archive between Jan 1, 1995 and December 31, 1999.",
+			"source": "newman",
+			"url": "https://websites.umich.edu/~mejn/netdata/astro-ph.zip",
+			"citation": {
+				"authors": [
+					"M. E. J. Newman"
+				],
+				"title": "The structure of scientific collaboration networks",
+				"journal": "Proceedings of the National Academy of Sciences",
+				"volume": 98,
+				"pages": "404-409",
+				"year": 2001,
+				"type": "article"
+			},
+			"retrieved": "2026-01-17",
+			"creator": "Mark Newman on Fri Jul 21 13:45:25 2006",
+			"rawBytes": 10616855,
+			"nodeCount": 16706,
+			"edgeCount": 121251,
+			"directed": false,
+			"weighted": true,
+			"hasNodeAttributes": false,
+			"hasEdgeAttributes": true,
+			"labeled": true
+		},
+		"barabasi-actor": {
+			"id": "barabasi-actor",
+			"name": "Actor Collaboration Network",
+			"description": "Collaboration network of film actors from IMDB. Nodes are actors, edges connect actors who appeared in the same movie.",
+			"source": "barabasi",
+			"url": "http://www.nd.edu/~networks/resources/actor/actor.dat.gz",
+			"citation": {
+				"authors": [
+					"A.-L. Barabási",
+					"R. Albert"
+				],
+				"title": "Emergence of scaling in random networks",
+				"journal": "Science",
+				"volume": 286,
+				"pages": "509-512",
+				"year": 1999,
+				"type": "article"
+			},
+			"retrieved": "2026-02-16",
+			"rawBytes": 10442476,
+			"nodeCount": 75034,
+			"edgeCount": 118477,
+			"directed": false,
+			"weighted": true,
+			"hasNodeAttributes": false,
+			"hasEdgeAttributes": true,
+			"labeled": false
+		},
+		"barabasi-protein-yeast": {
+			"id": "barabasi-protein-yeast",
+			"name": "Yeast Protein Interaction Network",
+			"description": "Protein-protein interaction network for Saccharomyces cerevisiae (yeast).",
+			"source": "barabasi",
+			"url": "http://www.nd.edu/~networks/resources/protein/bo.dat.gz",
+			"citation": {
+				"authors": [
+					"H. Jeong",
+					"S. Mason",
+					"A.-L. Barabási",
+					"Z. N. Oltvai"
+				],
+				"title": "Centrality and lethality of protein networks",
+				"journal": "Nature",
+				"volume": 411,
+				"pages": "41-42",
+				"year": 2001,
+				"type": "article"
+			},
+			"retrieved": "2026-02-16",
+			"rawBytes": 265179,
+			"nodeCount": 1870,
+			"edgeCount": 4480,
+			"directed": false,
+			"weighted": false,
+			"hasNodeAttributes": false,
+			"hasEdgeAttributes": false,
+			"labeled": false
+		},
+		"barabasi-www": {
+			"id": "barabasi-www",
+			"name": "World-Wide-Web",
+			"description": "Hyperlink network of web pages from a 1999 crawl of the nd.edu domain.",
+			"source": "barabasi",
+			"url": "http://www.nd.edu/~networks/resources/www/www.dat.gz",
+			"citation": {
+				"authors": [
+					"R. Albert",
+					"H. Jeong",
+					"A.-L. Barabási"
+				],
+				"title": "Diameter of the World Wide Web",
+				"journal": "Nature",
+				"volume": 401,
+				"pages": "130-131",
+				"year": 1999,
+				"type": "article"
+			},
+			"retrieved": "2026-02-16",
+			"rawBytes": 88627319,
+			"nodeCount": 325729,
+			"edgeCount": 1497135,
+			"directed": true,
+			"weighted": false,
+			"hasNodeAttributes": false,
+			"hasEdgeAttributes": false,
+			"labeled": false
+		},
+		"ca-astroph": {
+			"id": "ca-astroph",
+			"name": "Arxiv Astro Physics Collaborations",
+			"description": "Collaboration network of Arxiv Astro Physics category.",
+			"source": "snap",
+			"url": "https://snap.stanford.edu/data/ca-AstroPh.txt.gz",
+			"citation": {
+				"authors": [
+					"J. Leskovec",
+					"J. Kleinberg",
+					"C. Faloutsos"
+				],
+				"title": "Graph Evolution: Densification and Shrinking Diameters",
+				"journal": "ACM TKDD",
+				"year": 2007,
+				"type": "article"
+			},
+			"retrieved": "2026-01-17",
+			"rawBytes": 21226182,
+			"nodeCount": 18772,
+			"edgeCount": 396160,
+			"directed": false,
+			"weighted": false,
+			"hasNodeAttributes": false,
+			"hasEdgeAttributes": false,
+			"labeled": false
+		},
+		"ca-condmat": {
+			"id": "ca-condmat",
+			"name": "Arxiv Condensed Matter Collaborations",
+			"description": "Collaboration network of Arxiv Condensed Matter category.",
+			"source": "snap",
+			"url": "https://snap.stanford.edu/data/ca-CondMat.txt.gz",
+			"citation": {
+				"authors": [
+					"J. Leskovec",
+					"J. Kleinberg",
+					"C. Faloutsos"
+				],
+				"title": "Graph Evolution: Densification and Shrinking Diameters",
+				"journal": "ACM TKDD",
+				"year": 2007,
+				"type": "article"
+			},
+			"retrieved": "2026-01-17",
+			"rawBytes": 10311266,
+			"nodeCount": 23133,
+			"edgeCount": 186936,
+			"directed": false,
+			"weighted": false,
+			"hasNodeAttributes": false,
+			"hasEdgeAttributes": false,
+			"labeled": false
+		},
+		"ca-grqc": {
+			"id": "ca-grqc",
+			"name": "Arxiv General Relativity Collaborations",
+			"description": "Collaboration network of Arxiv General Relativity category.",
+			"source": "snap",
+			"url": "https://snap.stanford.edu/data/ca-GrQc.txt.gz",
+			"citation": {
+				"authors": [
+					"J. Leskovec",
+					"J. Kleinberg",
+					"C. Faloutsos"
+				],
+				"title": "Graph Evolution: Densification and Shrinking Diameters",
+				"journal": "ACM TKDD",
+				"year": 2007,
+				"type": "article"
+			},
+			"retrieved": "2026-01-17",
+			"rawBytes": 1616300,
+			"nodeCount": 5242,
+			"edgeCount": 28980,
+			"directed": false,
+			"weighted": false,
+			"hasNodeAttributes": false,
+			"hasEdgeAttributes": false,
+			"labeled": false
+		},
+		"ca-hepph": {
+			"id": "ca-hepph",
+			"name": "Arxiv High Energy Physics Collaborations",
+			"description": "Collaboration network of Arxiv High Energy Physics category.",
+			"source": "snap",
+			"url": "https://snap.stanford.edu/data/ca-HepPh.txt.gz",
+			"citation": {
+				"authors": [
+					"J. Leskovec",
+					"J. Kleinberg",
+					"C. Faloutsos"
+				],
+				"title": "Graph Evolution: Densification and Shrinking Diameters",
+				"journal": "ACM TKDD",
+				"year": 2007,
+				"type": "article"
+			},
+			"retrieved": "2026-01-17",
+			"rawBytes": 12574629,
+			"nodeCount": 12008,
+			"edgeCount": 237010,
+			"directed": false,
+			"weighted": false,
+			"hasNodeAttributes": false,
+			"hasEdgeAttributes": false,
+			"labeled": false
+		},
+		"ca-hepth": {
+			"id": "ca-hepth",
+			"name": "Arxiv High Energy Physics Theory Collaborations",
+			"description": "Collaboration network of Arxiv High Energy Physics Theory category.",
+			"source": "snap",
+			"url": "https://snap.stanford.edu/data/ca-HepTh.txt.gz",
+			"citation": {
+				"authors": [
+					"J. Leskovec",
+					"J. Kleinberg",
+					"C. Faloutsos"
+				],
+				"title": "Graph Evolution: Densification and Shrinking Diameters",
+				"journal": "ACM TKDD",
+				"year": 2007,
+				"type": "article"
+			},
+			"retrieved": "2026-01-17",
+			"rawBytes": 2941184,
+			"nodeCount": 9877,
+			"edgeCount": 51971,
+			"directed": false,
+			"weighted": false,
+			"hasNodeAttributes": false,
+			"hasEdgeAttributes": false,
+			"labeled": false
+		},
+		"celegans": {
+			"id": "celegans",
+			"name": "C. Elegans Neural Network",
+			"description": "Directed, weighted network representing the neural network of the nematode C. Elegans. Nodes are neurons and edges represent synaptic connections.",
+			"source": "newman",
+			"url": "https://websites.umich.edu/~mejn/netdata/celegansneural.zip",
+			"citation": {
+				"authors": [
+					"D. J. Watts",
+					"S. H. Strogatz"
+				],
+				"title": "Collective dynamics of 'small-world' networks",
+				"journal": "Nature",
+				"volume": 393,
+				"pages": "440-442",
+				"year": 1998,
+				"type": "article"
+			},
+			"retrieved": "2026-01-17",
+			"creator": "Mark Newman on Thu Aug 31 12:59:09 2006",
+			"rawBytes": 154557,
+			"nodeCount": 297,
+			"edgeCount": 2359,
+			"directed": true,
+			"weighted": true,
+			"hasNodeAttributes": false,
+			"hasEdgeAttributes": true,
+			"labeled": false
+		},
+		"cit-hepph": {
+			"id": "cit-hepph",
+			"name": "HEP-PH Citation Network",
+			"description": "Arxiv High Energy Physics paper citation network.",
+			"source": "snap",
+			"url": "https://snap.stanford.edu/data/cit-HepPh.txt.gz",
+			"citation": {
+				"authors": [
+					"J. Leskovec",
+					"J. Kleinberg",
+					"C. Faloutsos"
+				],
+				"title": "Graph Evolution: Densification and Shrinking Diameters",
+				"journal": "ACM TKDD",
+				"year": 2007,
+				"type": "article"
+			},
+			"retrieved": "2026-01-17",
+			"rawBytes": 24094154,
+			"nodeCount": 34546,
+			"edgeCount": 421578,
+			"directed": true,
+			"weighted": false,
+			"hasNodeAttributes": false,
+			"hasEdgeAttributes": false,
+			"labeled": false
+		},
+		"cit-hepth": {
+			"id": "cit-hepth",
+			"name": "HEP-TH Citation Network",
+			"description": "Arxiv High Energy Physics Theory paper citation network.",
+			"source": "snap",
+			"url": "https://snap.stanford.edu/data/cit-HepTh.txt.gz",
+			"citation": {
+				"authors": [
+					"J. Leskovec",
+					"J. Kleinberg",
+					"C. Faloutsos"
+				],
+				"title": "Graph Evolution: Densification and Shrinking Diameters",
+				"journal": "ACM TKDD",
+				"year": 2007,
+				"type": "article"
+			},
+			"retrieved": "2026-01-17",
+			"rawBytes": 20098704,
+			"nodeCount": 27770,
+			"edgeCount": 352807,
+			"directed": true,
+			"weighted": false,
+			"hasNodeAttributes": false,
+			"hasEdgeAttributes": false,
+			"labeled": false
+		},
+		"cities": {
+			"id": "cities",
+			"name": "Cities and Services",
+			"description": "Two-mode network of cities and the services they provide.",
+			"source": "pajek",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/2mode/cities.zip",
+			"citation": {
+				"authors": [
+					"Vladimir Batagelj",
+					"Andrej Mrvar"
+				],
+				"title": "Pajek Datasets",
+				"year": 2006,
+				"type": "article"
+			},
+			"retrieved": "2026-02-16",
+			"rawBytes": 80291,
+			"nodeCount": 102,
+			"edgeCount": 1397,
+			"directed": false,
+			"weighted": true,
+			"hasNodeAttributes": true,
+			"hasEdgeAttributes": true,
+			"labeled": false
+		},
+		"cond-mat-2003": {
+			"id": "cond-mat-2003",
+			"name": "Condensed Matter Collaborations 2003",
+			"description": "Weighted network of coauthorships between scientists posting preprints on the Condensed Matter E-Print Archive between Jan 1, 1995 and June 30, 2003.",
+			"source": "newman",
+			"url": "https://websites.umich.edu/~mejn/netdata/cond-mat-2003.zip",
+			"citation": {
+				"authors": [
+					"M. E. J. Newman"
+				],
+				"title": "The structure of scientific collaboration networks",
+				"journal": "Proceedings of the National Academy of Sciences",
+				"volume": 98,
+				"pages": "404-409",
+				"year": 2001,
+				"type": "article"
+			},
+			"retrieved": "2026-01-17",
+			"creator": "Mark Newman on Sat Jul 22 15:39:01 2006",
+			"rawBytes": 10807431,
+			"nodeCount": 31163,
+			"edgeCount": 120029,
+			"directed": false,
+			"weighted": true,
+			"hasNodeAttributes": false,
+			"hasEdgeAttributes": true,
+			"labeled": true
+		},
+		"cond-mat-2005": {
+			"id": "cond-mat-2005",
+			"name": "Condensed Matter Collaborations 2005",
+			"description": "Weighted network of coauthorships between scientists posting preprints on the Condensed Matter E-Print Archive between Jan 1, 1995 and March 31, 2005.",
+			"source": "newman",
+			"url": "https://websites.umich.edu/~mejn/netdata/cond-mat-2005.zip",
+			"citation": {
+				"authors": [
+					"M. E. J. Newman"
+				],
+				"title": "The structure of scientific collaboration networks",
+				"journal": "Proceedings of the National Academy of Sciences",
+				"volume": 98,
+				"pages": "404-409",
+				"year": 2001,
+				"type": "article"
+			},
+			"retrieved": "2026-01-17",
+			"creator": "Mark Newman on Sat Jul 22 15:28:23 2006",
+			"rawBytes": 15654354,
+			"nodeCount": 40421,
+			"edgeCount": 175692,
+			"directed": false,
+			"weighted": true,
+			"hasNodeAttributes": false,
+			"hasEdgeAttributes": true,
+			"labeled": true
+		},
+		"cond-mat": {
+			"id": "cond-mat",
+			"name": "Condensed Matter Collaborations 1999",
+			"description": "Weighted network of coauthorships between scientists posting preprints on the Condensed Matter E-Print Archive between Jan 1, 1995 and December 31, 1999.",
+			"source": "newman",
+			"url": "https://websites.umich.edu/~mejn/netdata/cond-mat.zip",
+			"citation": {
+				"authors": [
+					"M. E. J. Newman"
+				],
+				"title": "The structure of scientific collaboration networks",
+				"journal": "Proceedings of the National Academy of Sciences",
+				"volume": 98,
+				"pages": "404-409",
+				"year": 2001,
+				"type": "article"
+			},
+			"retrieved": "2026-01-17",
+			"creator": "Mark Newman on Fri Jul 21 13:45:04 2006",
+			"rawBytes": 4407269,
+			"nodeCount": 16726,
+			"edgeCount": 47594,
+			"directed": false,
+			"weighted": true,
+			"hasNodeAttributes": false,
+			"hasEdgeAttributes": true,
+			"labeled": true
+		},
+		"csphd": {
+			"id": "csphd",
+			"name": "CS PhD Genealogy",
+			"description": "Computer Science PhD advisor-student relationships.",
+			"source": "pajek",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/GED/CSphd.ZIP",
+			"citation": {
+				"authors": [
+					"Vladimir Batagelj",
+					"Andrej Mrvar"
+				],
+				"title": "Pajek Datasets",
+				"year": 2006,
+				"type": "article"
+			},
+			"retrieved": "2026-01-17",
+			"rawBytes": 141274,
+			"nodeCount": 1882,
+			"edgeCount": 723,
+			"directed": true,
+			"weighted": true,
+			"hasNodeAttributes": true,
+			"hasEdgeAttributes": true,
+			"labeled": false,
+			"alternateUrls": [
+				{
+					"url": "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/CSphd.tar.gz",
+					"source": "suitesparse",
+					"format": "matrix-market",
+					"description": "SuiteSparse Matrix Collection (Pajek/CSphd)"
+				}
+			]
+		},
+		"dic28": {
+			"id": "dic28",
+			"name": "Words 2-8",
+			"description": "Network of English words of length 2-8, connected if they differ by one letter.",
+			"source": "pajek",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/dic/knuth/dic28.zip",
+			"citation": {
+				"authors": [
+					"Donald Knuth"
+				],
+				"title": "The Stanford GraphBase",
+				"year": 1993,
+				"type": "article"
+			},
+			"retrieved": "2026-01-17",
+			"rawBytes": 3168897,
+			"nodeCount": 52652,
+			"edgeCount": 28635,
+			"directed": false,
+			"weighted": true,
+			"hasNodeAttributes": false,
+			"hasEdgeAttributes": true,
+			"labeled": false
+		},
+		"divorce": {
+			"id": "divorce",
+			"name": "Divorce in US",
+			"description": "Two-mode network of US states and grounds for divorce.",
+			"source": "pajek",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/2mode/divorce.net",
+			"citation": {
+				"authors": [
+					"Vladimir Batagelj",
+					"Andrej Mrvar"
+				],
+				"title": "Pajek Datasets",
+				"year": 2006,
+				"type": "article"
+			},
+			"retrieved": "2026-02-16",
+			"rawBytes": 13580,
+			"nodeCount": 59,
+			"edgeCount": 225,
+			"directed": false,
+			"weighted": false,
+			"hasNodeAttributes": true,
+			"hasEdgeAttributes": false,
+			"labeled": false
+		},
+		"dolphins": {
+			"id": "dolphins",
+			"name": "Dolphin Social Network",
+			"description": "Undirected social network of frequent associations between 62 dolphins in a community living off Doubtful Sound, New Zealand.",
+			"source": "newman",
+			"url": "https://websites.umich.edu/~mejn/netdata/dolphins.zip",
+			"citation": {
+				"authors": [
+					"D. Lusseau",
+					"K. Schneider",
+					"O. J. Boisseau",
+					"P. Haase",
+					"E. Slooten",
+					"S. M. Dawson"
+				],
+				"title": "The bottlenose dolphin community of Doubtful Sound features a large proportion of long-lasting associations",
+				"journal": "Behavioral Ecology and Sociobiology",
+				"volume": 54,
+				"pages": "396-405",
+				"year": 2003,
+				"type": "article"
+			},
+			"retrieved": "2026-01-17",
+			"creator": "Mark Newman on Wed Jul 26 15:04:20 2006",
+			"rawBytes": 10820,
+			"nodeCount": 62,
+			"edgeCount": 159,
+			"directed": false,
+			"weighted": false,
+			"hasNodeAttributes": false,
+			"hasEdgeAttributes": false,
+			"labeled": true
+		},
+		"ego-facebook": {
+			"id": "ego-facebook",
+			"name": "Facebook Social Circles",
+			"description": "Social circles from Facebook (anonymized). Nodes are users and edges are friendships.",
+			"source": "snap",
+			"url": "https://snap.stanford.edu/data/facebook_combined.txt.gz",
+			"citation": {
+				"authors": [
+					"J. McAuley",
+					"J. Leskovec"
+				],
+				"title": "Learning to Discover Social Circles in Ego Networks",
+				"journal": "NIPS",
+				"year": 2012,
+				"type": "article"
+			},
+			"retrieved": "2026-01-17",
+			"rawBytes": 4484148,
+			"nodeCount": 4039,
+			"edgeCount": 88234,
+			"directed": false,
+			"weighted": false,
+			"hasNodeAttributes": false,
+			"hasEdgeAttributes": false,
+			"labeled": false
+		},
+		"ego-twitter": {
+			"id": "ego-twitter",
+			"name": "Twitter Social Circles",
+			"description": "Social circles from Twitter. Nodes are users and edges represent following relationships.",
+			"source": "snap",
+			"url": "https://snap.stanford.edu/data/twitter_combined.txt.gz",
+			"citation": {
+				"authors": [
+					"J. McAuley",
+					"J. Leskovec"
+				],
+				"title": "Learning to Discover Social Circles in Ego Networks",
+				"journal": "NIPS",
+				"year": 2012,
+				"type": "article"
+			},
+			"retrieved": "2026-01-17",
+			"rawBytes": 143762659,
+			"nodeCount": 81306,
+			"edgeCount": 2420766,
+			"directed": true,
+			"weighted": false,
+			"hasNodeAttributes": false,
+			"hasEdgeAttributes": false,
+			"labeled": false
+		},
+		"email-enron": {
+			"id": "email-enron",
+			"name": "Enron Email Network",
+			"description": "Email communication network from Enron.",
+			"source": "snap",
+			"url": "https://snap.stanford.edu/data/email-Enron.txt.gz",
+			"citation": {
+				"authors": [
+					"J. Leskovec",
+					"J. Kleinberg",
+					"C. Faloutsos"
+				],
+				"title": "Graph Evolution: Densification and Shrinking Diameters",
+				"journal": "ACM TKDD",
+				"year": 2007,
+				"type": "article"
+			},
+			"retrieved": "2026-01-17",
+			"rawBytes": 19331350,
+			"nodeCount": 36692,
+			"edgeCount": 367662,
+			"directed": false,
+			"weighted": false,
+			"hasNodeAttributes": false,
+			"hasEdgeAttributes": false,
+			"labeled": false
+		},
+		"email-euall": {
+			"id": "email-euall",
+			"name": "EU Email Network",
+			"description": "Email network from a European research institution.",
+			"source": "snap",
+			"url": "https://snap.stanford.edu/data/email-EuAll.txt.gz",
+			"citation": {
+				"authors": [
+					"J. Leskovec",
+					"J. Kleinberg",
+					"C. Faloutsos"
+				],
+				"title": "Graph Evolution: Densification and Shrinking Diameters",
+				"journal": "ACM TKDD",
+				"year": 2007,
+				"type": "article"
+			},
+			"retrieved": "2026-01-17",
+			"rawBytes": 28433526,
+			"nodeCount": 265214,
+			"edgeCount": 420045,
+			"directed": true,
+			"weighted": false,
+			"hasNodeAttributes": false,
+			"hasEdgeAttributes": false,
+			"labeled": false
+		},
+		"erdos02": {
+			"id": "erdos02",
+			"name": "Erdos Collaboration 2002",
+			"description": "Collaboration network centered on Paul Erdos. Nodes are mathematicians who collaborated with Erdos or his collaborators.",
+			"source": "pajek",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/Erdos/Erdos02.net",
+			"citation": {
+				"authors": [
+					"Vladimir Batagelj",
+					"Andrej Mrvar"
+				],
+				"title": "Pajek Datasets",
+				"year": 2006,
+				"type": "article"
+			},
+			"retrieved": "2026-01-17",
+			"rawBytes": 431480,
+			"nodeCount": 6927,
+			"edgeCount": 574,
+			"directed": false,
+			"weighted": true,
+			"hasNodeAttributes": true,
+			"hasEdgeAttributes": true,
+			"labeled": false,
+			"alternateUrls": [
+				{
+					"url": "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/Erdos02.tar.gz",
+					"source": "suitesparse",
+					"format": "matrix-market",
+					"description": "SuiteSparse Matrix Collection (Pajek/Erdos02)"
+				}
+			]
+		},
+		"football": {
+			"id": "football",
+			"name": "American College Football",
+			"description": "Network of American football games between Division IA colleges during regular season Fall 2000. Nodes represent teams and edges connect teams that played each other. The 'value' property indicates conference membership.",
+			"source": "newman",
+			"url": "https://websites.umich.edu/~mejn/netdata/football.zip",
+			"citation": {
+				"authors": [
+					"M. Girvan",
+					"M. E. J. Newman"
+				],
+				"title": "Community structure in social and biological networks",
+				"journal": "Proceedings of the National Academy of Sciences",
+				"volume": 99,
+				"pages": "7821-7826",
+				"year": 2002,
+				"type": "article"
+			},
+			"retrieved": "2026-01-17",
+			"creator": "Mark Newman on Sat Jul 22 05:32:16 2006",
+			"rawBytes": 43920,
+			"nodeCount": 115,
+			"edgeCount": 613,
+			"directed": false,
+			"weighted": false,
+			"hasNodeAttributes": true,
+			"hasEdgeAttributes": false,
+			"labeled": true
+		},
+		"gd01-citations": {
+			"id": "gd01-citations",
+			"name": "GD01 Graph Drawing Citations",
+			"description": "Citation network from Graph Drawing proceedings, from GD 2001 contest.",
+			"source": "pajek",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/GD/a01.zip",
+			"citation": {
+				"authors": [
+					"Vladimir Batagelj",
+					"Andrej Mrvar"
+				],
+				"title": "Pajek Datasets",
+				"year": 2006,
+				"type": "article"
+			},
+			"retrieved": "2026-01-17",
+			"rawBytes": 74038,
+			"nodeCount": 311,
+			"edgeCount": 645,
+			"directed": true,
+			"weighted": true,
+			"hasNodeAttributes": true,
+			"hasEdgeAttributes": true,
+			"labeled": false,
+			"alternateUrls": [
+				{
+					"url": "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/GD01_a.tar.gz",
+					"source": "suitesparse",
+					"format": "matrix-market",
+					"description": "SuiteSparse Matrix Collection (Pajek/GD01_a)"
+				}
+			]
+		},
+		"gd99-linden": {
+			"id": "gd99-linden",
+			"name": "GD99 Lindenstrasse",
+			"description": "Social network from German TV series Lindenstrasse, from Graph Drawing 1999 contest.",
+			"source": "pajek",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/GD/a99m.zip",
+			"citation": {
+				"authors": [
+					"Vladimir Batagelj",
+					"Andrej Mrvar"
+				],
+				"title": "Pajek Datasets",
+				"year": 2006,
+				"type": "article"
+			},
+			"retrieved": "2026-02-16",
+			"rawBytes": 42534,
+			"nodeCount": 234,
+			"edgeCount": 326,
+			"directed": false,
+			"weighted": true,
+			"hasNodeAttributes": true,
+			"hasEdgeAttributes": true,
+			"labeled": false
+		},
+		"geom": {
+			"id": "geom",
+			"name": "Computational Geometry Collaboration",
+			"description": "Collaboration network of computational geometry researchers.",
+			"source": "pajek",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/collab/geom.zip",
+			"citation": {
+				"authors": [
+					"Vladimir Batagelj",
+					"Andrej Mrvar"
+				],
+				"title": "Pajek Datasets",
+				"year": 2006,
+				"type": "article"
+			},
+			"retrieved": "2026-01-17",
+			"rawBytes": 1424132,
+			"nodeCount": 7343,
+			"edgeCount": 11898,
+			"directed": false,
+			"weighted": true,
+			"hasNodeAttributes": true,
+			"hasEdgeAttributes": true,
+			"labeled": false,
+			"alternateUrls": [
+				{
+					"url": "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/geom.tar.gz",
+					"source": "suitesparse",
+					"format": "matrix-market",
+					"description": "SuiteSparse Matrix Collection (Pajek/geom)"
+				}
+			]
+		},
+		"hep-th": {
+			"id": "hep-th",
+			"name": "High-Energy Theory Collaborations",
+			"description": "Weighted network of coauthorships between scientists posting preprints on the High-Energy Theory E-Print Archive between Jan 1, 1995 and December 31, 1999.",
+			"source": "newman",
+			"url": "https://websites.umich.edu/~mejn/netdata/hep-th.zip",
+			"citation": {
+				"authors": [
+					"M. E. J. Newman"
+				],
+				"title": "The structure of scientific collaboration networks",
+				"journal": "Proceedings of the National Academy of Sciences",
+				"volume": 98,
+				"pages": "404-409",
+				"year": 2001,
+				"type": "article"
+			},
+			"retrieved": "2026-01-17",
+			"creator": "Mark Newman on Fri Jul 21 13:45:08 2006",
+			"rawBytes": 1531855,
+			"nodeCount": 8361,
+			"edgeCount": 15751,
+			"directed": false,
+			"weighted": true,
+			"hasNodeAttributes": false,
+			"hasEdgeAttributes": true,
+			"labeled": true
+		},
+		"internet": {
+			"id": "internet",
+			"name": "Internet Autonomous Systems",
+			"description": "Symmetrized snapshot of the structure of the Internet at the level of autonomous systems, reconstructed from BGP tables posted by the University of Oregon Route Views Project. Snapshot from July 22, 2006.",
+			"source": "newman",
+			"url": "https://websites.umich.edu/~mejn/netdata/as-22july06.zip",
+			"citation": {
+				"authors": [
+					"M. E. J. Newman"
+				],
+				"title": "Internet Autonomous Systems snapshot",
+				"year": 2006,
+				"type": "other"
+			},
+			"retrieved": "2026-01-17",
+			"creator": "Mark Newman on Sat Jul 22 05:41:45 2006",
+			"rawBytes": 3057314,
+			"nodeCount": 22963,
+			"edgeCount": 48436,
+			"directed": false,
+			"weighted": false,
+			"hasNodeAttributes": false,
+			"hasEdgeAttributes": false,
+			"labeled": false
+		},
+		"karate": {
+			"id": "karate",
+			"name": "Zachary's Karate Club",
+			"description": "Social network of friendships between 34 members of a karate club at a US university in the 1970s.",
+			"source": "newman",
+			"url": "https://websites.umich.edu/~mejn/netdata/karate.zip",
+			"citation": {
+				"authors": [
+					"W. W. Zachary"
+				],
+				"title": "An information flow model for conflict and fission in small groups",
+				"journal": "Journal of Anthropological Research",
+				"volume": 33,
+				"pages": "452-473",
+				"year": 1977,
+				"type": "article"
+			},
+			"retrieved": "2026-01-17",
+			"creator": "Mark Newman on Fri Jul 21 12:39:27 2006",
+			"rawBytes": 5004,
+			"nodeCount": 34,
+			"edgeCount": 78,
+			"directed": false,
+			"weighted": false,
+			"hasNodeAttributes": false,
+			"hasEdgeAttributes": false,
+			"labeled": false
+		},
+		"lesmiserables": {
+			"id": "lesmiserables",
+			"name": "Les Miserables",
+			"description": "Co-appearance network of characters in Victor Hugo's novel Les Miserables. Edges connect characters that appear in the same chapter.",
+			"source": "newman",
+			"url": "https://websites.umich.edu/~mejn/netdata/lesmis.zip",
+			"citation": {
+				"authors": [
+					"D. E. Knuth"
+				],
+				"title": "The Stanford GraphBase: A Platform for Combinatorial Computing",
+				"publisher": "Addison-Wesley",
+				"location": "Reading, MA",
+				"year": 1993,
+				"type": "book"
+			},
+			"retrieved": "2026-01-17",
+			"creator": "Mark Newman on Fri Jul 21 12:44:53 2006",
+			"rawBytes": 21702,
+			"nodeCount": 77,
+			"edgeCount": 254,
+			"directed": false,
+			"weighted": true,
+			"hasNodeAttributes": false,
+			"hasEdgeAttributes": true,
+			"labeled": true
+		},
+		"loc-brightkite": {
+			"id": "loc-brightkite",
+			"name": "Brightkite Location Network",
+			"description": "Brightkite location based online social network.",
+			"source": "snap",
+			"url": "https://snap.stanford.edu/data/loc-brightkite_edges.txt.gz",
+			"citation": {
+				"authors": [
+					"E. Cho",
+					"S. Myers",
+					"J. Leskovec"
+				],
+				"title": "Friendship and Mobility: User Movement in Location-Based Social Networks",
+				"journal": "KDD",
+				"year": 2011,
+				"type": "article"
+			},
+			"retrieved": "2026-01-17",
+			"rawBytes": 23208555,
+			"nodeCount": 58228,
+			"edgeCount": 428156,
+			"directed": false,
+			"weighted": false,
+			"hasNodeAttributes": false,
+			"hasEdgeAttributes": false,
+			"labeled": false
+		},
+		"loc-gowalla": {
+			"id": "loc-gowalla",
+			"name": "Gowalla Location Network",
+			"description": "Gowalla location based online social network.",
+			"source": "snap",
+			"url": "https://snap.stanford.edu/data/loc-gowalla_edges.txt.gz",
+			"citation": {
+				"authors": [
+					"E. Cho",
+					"S. Myers",
+					"J. Leskovec"
+				],
+				"title": "Friendship and Mobility: Friendship and Mobility: User Movement in Location-Based Social Networks",
+				"journal": "KDD",
+				"year": 2011,
+				"type": "article"
+			},
+			"retrieved": "2026-01-17",
+			"rawBytes": 103342746,
+			"nodeCount": 196591,
+			"edgeCount": 1900654,
+			"directed": false,
+			"weighted": false,
+			"hasNodeAttributes": false,
+			"hasEdgeAttributes": false,
+			"labeled": false
+		},
+		"netscience": {
+			"id": "netscience",
+			"name": "Network Science Coauthorships",
+			"description": "Coauthorship network of scientists working on network theory and experiment, compiled by M. Newman in May 2006.",
+			"source": "newman",
+			"url": "https://websites.umich.edu/~mejn/netdata/netscience.zip",
+			"citation": {
+				"authors": [
+					"M. E. J. Newman"
+				],
+				"title": "Finding community structure in very large networks",
+				"journal": "Physical Review E",
+				"volume": 74,
+				"pages": "036104",
+				"year": 2006,
+				"type": "article"
+			},
+			"retrieved": "2026-01-17",
+			"creator": "Mark Newman on Sat Jul 22 06:24:59 2006",
+			"rawBytes": 271157,
+			"nodeCount": 1589,
+			"edgeCount": 2742,
+			"directed": false,
+			"weighted": true,
+			"hasNodeAttributes": false,
+			"hasEdgeAttributes": true,
+			"labeled": true
+		},
+		"p2p-gnutella05": {
+			"id": "p2p-gnutella05",
+			"name": "Gnutella P2P Aug 5 2002",
+			"description": "Gnutella peer to peer network from August 5 2002.",
+			"source": "snap",
+			"url": "https://snap.stanford.edu/data/p2p-Gnutella05.txt.gz",
+			"citation": {
+				"authors": [
+					"M. Ripeanu",
+					"I. Foster",
+					"A. Iamnitchi"
+				],
+				"title": "Mapping the Gnutella Network",
+				"journal": "IEEE Internet Computing",
+				"year": 2002,
+				"type": "article"
+			},
+			"retrieved": "2026-01-17",
+			"rawBytes": 1799706,
+			"nodeCount": 8846,
+			"edgeCount": 31839,
+			"directed": true,
+			"weighted": false,
+			"hasNodeAttributes": false,
+			"hasEdgeAttributes": false,
+			"labeled": false
+		},
+		"p2p-gnutella06": {
+			"id": "p2p-gnutella06",
+			"name": "Gnutella P2P Aug 6 2002",
+			"description": "Gnutella peer to peer network from August 6 2002.",
+			"source": "snap",
+			"url": "https://snap.stanford.edu/data/p2p-Gnutella06.txt.gz",
+			"citation": {
+				"authors": [
+					"M. Ripeanu",
+					"I. Foster",
+					"A. Iamnitchi"
+				],
+				"title": "Mapping the Gnutella Network",
+				"journal": "IEEE Internet Computing",
+				"year": 2002,
+				"type": "article"
+			},
+			"retrieved": "2026-01-17",
+			"rawBytes": 1779879,
+			"nodeCount": 8717,
+			"edgeCount": 31525,
+			"directed": true,
+			"weighted": false,
+			"hasNodeAttributes": false,
+			"hasEdgeAttributes": false,
+			"labeled": false
+		},
+		"p2p-gnutella08": {
+			"id": "p2p-gnutella08",
+			"name": "Gnutella P2P Aug 8 2002",
+			"description": "Gnutella peer to peer network from August 8 2002.",
+			"source": "snap",
+			"url": "https://snap.stanford.edu/data/p2p-Gnutella08.txt.gz",
+			"citation": {
+				"authors": [
+					"M. Ripeanu",
+					"I. Foster",
+					"A. Iamnitchi"
+				],
+				"title": "Mapping the Gnutella Network",
+				"journal": "IEEE Internet Computing",
+				"year": 2002,
+				"type": "article"
+			},
+			"retrieved": "2026-01-17",
+			"rawBytes": 1182425,
+			"nodeCount": 6301,
+			"edgeCount": 20777,
+			"directed": true,
+			"weighted": false,
+			"hasNodeAttributes": false,
+			"hasEdgeAttributes": false,
+			"labeled": false
+		},
+		"p2p-gnutella09": {
+			"id": "p2p-gnutella09",
+			"name": "Gnutella P2P Aug 9 2002",
+			"description": "Gnutella peer to peer network from August 9 2002.",
+			"source": "snap",
+			"url": "https://snap.stanford.edu/data/p2p-Gnutella09.txt.gz",
+			"citation": {
+				"authors": [
+					"M. Ripeanu",
+					"I. Foster",
+					"A. Iamnitchi"
+				],
+				"title": "Mapping the Gnutella Network",
+				"journal": "IEEE Internet Computing",
+				"year": 2002,
+				"type": "article"
+			},
+			"retrieved": "2026-01-17",
+			"rawBytes": 1489908,
+			"nodeCount": 8114,
+			"edgeCount": 26013,
+			"directed": true,
+			"weighted": false,
+			"hasNodeAttributes": false,
+			"hasEdgeAttributes": false,
+			"labeled": false
+		},
+		"p2p-gnutella24": {
+			"id": "p2p-gnutella24",
+			"name": "Gnutella P2P Aug 24 2002",
+			"description": "Gnutella peer to peer network from August 24 2002.",
+			"source": "snap",
+			"url": "https://snap.stanford.edu/data/p2p-Gnutella24.txt.gz",
+			"citation": {
+				"authors": [
+					"M. Ripeanu",
+					"I. Foster",
+					"A. Iamnitchi"
+				],
+				"title": "Mapping the Gnutella Network",
+				"journal": "IEEE Internet Computing",
+				"year": 2002,
+				"type": "article"
+			},
+			"retrieved": "2026-01-17",
+			"rawBytes": 4007961,
+			"nodeCount": 26518,
+			"edgeCount": 65369,
+			"directed": true,
+			"weighted": false,
+			"hasNodeAttributes": false,
+			"hasEdgeAttributes": false,
+			"labeled": false
+		},
+		"p2p-gnutella25": {
+			"id": "p2p-gnutella25",
+			"name": "Gnutella P2P Aug 25 2002",
+			"description": "Gnutella peer to peer network from August 25 2002.",
+			"source": "snap",
+			"url": "https://snap.stanford.edu/data/p2p-Gnutella25.txt.gz",
+			"citation": {
+				"authors": [
+					"M. Ripeanu",
+					"I. Foster",
+					"A. Iamnitchi"
+				],
+				"title": "Mapping the Gnutella Network",
+				"journal": "IEEE Internet Computing",
+				"year": 2002,
+				"type": "article"
+			},
+			"retrieved": "2026-01-17",
+			"rawBytes": 3359594,
+			"nodeCount": 22687,
+			"edgeCount": 54705,
+			"directed": true,
+			"weighted": false,
+			"hasNodeAttributes": false,
+			"hasEdgeAttributes": false,
+			"labeled": false
+		},
+		"p2p-gnutella30": {
+			"id": "p2p-gnutella30",
+			"name": "Gnutella P2P Aug 30 2002",
+			"description": "Gnutella peer to peer network from August 30 2002.",
+			"source": "snap",
+			"url": "https://snap.stanford.edu/data/p2p-Gnutella30.txt.gz",
+			"citation": {
+				"authors": [
+					"M. Ripeanu",
+					"I. Foster",
+					"A. Iamnitchi"
+				],
+				"title": "Mapping the Gnutella Network",
+				"journal": "IEEE Internet Computing",
+				"year": 2002,
+				"type": "article"
+			},
+			"retrieved": "2026-01-17",
+			"rawBytes": 5465814,
+			"nodeCount": 36682,
+			"edgeCount": 88328,
+			"directed": true,
+			"weighted": false,
+			"hasNodeAttributes": false,
+			"hasEdgeAttributes": false,
+			"labeled": false
+		},
+		"p2p-gnutella31": {
+			"id": "p2p-gnutella31",
+			"name": "Gnutella P2P Aug 31 2002",
+			"description": "Gnutella peer to peer network from August 31 2002.",
+			"source": "snap",
+			"url": "https://snap.stanford.edu/data/p2p-Gnutella31.txt.gz",
+			"citation": {
+				"authors": [
+					"M. Ripeanu",
+					"I. Foster",
+					"A. Iamnitchi"
+				],
+				"title": "Mapping the Gnutella Network",
+				"journal": "IEEE Internet Computing",
+				"year": 2002,
+				"type": "article"
+			},
+			"retrieved": "2026-01-17",
+			"rawBytes": 9237310,
+			"nodeCount": 62586,
+			"edgeCount": 147892,
+			"directed": true,
+			"weighted": false,
+			"hasNodeAttributes": false,
+			"hasEdgeAttributes": false,
+			"labeled": false
+		},
+		"pajek-california": {
+			"id": "pajek-california",
+			"name": "Pages matching the query 'California'",
+			"description": "Pages matching the query 'California'. Constructed by expanding a 200-page search engine response set.",
+			"source": "suitesparse",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
+			"citation": {
+				"authors": [
+					"J. Kleinberg"
+				],
+				"title": "Kleinberg web search: California",
+				"year": 2002,
+				"type": "dataset"
+			},
+			"retrieved": "2026-02-16",
+			"rawBytes": 1604382,
+			"nodeCount": 9664,
+			"edgeCount": 16150,
+			"directed": true,
+			"weighted": false,
+			"hasNodeAttributes": true,
+			"hasEdgeAttributes": false,
+			"labeled": false
+		},
+		"pajek-dutch-elite": {
+			"id": "pajek-dutch-elite",
+			"name": "Dutch Elite Network",
+			"description": "Interlocking directorates of the top 200 Dutch companies. Two-mode network of directors and boards.",
+			"source": "pajek",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/2mode/dutchelite.zip",
+			"citation": {
+				"authors": [
+					"Vladimir Batagelj",
+					"Andrej Mrvar"
+				],
+				"title": "Pajek Datasets",
+				"year": 2006,
+				"type": "article"
+			},
+			"retrieved": "2026-02-16",
+			"rawBytes": 527657,
+			"nodeCount": 4749,
+			"edgeCount": 5221,
+			"directed": false,
+			"weighted": false,
+			"hasNodeAttributes": true,
+			"hasEdgeAttributes": false,
+			"labeled": false
+		},
+		"pajek-eat": {
+			"id": "pajek-eat",
+			"name": "Edinburgh Associative Thesaurus",
+			"description": "Word association network from the Edinburgh Associative Thesaurus. 23,219 words, 325,624 associations.",
+			"source": "pajek",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/dic/eat/EATnew.zip",
+			"citation": {
+				"authors": [
+					"G. R. Kiss",
+					"C. Armstrong",
+					"R. Milroy",
+					"J. Piper"
+				],
+				"title": "An associative thesaurus of English",
+				"year": 1973,
+				"type": "article"
+			},
+			"retrieved": "2026-02-16",
+			"rawBytes": 22979702,
+			"nodeCount": 23219,
+			"edgeCount": 325593,
+			"directed": true,
+			"weighted": true,
+			"hasNodeAttributes": true,
+			"hasEdgeAttributes": true,
+			"labeled": false,
+			"alternateUrls": [
+				{
+					"url": "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/EAT_RS.tar.gz",
+					"source": "suitesparse",
+					"format": "matrix-market",
+					"description": "SuiteSparse Matrix Collection (Pajek/EAT_RS)"
+				}
+			]
+		},
+		"pajek-epa": {
+			"id": "pajek-epa",
+			"name": "Web pages from the US Environmental Protection Agency site",
+			"description": "Web pages from the US Environmental Protection Agency site.",
+			"source": "suitesparse",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
+			"citation": {
+				"authors": [
+					"V. Batagelj",
+					"A. Mrvar"
+				],
+				"title": "EPA web graph",
+				"year": 2006,
+				"type": "dataset"
+			},
+			"retrieved": "2026-02-16",
+			"rawBytes": 810704,
+			"nodeCount": 4772,
+			"edgeCount": 8965,
+			"directed": true,
+			"weighted": false,
+			"hasNodeAttributes": true,
+			"hasEdgeAttributes": false,
+			"labeled": false
+		},
+		"pajek-erdos-971": {
+			"id": "pajek-erdos-971",
+			"name": "Erdos Collaboration 1997 (Core)",
+			"description": "Core Erdos collaboration network, 1997 version. Direct collaborators only.",
+			"source": "pajek",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/erdos/ERDOS971.NET",
+			"citation": {
+				"authors": [
+					"Vladimir Batagelj",
+					"Andrej Mrvar"
+				],
+				"title": "Pajek Datasets",
+				"year": 2006,
+				"type": "article"
+			},
+			"retrieved": "2026-02-16",
+			"rawBytes": 47357,
+			"nodeCount": 472,
+			"edgeCount": 337,
+			"directed": false,
+			"weighted": true,
+			"hasNodeAttributes": true,
+			"hasEdgeAttributes": true,
+			"labeled": false,
+			"alternateUrls": [
+				{
+					"url": "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/Erdos971.tar.gz",
+					"source": "suitesparse",
+					"format": "matrix-market",
+					"description": "SuiteSparse Matrix Collection (Pajek/Erdos971)"
+				}
+			]
+		},
+		"pajek-erdos-972": {
+			"id": "pajek-erdos-972",
+			"name": "Erdos Collaboration 1997 (Extended)",
+			"description": "Extended Erdos collaboration network, 1997 version. Includes second-order collaborators.",
+			"source": "pajek",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/erdos/ERDOS972.NET",
+			"citation": {
+				"authors": [
+					"Vladimir Batagelj",
+					"Andrej Mrvar"
+				],
+				"title": "Pajek Datasets",
+				"year": 2006,
+				"type": "article"
+			},
+			"retrieved": "2026-02-16",
+			"rawBytes": 343928,
+			"nodeCount": 5488,
+			"edgeCount": 492,
+			"directed": false,
+			"weighted": true,
+			"hasNodeAttributes": true,
+			"hasEdgeAttributes": true,
+			"labeled": false,
+			"alternateUrls": [
+				{
+					"url": "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/Erdos972.tar.gz",
+					"source": "suitesparse",
+					"format": "matrix-market",
+					"description": "SuiteSparse Matrix Collection (Pajek/Erdos972)"
+				}
+			]
+		},
+		"pajek-erdos-981": {
+			"id": "pajek-erdos-981",
+			"name": "Erdos Collaboration 1998 (Core)",
+			"description": "Core Erdos collaboration network, 1998 version.",
+			"source": "pajek",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/erdos/ERDOS981.NET",
+			"citation": {
+				"authors": [
+					"Vladimir Batagelj",
+					"Andrej Mrvar"
+				],
+				"title": "Pajek Datasets",
+				"year": 2006,
+				"type": "article"
+			},
+			"retrieved": "2026-02-16",
+			"rawBytes": 48735,
+			"nodeCount": 485,
+			"edgeCount": 347,
+			"directed": false,
+			"weighted": true,
+			"hasNodeAttributes": true,
+			"hasEdgeAttributes": true,
+			"labeled": false,
+			"alternateUrls": [
+				{
+					"url": "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/Erdos981.tar.gz",
+					"source": "suitesparse",
+					"format": "matrix-market",
+					"description": "SuiteSparse Matrix Collection (Pajek/Erdos981)"
+				}
+			]
+		},
+		"pajek-erdos-982": {
+			"id": "pajek-erdos-982",
+			"name": "Erdos Collaboration 1998 (Extended)",
+			"description": "Extended Erdos collaboration network, 1998 version.",
+			"source": "pajek",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/erdos/ERDOS982.NET",
+			"citation": {
+				"authors": [
+					"Vladimir Batagelj",
+					"Andrej Mrvar"
+				],
+				"title": "Pajek Datasets",
+				"year": 2006,
+				"type": "article"
+			},
+			"retrieved": "2026-02-16",
+			"rawBytes": 364191,
+			"nodeCount": 5822,
+			"edgeCount": 511,
+			"directed": false,
+			"weighted": true,
+			"hasNodeAttributes": true,
+			"hasEdgeAttributes": true,
+			"labeled": false,
+			"alternateUrls": [
+				{
+					"url": "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/Erdos982.tar.gz",
+					"source": "suitesparse",
+					"format": "matrix-market",
+					"description": "SuiteSparse Matrix Collection (Pajek/Erdos982)"
+				}
+			]
+		},
+		"pajek-erdos-991": {
+			"id": "pajek-erdos-991",
+			"name": "Erdos Collaboration 1999 (Core)",
+			"description": "Core Erdos collaboration network, 1999 version.",
+			"source": "pajek",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/erdos/ERDOS991.NET",
+			"citation": {
+				"authors": [
+					"Vladimir Batagelj",
+					"Andrej Mrvar"
+				],
+				"title": "Pajek Datasets",
+				"year": 2006,
+				"type": "article"
+			},
+			"retrieved": "2026-02-16",
+			"rawBytes": 49583,
+			"nodeCount": 492,
+			"edgeCount": 355,
+			"directed": false,
+			"weighted": true,
+			"hasNodeAttributes": true,
+			"hasEdgeAttributes": true,
+			"labeled": false,
+			"alternateUrls": [
+				{
+					"url": "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/Erdos991.tar.gz",
+					"source": "suitesparse",
+					"format": "matrix-market",
+					"description": "SuiteSparse Matrix Collection (Pajek/Erdos991)"
+				}
+			]
+		},
+		"pajek-erdos-992": {
+			"id": "pajek-erdos-992",
+			"name": "Erdos Collaboration 1999 (Extended)",
+			"description": "Extended Erdos collaboration network, 1999 version.",
+			"source": "pajek",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/erdos/ERDOS992.NET",
+			"citation": {
+				"authors": [
+					"Vladimir Batagelj",
+					"Andrej Mrvar"
+				],
+				"title": "Pajek Datasets",
+				"year": 2006,
+				"type": "article"
+			},
+			"retrieved": "2026-02-16",
+			"rawBytes": 380849,
+			"nodeCount": 6100,
+			"edgeCount": 524,
+			"directed": false,
+			"weighted": true,
+			"hasNodeAttributes": true,
+			"hasEdgeAttributes": true,
+			"labeled": false,
+			"alternateUrls": [
+				{
+					"url": "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/Erdos992.tar.gz",
+					"source": "suitesparse",
+					"format": "matrix-market",
+					"description": "SuiteSparse Matrix Collection (Pajek/Erdos992)"
+				}
+			]
+		},
+		"pajek-eva": {
+			"id": "pajek-eva",
+			"name": "EVA Ownership Network",
+			"description": "Corporate ownership network from EVA database. 8,343 entities, 6,726 ownership links.",
+			"source": "pajek",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/econ/Eva/EVA.zip",
+			"citation": {
+				"authors": [
+					"Vladimir Batagelj",
+					"Andrej Mrvar"
+				],
+				"title": "Pajek Datasets",
+				"year": 2006,
+				"type": "article"
+			},
+			"retrieved": "2026-02-16",
+			"rawBytes": 831492,
+			"nodeCount": 8325,
+			"edgeCount": 6726,
+			"directed": true,
+			"weighted": false,
+			"hasNodeAttributes": true,
+			"hasEdgeAttributes": false,
+			"labeled": false
+		},
+		"pajek-foldoc": {
+			"id": "pajek-foldoc",
+			"name": "FOLDOC Dictionary",
+			"description": "Cross-reference network from the Free On-Line Dictionary of Computing.",
+			"source": "pajek",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/dic/foldoc/foldoc.zip",
+			"citation": {
+				"authors": [
+					"Vladimir Batagelj",
+					"Andrej Mrvar"
+				],
+				"title": "Pajek Datasets",
+				"year": 2006,
+				"type": "article"
+			},
+			"retrieved": "2026-02-16",
+			"rawBytes": 8668115,
+			"nodeCount": 13356,
+			"edgeCount": 120238,
+			"directed": true,
+			"weighted": true,
+			"hasNodeAttributes": true,
+			"hasEdgeAttributes": true,
+			"labeled": false,
+			"alternateUrls": [
+				{
+					"url": "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/foldoc.tar.gz",
+					"source": "suitesparse",
+					"format": "matrix-market",
+					"description": "SuiteSparse Matrix Collection (Pajek/foldoc)"
+				}
+			]
+		},
+		"pajek-football": {
+			"id": "pajek-football",
+			"name": "World Soccer 1998",
+			"description": "World Cup 1998 match network. 35 teams, 118 matches.",
+			"source": "pajek",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/sport/football.net",
+			"citation": {
+				"authors": [
+					"Vladimir Batagelj",
+					"Andrej Mrvar"
+				],
+				"title": "Pajek Datasets",
+				"year": 2006,
+				"type": "article"
+			},
+			"retrieved": "2026-02-16",
+			"rawBytes": 10788,
+			"nodeCount": 35,
+			"edgeCount": 118,
+			"directed": false,
+			"weighted": true,
+			"hasNodeAttributes": true,
+			"hasEdgeAttributes": true,
+			"labeled": false,
+			"alternateUrls": [
+				{
+					"url": "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/football.tar.gz",
+					"source": "suitesparse",
+					"format": "matrix-market",
+					"description": "SuiteSparse Matrix Collection (Pajek/football)"
+				}
+			]
+		},
+		"pajek-freeassoc": {
+			"id": "pajek-freeassoc",
+			"name": "USF Free Association Norms",
+			"description": "Word association network from the University of South Florida Free Association Norms.",
+			"source": "pajek",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/dic/fa/Pairs.zip",
+			"citation": {
+				"authors": [
+					"D. L. Nelson",
+					"C. L. McEvoy",
+					"T. A. Schreiber"
+				],
+				"title": "The University of South Florida word association, rhyme, and word fragment norms",
+				"year": 1998,
+				"type": "article"
+			},
+			"retrieved": "2026-02-16",
+			"rawBytes": 5509356,
+			"nodeCount": 10617,
+			"edgeCount": 72168,
+			"directed": true,
+			"weighted": true,
+			"hasNodeAttributes": true,
+			"hasEdgeAttributes": true,
+			"labeled": false
+		},
+		"pajek-gd00": {
+			"id": "pajek-gd00",
+			"name": "GD00 Contest Graph A",
+			"description": "Graph Drawing 2000 contest, Problem A. 352 vertices, 458 arcs.",
+			"source": "pajek",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/GD/gd00/A00.net",
+			"citation": {
+				"authors": [
+					"Vladimir Batagelj",
+					"Andrej Mrvar"
+				],
+				"title": "Pajek Datasets",
+				"year": 2006,
+				"type": "article"
+			},
+			"retrieved": "2026-02-16",
+			"rawBytes": 68418,
+			"nodeCount": 352,
+			"edgeCount": 458,
+			"directed": true,
+			"weighted": true,
+			"hasNodeAttributes": true,
+			"hasEdgeAttributes": true,
+			"labeled": false
+		},
+		"pajek-gd02": {
+			"id": "pajek-gd02",
+			"name": "GD02 Contest Graph A",
+			"description": "Graph Drawing 2002 contest, Problem A. 23 vertices, 87 arcs.",
+			"source": "pajek",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/GD/gd02/A02.net",
+			"citation": {
+				"authors": [
+					"Vladimir Batagelj",
+					"Andrej Mrvar"
+				],
+				"title": "Pajek Datasets",
+				"year": 2006,
+				"type": "article"
+			},
+			"retrieved": "2026-02-16",
+			"rawBytes": 8060,
+			"nodeCount": 23,
+			"edgeCount": 87,
+			"directed": true,
+			"weighted": true,
+			"hasNodeAttributes": true,
+			"hasEdgeAttributes": true,
+			"labeled": false,
+			"alternateUrls": [
+				{
+					"url": "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/GD02_a.tar.gz",
+					"source": "suitesparse",
+					"format": "matrix-market",
+					"description": "SuiteSparse Matrix Collection (Pajek/GD02_a)"
+				}
+			]
+		},
+		"pajek-gd03": {
+			"id": "pajek-gd03",
+			"name": "GD03 Contest Graph A",
+			"description": "Graph Drawing 2003 contest, Problem A. 423 vertices, 578 arcs.",
+			"source": "pajek",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/GD/gd03/A03.net",
+			"citation": {
+				"authors": [
+					"Vladimir Batagelj",
+					"Andrej Mrvar"
+				],
+				"title": "Pajek Datasets",
+				"year": 2006,
+				"type": "article"
+			},
+			"retrieved": "2026-02-16",
+			"rawBytes": 47168,
+			"nodeCount": 423,
+			"edgeCount": 578,
+			"directed": true,
+			"weighted": false,
+			"hasNodeAttributes": true,
+			"hasEdgeAttributes": false,
+			"labeled": false,
+			"alternateUrls": [
+				{
+					"url": "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/GD99_c.tar.gz",
+					"source": "suitesparse",
+					"format": "matrix-market",
+					"description": "SuiteSparse Matrix Collection (Pajek/GD99_c)"
+				}
+			]
+		},
+		"pajek-gd04-prob1": {
+			"id": "pajek-gd04-prob1",
+			"name": "GD04 Contest Problem 1",
+			"description": "Graph Drawing 2004 crossing minimisation contest, Problem 1. 69 nodes, 151 edges.",
+			"source": "pajek",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/GD/gd04/gd04.zip",
+			"citation": {
+				"authors": [
+					"S. Kobourov"
+				],
+				"title": "GD 2004 Graph Drawing Contest",
+				"year": 2004,
+				"type": "article"
+			},
+			"retrieved": "2026-02-16",
+			"rawBytes": 10773,
+			"nodeCount": 69,
+			"edgeCount": 151,
+			"directed": false,
+			"weighted": false,
+			"hasNodeAttributes": true,
+			"hasEdgeAttributes": false,
+			"labeled": false
+		},
+		"pajek-gd04-prob10": {
+			"id": "pajek-gd04-prob10",
+			"name": "GD04 Contest Problem 10",
+			"description": "Graph Drawing 2004 crossing minimisation contest, Problem 10. 64 nodes, 125 edges.",
+			"source": "pajek",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/GD/gd04/gd04.zip",
+			"citation": {
+				"authors": [
+					"S. Kobourov"
+				],
+				"title": "GD 2004 Graph Drawing Contest",
+				"year": 2004,
+				"type": "article"
+			},
+			"retrieved": "2026-02-16",
+			"rawBytes": 9347,
+			"nodeCount": 64,
+			"edgeCount": 125,
+			"directed": false,
+			"weighted": false,
+			"hasNodeAttributes": true,
+			"hasEdgeAttributes": false,
+			"labeled": false
+		},
+		"pajek-gd04-prob2": {
+			"id": "pajek-gd04-prob2",
+			"name": "GD04 Contest Problem 2",
+			"description": "Graph Drawing 2004 crossing minimisation contest, Problem 2. 96 nodes, 214 edges.",
+			"source": "pajek",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/GD/gd04/gd04.zip",
+			"citation": {
+				"authors": [
+					"S. Kobourov"
+				],
+				"title": "GD 2004 Graph Drawing Contest",
+				"year": 2004,
+				"type": "article"
+			},
+			"retrieved": "2026-02-16",
+			"rawBytes": 14975,
+			"nodeCount": 96,
+			"edgeCount": 214,
+			"directed": false,
+			"weighted": false,
+			"hasNodeAttributes": true,
+			"hasEdgeAttributes": false,
+			"labeled": false
+		},
+		"pajek-gd04-prob3": {
+			"id": "pajek-gd04-prob3",
+			"name": "GD04 Contest Problem 3",
+			"description": "Graph Drawing 2004 crossing minimisation contest, Problem 3. 102 nodes, 224 edges.",
+			"source": "pajek",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/GD/gd04/gd04.zip",
+			"citation": {
+				"authors": [
+					"S. Kobourov"
+				],
+				"title": "GD 2004 Graph Drawing Contest",
+				"year": 2004,
+				"type": "article"
+			},
+			"retrieved": "2026-02-16",
+			"rawBytes": 15755,
+			"nodeCount": 102,
+			"edgeCount": 224,
+			"directed": false,
+			"weighted": false,
+			"hasNodeAttributes": true,
+			"hasEdgeAttributes": false,
+			"labeled": false
+		},
+		"pajek-gd04-prob4": {
+			"id": "pajek-gd04-prob4",
+			"name": "GD04 Contest Problem 4",
+			"description": "Graph Drawing 2004 crossing minimisation contest, Problem 4. 20 nodes, 36 edges.",
+			"source": "pajek",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/GD/gd04/gd04.zip",
+			"citation": {
+				"authors": [
+					"S. Kobourov"
+				],
+				"title": "GD 2004 Graph Drawing Contest",
+				"year": 2004,
+				"type": "article"
+			},
+			"retrieved": "2026-02-16",
+			"rawBytes": 3101,
+			"nodeCount": 20,
+			"edgeCount": 36,
+			"directed": false,
+			"weighted": false,
+			"hasNodeAttributes": true,
+			"hasEdgeAttributes": false,
+			"labeled": false
+		},
+		"pajek-gd04-prob5": {
+			"id": "pajek-gd04-prob5",
+			"name": "GD04 Contest Problem 5",
+			"description": "Graph Drawing 2004 crossing minimisation contest, Problem 5. 40 nodes, 115 edges.",
+			"source": "pajek",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/GD/gd04/gd04.zip",
+			"citation": {
+				"authors": [
+					"S. Kobourov"
+				],
+				"title": "GD 2004 Graph Drawing Contest",
+				"year": 2004,
+				"type": "article"
+			},
+			"retrieved": "2026-02-16",
+			"rawBytes": 7690,
+			"nodeCount": 40,
+			"edgeCount": 115,
+			"directed": false,
+			"weighted": false,
+			"hasNodeAttributes": true,
+			"hasEdgeAttributes": false,
+			"labeled": false
+		},
+		"pajek-gd04-prob6": {
+			"id": "pajek-gd04-prob6",
+			"name": "GD04 Contest Problem 6",
+			"description": "Graph Drawing 2004 crossing minimisation contest, Problem 6. 80 nodes, 312 edges.",
+			"source": "pajek",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/GD/gd04/gd04.zip",
+			"citation": {
+				"authors": [
+					"S. Kobourov"
+				],
+				"title": "GD 2004 Graph Drawing Contest",
+				"year": 2004,
+				"type": "article"
+			},
+			"retrieved": "2026-02-16",
+			"rawBytes": 18669,
+			"nodeCount": 80,
+			"edgeCount": 312,
+			"directed": false,
+			"weighted": false,
+			"hasNodeAttributes": true,
+			"hasEdgeAttributes": false,
+			"labeled": false
+		},
+		"pajek-gd04-prob7": {
+			"id": "pajek-gd04-prob7",
+			"name": "GD04 Contest Problem 7",
+			"description": "Graph Drawing 2004 crossing minimisation contest, Problem 7. 40 nodes, 143 edges.",
+			"source": "pajek",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/GD/gd04/gd04.zip",
+			"citation": {
+				"authors": [
+					"S. Kobourov"
+				],
+				"title": "GD 2004 Graph Drawing Contest",
+				"year": 2004,
+				"type": "article"
+			},
+			"retrieved": "2026-02-16",
+			"rawBytes": 8960,
+			"nodeCount": 40,
+			"edgeCount": 143,
+			"directed": false,
+			"weighted": false,
+			"hasNodeAttributes": true,
+			"hasEdgeAttributes": false,
+			"labeled": false
+		},
+		"pajek-gd04-prob8": {
+			"id": "pajek-gd04-prob8",
+			"name": "GD04 Contest Problem 8",
+			"description": "Graph Drawing 2004 crossing minimisation contest, Problem 8. 100 nodes, 477 edges.",
+			"source": "pajek",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/GD/gd04/gd04.zip",
+			"citation": {
+				"authors": [
+					"S. Kobourov"
+				],
+				"title": "GD 2004 Graph Drawing Contest",
+				"year": 2004,
+				"type": "article"
+			},
+			"retrieved": "2026-02-16",
+			"rawBytes": 27233,
+			"nodeCount": 100,
+			"edgeCount": 477,
+			"directed": false,
+			"weighted": false,
+			"hasNodeAttributes": true,
+			"hasEdgeAttributes": false,
+			"labeled": false
+		},
+		"pajek-gd04-prob9": {
+			"id": "pajek-gd04-prob9",
+			"name": "GD04 Contest Problem 9",
+			"description": "Graph Drawing 2004 crossing minimisation contest, Problem 9. 112 nodes, 168 edges.",
+			"source": "pajek",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/GD/gd04/gd04.zip",
+			"citation": {
+				"authors": [
+					"S. Kobourov"
+				],
+				"title": "GD 2004 Graph Drawing Contest",
+				"year": 2004,
+				"type": "article"
+			},
+			"retrieved": "2026-02-16",
+			"rawBytes": 13715,
+			"nodeCount": 112,
+			"edgeCount": 168,
+			"directed": false,
+			"weighted": false,
+			"hasNodeAttributes": true,
+			"hasEdgeAttributes": false,
+			"labeled": false
+		},
+		"pajek-gd06": {
+			"id": "pajek-gd06",
+			"name": "GD06 World Cup Network",
+			"description": "World Cup network from Graph Drawing 2006 contest. 79 vertices, 1,460 arcs.",
+			"source": "pajek",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/GD/GD06/WC.net.zip",
+			"citation": {
+				"authors": [
+					"Vladimir Batagelj",
+					"Andrej Mrvar"
+				],
+				"title": "Pajek Datasets",
+				"year": 2006,
+				"type": "article"
+			},
+			"retrieved": "2026-02-16",
+			"rawBytes": 94169,
+			"nodeCount": 79,
+			"edgeCount": 1460,
+			"directed": true,
+			"weighted": true,
+			"hasNodeAttributes": true,
+			"hasEdgeAttributes": true,
+			"labeled": false
+		},
+		"pajek-gd95": {
+			"id": "pajek-gd95",
+			"name": "GD95 Contest Graph A",
+			"description": "Graph Drawing 1995 contest, Problem A. 36 vertices, 57 arcs.",
+			"source": "pajek",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/GD/gd95/A95.net",
+			"citation": {
+				"authors": [
+					"Vladimir Batagelj",
+					"Andrej Mrvar"
+				],
+				"title": "Pajek Datasets",
+				"year": 2006,
+				"type": "article"
+			},
+			"retrieved": "2026-02-16",
+			"rawBytes": 6794,
+			"nodeCount": 36,
+			"edgeCount": 57,
+			"directed": true,
+			"weighted": true,
+			"hasNodeAttributes": true,
+			"hasEdgeAttributes": true,
+			"labeled": false
+		},
+		"pajek-gd96": {
+			"id": "pajek-gd96",
+			"name": "GD96 Contest Graph A",
+			"description": "Graph Drawing 1996 contest, Problem A. 1,096 vertices, 1,691 arcs.",
+			"source": "pajek",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/GD/gd96/A96.net",
+			"citation": {
+				"authors": [
+					"Vladimir Batagelj",
+					"Andrej Mrvar"
+				],
+				"title": "Pajek Datasets",
+				"year": 2006,
+				"type": "article"
+			},
+			"retrieved": "2026-02-16",
+			"rawBytes": 203875,
+			"nodeCount": 1096,
+			"edgeCount": 1691,
+			"directed": true,
+			"weighted": true,
+			"hasNodeAttributes": true,
+			"hasEdgeAttributes": true,
+			"labeled": false
+		},
+		"pajek-gd97": {
+			"id": "pajek-gd97",
+			"name": "GD97 Contest Graph A",
+			"description": "Graph Drawing 1997 contest, Problem A. 84 vertices, 332 arcs.",
+			"source": "pajek",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/GD/gd97/A97.net",
+			"citation": {
+				"authors": [
+					"Vladimir Batagelj",
+					"Andrej Mrvar"
+				],
+				"title": "Pajek Datasets",
+				"year": 2006,
+				"type": "article"
+			},
+			"retrieved": "2026-02-16",
+			"rawBytes": 28442,
+			"nodeCount": 84,
+			"edgeCount": 332,
+			"directed": true,
+			"weighted": true,
+			"hasNodeAttributes": true,
+			"hasEdgeAttributes": true,
+			"labeled": false
+		},
+		"pajek-gd98": {
+			"id": "pajek-gd98",
+			"name": "GD98 Contest Graph A",
+			"description": "Graph Drawing 1998 contest, Problem A. 38 vertices, 50 arcs.",
+			"source": "pajek",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/GD/gd98/A98.net",
+			"citation": {
+				"authors": [
+					"Vladimir Batagelj",
+					"Andrej Mrvar"
+				],
+				"title": "Pajek Datasets",
+				"year": 2006,
+				"type": "article"
+			},
+			"retrieved": "2026-02-16",
+			"rawBytes": 7582,
+			"nodeCount": 38,
+			"edgeCount": 50,
+			"directed": true,
+			"weighted": true,
+			"hasNodeAttributes": true,
+			"hasEdgeAttributes": true,
+			"labeled": false
+		},
+		"pajek-glosstg": {
+			"id": "pajek-glosstg",
+			"name": "Glossary of graph theory terms and their cross-references",
+			"description": "Glossary of graph theory terms and their cross-references.",
+			"source": "suitesparse",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
+			"citation": {
+				"authors": [
+					"V. Batagelj",
+					"A. Mrvar"
+				],
+				"title": "Graph theory glossary network",
+				"year": 2006,
+				"type": "dataset"
+			},
+			"retrieved": "2026-02-16",
+			"rawBytes": 9601,
+			"nodeCount": 72,
+			"edgeCount": 122,
+			"directed": true,
+			"weighted": false,
+			"hasNodeAttributes": true,
+			"hasEdgeAttributes": false,
+			"labeled": false,
+			"alternateUrls": [
+				{
+					"url": "https://web.archive.org/web/20041222052810/http://vlado.fmf.uni-lj.si/pub/networks/data/DIC/TG/glossTG.paj",
+					"source": "pajek",
+					"format": "pajek",
+					"description": "Wayback Machine archive of original Pajek dataset"
+				}
+			]
+		},
+		"pajek-hep-th": {
+			"id": "pajek-hep-th",
+			"name": "HEP-TH Citations",
+			"description": "High-energy physics theory citation network (KDD Cup 2003). 27,770 papers, 352,807 citations.",
+			"source": "pajek",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/hep-th/hep-th.zip",
+			"citation": {
+				"authors": [
+					"J. Gehrke",
+					"P. Ginsparg",
+					"J. Kleinberg"
+				],
+				"title": "KDD Cup 2003",
+				"year": 2003,
+				"type": "article"
+			},
+			"retrieved": "2026-02-16",
+			"rawBytes": 18843082,
+			"nodeCount": 27240,
+			"edgeCount": 342437,
+			"directed": true,
+			"weighted": false,
+			"hasNodeAttributes": true,
+			"hasEdgeAttributes": false,
+			"labeled": false,
+			"alternateUrls": [
+				{
+					"url": "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/HEP-th.tar.gz",
+					"source": "suitesparse",
+					"format": "matrix-market",
+					"description": "SuiteSparse Matrix Collection (Pajek/HEP-th)"
+				}
+			]
+		},
+		"pajek-journals": {
+			"id": "pajek-journals",
+			"name": "Citation network between 124 computational journals",
+			"description": "Citation network between 124 computational journals.",
+			"source": "suitesparse",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
+			"citation": {
+				"authors": [
+					"V. Batagelj",
+					"A. Mrvar"
+				],
+				"title": "Computational journal citation network",
+				"year": 2006,
+				"type": "dataset"
+			},
+			"retrieved": "2026-02-16",
+			"rawBytes": 739353,
+			"nodeCount": 124,
+			"edgeCount": 12068,
+			"directed": false,
+			"weighted": true,
+			"hasNodeAttributes": true,
+			"hasEdgeAttributes": true,
+			"labeled": false,
+			"alternateUrls": [
+				{
+					"url": "https://web.archive.org/web/20130507053929/http://vlado.fmf.uni-lj.si/pub/networks/data/2mode/revije.zip",
+					"source": "pajek",
+					"format": "pajek",
+					"description": "Wayback Machine archive of original Pajek dataset"
+				}
+			]
+		},
+		"pajek-keds": {
+			"id": "pajek-keds",
+			"name": "KEDS Gulf War Political Events",
+			"description": "Political event network from the Kansas Event Data System (Gulf War, daily aggregation).",
+			"source": "pajek",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/KEDS/GulfLDays.zip",
+			"citation": {
+				"authors": [
+					"Philip Schrodt"
+				],
+				"title": "Kansas Event Data System",
+				"year": 2001,
+				"type": "article"
+			},
+			"retrieved": "2026-02-16",
+			"rawBytes": 3677179,
+			"nodeCount": 188,
+			"edgeCount": 57131,
+			"directed": true,
+			"weighted": true,
+			"hasNodeAttributes": true,
+			"hasEdgeAttributes": true,
+			"labeled": false
+		},
+		"pajek-kohonen": {
+			"id": "pajek-kohonen",
+			"name": "Kohonen Citations",
+			"description": "Citation network around self-organising maps research (Teuvo Kohonen).",
+			"source": "pajek",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/cite/Kohonen.zip",
+			"citation": {
+				"authors": [
+					"Vladimir Batagelj",
+					"Andrej Mrvar"
+				],
+				"title": "Pajek Datasets",
+				"year": 2006,
+				"type": "article"
+			},
+			"retrieved": "2026-02-16",
+			"rawBytes": 334949,
+			"nodeCount": 4470,
+			"edgeCount": 1818,
+			"directed": true,
+			"weighted": true,
+			"hasNodeAttributes": true,
+			"hasEdgeAttributes": true,
+			"labeled": false
+		},
+		"pajek-lederberg": {
+			"id": "pajek-lederberg",
+			"name": "Lederberg Citations",
+			"description": "Citation network around Joshua Lederberg's genetics research.",
+			"source": "pajek",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/cite/Lederberg.zip",
+			"citation": {
+				"authors": [
+					"Vladimir Batagelj",
+					"Andrej Mrvar"
+				],
+				"title": "Pajek Datasets",
+				"year": 2006,
+				"type": "article"
+			},
+			"retrieved": "2026-02-16",
+			"rawBytes": 733180,
+			"nodeCount": 8843,
+			"edgeCount": 4529,
+			"directed": true,
+			"weighted": true,
+			"hasNodeAttributes": true,
+			"hasEdgeAttributes": true,
+			"labeled": false
+		},
+		"pajek-nd-actors": {
+			"id": "pajek-nd-actors",
+			"name": "Notre Dame Actors",
+			"description": "Two-mode network of actors and films. 392,400 actors, 127,823 films, 1,470,418 appearances.",
+			"source": "pajek",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/ND/NDactors.zip",
+			"citation": {
+				"authors": [
+					"Vladimir Batagelj",
+					"Andrej Mrvar"
+				],
+				"title": "Pajek Datasets",
+				"year": 2006,
+				"type": "article"
+			},
+			"retrieved": "2026-02-16",
+			"rawBytes": 23140773,
+			"nodeCount": 520223,
+			"edgeCount": 127823,
+			"directed": false,
+			"weighted": true,
+			"hasNodeAttributes": false,
+			"hasEdgeAttributes": true,
+			"labeled": false,
+			"alternateUrls": [
+				{
+					"url": "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/NotreDame_actors.tar.gz",
+					"source": "suitesparse",
+					"format": "matrix-market",
+					"description": "SuiteSparse Matrix Collection (Pajek/NotreDame_actors)"
+				}
+			]
+		},
+		"pajek-nd-www": {
+			"id": "pajek-nd-www",
+			"name": "Notre Dame WWW",
+			"description": "Web graph of the University of Notre Dame domain. 325,729 pages, 1,497,135 hyperlinks.",
+			"source": "pajek",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/ND/NDwww.zip",
+			"citation": {
+				"authors": [
+					"R. Albert",
+					"H. Jeong",
+					"A.-L. Barabasi"
+				],
+				"title": "Diameter of the World-Wide Web",
+				"journal": "Nature",
+				"year": 1999,
+				"type": "article"
+			},
+			"retrieved": "2026-02-16",
+			"rawBytes": 19602142,
+			"nodeCount": 325729,
+			"edgeCount": 154249,
+			"directed": true,
+			"weighted": true,
+			"hasNodeAttributes": false,
+			"hasEdgeAttributes": true,
+			"labeled": false,
+			"alternateUrls": [
+				{
+					"url": "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/NotreDame_www.tar.gz",
+					"source": "suitesparse",
+					"format": "matrix-market",
+					"description": "SuiteSparse Matrix Collection (Pajek/NotreDame_www)"
+				}
+			]
+		},
+		"pajek-netscience": {
+			"id": "pajek-netscience",
+			"name": "Network Science Collaboration",
+			"description": "Collaboration network of network science researchers. 1,589 authors.",
+			"source": "pajek",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/collab/NetScience.zip",
+			"citation": {
+				"authors": [
+					"M. E. J. Newman"
+				],
+				"title": "Finding community structure in very large networks",
+				"year": 2004,
+				"type": "article"
+			},
+			"retrieved": "2026-02-16",
+			"rawBytes": 268721,
+			"nodeCount": 1589,
+			"edgeCount": 2742,
+			"directed": false,
+			"weighted": true,
+			"hasNodeAttributes": true,
+			"hasEdgeAttributes": true,
+			"labeled": false
+		},
+		"pajek-odlis": {
+			"id": "pajek-odlis",
+			"name": "ODLIS Dictionary",
+			"description": "Cross-reference network from the Online Dictionary for Library and Information Science.",
+			"source": "pajek",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/dic/odlis/odlis.zip",
+			"citation": {
+				"authors": [
+					"Vladimir Batagelj",
+					"Andrej Mrvar"
+				],
+				"title": "Pajek Datasets",
+				"year": 2006,
+				"type": "article"
+			},
+			"retrieved": "2026-02-16",
+			"rawBytes": 341682,
+			"nodeCount": 2909,
+			"edgeCount": 2896,
+			"directed": true,
+			"weighted": true,
+			"hasNodeAttributes": true,
+			"hasEdgeAttributes": true,
+			"labeled": false
+		},
+		"pajek-sandi": {
+			"id": "pajek-sandi",
+			"name": "Graph Products Collaboration",
+			"description": "Two-mode network of authors and papers on graph products. 674 authors, 314 papers.",
+			"source": "pajek",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/2mode/Sandi/sandi.net",
+			"citation": {
+				"authors": [
+					"Vladimir Batagelj",
+					"Andrej Mrvar"
+				],
+				"title": "Pajek Datasets",
+				"year": 2006,
+				"type": "article"
+			},
+			"retrieved": "2026-02-16",
+			"rawBytes": 102919,
+			"nodeCount": 674,
+			"edgeCount": 613,
+			"directed": false,
+			"weighted": true,
+			"hasNodeAttributes": true,
+			"hasEdgeAttributes": true,
+			"labeled": false,
+			"alternateUrls": [
+				{
+					"url": "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/Sandi_sandi.tar.gz",
+					"source": "suitesparse",
+					"format": "matrix-market",
+					"description": "SuiteSparse Matrix Collection (Pajek/Sandi_sandi)"
+				}
+			]
+		},
+		"pajek-scimet": {
+			"id": "pajek-scimet",
+			"name": "Science of Science Citations",
+			"description": "Citation network from science of science research.",
+			"source": "pajek",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/cite/SciMet.zip",
+			"citation": {
+				"authors": [
+					"Vladimir Batagelj",
+					"Andrej Mrvar"
+				],
+				"title": "Pajek Datasets",
+				"year": 2006,
+				"type": "article"
+			},
+			"retrieved": "2026-02-16",
+			"rawBytes": 266897,
+			"nodeCount": 3084,
+			"edgeCount": 1781,
+			"directed": true,
+			"weighted": true,
+			"hasNodeAttributes": true,
+			"hasEdgeAttributes": true,
+			"labeled": false
+		},
+		"pajek-sept11": {
+			"id": "pajek-sept11",
+			"name": "September 11 News Network",
+			"description": "Daily network of September 11 news connections. 13,332 nodes, 243,447 links.",
+			"source": "pajek",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/CRA/Days.zip",
+			"citation": {
+				"authors": [
+					"Vladimir Batagelj",
+					"Andrej Mrvar"
+				],
+				"title": "Pajek Datasets",
+				"year": 2006,
+				"type": "article"
+			},
+			"retrieved": "2026-02-16",
+			"rawBytes": 16822872,
+			"nodeCount": 13332,
+			"edgeCount": 243447,
+			"directed": true,
+			"weighted": true,
+			"hasNodeAttributes": true,
+			"hasEdgeAttributes": true,
+			"labeled": false,
+			"alternateUrls": [
+				{
+					"url": "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/Reuters911.tar.gz",
+					"source": "suitesparse",
+					"format": "matrix-market",
+					"description": "SuiteSparse Matrix Collection (Pajek/Reuters911)"
+				}
+			]
+		},
+		"pajek-smagri": {
+			"id": "pajek-smagri",
+			"name": "Scientometrics Citations",
+			"description": "Citation network from Scientometrics literature.",
+			"source": "pajek",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/cite/SmaGri.zip",
+			"citation": {
+				"authors": [
+					"Vladimir Batagelj",
+					"Andrej Mrvar"
+				],
+				"title": "Pajek Datasets",
+				"year": 2006,
+				"type": "article"
+			},
+			"retrieved": "2026-02-16",
+			"rawBytes": 89081,
+			"nodeCount": 1059,
+			"edgeCount": 594,
+			"directed": true,
+			"weighted": true,
+			"hasNodeAttributes": true,
+			"hasEdgeAttributes": true,
+			"labeled": false
+		},
+		"pajek-smallw": {
+			"id": "pajek-smallw",
+			"name": "Small World Citations",
+			"description": "Citation network around small-world research papers.",
+			"source": "pajek",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/cite/SmallW.zip",
+			"citation": {
+				"authors": [
+					"Vladimir Batagelj",
+					"Andrej Mrvar"
+				],
+				"title": "Pajek Datasets",
+				"year": 2006,
+				"type": "article"
+			},
+			"retrieved": "2026-02-16",
+			"rawBytes": 72521,
+			"nodeCount": 396,
+			"edgeCount": 1093,
+			"directed": true,
+			"weighted": true,
+			"hasNodeAttributes": true,
+			"hasEdgeAttributes": true,
+			"labeled": false
+		},
+		"pajek-stranke94": {
+			"id": "pajek-stranke94",
+			"name": "Slovene Political Parties 1994",
+			"description": "Perceived closeness between Slovenian political parties, 1994.",
+			"source": "pajek",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/soc/Samo/Stranke94.net",
+			"citation": {
+				"authors": [
+					"Vladimir Batagelj",
+					"Andrej Mrvar"
+				],
+				"title": "Pajek Datasets",
+				"year": 2006,
+				"type": "article"
+			},
+			"retrieved": "2026-02-16",
+			"rawBytes": 6367,
+			"nodeCount": 10,
+			"edgeCount": 90,
+			"directed": false,
+			"weighted": true,
+			"hasNodeAttributes": false,
+			"hasEdgeAttributes": true,
+			"labeled": false
+		},
+		"pajek-tina": {
+			"id": "pajek-tina",
+			"name": "Tina Social Network",
+			"description": "Multi-relational social network study (discussion/cognitive agreement).",
+			"source": "pajek",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/soc/Tina/tina.zip",
+			"citation": {
+				"authors": [
+					"Vladimir Batagelj",
+					"Andrej Mrvar"
+				],
+				"title": "Pajek Datasets",
+				"year": 2006,
+				"type": "article"
+			},
+			"retrieved": "2026-02-16",
+			"rawBytes": 1643,
+			"nodeCount": 11,
+			"edgeCount": 10,
+			"directed": false,
+			"weighted": true,
+			"hasNodeAttributes": true,
+			"hasEdgeAttributes": true,
+			"labeled": false
+		},
+		"pajek-uspowergrid": {
+			"id": "pajek-uspowergrid",
+			"name": "Western US power grid topology",
+			"description": "Western US power grid topology.",
+			"source": "suitesparse",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
+			"citation": {
+				"authors": [
+					"D. Watts",
+					"S. Strogatz"
+				],
+				"title": "US power grid network",
+				"year": 1998,
+				"type": "dataset"
+			},
+			"retrieved": "2026-02-16",
+			"rawBytes": 776428,
+			"nodeCount": 4941,
+			"edgeCount": 13188,
+			"directed": false,
+			"weighted": false,
+			"hasNodeAttributes": false,
+			"hasEdgeAttributes": false,
+			"labeled": false
+		},
+		"pajek-wordnet": {
+			"id": "pajek-wordnet",
+			"name": "WordNet",
+			"description": "Lexical reference network from Princeton WordNet. 82,670 synsets, 133,445 relations.",
+			"source": "pajek",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/dic/Wordnet/wordNet.zip",
+			"citation": {
+				"authors": [
+					"G. A. Miller"
+				],
+				"title": "WordNet: A Lexical Database for English",
+				"journal": "CACM",
+				"year": 1995,
+				"type": "article"
+			},
+			"retrieved": "2026-02-16",
+			"rawBytes": 9736311,
+			"nodeCount": 82670,
+			"edgeCount": 98678,
+			"directed": true,
+			"weighted": true,
+			"hasNodeAttributes": true,
+			"hasEdgeAttributes": true,
+			"labeled": false,
+			"alternateUrls": [
+				{
+					"url": "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/Wordnet3.tar.gz",
+					"source": "suitesparse",
+					"format": "matrix-market",
+					"description": "SuiteSparse Matrix Collection (Pajek/Wordnet3)"
+				}
+			]
+		},
+		"pajek-worldcities": {
+			"id": "pajek-worldcities",
+			"name": "Two-mode network of world cities and their attributes",
+			"description": "Two-mode network of world cities and their attributes.",
+			"source": "suitesparse",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
+			"citation": {
+				"authors": [
+					"V. Batagelj",
+					"A. Mrvar"
+				],
+				"title": "World cities network",
+				"year": 2006,
+				"type": "dataset"
+			},
+			"retrieved": "2026-02-16",
+			"rawBytes": 473523,
+			"nodeCount": 315,
+			"edgeCount": 7518,
+			"directed": false,
+			"weighted": true,
+			"hasNodeAttributes": false,
+			"hasEdgeAttributes": true,
+			"labeled": false
+		},
+		"pajek-zewail": {
+			"id": "pajek-zewail",
+			"name": "Zewail Citations",
+			"description": "Citation network around Ahmed Zewail's femtochemistry research.",
+			"source": "pajek",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/cite/Zewail.zip",
+			"citation": {
+				"authors": [
+					"Vladimir Batagelj",
+					"Andrej Mrvar"
+				],
+				"title": "Pajek Datasets",
+				"year": 2006,
+				"type": "article"
+			},
+			"retrieved": "2026-02-16",
+			"rawBytes": 636485,
+			"nodeCount": 6752,
+			"edgeCount": 4581,
+			"directed": true,
+			"weighted": true,
+			"hasNodeAttributes": true,
+			"hasEdgeAttributes": true,
+			"labeled": false
+		},
+		"polblogs": {
+			"id": "polblogs",
+			"name": "Political Blogs",
+			"description": "Directed network of hyperlinks between weblogs on US politics, recorded in 2005. The 'value' property indicates political leaning: 0 for left/liberal, 1 for right/conservative.",
+			"source": "newman",
+			"url": "https://websites.umich.edu/~mejn/netdata/polblogs.zip",
+			"citation": {
+				"authors": [
+					"L. A. Adamic",
+					"N. Glance"
+				],
+				"title": "The political blogosphere and the 2004 US Election: Divided they blog",
+				"journal": "Proceedings of the 3rd International Workshop on Link Discovery",
+				"pages": "36-43",
+				"year": 2005,
+				"type": "conference"
+			},
+			"retrieved": "2026-01-17",
+			"creator": "Lada Adamic on Tue Aug 15 2006",
+			"rawBytes": 1705487,
+			"nodeCount": 1490,
+			"edgeCount": 19090,
+			"directed": true,
+			"weighted": false,
+			"hasNodeAttributes": true,
+			"hasEdgeAttributes": false,
+			"labeled": true
+		},
+		"polbooks": {
+			"id": "polbooks",
+			"name": "Books about US Politics",
+			"description": "Network of books about US politics published around the time of the 2004 presidential election, sold by Amazon.com. Edges connect books frequently co-purchased by the same buyers. The 'value' property indicates political alignment: 'l' for liberal, 'n' for neutral, 'c' for conservative.",
+			"source": "newman",
+			"url": "https://websites.umich.edu/~mejn/netdata/polbooks.zip",
+			"citation": {
+				"authors": [
+					"V. Krebs"
+				],
+				"title": "Books about US Politics",
+				"year": 2004,
+				"type": "other"
+			},
+			"retrieved": "2026-01-17",
+			"creator": "Mark Newman on Wed Oct 18 16:42:04 2006",
+			"rawBytes": 41015,
+			"nodeCount": 105,
+			"edgeCount": 441,
+			"directed": false,
+			"weighted": false,
+			"hasNodeAttributes": true,
+			"hasEdgeAttributes": false,
+			"labeled": true
+		},
+		"power": {
+			"id": "power",
+			"name": "Western States Power Grid",
+			"description": "Undirected, unweighted network representing the topology of the Western States Power Grid of the United States. Nodes represent generators, transformers, and substations.",
+			"source": "newman",
+			"url": "https://websites.umich.edu/~mejn/netdata/power.zip",
+			"citation": {
+				"authors": [
+					"D. J. Watts",
+					"S. H. Strogatz"
+				],
+				"title": "Collective dynamics of 'small-world' networks",
+				"journal": "Nature",
+				"volume": 393,
+				"pages": "440-442",
+				"year": 1998,
+				"type": "article"
+			},
+			"retrieved": "2026-01-17",
+			"creator": "Mark Newman on Thu Aug 31 13:33:32 2006",
+			"rawBytes": 449931,
+			"nodeCount": 4941,
+			"edgeCount": 6594,
+			"directed": false,
+			"weighted": false,
+			"hasNodeAttributes": false,
+			"hasEdgeAttributes": false,
+			"labeled": false
+		},
+		"roadnet-tx": {
+			"id": "roadnet-tx",
+			"name": "Texas Road Network",
+			"description": "Road network of Texas.",
+			"source": "snap",
+			"url": "https://snap.stanford.edu/data/roadNet-TX.txt.gz",
+			"citation": {
+				"authors": [
+					"J. Leskovec",
+					"K. Lang",
+					"A. Dasgupta",
+					"M. Mahoney"
+				],
+				"title": "Community Structure in Large Networks",
+				"journal": "Internet Mathematics",
+				"year": 2009,
+				"type": "article"
+			},
+			"retrieved": "2026-01-17",
+			"rawBytes": 246662965,
+			"nodeCount": 1379917,
+			"edgeCount": 3843320,
+			"directed": false,
+			"weighted": false,
+			"hasNodeAttributes": false,
+			"hasEdgeAttributes": false,
+			"labeled": false
+		},
+		"roget": {
+			"id": "roget",
+			"name": "Roget's Thesaurus",
+			"description": "Network of cross-references in Roget's Thesaurus.",
+			"source": "pajek",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/dic/roget/Roget.zip",
+			"citation": {
+				"authors": [
+					"Vladimir Batagelj",
+					"Andrej Mrvar"
+				],
+				"title": "Pajek Datasets",
+				"year": 2006,
+				"type": "article"
+			},
+			"retrieved": "2026-01-17",
+			"rawBytes": 113272,
+			"nodeCount": 1022,
+			"edgeCount": 997,
+			"directed": true,
+			"weighted": true,
+			"hasNodeAttributes": true,
+			"hasEdgeAttributes": true,
+			"labeled": false,
+			"alternateUrls": [
+				{
+					"url": "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/Roget.tar.gz",
+					"source": "suitesparse",
+					"format": "matrix-market",
+					"description": "SuiteSparse Matrix Collection (Pajek/Roget)"
+				}
+			]
+		},
+		"soc-epinions": {
+			"id": "soc-epinions",
+			"name": "Epinions Trust Network",
+			"description": "Who-trusts-whom network of Epinions.com.",
+			"source": "snap",
+			"url": "https://snap.stanford.edu/data/soc-Epinions1.txt.gz",
+			"citation": {
+				"authors": [
+					"M. Richardson",
+					"R. Agrawal",
+					"P. Domingos"
+				],
+				"title": "Trust Management for the Semantic Web",
+				"journal": "ISWC",
+				"year": 2003,
+				"type": "article"
+			},
+			"retrieved": "2026-01-17",
+			"rawBytes": 27469818,
+			"nodeCount": 75879,
+			"edgeCount": 508837,
+			"directed": true,
+			"weighted": false,
+			"hasNodeAttributes": false,
+			"hasEdgeAttributes": false,
+			"labeled": false
+		},
+		"soc-slashdot0811": {
+			"id": "soc-slashdot0811",
+			"name": "Slashdot Network Nov 2008",
+			"description": "Slashdot social network from November 2008.",
+			"source": "snap",
+			"url": "https://snap.stanford.edu/data/soc-Slashdot0811.txt.gz",
+			"citation": {
+				"authors": [
+					"Jure Leskovec",
+					"Andrej Krevl"
+				],
+				"title": "SNAP Datasets: Stanford Large Network Dataset Collection",
+				"year": 2014,
+				"type": "article"
+			},
+			"retrieved": "2026-01-17",
+			"rawBytes": 48061022,
+			"nodeCount": 77360,
+			"edgeCount": 905468,
+			"directed": true,
+			"weighted": false,
+			"hasNodeAttributes": false,
+			"hasEdgeAttributes": false,
+			"labeled": false
+		},
+		"soc-slashdot0902": {
+			"id": "soc-slashdot0902",
+			"name": "Slashdot Network Feb 2009",
+			"description": "Slashdot social network from February 2009.",
+			"source": "snap",
+			"url": "https://snap.stanford.edu/data/soc-Slashdot0902.txt.gz",
+			"citation": {
+				"authors": [
+					"Jure Leskovec",
+					"Andrej Krevl"
+				],
+				"title": "SNAP Datasets: Stanford Large Network Dataset Collection",
+				"year": 2014,
+				"type": "article"
+			},
+			"retrieved": "2026-01-17",
+			"rawBytes": 50389963,
+			"nodeCount": 82168,
+			"edgeCount": 948464,
+			"directed": true,
+			"weighted": false,
+			"hasNodeAttributes": false,
+			"hasEdgeAttributes": false,
+			"labeled": false
+		},
+		"ss-pajek-cities": {
+			"id": "ss-pajek-cities",
+			"name": "Two-mode network of cities and their features",
+			"description": "Two-mode network of cities and their features.",
+			"source": "suitesparse",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
+			"citation": {
+				"authors": [
+					"V. Batagelj",
+					"A. Mrvar"
+				],
+				"title": "Cities feature network",
+				"year": 2006,
+				"type": "dataset"
+			},
+			"retrieved": "2026-02-16",
+			"rawBytes": 72301,
+			"nodeCount": 55,
+			"edgeCount": 1342,
+			"directed": false,
+			"weighted": true,
+			"hasNodeAttributes": false,
+			"hasEdgeAttributes": true,
+			"labeled": false
+		},
+		"ss-pajek-dictionary28": {
+			"id": "ss-pajek-dictionary28",
+			"name": "Word adjacency network from a dictionary",
+			"description": "Word adjacency network from a dictionary. Edges connect words differing by one letter.",
+			"source": "suitesparse",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
+			"citation": {
+				"authors": [
+					"V. Batagelj",
+					"A. Mrvar"
+				],
+				"title": "Dictionary word adjacency network",
+				"year": 2006,
+				"type": "dataset"
+			},
+			"retrieved": "2026-02-16",
+			"rawBytes": 11643180,
+			"nodeCount": 52652,
+			"edgeCount": 178076,
+			"directed": false,
+			"weighted": false,
+			"hasNodeAttributes": true,
+			"hasEdgeAttributes": false,
+			"labeled": false
+		},
+		"ss-pajek-divorce": {
+			"id": "ss-pajek-divorce",
+			"name": "Two-mode network of 50 divorce cases and 9 predictor variables",
+			"description": "Two-mode network of 50 divorce cases and 9 predictor variables.",
+			"source": "suitesparse",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
+			"citation": {
+				"authors": [
+					"V. Batagelj",
+					"A. Mrvar"
+				],
+				"title": "Divorce predictor network",
+				"year": 2006,
+				"type": "dataset"
+			},
+			"retrieved": "2026-02-16",
+			"rawBytes": 11750,
+			"nodeCount": 50,
+			"edgeCount": 225,
+			"directed": false,
+			"weighted": false,
+			"hasNodeAttributes": false,
+			"hasEdgeAttributes": false,
+			"labeled": false
+		},
+		"ss-pajek-eat-sr": {
+			"id": "ss-pajek-eat-sr",
+			"name": "Edinburgh Associative Thesaurus, response-stimulus direction",
+			"description": "Edinburgh Associative Thesaurus, response-stimulus direction.",
+			"source": "suitesparse",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
+			"citation": {
+				"authors": [
+					"G. Kiss",
+					"C. Armstrong",
+					"R. Milroy",
+					"J. Piper"
+				],
+				"title": "Edinburgh Associative Thesaurus (reverse)",
+				"year": 1973,
+				"type": "dataset"
+			},
+			"retrieved": "2026-02-16",
+			"rawBytes": 19339539,
+			"nodeCount": 23219,
+			"edgeCount": 325589,
+			"directed": true,
+			"weighted": true,
+			"hasNodeAttributes": true,
+			"hasEdgeAttributes": true,
+			"labeled": false
+		},
+		"ss-pajek-eva": {
+			"id": "ss-pajek-eva",
+			"name": "Citation network from EVA (Electronic Visualisation and the Arts) conference proceedings",
+			"description": "Citation network from EVA (Electronic Visualisation and the Arts) conference proceedings.",
+			"source": "suitesparse",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
+			"citation": {
+				"authors": [
+					"V. Batagelj",
+					"A. Mrvar"
+				],
+				"title": "EVA conference citations",
+				"year": 2006,
+				"type": "dataset"
+			},
+			"retrieved": "2026-02-16",
+			"rawBytes": 835825,
+			"nodeCount": 8497,
+			"edgeCount": 6726,
+			"directed": true,
+			"weighted": false,
+			"hasNodeAttributes": true,
+			"hasEdgeAttributes": false,
+			"labeled": false
+		},
+		"ss-pajek-fa": {
+			"id": "ss-pajek-fa",
+			"name": "Web graph of Slovenian research agency (ARRS) pages",
+			"description": "Web graph of Slovenian research agency (ARRS) pages.",
+			"source": "suitesparse",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
+			"citation": {
+				"authors": [
+					"V. Batagelj",
+					"A. Mrvar"
+				],
+				"title": "Slovenian research agency web graph",
+				"year": 2006,
+				"type": "dataset"
+			},
+			"retrieved": "2026-02-16",
+			"rawBytes": 5544276,
+			"nodeCount": 10617,
+			"edgeCount": 72176,
+			"directed": true,
+			"weighted": true,
+			"hasNodeAttributes": true,
+			"hasEdgeAttributes": true,
+			"labeled": false
+		},
+		"ss-pajek-gd00-a": {
+			"id": "ss-pajek-gd00-a",
+			"name": "Graph Drawing Contest 2000, graph A",
+			"description": "Graph Drawing Contest 2000, graph A.",
+			"source": "suitesparse",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
+			"citation": {
+				"authors": [
+					"Graph Drawing"
+				],
+				"title": "Graph Drawing Contest 2000",
+				"year": 2000,
+				"type": "dataset"
+			},
+			"retrieved": "2026-02-16",
+			"rawBytes": 45269,
+			"nodeCount": 352,
+			"edgeCount": 458,
+			"directed": true,
+			"weighted": false,
+			"hasNodeAttributes": true,
+			"hasEdgeAttributes": false,
+			"labeled": false
+		},
+		"ss-pajek-gd00-c": {
+			"id": "ss-pajek-gd00-c",
+			"name": "Graph Drawing Contest 2000, graph C",
+			"description": "Graph Drawing Contest 2000, graph C.",
+			"source": "suitesparse",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
+			"citation": {
+				"authors": [
+					"Graph Drawing"
+				],
+				"title": "Graph Drawing Contest 2000",
+				"year": 2000,
+				"type": "dataset"
+			},
+			"retrieved": "2026-02-16",
+			"rawBytes": 102803,
+			"nodeCount": 638,
+			"edgeCount": 1041,
+			"directed": true,
+			"weighted": true,
+			"hasNodeAttributes": true,
+			"hasEdgeAttributes": true,
+			"labeled": false
+		},
+		"ss-pajek-gd01-a": {
+			"id": "ss-pajek-gd01-a",
+			"name": "Graph Drawing Contest 2001, graph A",
+			"description": "Graph Drawing Contest 2001, graph A.",
+			"source": "suitesparse",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
+			"citation": {
+				"authors": [
+					"Graph Drawing"
+				],
+				"title": "Graph Drawing Contest 2001",
+				"year": 2001,
+				"type": "dataset"
+			},
+			"retrieved": "2026-02-16",
+			"rawBytes": 49977,
+			"nodeCount": 311,
+			"edgeCount": 645,
+			"directed": true,
+			"weighted": true,
+			"hasNodeAttributes": true,
+			"hasEdgeAttributes": true,
+			"labeled": false
+		},
+		"ss-pajek-gd01-acap": {
+			"id": "ss-pajek-gd01-acap",
+			"name": "Graph Drawing Contest 2001, graph A capacities",
+			"description": "Graph Drawing Contest 2001, graph A capacities.",
+			"source": "suitesparse",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
+			"citation": {
+				"authors": [
+					"Graph Drawing"
+				],
+				"title": "Graph Drawing Contest 2001",
+				"year": 2001,
+				"type": "dataset"
+			},
+			"retrieved": "2026-02-16",
+			"rawBytes": 65790,
+			"nodeCount": 953,
+			"edgeCount": 645,
+			"directed": true,
+			"weighted": true,
+			"hasNodeAttributes": true,
+			"hasEdgeAttributes": true,
+			"labeled": false
+		},
+		"ss-pajek-gd01-b": {
+			"id": "ss-pajek-gd01-b",
+			"name": "Graph Drawing Contest 2001, graph B",
+			"description": "Graph Drawing Contest 2001, graph B.",
+			"source": "suitesparse",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
+			"citation": {
+				"authors": [
+					"Graph Drawing"
+				],
+				"title": "Graph Drawing Contest 2001",
+				"year": 2001,
+				"type": "dataset"
+			},
+			"retrieved": "2026-02-16",
+			"rawBytes": 3054,
+			"nodeCount": 18,
+			"edgeCount": 37,
+			"directed": true,
+			"weighted": false,
+			"hasNodeAttributes": true,
+			"hasEdgeAttributes": false,
+			"labeled": false
+		},
+		"ss-pajek-gd01-c": {
+			"id": "ss-pajek-gd01-c",
+			"name": "Graph Drawing Contest 2001, graph C",
+			"description": "Graph Drawing Contest 2001, graph C.",
+			"source": "suitesparse",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
+			"citation": {
+				"authors": [
+					"Graph Drawing"
+				],
+				"title": "Graph Drawing Contest 2001",
+				"year": 2001,
+				"type": "dataset"
+			},
+			"retrieved": "2026-02-16",
+			"rawBytes": 8137,
+			"nodeCount": 33,
+			"edgeCount": 135,
+			"directed": true,
+			"weighted": true,
+			"hasNodeAttributes": true,
+			"hasEdgeAttributes": true,
+			"labeled": false
+		},
+		"ss-pajek-gd02-a": {
+			"id": "ss-pajek-gd02-a",
+			"name": "Graph Drawing Contest 2002, graph A",
+			"description": "Graph Drawing Contest 2002, graph A.",
+			"source": "suitesparse",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
+			"citation": {
+				"authors": [
+					"Graph Drawing"
+				],
+				"title": "Graph Drawing Contest 2002",
+				"year": 2002,
+				"type": "dataset"
+			},
+			"retrieved": "2026-02-16",
+			"rawBytes": 5591,
+			"nodeCount": 23,
+			"edgeCount": 87,
+			"directed": true,
+			"weighted": false,
+			"hasNodeAttributes": true,
+			"hasEdgeAttributes": false,
+			"labeled": false
+		},
+		"ss-pajek-gd02-b": {
+			"id": "ss-pajek-gd02-b",
+			"name": "Graph Drawing Contest 2002, graph B",
+			"description": "Graph Drawing Contest 2002, graph B.",
+			"source": "suitesparse",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
+			"citation": {
+				"authors": [
+					"Graph Drawing"
+				],
+				"title": "Graph Drawing Contest 2002",
+				"year": 2002,
+				"type": "dataset"
+			},
+			"retrieved": "2026-02-16",
+			"rawBytes": 14507,
+			"nodeCount": 80,
+			"edgeCount": 232,
+			"directed": true,
+			"weighted": false,
+			"hasNodeAttributes": true,
+			"hasEdgeAttributes": false,
+			"labeled": false
+		},
+		"ss-pajek-gd06-java": {
+			"id": "ss-pajek-gd06-java",
+			"name": "Graph Drawing Contest 2006, Java class dependency graph",
+			"description": "Graph Drawing Contest 2006, Java class dependency graph.",
+			"source": "suitesparse",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
+			"citation": {
+				"authors": [
+					"Graph Drawing"
+				],
+				"title": "Graph Drawing Contest 2006",
+				"year": 2006,
+				"type": "dataset"
+			},
+			"retrieved": "2026-02-16",
+			"rawBytes": 492046,
+			"nodeCount": 1538,
+			"edgeCount": 8032,
+			"directed": true,
+			"weighted": false,
+			"hasNodeAttributes": true,
+			"hasEdgeAttributes": false,
+			"labeled": false
+		},
+		"ss-pajek-gd06-theory": {
+			"id": "ss-pajek-gd06-theory",
+			"name": "Graph Drawing Contest 2006, theory graph",
+			"description": "Graph Drawing Contest 2006, theory graph.",
+			"source": "suitesparse",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
+			"citation": {
+				"authors": [
+					"Graph Drawing"
+				],
+				"title": "Graph Drawing Contest 2006",
+				"year": 2006,
+				"type": "dataset"
+			},
+			"retrieved": "2026-02-16",
+			"rawBytes": 20255,
+			"nodeCount": 101,
+			"edgeCount": 380,
+			"directed": false,
+			"weighted": false,
+			"hasNodeAttributes": false,
+			"hasEdgeAttributes": false,
+			"labeled": false
+		},
+		"ss-pajek-gd95-a": {
+			"id": "ss-pajek-gd95-a",
+			"name": "Graph Drawing Contest 1995, graph A",
+			"description": "Graph Drawing Contest 1995, graph A.",
+			"source": "suitesparse",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
+			"citation": {
+				"authors": [
+					"Graph Drawing"
+				],
+				"title": "Graph Drawing Contest 1995",
+				"year": 1995,
+				"type": "dataset"
+			},
+			"retrieved": "2026-02-16",
+			"rawBytes": 4758,
+			"nodeCount": 36,
+			"edgeCount": 57,
+			"directed": true,
+			"weighted": false,
+			"hasNodeAttributes": true,
+			"hasEdgeAttributes": false,
+			"labeled": false
+		},
+		"ss-pajek-gd95-b": {
+			"id": "ss-pajek-gd95-b",
+			"name": "Graph Drawing Contest 1995, graph B",
+			"description": "Graph Drawing Contest 1995, graph B.",
+			"source": "suitesparse",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
+			"citation": {
+				"authors": [
+					"Graph Drawing"
+				],
+				"title": "Graph Drawing Contest 1995",
+				"year": 1995,
+				"type": "dataset"
+			},
+			"retrieved": "2026-02-16",
+			"rawBytes": 9190,
+			"nodeCount": 73,
+			"edgeCount": 96,
+			"directed": true,
+			"weighted": false,
+			"hasNodeAttributes": true,
+			"hasEdgeAttributes": false,
+			"labeled": false
+		},
+		"ss-pajek-gd95-c": {
+			"id": "ss-pajek-gd95-c",
+			"name": "Graph Drawing Contest 1995, graph C",
+			"description": "Graph Drawing Contest 1995, graph C.",
+			"source": "suitesparse",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
+			"citation": {
+				"authors": [
+					"Graph Drawing"
+				],
+				"title": "Graph Drawing Contest 1995",
+				"year": 1995,
+				"type": "dataset"
+			},
+			"retrieved": "2026-02-16",
+			"rawBytes": 15999,
+			"nodeCount": 62,
+			"edgeCount": 287,
+			"directed": true,
+			"weighted": false,
+			"hasNodeAttributes": true,
+			"hasEdgeAttributes": false,
+			"labeled": false
+		},
+		"ss-pajek-gd96-a": {
+			"id": "ss-pajek-gd96-a",
+			"name": "Graph Drawing Contest 1996, graph A",
+			"description": "Graph Drawing Contest 1996, graph A.",
+			"source": "suitesparse",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
+			"citation": {
+				"authors": [
+					"Graph Drawing"
+				],
+				"title": "Graph Drawing Contest 1996",
+				"year": 1996,
+				"type": "dataset"
+			},
+			"retrieved": "2026-02-16",
+			"rawBytes": 107051,
+			"nodeCount": 1096,
+			"edgeCount": 1677,
+			"directed": true,
+			"weighted": true,
+			"hasNodeAttributes": true,
+			"hasEdgeAttributes": true,
+			"labeled": false
+		},
+		"ss-pajek-gd96-b": {
+			"id": "ss-pajek-gd96-b",
+			"name": "Graph Drawing Contest 1996, graph B",
+			"description": "Graph Drawing Contest 1996, graph B.",
+			"source": "suitesparse",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
+			"citation": {
+				"authors": [
+					"Graph Drawing"
+				],
+				"title": "Graph Drawing Contest 1996",
+				"year": 1996,
+				"type": "dataset"
+			},
+			"retrieved": "2026-02-16",
+			"rawBytes": 14891,
+			"nodeCount": 111,
+			"edgeCount": 193,
+			"directed": true,
+			"weighted": false,
+			"hasNodeAttributes": true,
+			"hasEdgeAttributes": false,
+			"labeled": false
+		},
+		"ss-pajek-gd96-c": {
+			"id": "ss-pajek-gd96-c",
+			"name": "Graph Drawing Contest 1996, graph C",
+			"description": "Graph Drawing Contest 1996, graph C.",
+			"source": "suitesparse",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
+			"citation": {
+				"authors": [
+					"Graph Drawing"
+				],
+				"title": "Graph Drawing Contest 1996",
+				"year": 1996,
+				"type": "dataset"
+			},
+			"retrieved": "2026-02-16",
+			"rawBytes": 13389,
+			"nodeCount": 65,
+			"edgeCount": 250,
+			"directed": false,
+			"weighted": false,
+			"hasNodeAttributes": true,
+			"hasEdgeAttributes": false,
+			"labeled": false
+		},
+		"ss-pajek-gd96-d": {
+			"id": "ss-pajek-gd96-d",
+			"name": "Graph Drawing Contest 1996, graph D",
+			"description": "Graph Drawing Contest 1996, graph D.",
+			"source": "suitesparse",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
+			"citation": {
+				"authors": [
+					"Graph Drawing"
+				],
+				"title": "Graph Drawing Contest 1996",
+				"year": 1996,
+				"type": "dataset"
+			},
+			"retrieved": "2026-02-16",
+			"rawBytes": 22725,
+			"nodeCount": 180,
+			"edgeCount": 229,
+			"directed": true,
+			"weighted": false,
+			"hasNodeAttributes": true,
+			"hasEdgeAttributes": false,
+			"labeled": false
+		},
+		"ss-pajek-gd97-a": {
+			"id": "ss-pajek-gd97-a",
+			"name": "Graph Drawing Contest 1997, graph A",
+			"description": "Graph Drawing Contest 1997, graph A.",
+			"source": "suitesparse",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
+			"citation": {
+				"authors": [
+					"Graph Drawing"
+				],
+				"title": "Graph Drawing Contest 1997",
+				"year": 1997,
+				"type": "dataset"
+			},
+			"retrieved": "2026-02-16",
+			"rawBytes": 17580,
+			"nodeCount": 84,
+			"edgeCount": 332,
+			"directed": true,
+			"weighted": false,
+			"hasNodeAttributes": false,
+			"hasEdgeAttributes": false,
+			"labeled": false
+		},
+		"ss-pajek-gd97-b": {
+			"id": "ss-pajek-gd97-b",
+			"name": "Graph Drawing Contest 1997, graph B",
+			"description": "Graph Drawing Contest 1997, graph B.",
+			"source": "suitesparse",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
+			"citation": {
+				"authors": [
+					"Graph Drawing"
+				],
+				"title": "Graph Drawing Contest 1997",
+				"year": 1997,
+				"type": "dataset"
+			},
+			"retrieved": "2026-02-16",
+			"rawBytes": 20823,
+			"nodeCount": 47,
+			"edgeCount": 264,
+			"directed": false,
+			"weighted": true,
+			"hasNodeAttributes": true,
+			"hasEdgeAttributes": true,
+			"labeled": false
+		},
+		"ss-pajek-gd97-c": {
+			"id": "ss-pajek-gd97-c",
+			"name": "Graph Drawing Contest 1997, graph C",
+			"description": "Graph Drawing Contest 1997, graph C.",
+			"source": "suitesparse",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
+			"citation": {
+				"authors": [
+					"Graph Drawing"
+				],
+				"title": "Graph Drawing Contest 1997",
+				"year": 1997,
+				"type": "dataset"
+			},
+			"retrieved": "2026-02-16",
+			"rawBytes": 34893,
+			"nodeCount": 452,
+			"edgeCount": 460,
+			"directed": true,
+			"weighted": true,
+			"hasNodeAttributes": false,
+			"hasEdgeAttributes": true,
+			"labeled": false
+		},
+		"ss-pajek-gd98-a": {
+			"id": "ss-pajek-gd98-a",
+			"name": "Graph Drawing Contest 1998, graph A",
+			"description": "Graph Drawing Contest 1998, graph A.",
+			"source": "suitesparse",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
+			"citation": {
+				"authors": [
+					"Graph Drawing"
+				],
+				"title": "Graph Drawing Contest 1998",
+				"year": 1998,
+				"type": "dataset"
+			},
+			"retrieved": "2026-02-16",
+			"rawBytes": 5043,
+			"nodeCount": 38,
+			"edgeCount": 50,
+			"directed": true,
+			"weighted": false,
+			"hasNodeAttributes": true,
+			"hasEdgeAttributes": false,
+			"labeled": false
+		},
+		"ss-pajek-gd98-b": {
+			"id": "ss-pajek-gd98-b",
+			"name": "Graph Drawing Contest 1998, graph B",
+			"description": "Graph Drawing Contest 1998, graph B.",
+			"source": "suitesparse",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
+			"citation": {
+				"authors": [
+					"Graph Drawing"
+				],
+				"title": "Graph Drawing Contest 1998",
+				"year": 1998,
+				"type": "dataset"
+			},
+			"retrieved": "2026-02-16",
+			"rawBytes": 14958,
+			"nodeCount": 121,
+			"edgeCount": 207,
+			"directed": true,
+			"weighted": false,
+			"hasNodeAttributes": true,
+			"hasEdgeAttributes": false,
+			"labeled": false
+		},
+		"ss-pajek-gd98-c": {
+			"id": "ss-pajek-gd98-c",
+			"name": "Graph Drawing Contest 1998, graph C",
+			"description": "Graph Drawing Contest 1998, graph C.",
+			"source": "suitesparse",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
+			"citation": {
+				"authors": [
+					"Graph Drawing"
+				],
+				"title": "Graph Drawing Contest 1998",
+				"year": 1998,
+				"type": "dataset"
+			},
+			"retrieved": "2026-02-16",
+			"rawBytes": 18516,
+			"nodeCount": 112,
+			"edgeCount": 336,
+			"directed": false,
+			"weighted": false,
+			"hasNodeAttributes": false,
+			"hasEdgeAttributes": false,
+			"labeled": false
+		},
+		"ss-pajek-gd99-b": {
+			"id": "ss-pajek-gd99-b",
+			"name": "Graph Drawing Contest 1999, graph B",
+			"description": "Graph Drawing Contest 1999, graph B.",
+			"source": "suitesparse",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
+			"citation": {
+				"authors": [
+					"Graph Drawing"
+				],
+				"title": "Graph Drawing Contest 1999",
+				"year": 1999,
+				"type": "dataset"
+			},
+			"retrieved": "2026-02-16",
+			"rawBytes": 14815,
+			"nodeCount": 64,
+			"edgeCount": 252,
+			"directed": false,
+			"weighted": true,
+			"hasNodeAttributes": true,
+			"hasEdgeAttributes": true,
+			"labeled": false
+		},
+		"ss-pajek-gd99-c": {
+			"id": "ss-pajek-gd99-c",
+			"name": "Graph Drawing Contest 1999, graph C",
+			"description": "Graph Drawing Contest 1999, graph C.",
+			"source": "suitesparse",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
+			"citation": {
+				"authors": [
+					"Graph Drawing"
+				],
+				"title": "Graph Drawing Contest 1999",
+				"year": 1999,
+				"type": "dataset"
+			},
+			"retrieved": "2026-02-16",
+			"rawBytes": 12061,
+			"nodeCount": 105,
+			"edgeCount": 149,
+			"directed": true,
+			"weighted": false,
+			"hasNodeAttributes": true,
+			"hasEdgeAttributes": false,
+			"labeled": false
+		},
+		"ss-pajek-hep-th-new": {
+			"id": "ss-pajek-hep-th-new",
+			"name": "Updated citation network from high-energy physics theory papers on arXiv",
+			"description": "Updated citation network from high-energy physics theory papers on arXiv.",
+			"source": "suitesparse",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
+			"citation": {
+				"authors": [
+					"KDD Cup"
+				],
+				"title": "hep-th citation network (updated)",
+				"year": 2003,
+				"type": "dataset"
+			},
+			"retrieved": "2026-02-16",
+			"rawBytes": 19400272,
+			"nodeCount": 27770,
+			"edgeCount": 352807,
+			"directed": true,
+			"weighted": false,
+			"hasNodeAttributes": true,
+			"hasEdgeAttributes": false,
+			"labeled": false
+		},
+		"ss-pajek-kohonen": {
+			"id": "ss-pajek-kohonen",
+			"name": "Citation network related to Kohonen self-organising map publications",
+			"description": "Citation network related to Kohonen self-organising map publications.",
+			"source": "suitesparse",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
+			"citation": {
+				"authors": [
+					"V. Batagelj",
+					"A. Mrvar"
+				],
+				"title": "Kohonen SOM citation network",
+				"year": 2006,
+				"type": "dataset"
+			},
+			"retrieved": "2026-02-16",
+			"rawBytes": 847619,
+			"nodeCount": 4470,
+			"edgeCount": 12731,
+			"directed": true,
+			"weighted": false,
+			"hasNodeAttributes": true,
+			"hasEdgeAttributes": false,
+			"labeled": false
+		},
+		"ss-pajek-lederberg": {
+			"id": "ss-pajek-lederberg",
+			"name": "Citation network from Lederberg's Roget thesaurus analysis",
+			"description": "Citation network from Lederberg's Roget thesaurus analysis.",
+			"source": "suitesparse",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
+			"citation": {
+				"authors": [
+					"V. Batagelj",
+					"A. Mrvar"
+				],
+				"title": "Lederberg citation network",
+				"year": 2006,
+				"type": "dataset"
+			},
+			"retrieved": "2026-02-16",
+			"rawBytes": 2502066,
+			"nodeCount": 8843,
+			"edgeCount": 41601,
+			"directed": true,
+			"weighted": true,
+			"hasNodeAttributes": true,
+			"hasEdgeAttributes": true,
+			"labeled": false
+		},
+		"ss-pajek-odlis": {
+			"id": "ss-pajek-odlis",
+			"name": "Online Dictionary for Library and Information Science hyperlink network",
+			"description": "Online Dictionary for Library and Information Science hyperlink network.",
+			"source": "suitesparse",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
+			"citation": {
+				"authors": [
+					"V. Batagelj",
+					"A. Mrvar"
+				],
+				"title": "ODLIS hyperlink network",
+				"year": 2006,
+				"type": "dataset"
+			},
+			"retrieved": "2026-02-16",
+			"rawBytes": 1056075,
+			"nodeCount": 2909,
+			"edgeCount": 18246,
+			"directed": true,
+			"weighted": true,
+			"hasNodeAttributes": true,
+			"hasEdgeAttributes": true,
+			"labeled": false
+		},
+		"ss-pajek-ragusa16": {
+			"id": "ss-pajek-ragusa16",
+			"name": "Social network from Ragusa study with 16 individuals",
+			"description": "Social network from Ragusa study with 16 individuals.",
+			"source": "suitesparse",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
+			"citation": {
+				"authors": [
+					"V. Batagelj",
+					"A. Mrvar"
+				],
+				"title": "Ragusa social network (16)",
+				"year": 2006,
+				"type": "dataset"
+			},
+			"retrieved": "2026-02-16",
+			"rawBytes": 5487,
+			"nodeCount": 24,
+			"edgeCount": 81,
+			"directed": true,
+			"weighted": true,
+			"hasNodeAttributes": true,
+			"hasEdgeAttributes": true,
+			"labeled": false
+		},
+		"ss-pajek-ragusa18": {
+			"id": "ss-pajek-ragusa18",
+			"name": "Social network from Ragusa study with 18 individuals",
+			"description": "Social network from Ragusa study with 18 individuals.",
+			"source": "suitesparse",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
+			"citation": {
+				"authors": [
+					"V. Batagelj",
+					"A. Mrvar"
+				],
+				"title": "Ragusa social network (18)",
+				"year": 2006,
+				"type": "dataset"
+			},
+			"retrieved": "2026-02-16",
+			"rawBytes": 4628,
+			"nodeCount": 23,
+			"edgeCount": 64,
+			"directed": true,
+			"weighted": true,
+			"hasNodeAttributes": true,
+			"hasEdgeAttributes": true,
+			"labeled": false
+		},
+		"ss-pajek-sandi-authors": {
+			"id": "ss-pajek-sandi-authors",
+			"name": "Collaboration network among Sandi conference authors",
+			"description": "Collaboration network among Sandi conference authors.",
+			"source": "suitesparse",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
+			"citation": {
+				"authors": [
+					"V. Batagelj",
+					"A. Mrvar"
+				],
+				"title": "Sandi author collaboration network",
+				"year": 2006,
+				"type": "dataset"
+			},
+			"retrieved": "2026-02-16",
+			"rawBytes": 17304,
+			"nodeCount": 86,
+			"edgeCount": 248,
+			"directed": false,
+			"weighted": true,
+			"hasNodeAttributes": true,
+			"hasEdgeAttributes": true,
+			"labeled": false
+		},
+		"ss-pajek-scimet": {
+			"id": "ss-pajek-scimet",
+			"name": "Scientometric citation network",
+			"description": "Scientometric citation network.",
+			"source": "suitesparse",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
+			"citation": {
+				"authors": [
+					"V. Batagelj",
+					"A. Mrvar"
+				],
+				"title": "Scientometric citation network",
+				"year": 2006,
+				"type": "dataset"
+			},
+			"retrieved": "2026-02-16",
+			"rawBytes": 665523,
+			"nodeCount": 3084,
+			"edgeCount": 10413,
+			"directed": true,
+			"weighted": true,
+			"hasNodeAttributes": true,
+			"hasEdgeAttributes": true,
+			"labeled": false
+		},
+		"ss-pajek-smagri": {
+			"id": "ss-pajek-smagri",
+			"name": "Small graph drawing contest network",
+			"description": "Small graph drawing contest network.",
+			"source": "suitesparse",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
+			"citation": {
+				"authors": [
+					"V. Batagelj",
+					"A. Mrvar"
+				],
+				"title": "SmaGri network",
+				"year": 2006,
+				"type": "dataset"
+			},
+			"retrieved": "2026-02-16",
+			"rawBytes": 286765,
+			"nodeCount": 1059,
+			"edgeCount": 4919,
+			"directed": true,
+			"weighted": true,
+			"hasNodeAttributes": true,
+			"hasEdgeAttributes": true,
+			"labeled": false
+		},
+		"ss-pajek-smallw": {
+			"id": "ss-pajek-smallw",
+			"name": "Small-world network dataset",
+			"description": "Small-world network dataset.",
+			"source": "suitesparse",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
+			"citation": {
+				"authors": [
+					"V. Batagelj",
+					"A. Mrvar"
+				],
+				"title": "Small-world network",
+				"year": 2006,
+				"type": "dataset"
+			},
+			"retrieved": "2026-02-16",
+			"rawBytes": 82479,
+			"nodeCount": 396,
+			"edgeCount": 994,
+			"directed": true,
+			"weighted": true,
+			"hasNodeAttributes": true,
+			"hasEdgeAttributes": true,
+			"labeled": false
+		},
+		"ss-pajek-stranke94": {
+			"id": "ss-pajek-stranke94",
+			"name": "Social network from Stranke's 1994 study",
+			"description": "Social network from Stranke's 1994 study.",
+			"source": "suitesparse",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
+			"citation": {
+				"authors": [
+					"V. Batagelj",
+					"A. Mrvar"
+				],
+				"title": "Stranke social network 1994",
+				"year": 2006,
+				"type": "dataset"
+			},
+			"retrieved": "2026-02-16",
+			"rawBytes": 6524,
+			"nodeCount": 10,
+			"edgeCount": 90,
+			"directed": false,
+			"weighted": true,
+			"hasNodeAttributes": true,
+			"hasEdgeAttributes": true,
+			"labeled": false
+		},
+		"ss-pajek-tina-askcal": {
+			"id": "ss-pajek-tina-askcal",
+			"name": "Tina's network: ask/calendar interactions",
+			"description": "Tina's network: ask/calendar interactions.",
+			"source": "suitesparse",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
+			"citation": {
+				"authors": [
+					"V. Batagelj",
+					"A. Mrvar"
+				],
+				"title": "Tina network (AskCal)",
+				"year": 2006,
+				"type": "dataset"
+			},
+			"retrieved": "2026-02-16",
+			"rawBytes": 2293,
+			"nodeCount": 11,
+			"edgeCount": 29,
+			"directed": true,
+			"weighted": false,
+			"hasNodeAttributes": true,
+			"hasEdgeAttributes": false,
+			"labeled": false
+		},
+		"ss-pajek-tina-askcog": {
+			"id": "ss-pajek-tina-askcog",
+			"name": "Tina's network: ask/cognitive interactions",
+			"description": "Tina's network: ask/cognitive interactions.",
+			"source": "suitesparse",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
+			"citation": {
+				"authors": [
+					"V. Batagelj",
+					"A. Mrvar"
+				],
+				"title": "Tina network (AskCog)",
+				"year": 2006,
+				"type": "dataset"
+			},
+			"retrieved": "2026-02-16",
+			"rawBytes": 2604,
+			"nodeCount": 11,
+			"edgeCount": 36,
+			"directed": true,
+			"weighted": false,
+			"hasNodeAttributes": true,
+			"hasEdgeAttributes": false,
+			"labeled": false
+		},
+		"ss-pajek-tina-discal": {
+			"id": "ss-pajek-tina-discal",
+			"name": "Tina's network: discuss/calendar interactions",
+			"description": "Tina's network: discuss/calendar interactions.",
+			"source": "suitesparse",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
+			"citation": {
+				"authors": [
+					"V. Batagelj",
+					"A. Mrvar"
+				],
+				"title": "Tina network (DisCal)",
+				"year": 2006,
+				"type": "dataset"
+			},
+			"retrieved": "2026-02-16",
+			"rawBytes": 2819,
+			"nodeCount": 11,
+			"edgeCount": 41,
+			"directed": true,
+			"weighted": false,
+			"hasNodeAttributes": true,
+			"hasEdgeAttributes": false,
+			"labeled": false
+		},
+		"ss-pajek-tina-discog": {
+			"id": "ss-pajek-tina-discog",
+			"name": "Tina's network: discuss/cognitive interactions",
+			"description": "Tina's network: discuss/cognitive interactions.",
+			"source": "suitesparse",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
+			"citation": {
+				"authors": [
+					"V. Batagelj",
+					"A. Mrvar"
+				],
+				"title": "Tina network (DisCog)",
+				"year": 2006,
+				"type": "dataset"
+			},
+			"retrieved": "2026-02-16",
+			"rawBytes": 3143,
+			"nodeCount": 11,
+			"edgeCount": 48,
+			"directed": true,
+			"weighted": false,
+			"hasNodeAttributes": true,
+			"hasEdgeAttributes": false,
+			"labeled": false
+		},
+		"ss-pajek-zewail": {
+			"id": "ss-pajek-zewail",
+			"name": "Citation network related to Ahmed Zewail's Nobel Prize publications",
+			"description": "Citation network related to Ahmed Zewail's Nobel Prize publications.",
+			"source": "suitesparse",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/",
+			"citation": {
+				"authors": [
+					"V. Batagelj",
+					"A. Mrvar"
+				],
+				"title": "Zewail citation network",
+				"year": 2006,
+				"type": "dataset"
+			},
+			"retrieved": "2026-02-16",
+			"rawBytes": 3032293,
+			"nodeCount": 6752,
+			"edgeCount": 54233,
+			"directed": true,
+			"weighted": true,
+			"hasNodeAttributes": true,
+			"hasEdgeAttributes": true,
+			"labeled": false
+		},
+		"ucinet-bkfrat": {
+			"id": "ucinet-bkfrat",
+			"name": "Bernard & Killworth Fraternity",
+			"description": "Interaction data from 58 students in a West Virginia fraternity. Includes observed conversation frequency and recalled interaction rankings.",
+			"source": "ucinet",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/UciNet/bkfrat.dat",
+			"citation": {
+				"authors": [
+					"H. Bernard",
+					"P. Killworth",
+					"L. Sailer"
+				],
+				"title": "Informant accuracy in social network data IV",
+				"journal": "Social Networks",
+				"volume": 2,
+				"pages": "191-218",
+				"year": 1980,
+				"type": "article"
+			},
+			"retrieved": "2026-02-16",
+			"rawBytes": 41154,
+			"nodeCount": 58,
+			"edgeCount": 691,
+			"directed": false,
+			"weighted": true,
+			"hasNodeAttributes": false,
+			"hasEdgeAttributes": true,
+			"labeled": false
+		},
+		"ucinet-bkham": {
+			"id": "ucinet-bkham",
+			"name": "Bernard & Killworth Ham Radio",
+			"description": "HAM radio calls among 44 operators over one month, with recalled frequency rankings.",
+			"source": "ucinet",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/UciNet/bkham.dat",
+			"citation": {
+				"authors": [
+					"B. Killworth",
+					"H. Bernard"
+				],
+				"title": "Informant accuracy in social network data",
+				"journal": "Human Organization",
+				"volume": 35,
+				"pages": "269-286",
+				"year": 1976,
+				"type": "article"
+			},
+			"retrieved": "2026-02-16",
+			"rawBytes": 9874,
+			"nodeCount": 44,
+			"edgeCount": 150,
+			"directed": false,
+			"weighted": true,
+			"hasNodeAttributes": false,
+			"hasEdgeAttributes": true,
+			"labeled": false
+		},
+		"ucinet-bkoff": {
+			"id": "ucinet-bkoff",
+			"name": "Bernard & Killworth Office",
+			"description": "Interactions in a small business office among 40 employees, observed over two four-day periods.",
+			"source": "ucinet",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/UciNet/bkoff.dat",
+			"citation": {
+				"authors": [
+					"H. Bernard",
+					"P. Killworth",
+					"L. Sailer"
+				],
+				"title": "Informant accuracy in social network data IV",
+				"journal": "Social Networks",
+				"volume": 2,
+				"pages": "191-218",
+				"year": 1980,
+				"type": "article"
+			},
+			"retrieved": "2026-02-16",
+			"rawBytes": 15308,
+			"nodeCount": 40,
+			"edgeCount": 255,
+			"directed": false,
+			"weighted": true,
+			"hasNodeAttributes": false,
+			"hasEdgeAttributes": true,
+			"labeled": false
+		},
+		"ucinet-bktec": {
+			"id": "ucinet-bktec",
+			"name": "Bernard & Killworth Technical",
+			"description": "Interactions in a technical research group of 34 members at a West Virginia university.",
+			"source": "ucinet",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/UciNet/bktec.dat",
+			"citation": {
+				"authors": [
+					"H. Bernard",
+					"P. Killworth",
+					"L. Sailer"
+				],
+				"title": "Informant accuracy in social network data IV",
+				"journal": "Social Networks",
+				"volume": 2,
+				"pages": "191-218",
+				"year": 1980,
+				"type": "article"
+			},
+			"retrieved": "2026-02-16",
+			"rawBytes": 11207,
+			"nodeCount": 34,
+			"edgeCount": 187,
+			"directed": false,
+			"weighted": true,
+			"hasNodeAttributes": false,
+			"hasEdgeAttributes": true,
+			"labeled": false
+		},
+		"ucinet-davis": {
+			"id": "ucinet-davis",
+			"name": "Davis Southern Club Women",
+			"description": "Attendance at 14 social events by 18 Southern women in the 1930s. A classic bipartite (two-mode) network.",
+			"source": "ucinet",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/UciNet/davis.dat",
+			"citation": {
+				"authors": [
+					"A. Davis",
+					"B. Gardner",
+					"M. Gardner"
+				],
+				"title": "Deep South",
+				"publisher": "University of Chicago Press",
+				"year": 1941,
+				"type": "book"
+			},
+			"retrieved": "2026-02-16",
+			"rawBytes": 6104,
+			"nodeCount": 32,
+			"edgeCount": 93,
+			"directed": false,
+			"weighted": false,
+			"hasNodeAttributes": false,
+			"hasEdgeAttributes": false,
+			"labeled": true
+		},
+		"ucinet-gama": {
+			"id": "ucinet-gama",
+			"name": "Gahuku-Gama Highland Tribes",
+			"description": "Alliance and antagonism relations among 16 tribes in the Eastern Central Highlands of New Guinea.",
+			"source": "ucinet",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/UciNet/gama.dat",
+			"citation": {
+				"authors": [
+					"K. Read"
+				],
+				"title": "Cultures of the central highlands, New Guinea",
+				"journal": "Southwestern Journal of Anthropology",
+				"volume": 10,
+				"pages": "1-43",
+				"year": 1954,
+				"type": "article"
+			},
+			"retrieved": "2026-02-16",
+			"rawBytes": 4062,
+			"nodeCount": 16,
+			"edgeCount": 58,
+			"directed": false,
+			"weighted": false,
+			"hasNodeAttributes": false,
+			"hasEdgeAttributes": false,
+			"labeled": true
+		},
+		"ucinet-kapmine": {
+			"id": "ucinet-kapmine",
+			"name": "Kapferer Mine",
+			"description": "Multiplex and uniplex ties among 15 workers in a Zambian mining operation.",
+			"source": "ucinet",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/UciNet/kapmine.dat",
+			"citation": {
+				"authors": [
+					"B. Kapferer"
+				],
+				"title": "Norms and the manipulation of relationships in a work context",
+				"publisher": "Manchester University Press",
+				"year": 1969,
+				"type": "book"
+			},
+			"retrieved": "2026-02-16",
+			"rawBytes": 3061,
+			"nodeCount": 15,
+			"edgeCount": 38,
+			"directed": false,
+			"weighted": false,
+			"hasNodeAttributes": false,
+			"hasEdgeAttributes": false,
+			"labeled": true
+		},
+		"ucinet-kaptail": {
+			"id": "ucinet-kaptail",
+			"name": "Kapferer Tailor Shop",
+			"description": "Instrumental and sociational interactions among 39 workers in a Zambian tailor shop, observed at two time points.",
+			"source": "ucinet",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/UciNet/kaptail.dat",
+			"citation": {
+				"authors": [
+					"B. Kapferer"
+				],
+				"title": "Strategy and transaction in an African factory",
+				"publisher": "Manchester University Press",
+				"year": 1972,
+				"type": "book"
+			},
+			"retrieved": "2026-02-16",
+			"rawBytes": 19064,
+			"nodeCount": 39,
+			"edgeCount": 316,
+			"directed": true,
+			"weighted": false,
+			"hasNodeAttributes": false,
+			"hasEdgeAttributes": false,
+			"labeled": true
+		},
+		"ucinet-knokbur": {
+			"id": "ucinet-knokbur",
+			"name": "Knoke Bureaucracies",
+			"description": "Information exchange among 10 organizations in Indianapolis.",
+			"source": "ucinet",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/UciNet/knokbur.dat",
+			"citation": {
+				"authors": [
+					"D. Knoke",
+					"J. Kuklinski"
+				],
+				"title": "Network analysis",
+				"publisher": "Sage",
+				"year": 1982,
+				"type": "book"
+			},
+			"retrieved": "2026-02-16",
+			"rawBytes": 3229,
+			"nodeCount": 10,
+			"edgeCount": 49,
+			"directed": true,
+			"weighted": false,
+			"hasNodeAttributes": false,
+			"hasEdgeAttributes": false,
+			"labeled": true
+		},
+		"ucinet-krackad": {
+			"id": "ucinet-krackad",
+			"name": "Krackhardt Office Advice",
+			"description": "Cognitive social structure data: 21 managers' perceptions of advice-seeking relationships.",
+			"source": "ucinet",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/UciNet/krackad.dat",
+			"citation": {
+				"authors": [
+					"D. Krackhardt"
+				],
+				"title": "Cognitive social structures",
+				"journal": "Social Networks",
+				"volume": 9,
+				"pages": "104-134",
+				"year": 1987,
+				"type": "article"
+			},
+			"retrieved": "2026-02-16",
+			"rawBytes": 13611,
+			"nodeCount": 21,
+			"edgeCount": 277,
+			"directed": true,
+			"weighted": false,
+			"hasNodeAttributes": false,
+			"hasEdgeAttributes": false,
+			"labeled": false
+		},
+		"ucinet-krackfr": {
+			"id": "ucinet-krackfr",
+			"name": "Krackhardt Office Friendship",
+			"description": "Cognitive social structure data: 21 managers' perceptions of friendship relationships.",
+			"source": "ucinet",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/UciNet/krackfr.dat",
+			"citation": {
+				"authors": [
+					"D. Krackhardt"
+				],
+				"title": "Cognitive social structures",
+				"journal": "Social Networks",
+				"volume": 9,
+				"pages": "104-134",
+				"year": 1987,
+				"type": "article"
+			},
+			"retrieved": "2026-02-16",
+			"rawBytes": 3788,
+			"nodeCount": 21,
+			"edgeCount": 60,
+			"directed": false,
+			"weighted": false,
+			"hasNodeAttributes": false,
+			"hasEdgeAttributes": false,
+			"labeled": false
+		},
+		"ucinet-newfrat": {
+			"id": "ucinet-newfrat",
+			"name": "Newcomb Fraternity",
+			"description": "Weekly sociometric preference rankings from 17 men over 15 weeks in a University of Michigan fraternity.",
+			"source": "ucinet",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/UciNet/newfrat.dat",
+			"citation": {
+				"authors": [
+					"T. Newcomb"
+				],
+				"title": "The acquaintance process",
+				"publisher": "Holt, Reinhard & Winston",
+				"year": 1961,
+				"type": "book"
+			},
+			"retrieved": "2026-02-16",
+			"rawBytes": 17392,
+			"nodeCount": 17,
+			"edgeCount": 272,
+			"directed": true,
+			"weighted": true,
+			"hasNodeAttributes": false,
+			"hasEdgeAttributes": true,
+			"labeled": false
+		},
+		"ucinet-padgett": {
+			"id": "ucinet-padgett",
+			"name": "Padgett Florentine Families",
+			"description": "Business and marriage ties among Renaissance Florentine families. The Medici vs Strozzi conflict.",
+			"source": "ucinet",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/UciNet/padgett.dat",
+			"citation": {
+				"authors": [
+					"R. Breiger",
+					"P. Pattison"
+				],
+				"title": "Cumulated social roles: The duality of persons and their algebras",
+				"journal": "Social Networks",
+				"volume": 8,
+				"pages": "215-256",
+				"year": 1986,
+				"type": "article"
+			},
+			"retrieved": "2026-02-16",
+			"rawBytes": 3416,
+			"nodeCount": 16,
+			"edgeCount": 40,
+			"directed": false,
+			"weighted": false,
+			"hasNodeAttributes": false,
+			"hasEdgeAttributes": false,
+			"labeled": true
+		},
+		"ucinet-prison": {
+			"id": "ucinet-prison",
+			"name": "Gagnon Prison",
+			"description": "Friendship choices among 67 prison inmates in a 1950s study.",
+			"source": "ucinet",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/UciNet/prison.dat",
+			"citation": {
+				"authors": [
+					"J. MacRae"
+				],
+				"title": "Direct factor analysis of sociometric data",
+				"journal": "Sociometry",
+				"volume": 23,
+				"pages": "360-371",
+				"year": 1960,
+				"type": "article"
+			},
+			"retrieved": "2026-02-16",
+			"rawBytes": 5887,
+			"nodeCount": 67,
+			"edgeCount": 83,
+			"directed": true,
+			"weighted": false,
+			"hasNodeAttributes": false,
+			"hasEdgeAttributes": false,
+			"labeled": false
+		},
+		"ucinet-sampson": {
+			"id": "ucinet-sampson",
+			"name": "Sampson Monastery",
+			"description": "Social interactions among 18 monks including liking, esteem, influence, and praise, at three time points.",
+			"source": "ucinet",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/UciNet/sampson.dat",
+			"citation": {
+				"authors": [
+					"S. Sampson"
+				],
+				"title": "Crisis in a cloister",
+				"year": 1969,
+				"type": "thesis"
+			},
+			"retrieved": "2026-02-16",
+			"rawBytes": 4792,
+			"nodeCount": 18,
+			"edgeCount": 55,
+			"directed": true,
+			"weighted": true,
+			"hasNodeAttributes": false,
+			"hasEdgeAttributes": true,
+			"labeled": true
+		},
+		"ucinet-szcid": {
+			"id": "ucinet-szcid",
+			"name": "Stokman-Ziegler Netherlands Interlocks",
+			"description": "Corporate interlocks among 16 major Dutch business entities.",
+			"source": "ucinet",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/UciNet/szcid.dat",
+			"citation": {
+				"authors": [
+					"F. Stokman",
+					"F. Wasseur",
+					"D. Elsas"
+				],
+				"title": "The Dutch network: Types of interlocks and network structure",
+				"publisher": "Polity Press",
+				"year": 1985,
+				"type": "incollection"
+			},
+			"retrieved": "2026-02-16",
+			"rawBytes": 7527,
+			"nodeCount": 16,
+			"edgeCount": 120,
+			"directed": false,
+			"weighted": true,
+			"hasNodeAttributes": false,
+			"hasEdgeAttributes": true,
+			"labeled": true
+		},
+		"ucinet-szcig": {
+			"id": "ucinet-szcig",
+			"name": "Stokman-Ziegler German Interlocks",
+			"description": "Corporate interlocks among 15 major West German business entities.",
+			"source": "ucinet",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/UciNet/szcig.dat",
+			"citation": {
+				"authors": [
+					"R. Ziegler",
+					"R. Bender",
+					"H. Biehler"
+				],
+				"title": "Industry and banking in the German corporate network",
+				"publisher": "Polity Press",
+				"year": 1985,
+				"type": "incollection"
+			},
+			"retrieved": "2026-02-16",
+			"rawBytes": 9011,
+			"nodeCount": 15,
+			"edgeCount": 134,
+			"directed": false,
+			"weighted": true,
+			"hasNodeAttributes": false,
+			"hasEdgeAttributes": true,
+			"labeled": true
+		},
+		"ucinet-taro": {
+			"id": "ucinet-taro",
+			"name": "Schwimmer Taro Exchange",
+			"description": "Gift-giving (taro exchange) among 22 households in a Papuan village.",
+			"source": "ucinet",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/UciNet/taro.dat",
+			"citation": {
+				"authors": [
+					"E. Schwimmer"
+				],
+				"title": "Exchange in the social structure of the Orokaiva",
+				"publisher": "St Martins",
+				"year": 1973,
+				"type": "book"
+			},
+			"retrieved": "2026-02-16",
+			"rawBytes": 4587,
+			"nodeCount": 22,
+			"edgeCount": 78,
+			"directed": false,
+			"weighted": false,
+			"hasNodeAttributes": false,
+			"hasEdgeAttributes": false,
+			"labeled": false
+		},
+		"ucinet-thuroff": {
+			"id": "ucinet-thuroff",
+			"name": "Thurman Office",
+			"description": "Formal and informal ties among 15 employees in an overseas branch office of a large multinational corporation.",
+			"source": "ucinet",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/UciNet/thuroff.dat",
+			"citation": {
+				"authors": [
+					"B. Thurman"
+				],
+				"title": "In the office: Networks and coalitions",
+				"journal": "Social Networks",
+				"volume": 2,
+				"pages": "47-63",
+				"year": 1979,
+				"type": "article"
+			},
+			"retrieved": "2026-02-16",
+			"rawBytes": 2776,
+			"nodeCount": 15,
+			"edgeCount": 34,
+			"directed": true,
+			"weighted": false,
+			"hasNodeAttributes": false,
+			"hasEdgeAttributes": false,
+			"labeled": true
+		},
+		"ucinet-wiring": {
+			"id": "ucinet-wiring",
+			"name": "Hawthorne Bank Wiring Room",
+			"description": "Observational data on 14 Western Electric employees from the famous Hawthorne studies.",
+			"source": "ucinet",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/UciNet/wiring.dat",
+			"citation": {
+				"authors": [
+					"F. Roethlisberger",
+					"W. Dickson"
+				],
+				"title": "Management and the worker",
+				"publisher": "Cambridge University Press",
+				"year": 1939,
+				"type": "book"
+			},
+			"retrieved": "2026-02-16",
+			"rawBytes": 3503,
+			"nodeCount": 14,
+			"edgeCount": 56,
+			"directed": false,
+			"weighted": false,
+			"hasNodeAttributes": false,
+			"hasEdgeAttributes": false,
+			"labeled": true
+		},
+		"ucinet-wolf": {
+			"id": "ucinet-wolf",
+			"name": "Wolfe Primates",
+			"description": "Interactions and kin relationships among 20 monkeys observed in Ocala, Florida.",
+			"source": "ucinet",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/UciNet/wolf.dat",
+			"citation": {
+				"authors": [
+					"L. Wolfe"
+				],
+				"title": "Japanese macaques at the Arashiyama West and Silver Springs troops",
+				"year": 1984,
+				"type": "article"
+			},
+			"retrieved": "2026-02-16",
+			"rawBytes": 1680,
+			"nodeCount": 20,
+			"edgeCount": 15,
+			"directed": true,
+			"weighted": false,
+			"hasNodeAttributes": false,
+			"hasEdgeAttributes": false,
+			"labeled": false
+		},
+		"ucinet-zachary": {
+			"id": "ucinet-zachary",
+			"name": "Zachary Karate Club",
+			"description": "Social network of a university karate club. Famous for the split following disputes between members.",
+			"source": "ucinet",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/UciNet/zachary.dat",
+			"citation": {
+				"authors": [
+					"W. Zachary"
+				],
+				"title": "An information flow model for conflict and fission in small groups",
+				"journal": "Journal of Anthropological Research",
+				"volume": 33,
+				"pages": "452-473",
+				"year": 1977,
+				"type": "article"
+			},
+			"retrieved": "2026-02-16",
+			"rawBytes": 8506,
+			"nodeCount": 34,
+			"edgeCount": 156,
+			"directed": false,
+			"weighted": false,
+			"hasNodeAttributes": false,
+			"hasEdgeAttributes": false,
+			"labeled": false
+		},
+		"usair97": {
+			"id": "usair97",
+			"name": "US Airlines 1997",
+			"description": "US airline routes network from 1997. Nodes are airports, edges are flight routes.",
+			"source": "pajek",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/mix/USAir97.net",
+			"citation": {
+				"authors": [
+					"Vladimir Batagelj",
+					"Andrej Mrvar"
+				],
+				"title": "Pajek Datasets",
+				"year": 2006,
+				"type": "article"
+			},
+			"retrieved": "2026-01-17",
+			"rawBytes": 179815,
+			"nodeCount": 332,
+			"edgeCount": 2126,
+			"directed": false,
+			"weighted": true,
+			"hasNodeAttributes": true,
+			"hasEdgeAttributes": true,
+			"labeled": false,
+			"alternateUrls": [
+				{
+					"url": "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/USAir97.tar.gz",
+					"source": "suitesparse",
+					"format": "matrix-market",
+					"description": "SuiteSparse Matrix Collection (Pajek/USAir97)"
+				}
+			]
+		},
+		"web-notredame": {
+			"id": "web-notredame",
+			"name": "Notre Dame Web Graph",
+			"description": "Web graph of Notre Dame.",
+			"source": "snap",
+			"url": "https://snap.stanford.edu/data/web-NotreDame.txt.gz",
+			"citation": {
+				"authors": [
+					"R. Albert",
+					"H. Jeong",
+					"A. Barabasi"
+				],
+				"title": "Diameter of the World Wide Web",
+				"journal": "Nature",
+				"year": 1999,
+				"type": "article"
+			},
+			"retrieved": "2026-01-17",
+			"rawBytes": 88627172,
+			"nodeCount": 325729,
+			"edgeCount": 1497134,
+			"directed": true,
+			"weighted": false,
+			"hasNodeAttributes": false,
+			"hasEdgeAttributes": false,
+			"labeled": false
+		},
+		"web-stanford": {
+			"id": "web-stanford",
+			"name": "Stanford Web Graph",
+			"description": "Web graph of Stanford.edu.",
+			"source": "snap",
+			"url": "https://snap.stanford.edu/data/web-Stanford.txt.gz",
+			"citation": {
+				"authors": [
+					"J. Leskovec",
+					"K. Lang",
+					"A. Dasgupta",
+					"M. Mahoney"
+				],
+				"title": "Community Structure in Large Networks: Natural Cluster Sizes and the Absence of Large Well-Defined Clusters",
+				"journal": "Internet Mathematics",
+				"year": 2009,
+				"type": "article"
+			},
+			"retrieved": "2026-01-17",
+			"rawBytes": 130576420,
+			"nodeCount": 281903,
+			"edgeCount": 2312497,
+			"directed": true,
+			"weighted": false,
+			"hasNodeAttributes": false,
+			"hasEdgeAttributes": false,
+			"labeled": false
+		},
+		"wiki-talk": {
+			"id": "wiki-talk",
+			"name": "Wikipedia Talk Network",
+			"description": "Wikipedia talk (communication) network.",
+			"source": "snap",
+			"url": "https://snap.stanford.edu/data/wiki-Talk.txt.gz",
+			"citation": {
+				"authors": [
+					"J. Leskovec",
+					"D. Huttenlocher",
+					"J. Kleinberg"
+				],
+				"title": "Predicting Positive and Negative Links in Online Social Networks",
+				"journal": "WWW",
+				"year": 2010,
+				"type": "article"
+			},
+			"retrieved": "2026-01-17",
+			"rawBytes": 328235104,
+			"nodeCount": 2394385,
+			"edgeCount": 5021410,
+			"directed": true,
+			"weighted": false,
+			"hasNodeAttributes": false,
+			"hasEdgeAttributes": false,
+			"labeled": false
+		},
+		"wiki-vote": {
+			"id": "wiki-vote",
+			"name": "Wikipedia Vote Network",
+			"description": "Wikipedia who-votes-on-whom network for adminship elections.",
+			"source": "snap",
+			"url": "https://snap.stanford.edu/data/wiki-Vote.txt.gz",
+			"citation": {
+				"authors": [
+					"J. Leskovec",
+					"D. Huttenlocher",
+					"J. Kleinberg"
+				],
+				"title": "Predicting Positive and Negative Links in Online Social Networks",
+				"journal": "WWW",
+				"year": 2010,
+				"type": "article"
+			},
+			"retrieved": "2026-01-17",
+			"rawBytes": 5316066,
+			"nodeCount": 7115,
+			"edgeCount": 103689,
+			"directed": true,
+			"weighted": false,
+			"hasNodeAttributes": false,
+			"hasEdgeAttributes": false,
+			"labeled": false
+		},
+		"yeast": {
+			"id": "yeast",
+			"name": "Yeast Protein Interactions",
+			"description": "Protein-protein interaction network in yeast (Saccharomyces cerevisiae).",
+			"source": "pajek",
+			"url": "http://vlado.fmf.uni-lj.si/pub/networks/data/bio/Yeast/Yeast.zip",
+			"citation": {
+				"authors": [
+					"H. Jeong",
+					"S. P. Mason",
+					"A.-L. Barabási",
+					"Z. N. Oltvai"
+				],
+				"title": "Lethality and centrality in protein networks",
+				"journal": "Nature",
+				"year": 2001,
+				"type": "article"
+			},
+			"retrieved": "2026-01-17",
+			"rawBytes": 462602,
+			"nodeCount": 2361,
+			"edgeCount": 7182,
+			"directed": false,
+			"weighted": false,
+			"hasNodeAttributes": true,
+			"hasEdgeAttributes": false,
+			"labeled": false,
+			"alternateUrls": [
+				{
+					"url": "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/yeast.tar.gz",
+					"source": "suitesparse",
+					"format": "matrix-market",
+					"description": "SuiteSparse Matrix Collection (Pajek/yeast)"
+				}
+			]
+		}
+	}
+}
