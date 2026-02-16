@@ -6,9 +6,9 @@
  * to the standard JSON format used by graph-box.
  */
 
+import { execSync } from "node:child_process";
 import * as fs from "node:fs";
 import * as path from "node:path";
-import { execSync } from "node:child_process";
 
 const DATA_DIR = path.join(import.meta.dirname, "../data");
 const TEMP_DIR = "/tmp/graph-box-download";
@@ -84,8 +84,10 @@ const writeDataset = (id: string, dataset: Dataset): void => {
 
 /**
  * Parse edge list format: "source target [weight]" per line
+ * @param content
+ * @param _directed
  */
-const parseEdgeList = (content: string, directed: boolean): { nodes: Node[]; edges: Edge[] } => {
+const parseEdgeList = (content: string, _directed: boolean): { nodes: Node[]; edges: Edge[] } => {
 	const nodeSet = new Set<string>();
 	const edges: Edge[] = [];
 
@@ -97,25 +99,26 @@ const parseEdgeList = (content: string, directed: boolean): { nodes: Node[]; edg
 		if (parts.length >= 2) {
 			const source = parts[0];
 			const target = parts[1];
-			const weight = parts.length > 2 ? parseFloat(parts[2]) : undefined;
+			const weight = parts.length > 2 ? Number.parseFloat(parts[2]) : undefined;
 
 			nodeSet.add(source);
 			nodeSet.add(target);
 
 			const edge: Edge = { source, target };
-			if (weight !== undefined && !isNaN(weight)) {
+			if (weight !== undefined && !Number.isNaN(weight)) {
 				edge.weight = weight;
 			}
 			edges.push(edge);
 		}
 	}
 
-	const nodes = Array.from(nodeSet).map(id => ({ id }));
+	const nodes = [...nodeSet].map(id => ({ id }));
 	return { nodes, edges };
 };
 
 /**
  * Parse UCINET DAT format
+ * @param content
  */
 const parseUcinetDat = (content: string): { nodes: Node[]; edges: Edge[]; matrices: string[] } => {
 	const lines = content.split("\n");
@@ -126,7 +129,7 @@ const parseUcinetDat = (content: string): { nodes: Node[]; edges: Edge[]; matric
 	let inData = false;
 	let inLabels = false;
 	let currentMatrix: number[][] = [];
-	let labels: string[] = [];
+	const labels: string[] = [];
 	let n = 0;
 	let matrixName = "";
 
@@ -136,7 +139,7 @@ const parseUcinetDat = (content: string): { nodes: Node[]; edges: Edge[]; matric
 
 		if (upper.startsWith("DL")) continue;
 		if (upper.startsWith("N=")) {
-			n = parseInt(trimmed.split("=")[1], 10);
+			n = Number.parseInt(trimmed.split("=")[1], 10);
 			continue;
 		}
 		if (upper.startsWith("NR=") || upper.startsWith("NC=")) continue;
@@ -164,17 +167,17 @@ const parseUcinetDat = (content: string): { nodes: Node[]; edges: Edge[]; matric
 
 		if (inLabels && trimmed) {
 			// Labels can be quoted or unquoted
-			const labelMatch = trimmed.match(/"([^"]+)"|(\S+)/g);
+			const labelMatch = trimmed.match(/"[^"]+"|\S+/g);
 			if (labelMatch) {
 				for (const l of labelMatch) {
-					labels.push(l.replace(/"/g, ""));
+					labels.push(l.replaceAll('"', ""));
 				}
 			}
 		}
 
 		if (inData && trimmed) {
-			const values = trimmed.split(/\s+/).map(v => parseFloat(v));
-			if (values.length > 0 && !values.some(isNaN)) {
+			const values = trimmed.split(/\s+/).map(v => Number.parseFloat(v));
+			if (values.length > 0 && !values.some(Number.isNaN)) {
 				currentMatrix.push(values);
 			}
 		}
@@ -225,7 +228,7 @@ const processArenasEmail = async (): Promise<void> => {
 	// Find the edge list file
 	const files = fs.readdirSync(dir);
 	const edgeFile = files.find(f => f.endsWith(".txt") || f.endsWith(".edges") || !f.includes("."));
-	const content = fs.readFileSync(path.join(dir, edgeFile || files[0]), "utf-8");
+	const content = fs.readFileSync(path.join(dir, edgeFile || files[0]), "utf8");
 
 	const { nodes, edges } = parseEdgeList(content, true);
 
@@ -264,7 +267,7 @@ const processArenasJazz = async (): Promise<void> => {
 
 	const files = fs.readdirSync(dir);
 	const edgeFile = files.find(f => f.endsWith(".net") || f.endsWith(".txt") || f.endsWith(".edges"));
-	const content = fs.readFileSync(path.join(dir, edgeFile || files[0]), "utf-8");
+	const content = fs.readFileSync(path.join(dir, edgeFile || files[0]), "utf8");
 
 	const { nodes, edges } = parseEdgeList(content, false);
 
@@ -303,7 +306,7 @@ const processArenasPGP = async (): Promise<void> => {
 
 	const files = fs.readdirSync(dir);
 	const edgeFile = files.find(f => f.endsWith(".net") || f.endsWith(".txt") || f.endsWith(".edges"));
-	const content = fs.readFileSync(path.join(dir, edgeFile || files[0]), "utf-8");
+	const content = fs.readFileSync(path.join(dir, edgeFile || files[0]), "utf8");
 
 	const { nodes, edges } = parseEdgeList(content, false);
 
@@ -342,7 +345,7 @@ const processArenasCelegans = async (): Promise<void> => {
 
 	const files = fs.readdirSync(dir);
 	const edgeFile = files.find(f => f.endsWith(".net") || f.endsWith(".txt") || f.endsWith(".edges"));
-	const content = fs.readFileSync(path.join(dir, edgeFile || files[0]), "utf-8");
+	const content = fs.readFileSync(path.join(dir, edgeFile || files[0]), "utf8");
 
 	const { nodes, edges } = parseEdgeList(content, true);
 
@@ -380,7 +383,7 @@ const processBarabasiWWW = async (): Promise<void> => {
 		"www.dat.gz"
 	);
 	const datPath = gunzip(gzPath);
-	const content = fs.readFileSync(datPath, "utf-8");
+	const content = fs.readFileSync(datPath, "utf8");
 
 	const { nodes, edges } = parseEdgeList(content, true);
 
@@ -416,7 +419,7 @@ const processBarabasiActor = async (): Promise<void> => {
 		"actor.dat.gz"
 	);
 	const datPath = gunzip(gzPath);
-	const content = fs.readFileSync(datPath, "utf-8");
+	const content = fs.readFileSync(datPath, "utf8");
 
 	const { nodes, edges } = parseEdgeList(content, false);
 
@@ -452,7 +455,7 @@ const processBarabasiProtein = async (): Promise<void> => {
 		"protein.dat.gz"
 	);
 	const datPath = gunzip(gzPath);
-	const content = fs.readFileSync(datPath, "utf-8");
+	const content = fs.readFileSync(datPath, "utf8");
 
 	const { nodes, edges } = parseEdgeList(content, false);
 
@@ -489,7 +492,7 @@ const processUcinetZachary = async (): Promise<void> => {
 		"https://web.archive.org/web/20240908121535id_/http://vlado.fmf.uni-lj.si/pub/networks/data/UciNet/zachary.dat",
 		"zachary.dat"
 	);
-	const content = fs.readFileSync(datPath, "utf-8");
+	const content = fs.readFileSync(datPath, "utf8");
 
 	const { nodes, edges } = parseUcinetDat(content);
 
@@ -524,7 +527,7 @@ const processUcinetPadgett = async (): Promise<void> => {
 		"https://web.archive.org/web/20240908121535id_/http://vlado.fmf.uni-lj.si/pub/networks/data/UciNet/padgett.dat",
 		"padgett.dat"
 	);
-	const content = fs.readFileSync(datPath, "utf-8");
+	const content = fs.readFileSync(datPath, "utf8");
 
 	const { nodes, edges } = parseUcinetDat(content);
 
@@ -559,7 +562,7 @@ const processUcinetGama = async (): Promise<void> => {
 		"https://web.archive.org/web/20240908121535id_/http://vlado.fmf.uni-lj.si/pub/networks/data/UciNet/gama.dat",
 		"gama.dat"
 	);
-	const content = fs.readFileSync(datPath, "utf-8");
+	const content = fs.readFileSync(datPath, "utf8");
 
 	const { nodes, edges } = parseUcinetDat(content);
 
@@ -594,7 +597,7 @@ const processUcinetTaro = async (): Promise<void> => {
 		"https://web.archive.org/web/20240908121535id_/http://vlado.fmf.uni-lj.si/pub/networks/data/UciNet/taro.dat",
 		"taro.dat"
 	);
-	const content = fs.readFileSync(datPath, "utf-8");
+	const content = fs.readFileSync(datPath, "utf8");
 
 	const { nodes, edges } = parseUcinetDat(content);
 
@@ -627,7 +630,7 @@ const processUcinetPrison = async (): Promise<void> => {
 		"https://web.archive.org/web/20240908121535id_/http://vlado.fmf.uni-lj.si/pub/networks/data/UciNet/prison.dat",
 		"prison.dat"
 	);
-	const content = fs.readFileSync(datPath, "utf-8");
+	const content = fs.readFileSync(datPath, "utf8");
 
 	const { nodes, edges } = parseUcinetDat(content);
 
@@ -662,7 +665,7 @@ const processUcinetWiring = async (): Promise<void> => {
 		"https://web.archive.org/web/20240908121535id_/http://vlado.fmf.uni-lj.si/pub/networks/data/UciNet/wiring.dat",
 		"wiring.dat"
 	);
-	const content = fs.readFileSync(datPath, "utf-8");
+	const content = fs.readFileSync(datPath, "utf8");
 
 	const { nodes, edges } = parseUcinetDat(content);
 
@@ -689,6 +692,540 @@ const processUcinetWiring = async (): Promise<void> => {
 	writeDataset("ucinet-wiring", dataset);
 };
 
+// ============ NEW UCINET DATASETS ============
+
+const WB_UCINET = "20240908121535id_";
+const UCINET_BASE = `https://web.archive.org/web/${WB_UCINET}/http://vlado.fmf.uni-lj.si/pub/networks/data/UciNet`;
+const UCINET_SOURCE = "http://vlado.fmf.uni-lj.si/pub/networks/data/UciNet/UciData.htm";
+
+const processUcinetBkfrat = async (): Promise<void> => {
+	console.log("\nProcessing: ucinet-bkfrat");
+	const datPath = download(`${UCINET_BASE}/bkfrat.dat`, "bkfrat.dat");
+	const content = fs.readFileSync(datPath, "utf8");
+	const { nodes, edges } = parseUcinetDat(content);
+
+	writeDataset("ucinet-bkfrat", {
+		meta: {
+			name: "Bernard & Killworth Fraternity",
+			description: "Interaction data from 58 students in a West Virginia fraternity. Includes observed conversation frequency and recalled interaction rankings.",
+			source: UCINET_SOURCE,
+			url: "http://vlado.fmf.uni-lj.si/pub/networks/data/UciNet/bkfrat.dat",
+			citation: {
+				authors: ["H. Bernard", "P. Killworth", "L. Sailer"],
+				title: "Informant accuracy in social network data IV",
+				journal: "Social Networks",
+				volume: 2,
+				pages: "191-218",
+				year: 1980,
+				type: "article",
+			},
+			retrieved: new Date().toISOString().split("T")[0],
+			directed: false,
+		},
+		nodes,
+		edges,
+	});
+};
+
+const processUcinetBkham = async (): Promise<void> => {
+	console.log("\nProcessing: ucinet-bkham");
+	const datPath = download(`${UCINET_BASE}/bkham.dat`, "bkham.dat");
+	const content = fs.readFileSync(datPath, "utf8");
+	const { nodes, edges } = parseUcinetDat(content);
+
+	writeDataset("ucinet-bkham", {
+		meta: {
+			name: "Bernard & Killworth Ham Radio",
+			description: "HAM radio calls among 44 operators over one month, with recalled frequency rankings.",
+			source: UCINET_SOURCE,
+			url: "http://vlado.fmf.uni-lj.si/pub/networks/data/UciNet/bkham.dat",
+			citation: {
+				authors: ["B. Killworth", "H. Bernard"],
+				title: "Informant accuracy in social network data",
+				journal: "Human Organization",
+				volume: 35,
+				pages: "269-286",
+				year: 1976,
+				type: "article",
+			},
+			retrieved: new Date().toISOString().split("T")[0],
+			directed: false,
+		},
+		nodes,
+		edges,
+	});
+};
+
+const processUcinetBkoff = async (): Promise<void> => {
+	console.log("\nProcessing: ucinet-bkoff");
+	const datPath = download(`${UCINET_BASE}/bkoff.dat`, "bkoff.dat");
+	const content = fs.readFileSync(datPath, "utf8");
+	const { nodes, edges } = parseUcinetDat(content);
+
+	writeDataset("ucinet-bkoff", {
+		meta: {
+			name: "Bernard & Killworth Office",
+			description: "Interactions in a small business office among 40 employees, observed over two four-day periods.",
+			source: UCINET_SOURCE,
+			url: "http://vlado.fmf.uni-lj.si/pub/networks/data/UciNet/bkoff.dat",
+			citation: {
+				authors: ["H. Bernard", "P. Killworth", "L. Sailer"],
+				title: "Informant accuracy in social network data IV",
+				journal: "Social Networks",
+				volume: 2,
+				pages: "191-218",
+				year: 1980,
+				type: "article",
+			},
+			retrieved: new Date().toISOString().split("T")[0],
+			directed: false,
+		},
+		nodes,
+		edges,
+	});
+};
+
+const processUcinetBktec = async (): Promise<void> => {
+	console.log("\nProcessing: ucinet-bktec");
+	const datPath = download(`${UCINET_BASE}/bktec.dat`, "bktec.dat");
+	const content = fs.readFileSync(datPath, "utf8");
+	const { nodes, edges } = parseUcinetDat(content);
+
+	writeDataset("ucinet-bktec", {
+		meta: {
+			name: "Bernard & Killworth Technical",
+			description: "Interactions in a technical research group of 34 members at a West Virginia university.",
+			source: UCINET_SOURCE,
+			url: "http://vlado.fmf.uni-lj.si/pub/networks/data/UciNet/bktec.dat",
+			citation: {
+				authors: ["H. Bernard", "P. Killworth", "L. Sailer"],
+				title: "Informant accuracy in social network data IV",
+				journal: "Social Networks",
+				volume: 2,
+				pages: "191-218",
+				year: 1980,
+				type: "article",
+			},
+			retrieved: new Date().toISOString().split("T")[0],
+			directed: false,
+		},
+		nodes,
+		edges,
+	});
+};
+
+const processUcinetDavis = async (): Promise<void> => {
+	console.log("\nProcessing: ucinet-davis");
+	const datPath = download(`${UCINET_BASE}/davis.dat`, "davis.dat");
+	const content = fs.readFileSync(datPath, "utf8");
+
+	// Custom parser for rectangular bipartite matrix (NR=18 NC=14)
+	const lines = content.split("\n");
+	const rowLabels: string[] = [];
+	const colLabels: string[] = [];
+	const matrix: number[][] = [];
+	let section: "none" | "rowLabels" | "colLabels" | "data" = "none";
+
+	for (const line of lines) {
+		const trimmed = line.trim();
+		const upper = trimmed.toUpperCase();
+		if (upper.startsWith("DL") || upper.startsWith("NR=") || upper.startsWith("FORMAT")) continue;
+		if (upper === "ROW LABELS:") { section = "rowLabels"; continue; }
+		if (upper === "COLUMN LABELS:") { section = "colLabels"; continue; }
+		if (upper === "DATA:") { section = "data"; continue; }
+
+		if (section === "rowLabels" && trimmed) rowLabels.push(trimmed);
+		if (section === "colLabels" && trimmed) colLabels.push(trimmed);
+		if (section === "data" && trimmed) {
+			matrix.push(trimmed.split(/\s+/).map(v => Number.parseInt(v, 10)));
+		}
+	}
+
+	const nodes: Node[] = [
+		...rowLabels.map(id => ({ id })),
+		...colLabels.map(id => ({ id })),
+	];
+	const edges: Edge[] = [];
+	for (const [i, element] of matrix.entries()) {
+		for (const [j, element_] of element.entries()) {
+			if (element_ !== 0) {
+				edges.push({ source: rowLabels[i], target: colLabels[j] });
+			}
+		}
+	}
+
+	writeDataset("ucinet-davis", {
+		meta: {
+			name: "Davis Southern Club Women",
+			description: "Attendance at 14 social events by 18 Southern women in the 1930s. A classic bipartite (two-mode) network.",
+			source: UCINET_SOURCE,
+			url: "http://vlado.fmf.uni-lj.si/pub/networks/data/UciNet/davis.dat",
+			citation: {
+				authors: ["A. Davis", "B. Gardner", "M. Gardner"],
+				title: "Deep South",
+				publisher: "University of Chicago Press",
+				year: 1941,
+				type: "book",
+			},
+			retrieved: new Date().toISOString().split("T")[0],
+			directed: false,
+		},
+		nodes,
+		edges,
+	});
+};
+
+const processUcinetKapmine = async (): Promise<void> => {
+	console.log("\nProcessing: ucinet-kapmine");
+	const datPath = download(`${UCINET_BASE}/kapmine.dat`, "kapmine.dat");
+	const content = fs.readFileSync(datPath, "utf8");
+	const { nodes, edges } = parseUcinetDat(content);
+
+	writeDataset("ucinet-kapmine", {
+		meta: {
+			name: "Kapferer Mine",
+			description: "Multiplex and uniplex ties among 15 workers in a Zambian mining operation.",
+			source: UCINET_SOURCE,
+			url: "http://vlado.fmf.uni-lj.si/pub/networks/data/UciNet/kapmine.dat",
+			citation: {
+				authors: ["B. Kapferer"],
+				title: "Norms and the manipulation of relationships in a work context",
+				publisher: "Manchester University Press",
+				year: 1969,
+				type: "book",
+			},
+			retrieved: new Date().toISOString().split("T")[0],
+			directed: false,
+		},
+		nodes,
+		edges,
+	});
+};
+
+const processUcinetKaptail = async (): Promise<void> => {
+	console.log("\nProcessing: ucinet-kaptail");
+	const datPath = download(`${UCINET_BASE}/kaptail.dat`, "kaptail.dat");
+	const content = fs.readFileSync(datPath, "utf8");
+	const { nodes, edges } = parseUcinetDat(content);
+
+	writeDataset("ucinet-kaptail", {
+		meta: {
+			name: "Kapferer Tailor Shop",
+			description: "Instrumental and sociational interactions among 39 workers in a Zambian tailor shop, observed at two time points.",
+			source: UCINET_SOURCE,
+			url: "http://vlado.fmf.uni-lj.si/pub/networks/data/UciNet/kaptail.dat",
+			citation: {
+				authors: ["B. Kapferer"],
+				title: "Strategy and transaction in an African factory",
+				publisher: "Manchester University Press",
+				year: 1972,
+				type: "book",
+			},
+			retrieved: new Date().toISOString().split("T")[0],
+			directed: true,
+		},
+		nodes,
+		edges,
+	});
+};
+
+const processUcinetKnokbur = async (): Promise<void> => {
+	console.log("\nProcessing: ucinet-knokbur");
+	const datPath = download(`${UCINET_BASE}/knokbur.dat`, "knokbur.dat");
+	const content = fs.readFileSync(datPath, "utf8");
+
+	// Custom parser — non-standard format with multiple relation matrices.
+	// Uses the "information" relation (first matrix) as the primary network.
+	const lines = content.split("\n");
+	let labels: string[] = [];
+	const matrix: number[][] = [];
+	let inFirstMatrix = false;
+	let pastFirstLabel = false;
+
+	for (const line of lines) {
+		const trimmed = line.trim();
+		if (!trimmed) continue;
+
+		// First line is a comment
+		if (trimmed.startsWith("has to be")) continue;
+
+		// "information" signals the first relation
+		if (trimmed === "information") { inFirstMatrix = true; continue; }
+		// "money" signals the second relation — stop
+		if (trimmed === "money") break;
+
+		if (!inFirstMatrix) continue;
+
+		// Header line like "4, 10, 10, N, NB" — skip
+		if (/^\d+\s*,/.test(trimmed)) continue;
+
+		// Labels line (comma-separated)
+		if (!pastFirstLabel && trimmed.includes(",")) {
+			labels = trimmed.split(",").map(s => s.trim());
+			pastFirstLabel = true;
+			continue;
+		}
+
+		// Matrix rows (space-separated integers)
+		const values = trimmed.split(/\s+/).map(v => Number.parseInt(v, 10));
+		if (values.length > 0 && !values.some(Number.isNaN)) {
+			matrix.push(values);
+		}
+	}
+
+	const nodes: Node[] = labels.map(id => ({ id }));
+	const edges: Edge[] = [];
+	for (let i = 0; i < matrix.length && i < labels.length; i++) {
+		for (let j = 0; j < matrix[i].length && j < labels.length; j++) {
+			if (matrix[i][j] !== 0) {
+				const edge: Edge = { source: labels[i], target: labels[j] };
+				if (matrix[i][j] !== 1) edge.weight = matrix[i][j];
+				edges.push(edge);
+			}
+		}
+	}
+
+	writeDataset("ucinet-knokbur", {
+		meta: {
+			name: "Knoke Bureaucracies",
+			description: "Information exchange among 10 organizations in Indianapolis.",
+			source: UCINET_SOURCE,
+			url: "http://vlado.fmf.uni-lj.si/pub/networks/data/UciNet/knokbur.dat",
+			citation: {
+				authors: ["D. Knoke", "J. Kuklinski"],
+				title: "Network analysis",
+				publisher: "Sage",
+				year: 1982,
+				type: "book",
+			},
+			retrieved: new Date().toISOString().split("T")[0],
+			directed: true,
+		},
+		nodes,
+		edges,
+	});
+};
+
+const processUcinetKrackad = async (): Promise<void> => {
+	console.log("\nProcessing: ucinet-krackad");
+	const datPath = download(`${UCINET_BASE}/krackad.dat`, "krackad.dat");
+	const content = fs.readFileSync(datPath, "utf8");
+	const { nodes, edges } = parseUcinetDat(content);
+
+	writeDataset("ucinet-krackad", {
+		meta: {
+			name: "Krackhardt Office Advice",
+			description: "Cognitive social structure data: 21 managers' perceptions of advice-seeking relationships.",
+			source: UCINET_SOURCE,
+			url: "http://vlado.fmf.uni-lj.si/pub/networks/data/UciNet/krackad.dat",
+			citation: {
+				authors: ["D. Krackhardt"],
+				title: "Cognitive social structures",
+				journal: "Social Networks",
+				volume: 9,
+				pages: "104-134",
+				year: 1987,
+				type: "article",
+			},
+			retrieved: new Date().toISOString().split("T")[0],
+			directed: true,
+		},
+		nodes,
+		edges,
+	});
+};
+
+const processUcinetKrackfr = async (): Promise<void> => {
+	console.log("\nProcessing: ucinet-krackfr");
+	const datPath = download(`${UCINET_BASE}/krackfr.dat`, "krackfr.dat");
+	const content = fs.readFileSync(datPath, "utf8");
+	const { nodes, edges } = parseUcinetDat(content);
+
+	writeDataset("ucinet-krackfr", {
+		meta: {
+			name: "Krackhardt Office Friendship",
+			description: "Cognitive social structure data: 21 managers' perceptions of friendship relationships.",
+			source: UCINET_SOURCE,
+			url: "http://vlado.fmf.uni-lj.si/pub/networks/data/UciNet/krackfr.dat",
+			citation: {
+				authors: ["D. Krackhardt"],
+				title: "Cognitive social structures",
+				journal: "Social Networks",
+				volume: 9,
+				pages: "104-134",
+				year: 1987,
+				type: "article",
+			},
+			retrieved: new Date().toISOString().split("T")[0],
+			directed: false,
+		},
+		nodes,
+		edges,
+	});
+};
+
+const processUcinetNewfrat = async (): Promise<void> => {
+	console.log("\nProcessing: ucinet-newfrat");
+	const datPath = download(`${UCINET_BASE}/newfrat.dat`, "newfrat.dat");
+	const content = fs.readFileSync(datPath, "utf8");
+	const { nodes, edges } = parseUcinetDat(content);
+
+	writeDataset("ucinet-newfrat", {
+		meta: {
+			name: "Newcomb Fraternity",
+			description: "Weekly sociometric preference rankings from 17 men over 15 weeks in a University of Michigan fraternity.",
+			source: UCINET_SOURCE,
+			url: "http://vlado.fmf.uni-lj.si/pub/networks/data/UciNet/newfrat.dat",
+			citation: {
+				authors: ["T. Newcomb"],
+				title: "The acquaintance process",
+				publisher: "Holt, Reinhard & Winston",
+				year: 1961,
+				type: "book",
+			},
+			retrieved: new Date().toISOString().split("T")[0],
+			directed: true,
+		},
+		nodes,
+		edges,
+	});
+};
+
+const processUcinetSampson = async (): Promise<void> => {
+	console.log("\nProcessing: ucinet-sampson");
+	const datPath = download(`${UCINET_BASE}/sampson.dat`, "sampson.dat");
+	const content = fs.readFileSync(datPath, "utf8");
+	const { nodes, edges } = parseUcinetDat(content);
+
+	writeDataset("ucinet-sampson", {
+		meta: {
+			name: "Sampson Monastery",
+			description: "Social interactions among 18 monks including liking, esteem, influence, and praise, at three time points.",
+			source: UCINET_SOURCE,
+			url: "http://vlado.fmf.uni-lj.si/pub/networks/data/UciNet/sampson.dat",
+			citation: {
+				authors: ["S. Sampson"],
+				title: "Crisis in a cloister",
+				year: 1969,
+				type: "thesis",
+			},
+			retrieved: new Date().toISOString().split("T")[0],
+			directed: true,
+		},
+		nodes,
+		edges,
+	});
+};
+
+const processUcinetSzcid = async (): Promise<void> => {
+	console.log("\nProcessing: ucinet-szcid");
+	const datPath = download(`${UCINET_BASE}/szcid.dat`, "szcid.dat");
+	const content = fs.readFileSync(datPath, "utf8");
+	const { nodes, edges } = parseUcinetDat(content);
+
+	writeDataset("ucinet-szcid", {
+		meta: {
+			name: "Stokman-Ziegler Netherlands Interlocks",
+			description: "Corporate interlocks among 16 major Dutch business entities.",
+			source: UCINET_SOURCE,
+			url: "http://vlado.fmf.uni-lj.si/pub/networks/data/UciNet/szcid.dat",
+			citation: {
+				authors: ["F. Stokman", "F. Wasseur", "D. Elsas"],
+				title: "The Dutch network: Types of interlocks and network structure",
+				publisher: "Polity Press",
+				year: 1985,
+				type: "incollection",
+			},
+			retrieved: new Date().toISOString().split("T")[0],
+			directed: false,
+		},
+		nodes,
+		edges,
+	});
+};
+
+const processUcinetSzcig = async (): Promise<void> => {
+	console.log("\nProcessing: ucinet-szcig");
+	const datPath = download(`${UCINET_BASE}/szcig.dat`, "szcig.dat");
+	const content = fs.readFileSync(datPath, "utf8");
+	const { nodes, edges } = parseUcinetDat(content);
+
+	writeDataset("ucinet-szcig", {
+		meta: {
+			name: "Stokman-Ziegler German Interlocks",
+			description: "Corporate interlocks among 15 major West German business entities.",
+			source: UCINET_SOURCE,
+			url: "http://vlado.fmf.uni-lj.si/pub/networks/data/UciNet/szcig.dat",
+			citation: {
+				authors: ["R. Ziegler", "R. Bender", "H. Biehler"],
+				title: "Industry and banking in the German corporate network",
+				publisher: "Polity Press",
+				year: 1985,
+				type: "incollection",
+			},
+			retrieved: new Date().toISOString().split("T")[0],
+			directed: false,
+		},
+		nodes,
+		edges,
+	});
+};
+
+const processUcinetThuroff = async (): Promise<void> => {
+	console.log("\nProcessing: ucinet-thuroff");
+	const datPath = download(`${UCINET_BASE}/thuroff.dat`, "thuroff.dat");
+	const content = fs.readFileSync(datPath, "utf8");
+	const { nodes, edges } = parseUcinetDat(content);
+
+	writeDataset("ucinet-thuroff", {
+		meta: {
+			name: "Thurman Office",
+			description: "Formal and informal ties among 15 employees in an overseas branch office of a large multinational corporation.",
+			source: UCINET_SOURCE,
+			url: "http://vlado.fmf.uni-lj.si/pub/networks/data/UciNet/thuroff.dat",
+			citation: {
+				authors: ["B. Thurman"],
+				title: "In the office: Networks and coalitions",
+				journal: "Social Networks",
+				volume: 2,
+				pages: "47-63",
+				year: 1979,
+				type: "article",
+			},
+			retrieved: new Date().toISOString().split("T")[0],
+			directed: true,
+		},
+		nodes,
+		edges,
+	});
+};
+
+const processUcinetWolf = async (): Promise<void> => {
+	console.log("\nProcessing: ucinet-wolf");
+	const datPath = download(`${UCINET_BASE}/wolf.dat`, "wolf.dat");
+	const content = fs.readFileSync(datPath, "utf8");
+	const { nodes, edges } = parseUcinetDat(content);
+
+	writeDataset("ucinet-wolf", {
+		meta: {
+			name: "Wolfe Primates",
+			description: "Interactions and kin relationships among 20 monkeys observed in Ocala, Florida.",
+			source: UCINET_SOURCE,
+			url: "http://vlado.fmf.uni-lj.si/pub/networks/data/UciNet/wolf.dat",
+			citation: {
+				authors: ["L. Wolfe"],
+				title: "Japanese macaques at the Arashiyama West and Silver Springs troops",
+				year: 1984,
+				type: "article",
+			},
+			retrieved: new Date().toISOString().split("T")[0],
+			directed: true,
+		},
+		nodes,
+		edges,
+	});
+};
+
 // ============ MAIN ============
 
 const main = async (): Promise<void> => {
@@ -705,13 +1242,31 @@ const main = async (): Promise<void> => {
 	await processBarabasiActor();
 	await processBarabasiProtein();
 
-	// UCINet datasets
+	// UCINet datasets (existing)
 	await processUcinetZachary();
 	await processUcinetPadgett();
 	await processUcinetGama();
 	await processUcinetTaro();
 	await processUcinetPrison();
 	await processUcinetWiring();
+
+	// UCINet datasets (new)
+	await processUcinetBkfrat();
+	await processUcinetBkham();
+	await processUcinetBkoff();
+	await processUcinetBktec();
+	await processUcinetDavis();
+	await processUcinetKapmine();
+	await processUcinetKaptail();
+	await processUcinetKnokbur();
+	await processUcinetKrackad();
+	await processUcinetKrackfr();
+	await processUcinetNewfrat();
+	await processUcinetSampson();
+	await processUcinetSzcid();
+	await processUcinetSzcig();
+	await processUcinetThuroff();
+	await processUcinetWolf();
 
 	console.log("\nDone! Run 'npx tsx scripts/generate-datasets-catalog.ts' to update the catalog.");
 };

@@ -337,6 +337,14 @@ export default tseslint.config(
       },
     },
   },
+  // Scripts — download utilities that use shell commands and /tmp
+  {
+    files: ['scripts/*.ts'],
+    rules: {
+      'sonarjs/os-command': 'off',
+      'sonarjs/publicly-writable-directories': 'off',
+    },
+  },
   // Test files configuration
   {
     files: ['**/*.test.ts', '**/*.spec.ts'],
