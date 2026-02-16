@@ -1,18 +1,47 @@
 #!/usr/bin/env npx tsx
 /**
- * Download all Pajek datasets.
+ * Download all Pajek and GD4 datasets.
  *
- * Downloads and converts all configured Pajek datasets to the normalized JSON format.
+ * Downloads and converts all configured datasets to the normalised JSON format.
  * Uses Wayback Machine archives for reliability.
+ * Supports both Pajek (.net/.paj) and GD4 (.gd4) formats.
  */
 
 import * as fs from "node:fs";
 import * as path from "node:path";
 
+import { fetchGd4Dataset } from "../src/formats/gd4/fetch";
 import { fetchPajekDataset } from "../src/formats/pajek/fetch";
+import type { PajekDatasetConfig } from "./pajek-datasets";
 import { PAJEK_DATASETS } from "./pajek-datasets";
 
 const DATA_DIR = path.join(import.meta.dirname, "../data");
+
+/**
+ * Strip Wayback Machine URL wrapper to get original URL.
+ * @param url
+ */
+const stripWaybackUrl = (url: string): string =>
+	url.replace(/https:\/\/web\.archive\.org\/web\/\d+(?:id_)?\//, "");
+
+/**
+ * Build common metadata for a dataset.
+ * @param dataset
+ */
+const buildMeta = (dataset: PajekDatasetConfig) => ({
+	name: dataset.name,
+	description: dataset.description,
+	source: "http://vlado.fmf.uni-lj.si/pub/networks/data/",
+	url: stripWaybackUrl(dataset.url),
+	citation: {
+		authors: dataset.citation.authors,
+		title: dataset.citation.title,
+		journal: dataset.citation.venue,
+		year: dataset.citation.year,
+		type: "article" as const,
+	},
+	retrieved: new Date().toISOString().split("T")[0],
+});
 
 const main = async (): Promise<void> => {
 	let downloaded = 0;
@@ -30,26 +59,19 @@ const main = async (): Promise<void> => {
 			continue;
 		}
 
-		console.log(`Downloading ${dataset.id} from ${dataset.url}...`);
+		const format = dataset.format ?? "pajek";
+		console.log(`Downloading ${dataset.id} [${format}] from ${dataset.url}...`);
 
 		try {
-			const result = await fetchPajekDataset(dataset.url, {
-				meta: {
-					name: dataset.name,
-					description: dataset.description,
-					source: "http://vlado.fmf.uni-lj.si/pub/networks/data/",
-					url: dataset.url.replace(/https:\/\/web\.archive\.org\/web\/\d+\//, ""),
-					citation: {
-						authors: dataset.citation.authors,
-						title: dataset.citation.title,
-						journal: dataset.citation.venue,
-						year: dataset.citation.year,
-						type: "article",
-					},
-					retrieved: new Date().toISOString().split("T")[0],
-				},
+			let result: { graph: { nodes: unknown[]; edges: unknown[] }; archiveSize: number; contentSize: number };
+
+			result = await (format === "gd4" ? fetchGd4Dataset(dataset.url, {
+				meta: buildMeta(dataset),
+				entryName: dataset.entryName,
+			}) : fetchPajekDataset(dataset.url, {
+				meta: buildMeta(dataset),
 				directed: dataset.directed,
-			});
+			}));
 
 			fs.writeFileSync(jsonPath, JSON.stringify(result.graph, null, "\t") + "\n");
 
@@ -58,7 +80,7 @@ const main = async (): Promise<void> => {
 
 			downloaded++;
 
-			// Small delay to be nice to the server
+			// Small delay to be polite to the server
 			await new Promise(resolve => setTimeout(resolve, 1000));
 		} catch (error) {
 			console.error(`  Failed: ${error instanceof Error ? error.message : error}`);
