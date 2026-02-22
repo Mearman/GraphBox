@@ -399,6 +399,52 @@ export const THESIS_CLAIMS: EvaluationClaim[] = [
 		tags: ["efficiency"],
 	},
 
+	// Cost-Effectiveness Claims (AUSEC-based)
+	{
+		claimId: "dp-higher-ausec",
+		description: "Degree-prioritised expansion achieves higher AUSEC than Standard BFS on scale-free graphs",
+		sut: "degree-prioritised-v1.0.0",
+		baseline: "standard-bfs-v1.0.0",
+		metric: "ausec",
+		direction: "greater",
+		scope: "caseClass",
+		scopeConstraints: { caseClass: "scale-free" },
+		tags: ["cost-effectiveness", "ausec", "core"],
+	},
+	{
+		claimId: "dp-lower-hub-cost-ratio",
+		description: "Degree-prioritised expansion has lower hub cost ratio than Standard BFS (fewer API pages spent on high-degree nodes)",
+		sut: "degree-prioritised-v1.0.0",
+		baseline: "standard-bfs-v1.0.0",
+		metric: "hub-cost-ratio",
+		direction: "less",
+		scope: "caseClass",
+		scopeConstraints: { caseClass: "scale-free" },
+		tags: ["cost-effectiveness", "hub-deferral", "core"],
+	},
+	{
+		claimId: "dp-fewer-pages-to-threshold",
+		description: "Degree-prioritised expansion reaches 80% oracle salience using fewer API pages than Standard BFS",
+		sut: "degree-prioritised-v1.0.0",
+		baseline: "standard-bfs-v1.0.0",
+		metric: "pages-to-80pct-salience",
+		direction: "less",
+		scope: "caseClass",
+		scopeConstraints: { caseClass: "scale-free" },
+		tags: ["cost-effectiveness", "ausec"],
+	},
+	{
+		claimId: "spe-higher-ausec",
+		description: "Salience-prioritised expansion achieves higher AUSEC than Standard BFS on citation networks",
+		sut: "salience-prioritised-v1.0.0",
+		baseline: "standard-bfs-v1.0.0",
+		metric: "ausec",
+		direction: "greater",
+		scope: "caseClass",
+		scopeConstraints: { caseClass: "citation" },
+		tags: ["cost-effectiveness", "ausec", "core"],
+	},
+
 	// Representativeness Claims
 	{
 		claimId: "dp-better-coverage",
