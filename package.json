@@ -11,7 +11,10 @@
   "jsdelivr": "dist/index.umd.js",
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
+      "types": {
+        "import": "./dist/index.d.ts",
+        "require": "./dist/index.d.cts"
+      },
       "browser": "./dist/index.umd.js",
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
@@ -54,7 +57,7 @@
     "parse-tap": "tsx scripts/parse-tap-results.ts test-results.tap",
     "parse-tap:json": "tsx scripts/parse-tap-results.ts test-results.tap --format json --output tap-results.json",
     "parse-tap:csv": "tsx scripts/parse-tap-results.ts test-results.tap --format csv --output tap-metrics.csv",
-    "build": "vite build && BUILD_TARGET=cli vite build",
+    "build": "vite build && BUILD_TARGET=cli vite build && cp dist/index.d.ts dist/index.d.cts",
     "validate": "turbo run build",
     "prepare": "husky"
   },

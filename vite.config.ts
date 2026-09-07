@@ -17,8 +17,9 @@ export default defineConfig({
 		: [
 				dts({
 					include: ["src/**/*"],
-					exclude: ["src/cli.ts", "**/*.diagnostic.test.ts"],
+					exclude: ["src/cli.ts", "**/*.diagnostic.test.ts", "**/*.test.ts", "src/**/__tests__/**"],
 					outDir: "dist",
+					rollupTypes: true,
 				}),
 			],
 	build: isCliBuild
