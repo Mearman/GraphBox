@@ -97,8 +97,8 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Test (shard ${{ matrix.shard }}/${{ matrix.total }})
-        # Thresholds are zeroed per shard: a shard sees only a quarter of the suite, so global thresholds cannot hold shard-locally. The coverage job merges all shard reports and enforces the real thresholds once.
-        run: pnpm exec vitest run --shard=${{ matrix.shard }}/${{ matrix.total }} --reporter=blob --coverage --coverage.thresholds.lines=0 --coverage.thresholds.functions=0 --coverage.thresholds.branches=0 --coverage.thresholds.statements=0
+        # Thresholds are zeroed per shard: a shard sees only a quarter of the suite, so global thresholds cannot hold shard-locally. The coverage job merges all shard reports and enforces the real thresholds once. Blob reports go to a non-hidden directory: upload-artifact's default search does not descend into dot-directories.
+        run: pnpm exec vitest run --shard=${{ matrix.shard }}/${{ matrix.total }} --reporter=blob --outputFile.blob=blob-reports/blob-${{ matrix.shard }}-of-${{ matrix.total }}.json --coverage --coverage.thresholds.lines=0 --coverage.thresholds.functions=0 --coverage.thresholds.branches=0 --coverage.thresholds.statements=0
         env:
           CI: true
 
@@ -107,7 +107,7 @@ jobs:
         if: always()
         with:
           name: blob-report-shard-${{ matrix.shard }}
-          path: .vitest-reports/
+          path: blob-reports/
           retention-days: 7
 
   coverage:
@@ -138,11 +138,11 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           pattern: blob-report-shard-*
-          path: .vitest-reports/
+          path: blob-reports/
           merge-multiple: true
 
       - name: Merge shard reports and enforce coverage thresholds
-        run: pnpm exec vitest run --merge-reports --coverage
+        run: pnpm exec vitest run --merge-reports=blob-reports --coverage
         env:
           CI: true
 
