@@ -97,15 +97,59 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Test (shard ${{ matrix.shard }}/${{ matrix.total }})
-        run: pnpm exec vitest run --shard=${{ matrix.shard }}/${{ matrix.total }} --coverage
+        # Thresholds are zeroed per shard: a shard sees only a quarter of the suite, so global thresholds cannot hold shard-locally. The coverage job merges all shard reports and enforces the real thresholds once.
+        run: pnpm exec vitest run --shard=${{ matrix.shard }}/${{ matrix.total }} --reporter=blob --coverage --coverage.thresholds.lines=0 --coverage.thresholds.functions=0 --coverage.thresholds.branches=0 --coverage.thresholds.statements=0
         env:
           CI: true
 
-      - name: Upload coverage report (shard ${{ matrix.shard }})
+      - name: Upload blob report (shard ${{ matrix.shard }})
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: coverage-report-shard-${{ matrix.shard }}
+          name: blob-report-shard-${{ matrix.shard }}
+          path: .vitest-reports/
+          retention-days: 7
+
+  coverage:
+    name: Coverage (merged)
+    needs: test
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Download all shard blob reports
+        uses: actions/download-artifact@v4
+        with:
+          pattern: blob-report-shard-*
+          path: .vitest-reports/
+          merge-multiple: true
+
+      - name: Merge shard reports and enforce coverage thresholds
+        run: pnpm exec vitest run --merge-reports --coverage
+        env:
+          CI: true
+
+      - name: Upload merged coverage report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-report-merged
           path: |
             coverage/
             !coverage/.cache
@@ -113,14 +157,14 @@ jobs:
 
   required-checks:
     name: Required Checks
-    needs: [validate, test]
+    needs: [validate, test, coverage]
     if: always()
     runs-on: ubuntu-latest
     steps:
       - name: Check that every required job succeeded
         run: |
-          if [ "${{ needs.validate.result }}" != "success" ] || [ "${{ needs.test.result }}" != "success" ]; then
-            echo "One or more required jobs did not succeed: validate=${{ needs.validate.result }}, test=${{ needs.test.result }}"
+          if [ "${{ needs.validate.result }}" != "success" ] || [ "${{ needs.test.result }}" != "success" ] || [ "${{ needs.coverage.result }}" != "success" ]; then
+            echo "One or more required jobs did not succeed: validate=${{ needs.validate.result }}, test=${{ needs.test.result }}, coverage=${{ needs.coverage.result }}"
             exit 1
           fi
           echo "All required jobs succeeded."
