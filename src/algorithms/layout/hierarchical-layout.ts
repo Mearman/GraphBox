@@ -247,10 +247,10 @@ export const hierarchicalLayout = (
 	const visited = new Set<string>([rootNodeId]);
 	let maxDepth = 0;
 
-	while (queue.length > 0) {
-		const shifted = queue.shift();
-		if (!shifted) break;
-		const { nodeId, level } = shifted;
+	// Index-pointer dequeue instead of Array.shift(): O(1) per pop rather than O(n).
+	let queueHead = 0;
+	while (queueHead < queue.length) {
+		const { nodeId, level } = queue[queueHead++];
 		levels.set(nodeId, level);
 		maxDepth = Math.max(maxDepth, level);
 

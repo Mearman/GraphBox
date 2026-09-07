@@ -131,9 +131,10 @@ export class TruncatedComponentStrategy implements BetweenGraphStrategy {
 		const queue: string[] = [startNode];
 		visited.add(startNode);
 
-		while (queue.length > 0) {
-			const current = queue.shift();
-			if (current === undefined) continue;
+		// Index-pointer dequeue instead of Array.shift(): O(1) per pop rather than O(n).
+		let queueHead = 0;
+		while (queueHead < queue.length) {
+			const current = queue[queueHead++];
 
 			// Add this node to component
 			componentNodes.add(current);

@@ -65,6 +65,11 @@ interface FrontierState {
 	/** Queue of nodes to expand (FIFO) */
 	queue: string[];
 
+	/**
+	 * Index of the next unconsumed element in queue. Dequeue advances this pointer instead of Array.shift() (O(n)); the consumed prefix is never trimmed. Length checks below compare against this pointer, not raw queue.length.
+	 */
+	head: number;
+
 	/** Set of visited nodes */
 	visited: Set<string>;
 
@@ -127,6 +132,7 @@ export class DelayedTerminationExpansion<T> {
 			this.frontiers.push({
 				index: index,
 				queue: [seed],
+				head: 0,
 				visited: new Set([seed]),
 				parents: new Map(),
 			});
@@ -173,8 +179,7 @@ export class DelayedTerminationExpansion<T> {
 			if (activeIndex === -1) break;
 
 			const activeState = this.frontiers[activeIndex];
-			const node = activeState.queue.shift();
-			if (!node) continue;
+			const node = activeState.queue[activeState.head++];
 
 			this.stats.nodesExpanded++;
 			this.recordDegree(this.expander.getDegree(node));
@@ -253,17 +258,16 @@ export class DelayedTerminationExpansion<T> {
 	 * @internal
 	 */
 	private hasNonEmptyFrontier(): boolean {
-		return this.frontiers.some((state) => state.queue.length > 0);
+		return this.frontiers.some((state) => state.head < state.queue.length);
 	}
 
 	/**
-	 * Select the next frontier with items (round-robin).
-	 * Returns -1 if all frontiers are empty.
+	 * Select the next frontier with items (round-robin). Returns -1 if all frontiers are empty.
 	 * @internal
 	 */
 	private selectNextFrontier(): number {
 		for (let index = 0; index < this.frontiers.length; index++) {
-			if (this.frontiers[index].queue.length > 0) {
+			if (this.frontiers[index].head < this.frontiers[index].queue.length) {
 				return index;
 			}
 		}

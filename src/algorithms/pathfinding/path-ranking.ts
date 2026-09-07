@@ -240,11 +240,10 @@ const findAllShortestPaths = <N extends Node, E extends Edge>(
 		return result;
 	};
 
-	while (queue.length > 0) {
-		const current = queue.shift();
-		if (current === undefined) {
-			break;
-		}
+	// Index-pointer dequeue instead of Array.shift(): shift() is O(n), turning this BFS from O(V+E) into O(V^2) on the queue alone -- invisible on small graphs, catastrophic on real-scale ones. Same FIFO order, same results, O(1) per pop.
+	let queueHead = 0;
+	while (queueHead < queue.length) {
+		const current = queue[queueHead++];
 		const currentDistribution = distances.get(current);
 		if (currentDistribution === undefined) {
 			continue;

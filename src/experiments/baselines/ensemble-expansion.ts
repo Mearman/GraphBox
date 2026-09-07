@@ -47,6 +47,10 @@ export interface EnsembleExpansionStats {
 interface BfsFrontierState {
 	index: number;
 	queue: string[];
+	/**
+	 * Index of the next unconsumed element in queue. Dequeue advances this pointer instead of Array.shift() (O(n)); the consumed prefix is never trimmed. Length checks compare against this pointer, not raw queue.length.
+	 */
+	head: number;
 	visited: Set<string>;
 	parents: Map<string, string>;
 }
@@ -192,6 +196,7 @@ export class EnsembleExpansion<T> {
 			frontiers.push({
 				index,
 				queue: [seed],
+				head: 0,
 				visited: new Set([seed]),
 				parents: new Map(),
 			});
@@ -201,13 +206,12 @@ export class EnsembleExpansion<T> {
 			}
 		}
 
-		while (frontiers.some((f) => f.queue.length > 0)) {
+		while (frontiers.some((f) => f.head < f.queue.length)) {
 			iteration++;
 			for (const frontier of frontiers) {
-				if (frontier.queue.length === 0) continue;
+				if (frontier.head >= frontier.queue.length) continue;
 
-				const node = frontier.queue.shift();
-				if (node === undefined) continue;
+				const node = frontier.queue[frontier.head++];
 				const neighbors = await this.expander.getNeighbors(node);
 
 				for (const { targetId, relationshipType } of neighbors) {

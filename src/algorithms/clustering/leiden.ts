@@ -452,9 +452,10 @@ const refineCommunities = <N extends Node, E extends Edge>(
 		const queue: string[] = [superNodeIds[0]];
 		visited.add(superNodeIds[0]);
 
-		while (queue.length > 0) {
-			const currentSuperNodeId = queue.shift();
-			if (currentSuperNodeId === undefined) continue;
+		// Index-pointer dequeue instead of Array.shift(): O(1) per pop rather than O(n).
+		let queueHead = 0;
+		while (queueHead < queue.length) {
+			const currentSuperNodeId = queue[queueHead++];
 
 			const currentMemberNodes = superNodes.get(currentSuperNodeId);
 			if (currentMemberNodes === undefined) continue;
@@ -501,9 +502,10 @@ const refineCommunities = <N extends Node, E extends Edge>(
 			visited.add(startSuperNodeId);
 			const component: string[] = [];
 
-			while (queue.length > 0) {
-				const currentSuperNodeId = queue.shift();
-				if (currentSuperNodeId === undefined) continue;
+			// Index-pointer dequeue instead of Array.shift(): O(1) per pop rather than O(n).
+			let queueHead = 0;
+			while (queueHead < queue.length) {
+				const currentSuperNodeId = queue[queueHead++];
 
 				component.push(currentSuperNodeId);
 				const currentMemberNodes = superNodes.get(currentSuperNodeId);
@@ -884,9 +886,10 @@ const validateConnectivity = <N extends Node, E extends Edge>(
 	const queue: N[] = [startNode];
 	visited.add(startNode.id);
 
-	while (queue.length > 0) {
-		const current = queue.shift();
-		if (current === undefined) continue;
+	// Index-pointer dequeue instead of Array.shift(): O(1) per pop rather than O(n).
+	let queueHead = 0;
+	while (queueHead < queue.length) {
+		const current = queue[queueHead++];
 
 		const outgoingResult = graph.getOutgoingEdges(current.id);
 		if (outgoingResult.ok) {

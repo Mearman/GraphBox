@@ -299,9 +299,10 @@ export class HeterogeneityAwareExpansion<T> {
 		const queue: number[] = [0];
 		visited.add(0);
 
-		while (queue.length > 0) {
-			const current = queue.shift();
-			if (current === undefined) continue;
+		// Index-pointer dequeue instead of Array.shift(): O(1) per pop rather than O(n).
+		let queueHead = 0;
+		while (queueHead < queue.length) {
+			const current = queue[queueHead++];
 
 			for (const neighbor of adj.get(current) ?? []) {
 				if (!visited.has(neighbor)) {
