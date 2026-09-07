@@ -119,5 +119,11 @@
   "dependencies": {
     "fflate": "^0.8.2",
     "ppef": "1.2.0"
+  },
+  "pnpm": {
+    "overrides": {
+      "brace-expansion@^1.1.7": "^1.1.18",
+      "brace-expansion@^2.0.1": "^2.1.4"
+    }
   }
 }
