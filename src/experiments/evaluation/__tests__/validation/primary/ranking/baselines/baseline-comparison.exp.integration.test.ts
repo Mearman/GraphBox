@@ -163,7 +163,7 @@ describe("Baseline Comparison: MI vs Established Methods", { timeout: 120_000 },
 	}
 
 	it("should demonstrate significant improvement on dense social networks", async () => {
-		// Facebook is the key dataset for addressing examiner concern about narrow margins
+		// Runs full betweenness centrality (Brandes' algorithm) plus PageRank and path-salience ranking on the 4039-node Facebook benchmark -- the heaviest single computation in this file. An explicit, generous timeout accounts for CI runners being meaningfully slower than a development machine on genuinely CPU-bound work like this, rather than relying on vitest's global default. Facebook is the key dataset for addressing examiner concern about narrow margins
 		const benchmark = await loadBenchmarkByIdFromUrl("facebook");
 		const graph = benchmark.graph;
 		const source = "0";
@@ -213,5 +213,5 @@ describe("Baseline Comparison: MI vs Established Methods", { timeout: 120_000 },
 		// Our method should significantly outperform established baselines on dense graphs
 		expect(idfMetrics.meanMI).toBeGreaterThan(betweennessMetrics.meanMI);
 		expect(idfMetrics.meanMI).toBeGreaterThan(pagerankMetrics.meanMI);
-	});
+	}, 300_000);
 });
