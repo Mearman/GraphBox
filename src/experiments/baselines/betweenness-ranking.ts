@@ -66,7 +66,12 @@ export const computeBetweennessCentrality = <N extends Node, E extends Edge>(
 		}
 	}
 
+	// Brandes' outer loop calls this once per (source, visited-node) pair -- O(V^2) calls on a connected graph -- but the graph itself never changes during the computation, so the same current always returns the same result. Memoising here turns O(V^2) fresh Set/array allocations into O(V): each node's neighbour list is built exactly once and reused across every source's BFS. Bit-identical output, same construction logic, just computed once instead of up to V times.
+	const neighbourCache = new Map<string, Array<{ neighbour: string; edge: E }>>();
 	const getTraversableNeighbours = (current: string): Array<{ neighbour: string; edge: E }> => {
+		const cached = neighbourCache.get(current);
+		if (cached !== undefined) return cached;
+
 		const result: Array<{ neighbour: string; edge: E }> = [];
 		const seenEdges = new Set<string>();
 
@@ -90,6 +95,7 @@ export const computeBetweennessCentrality = <N extends Node, E extends Edge>(
 			}
 		}
 
+		neighbourCache.set(current, result);
 		return result;
 	};
 
@@ -114,10 +120,10 @@ export const computeBetweennessCentrality = <N extends Node, E extends Edge>(
 
 		const queue: string[] = [sourceId];
 
-		// BFS to find shortest paths
-		while (queue.length > 0) {
-			const current = queue.shift();
-			if (current === undefined) break;
+		// BFS to find shortest paths. Index-pointer dequeue instead of Array.shift(): shift() is O(n) (re-indexes the remaining array), so a plain FIFO queue built on it turns this per-source BFS from O(V) into O(V^2), and Brandes' outer loop runs it once per source, compounding to O(V^3) overall instead of the intended O(VE) -- invisible on small graphs, catastrophic past a few thousand nodes.
+		let queueHead = 0;
+		while (queueHead < queue.length) {
+			const current = queue[queueHead++];
 			stack.push(current);
 
 			const currentDistance = distance.get(current) ?? 0;
@@ -253,9 +259,9 @@ const findAllShortestPaths = <N extends Node, E extends Edge>(
 		return result;
 	};
 
-	while (queue.length > 0) {
-		const current = queue.shift();
-		if (current === undefined) break;
+	let queueHead = 0;
+	while (queueHead < queue.length) {
+		const current = queue[queueHead++];
 
 		const currentDistance = distances.get(current) ?? 0;
 		if (currentDistance >= targetDistance) continue;
