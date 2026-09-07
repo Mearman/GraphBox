@@ -1,3 +1,21 @@
+## [1.4.1](https://github.com/Mearman/GraphBox/compare/v1.4.0...v1.4.1) (2026-09-07)
+
+### Bug Fixes
+
+* **deps:** resolve brace-expansion security advisories via pnpm overrides ([1ddfa06](https://github.com/Mearman/GraphBox/commit/1ddfa060730a0a01f8fa0e9a108e895b46a6b0b8))
+* **loaders:** retry transient dataset download failures with a bounded timeout ([cfd5f26](https://github.com/Mearman/GraphBox/commit/cfd5f26ab179e963f2e0005f6a4fa942248e5894))
+
+### CI/CD
+
+* keep the default reporter on test shards alongside blob ([f7eca21](https://github.com/Mearman/GraphBox/commit/f7eca2130b9ed3f88721f056e92ffa8befcecf62))
+
+### Chores
+
+* **deps-dev:** bump turbo from 2.7.5 to 2.9.14 ([853fa04](https://github.com/Mearman/GraphBox/commit/853fa04ab4787b7515a0f9925dc82b8e6efcc0b3))
+* **deps-dev:** bump vite from 7.3.1 to 7.3.5 ([a25b54a](https://github.com/Mearman/GraphBox/commit/a25b54ac1de54a81c3b76094ca070faea0e61ff0))
+* **deps-dev:** bump vitest from 4.0.17 to 4.1.0 ([397d6d6](https://github.com/Mearman/GraphBox/commit/397d6d607e188d89f0d7501d97f4f58391f2634e))
+* **deps:** bump fflate from 0.8.2 to 0.8.3 ([b7e51ca](https://github.com/Mearman/GraphBox/commit/b7e51caa92fadbe981ebd0f3201b7f7baf6ebf53))
+
 ## [1.4.0](https://github.com/Mearman/GraphBox/compare/v1.3.0...v1.4.0) (2026-09-07)
 
 ### Features
