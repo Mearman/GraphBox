@@ -165,7 +165,7 @@ describe("fetchPajekDataset", () => {
 
 		await expect(
 			fetchPajekDataset("http://example.com/archive.zip", options)
-		).rejects.toThrow("No .net file found in ZIP archive");
+		).rejects.toThrow("No .net or .paj file found in ZIP archive");
 	});
 
 	it("should skip __MACOSX files when finding .net file in zip", async () => {
