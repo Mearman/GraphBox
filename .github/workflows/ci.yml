@@ -18,7 +18,56 @@ jobs:
   validate:
     name: Validate
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Build
+        run: pnpm build
+
+      - name: Verify build
+        run: |
+          test -d dist
+          test -f dist/index.js
+
+      - name: Verify published types resolve for both module systems
+        run: pnpm dlx @arethetypeswrong/cli --pack .
+
+      - name: Verify the package.json exports map matches what's on disk
+        run: pnpm dlx publint
+
+  test:
+    name: Test (shard ${{ matrix.shard }}/${{ matrix.total }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4]
+        total: [4]
     permissions:
       contents: read
     steps:
@@ -47,44 +96,38 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Typecheck
-        run: pnpm typecheck
-
-      - name: Lint
-        run: pnpm lint
-
-      - name: Test
-        run: pnpm test
+      - name: Test (shard ${{ matrix.shard }}/${{ matrix.total }})
+        run: pnpm exec vitest run --shard=${{ matrix.shard }}/${{ matrix.total }} --coverage
         env:
           CI: true
 
-      - name: Upload coverage reports
+      - name: Upload coverage report (shard ${{ matrix.shard }})
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: coverage-report
+          name: coverage-report-shard-${{ matrix.shard }}
           path: |
             coverage/
             !coverage/.cache
           retention-days: 30
 
-      - name: Build
-        run: pnpm build
-
-      - name: Verify build
+  required-checks:
+    name: Required Checks
+    needs: [validate, test]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check that every required job succeeded
         run: |
-          test -d dist
-          test -f dist/index.js
-
-      - name: Verify published types resolve for both module systems
-        run: pnpm dlx @arethetypeswrong/cli --pack .
-
-      - name: Verify the package.json exports map matches what's on disk
-        run: pnpm dlx publint
+          if [ "${{ needs.validate.result }}" != "success" ] || [ "${{ needs.test.result }}" != "success" ]; then
+            echo "One or more required jobs did not succeed: validate=${{ needs.validate.result }}, test=${{ needs.test.result }}"
+            exit 1
+          fi
+          echo "All required jobs succeeded."
 
   release:
     name: Release
-    needs: validate
+    needs: required-checks
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 10
