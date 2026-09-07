@@ -1,3 +1,91 @@
+## [1.4.0](https://github.com/Mearman/GraphBox/compare/v1.3.0...v1.4.0) (2026-09-07)
+
+### Features
+
+* **algorithms:** add early-stopping and hub tracking to expansion algorithms ([33eb0f1](https://github.com/Mearman/GraphBox/commit/33eb0f14db41ab45ce548f54f350668af1ac55d6))
+* **catalog:** add json schema for catalog validation ([6837ba3](https://github.com/Mearman/GraphBox/commit/6837ba361ac1ee0f2650091f1b5db0bd9b914551))
+* **catalog:** add suitesparse graph datasets with multi-format downloads ([742ea98](https://github.com/Mearman/GraphBox/commit/742ea98c7fcca3cbe607f21dc6641ca716dc9142))
+* **claims:** add baseline comparison claims ([204f91c](https://github.com/Mearman/GraphBox/commit/204f91c942528cbeec93214df9893079d4bf0710))
+* **claims:** add budget-constrained coverage and jsd claims ([de7d74d](https://github.com/Mearman/GraphBox/commit/de7d74d1d892dbed9aa5243fd1663128143ba8d0))
+* **claims:** add mi variant comparison claims ([0aec554](https://github.com/Mearman/GraphBox/commit/0aec5544cc200a61b7c9deeb9ce680490a7cd52e))
+* **domain:** add cost-effectiveness claims (ausec-based) ([a000079](https://github.com/Mearman/GraphBox/commit/a000079e47109972f21045e6239b8191bde3ea29))
+* **experiments:** add benchmark datasets for mi variant comparison ([ebf683a](https://github.com/Mearman/GraphBox/commit/ebf683aca395f9c265ef06576553562f2c31d1fd))
+* **experiments:** add budget-constrained salience coverage evaluation ([a483025](https://github.com/Mearman/GraphBox/commit/a483025115ba498c4deb88ec63d91d0820edc6ad))
+* **experiments:** add comprehensive baseline comparison experiment ([2a7c690](https://github.com/Mearman/GraphBox/commit/2a7c69057ee74f51dae14051e6587bc224ba05a8))
+* **experiments:** add estimated idf-weighted sut and comparison ([94554ec](https://github.com/Mearman/GraphBox/commit/94554ec574de83f20c62c272498f4b660859f47a))
+* **experiments:** add graph category to baseline comparison metrics ([dc73d63](https://github.com/Mearman/GraphBox/commit/dc73d634fb8f3bb311e6720f556d38d7ff23c249))
+* **experiments:** add hub encounter order tracking experiments ([aad237f](https://github.com/Mearman/GraphBox/commit/aad237fd34966d20e923d8b80fadd53ce98c07bb))
+* **experiments:** add jsd to structural representativeness metrics ([520ca5e](https://github.com/Mearman/GraphBox/commit/520ca5ec0a55c8804a3bc7edbe32c3c8a4a48dfd))
+* **experiments:** add mi variant comparison experiment ([5c52801](https://github.com/Mearman/GraphBox/commit/5c528011bb1f20dfeefb4c5c8d12173f15d0fbfc))
+* **experiments:** add ranking order comparison with kendall's tau-b ([34fabbc](https://github.com/Mearman/GraphBox/commit/34fabbcab644d9b487e2a933423d5094ff131c54))
+* **experiments:** add snap datasets to mi variant comparison ([99c8e60](https://github.com/Mearman/GraphBox/commit/99c8e60810500668ca1540836382f254c276137b))
+* **experiments:** expand cross-dataset experiments with per-method online paths ([712a4d2](https://github.com/Mearman/GraphBox/commit/712a4d23e2864612d65178d1dbd3cd61b25f3da1))
+* **experiments:** extend all expansion experiments to test all 14 algorithms ([38900b1](https://github.com/Mearman/GraphBox/commit/38900b165d706ecd5aeef6af83bbaa7df06f9d72))
+* **experiments:** extend hub and runtime experiments to all 9 benchmark datasets ([3102c35](https://github.com/Mearman/GraphBox/commit/3102c3527239993517de31cd9da583ac20dc6c28))
+* **experiments:** extend salience coverage to all 9 benchmark datasets ([17003ae](https://github.com/Mearman/GraphBox/commit/17003aef0e6d4b1d91457a7cfe5a3a1e8346c544))
+* **export:** add csv export for salience-coverage-budget category ([6d367e9](https://github.com/Mearman/GraphBox/commit/6d367e940789c77ce9dac51a5e7e3ecc4e62aacc))
+* **formats:** add graph drawing 2004 (.gd4) format parser ([4cdbb06](https://github.com/Mearman/GraphBox/commit/4cdbb065135555ea83ecf5d80ef4365db89b506d))
+* **formats:** add matrix market (.mtx) format parser ([eb65626](https://github.com/Mearman/GraphBox/commit/eb65626edddd610b05b8934cd17f39cc632bbdb2))
+* **metrics:** add baseline comparison metric type ([fa6ee95](https://github.com/Mearman/GraphBox/commit/fa6ee9594dc5833e4311c25a785cc8549da00a69))
+* **metrics:** add degree distribution jensen-shannon divergence metric ([5357d13](https://github.com/Mearman/GraphBox/commit/5357d137e0c32a6d778f6a348ee694147acd956c))
+* **metrics:** add kendall's tau-b and path-level scoring utilities ([2160fbd](https://github.com/Mearman/GraphBox/commit/2160fbd5217c3a7d7edc7c569a81c6acb5cde030))
+* **metrics:** add mi variant comparison metric type ([400aaa3](https://github.com/Mearman/GraphBox/commit/400aaa36c6c395a83312f9d658b7047551505121))
+* **metrics:** add salience-coverage-budget metric type and category ([ec744e3](https://github.com/Mearman/GraphBox/commit/ec744e3d1632c7311a75084bcc503c43f7fcb3d4))
+* **mi:** add alternative mi computation methods ([155d9f3](https://github.com/Mearman/GraphBox/commit/155d9f36008c14e42a72c822af4bd6df2bade6ae))
+* **mi:** add estimated total nodes config for streaming contexts ([2535a25](https://github.com/Mearman/GraphBox/commit/2535a253242ca6c06234bb55ad507279bb6157a0))
+* **registry:** register established baseline ranking suts ([c885c4d](https://github.com/Mearman/GraphBox/commit/c885c4d434c82ebbaf6ceb31a3fb56cd051be57c))
+* **registry:** register four mi variant suts ([744a84e](https://github.com/Mearman/GraphBox/commit/744a84ef6f418ab86eacae94c14d720d561b4a82))
+* **scripts:** add 16 ucinet dataset downloaders ([25f5547](https://github.com/Mearman/GraphBox/commit/25f55478bfe72791a6f2295dd661983dcbaec5da))
+* **scripts:** add mi variant comparison runner ([c905147](https://github.com/Mearman/GraphBox/commit/c9051475f91f4b065c67a7d22872c8cc1f401c97))
+* **scripts:** add multi-url support to catalog generator ([900ccc3](https://github.com/Mearman/GraphBox/commit/900ccc3684f5819b655bdd264d4d29caa74e995f))
+* **scripts:** add suitesparse pajek dataset downloader ([2d24e93](https://github.com/Mearman/GraphBox/commit/2d24e939e715ff0b8766555492f4e32fd64c57f6))
+* **scripts:** expand pajek dataset collection with alternate urls ([7d36a3d](https://github.com/Mearman/GraphBox/commit/7d36a3d707404347c0fe36dbd11837da81e4c6fa))
+* **suts:** add betweenness centrality ranking sut ([7e9b753](https://github.com/Mearman/GraphBox/commit/7e9b753c6770def40bf9ab3a6e7e1ceb852125a3))
+* **suts:** add four mi ranking variant suts ([5870e09](https://github.com/Mearman/GraphBox/commit/5870e09d6cfeabe0751e48743fc9e12628ab2892))
+
+### Bug Fixes
+
+* **algorithms:** dequeue via index pointer, not array.shift() ([e2292fc](https://github.com/Mearman/GraphBox/commit/e2292fceb8bb3594aadb3ac9fb12a10c5ddeca4d))
+* **baselines:** resolve betweenness ranking's hours-long hang on real graphs ([4e8d087](https://github.com/Mearman/GraphBox/commit/4e8d087b47d27c21644ec6f34ebb3b6d4d501cd6))
+* **build:** resolve require() to genuine commonjs type declarations ([180346b](https://github.com/Mearman/GraphBox/commit/180346b50304b28cf95cb420cff9bde2882eb1a6))
+* **coverage:** exclude cli/registry/config infrastructure never meant to be unit-tested ([c884720](https://github.com/Mearman/GraphBox/commit/c884720842b0c35d2d66c71977877b13b9e99082))
+* **experiments:** preserve mi precision and improve summary formatting ([58a42ad](https://github.com/Mearman/GraphBox/commit/58a42ad17cc8112496ee26713d27193cb0e20e8c))
+* **experiments:** use true early-stopping in budget-constrained experiments ([99ff534](https://github.com/Mearman/GraphBox/commit/99ff5340c842f3493cd44c0a178a10890faf9af2))
+* **formats:** improve pajek parser robustness ([44a1ffa](https://github.com/Mearman/GraphBox/commit/44a1ffa7f010cabab957b93e4124b3a3b0f5f239))
+* **husky:** narrow the pre-push gate to what currently terminates ([cc98539](https://github.com/Mearman/GraphBox/commit/cc985397adfdef7d39779bae8bfca442d605c46b))
+* **pajek:** match the test to the current no-.net-or-.paj error message ([bc5f965](https://github.com/Mearman/GraphBox/commit/bc5f96502ef95f2e2375a828cac0589b1fcb8dbb))
+* **tests:** give the facebook betweenness/pagerank test explicit headroom ([06d0c79](https://github.com/Mearman/GraphBox/commit/06d0c7978ab9084b4e589b613d83df75b25b313f))
+* **tests:** use a genuinely disconnected graph for the no-path test case ([2bdbaa6](https://github.com/Mearman/GraphBox/commit/2bdbaa6ea76d58fefdc442aca98370f0f7b0db20))
+* **tests:** widen the facebook path-salience benchmark's timeouts to 300s ([cf77597](https://github.com/Mearman/GraphBox/commit/cf775974ae579de180e1093c3d7a2ed245bba0b0))
+
+### Code Refactoring
+
+* **catalog:** restructure schema with hierarchical sources and downloads ([7758575](https://github.com/Mearman/GraphBox/commit/7758575ae0ae9513e1914500d9910eb824ffba03))
+* **experiments:** rename baseline-comparison to ranking-method-comparison ([461fade](https://github.com/Mearman/GraphBox/commit/461fade2acd5892aa2499ac8d4a514c9ea83c97c))
+* **export:** remove latex escaping and split csvs by graph category ([212d119](https://github.com/Mearman/GraphBox/commit/212d11911f860394456b20ec73209b79ccc0a599))
+* **graphbox:** update csv export path to src/data/ ([a8259cd](https://github.com/Mearman/GraphBox/commit/a8259cd1ef2faed511662b9423db898d872021a7))
+
+### Tests
+
+* **formats:** add unit tests for gd4 parser ([c655bae](https://github.com/Mearman/GraphBox/commit/c655bae59f8af031d3a7fe7ec74bf89482f12784))
+* **mi-variants:** add integration tests for mi variant comparison ([951e12d](https://github.com/Mearman/GraphBox/commit/951e12d85d780d05db0b7bca304e6e4027b875fa))
+* **ranking:** add integration tests for established baseline suts ([61613d2](https://github.com/Mearman/GraphBox/commit/61613d24f93b77ed382e7b11431689722b9f591a))
+
+### CI/CD
+
+* bound job runtime so a hang fails fast instead of burning hours ([b545e73](https://github.com/Mearman/GraphBox/commit/b545e732c08a5cf8f719068c8bffe4eea988f015))
+* enforce coverage thresholds on merged shard reports, not per shard ([e44a16f](https://github.com/Mearman/GraphBox/commit/e44a16f7ec418a8d9d1ac9b7f9487d2b9a3daf12))
+* grant the coverage job actions read to list shard artifacts ([e7fe690](https://github.com/Mearman/GraphBox/commit/e7fe690759f84374dd537309827e623b7c43f48e))
+* shard the test suite across 4 parallel jobs behind a required-checks junction ([b924aeb](https://github.com/Mearman/GraphBox/commit/b924aeb851eb48d587739dc4dd7525ad5d26591a))
+* verify dual-format type resolution and exports map on every build ([80caca6](https://github.com/Mearman/GraphBox/commit/80caca6fac337998aaa5fd1fefef9ae7dfefb6ab))
+* write shard blob reports to a non-hidden directory ([58a79f6](https://github.com/Mearman/GraphBox/commit/58a79f6e123176564ab4da2de927d6ce4aced78f))
+
+### Chores
+
+* **catalog:** check catalog.json into git as canonical source ([98dc8bc](https://github.com/Mearman/GraphBox/commit/98dc8bce66c3b587ef5b21652d4c0448e1b938c3))
+* **husky:** gate pushes on the full validate chain, re-lint after rewrites ([64cc066](https://github.com/Mearman/GraphBox/commit/64cc066783bfbe2970a5542ec460f92079e05426))
+* **scripts:** remove retired catalog generator ([22f2385](https://github.com/Mearman/GraphBox/commit/22f238555b0c67e4b28d42d2a0227dd0943ea68b))
+
 ## [1.3.0](https://github.com/Mearman/GraphBox/compare/v1.2.2...v1.3.0) (2026-01-30)
 
 ### Features
