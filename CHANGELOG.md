@@ -1,3 +1,9 @@
+## [1.4.2](https://github.com/Mearman/GraphBox/compare/v1.4.1...v1.4.2) (2026-09-07)
+
+### Bug Fixes
+
+* **deps:** pin @humanfs/node to the patched 0.16.8 via an override ([8d0875d](https://github.com/Mearman/GraphBox/commit/8d0875d1f87f4fbc683c2a372345e4e2f8aa79ac))
+
 ## [1.4.1](https://github.com/Mearman/GraphBox/compare/v1.4.0...v1.4.1) (2026-09-07)
 
 ### Bug Fixes
