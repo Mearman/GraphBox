@@ -4,7 +4,7 @@
 
 import { gzipSync } from "node:zlib";
 
-import { describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
 	clearCache,
@@ -118,9 +118,66 @@ describe("Decompression Utilities", () => {
 		it("should export the function", () => {
 			expect(typeof fetchWithAutoDecompress).toBe("function");
 		});
+	});
 
-		// Network tests would require mocking fetch or using a test server
-		// These are integration tests that verify the function exists and has the right signature
+	describe("fetch retry behaviour", () => {
+		// These tests wait through the real retry backoffs (2s then 4s), so they carry explicit timeouts with headroom above the worst case (6s of backoff).
+		const textResponse = (body: string): Response =>
+			new Response(body, { status: 200, headers: { "content-type": "text/plain" } });
+
+		beforeEach(async () => {
+			await clearCache();
+		});
+
+		afterEach(() => {
+			vi.unstubAllGlobals();
+		});
+
+		it("should retry and succeed after a transient 5xx response", async () => {
+			const fetchMock = vi
+				.fn()
+				.mockResolvedValueOnce(new Response("unavailable", { status: 503 }))
+				.mockResolvedValueOnce(textResponse("recovered"));
+			vi.stubGlobal("fetch", fetchMock);
+
+			const result = await fetchWithAutoDecompress("https://example.com/retry-5xx.txt");
+
+			expect(result).toBe("recovered");
+			expect(fetchMock).toHaveBeenCalledTimes(2);
+		}, 15_000);
+
+		it("should retry and succeed after a network-level failure", async () => {
+			const fetchMock = vi
+				.fn()
+				.mockRejectedValueOnce(new TypeError("fetch failed"))
+				.mockResolvedValueOnce(textResponse("recovered"));
+			vi.stubGlobal("fetch", fetchMock);
+
+			const result = await fetchWithAutoDecompress("https://example.com/retry-network.txt");
+
+			expect(result).toBe("recovered");
+			expect(fetchMock).toHaveBeenCalledTimes(2);
+		}, 15_000);
+
+		it("should not retry a 4xx client error", async () => {
+			const fetchMock = vi.fn().mockResolvedValue(new Response("not found", { status: 404 }));
+			vi.stubGlobal("fetch", fetchMock);
+
+			await expect(fetchWithAutoDecompress("https://example.com/missing.txt"))
+				.rejects.toThrow(/404/);
+
+			expect(fetchMock).toHaveBeenCalledTimes(1);
+		}, 15_000);
+
+		it("should fail after exhausting all attempts", async () => {
+			const fetchMock = vi.fn().mockResolvedValue(new Response("down", { status: 503 }));
+			vi.stubGlobal("fetch", fetchMock);
+
+			await expect(fetchWithAutoDecompress("https://example.com/always-down.txt"))
+				.rejects.toThrow(/3 attempts/);
+
+			expect(fetchMock).toHaveBeenCalledTimes(3);
+		}, 15_000);
 	});
 
 	describe("isZipUrl", () => {
