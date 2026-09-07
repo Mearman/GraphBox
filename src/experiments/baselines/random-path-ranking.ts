@@ -131,9 +131,10 @@ const findAllShortestPaths = <N extends Node, E extends Edge>(
 		return result;
 	};
 
-	while (queue.length > 0) {
-		const current = queue.shift();
-		if (current === undefined) break;
+	// Index-pointer dequeue instead of Array.shift(): O(1) per pop rather than O(n).
+	let queueHead = 0;
+	while (queueHead < queue.length) {
+		const current = queue[queueHead++];
 
 		const currentDistance = distances.get(current) ?? 0;
 		if (currentDistance >= targetDistance) continue;

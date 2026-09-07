@@ -165,9 +165,10 @@ export const extractReachabilitySubgraph = <N extends Node, E extends Edge>(grap
 
 	reachableNodes.add(sourceId);
 
-	while (queue.length > 0) {
-		const current = queue.shift();
-		if (!current) break;
+	// Index-pointer dequeue instead of Array.shift(): O(1) per pop rather than O(n).
+	let queueHead = 0;
+	while (queueHead < queue.length) {
+		const current = queue[queueHead++];
 
 		// Check depth limit
 		if (maxDepth !== undefined && current.depth >= maxDepth) {

@@ -208,11 +208,10 @@ const discoverNodesWithinRadius = <N extends NodeBase, E extends EdgeBase>(
 
 	distances.set(startId, 0);
 
-	while (queue.length > 0) {
-		const current = queue.shift();
-		if (!current) break;
-
-		const { nodeId, distance } = current;
+	// Index-pointer dequeue instead of Array.shift(): O(1) per pop rather than O(n).
+	let queueHead = 0;
+	while (queueHead < queue.length) {
+		const { nodeId, distance } = queue[queueHead++];
 
 		// Stop expanding if we've reached the radius limit
 		if (distance >= maxRadius) {

@@ -63,6 +63,11 @@ interface FrontierState {
 	/** Queue of nodes to expand (FIFO within frontier) */
 	queue: string[];
 
+	/**
+	 * Index of the next unconsumed element in queue. Dequeue advances this pointer instead of Array.shift() (O(n)); the consumed prefix is never trimmed. queue.length - head is the frontier's true remaining size -- selectSmallestFrontier's balancing decision depends on that, not on raw queue.length (which would report the cumulative ever-pushed count).
+	 */
+	head: number;
+
 	/** Set of visited nodes */
 	visited: Set<string>;
 
@@ -125,6 +130,7 @@ export class FrontierBalancedExpansion<T> {
 			this.frontiers.push({
 				index: index,
 				queue: [seed],
+				head: 0,
 				visited: new Set([seed]),
 				parents: new Map(),
 			});
@@ -169,8 +175,7 @@ export class FrontierBalancedExpansion<T> {
 			}
 
 			const activeState = this.frontiers[activeIndex];
-			const node = activeState.queue.shift();
-			if (!node) continue;
+			const node = activeState.queue[activeState.head++];
 
 			this.stats.nodesExpanded++;
 			if (this.maxNodes !== undefined && this.stats.nodesExpanded >= this.maxNodes) break;
@@ -260,13 +265,11 @@ export class FrontierBalancedExpansion<T> {
 	 * @internal
 	 */
 	private hasNonEmptyFrontier(): boolean {
-		return this.frontiers.some((state) => state.queue.length > 0);
+		return this.frontiers.some((state) => state.head < state.queue.length);
 	}
 
 	/**
-	 * Select the frontier with the smallest queue size.
-	 * This is the key Cerf et al. optimisation for fast path finding.
-	 * Returns -1 if all frontiers are empty.
+	 * Select the frontier with the smallest queue size. This is the key Cerf et al. optimisation for fast path finding. Returns -1 if all frontiers are empty.
 	 * @internal
 	 */
 	private selectSmallestFrontier(): number {
@@ -274,7 +277,8 @@ export class FrontierBalancedExpansion<T> {
 		let minIndex = -1;
 
 		for (let index = 0; index < this.frontiers.length; index++) {
-			const size = this.frontiers[index].queue.length;
+			const frontier = this.frontiers[index];
+			const size = frontier.queue.length - frontier.head;
 			if (size > 0 && size < minSize) {
 				minSize = size;
 				minIndex = index;

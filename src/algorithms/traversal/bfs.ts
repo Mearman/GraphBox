@@ -110,10 +110,11 @@ export const bfs = <N extends NodeBase, E extends EdgeBase>(
 	visited.add(startId);
 	parents.set(startId, null); // Root has no parent
 
-	while (queue.length > 0) {
+	// Index-pointer dequeue instead of Array.shift(): shift() is O(n), so a plain FIFO queue built on it turns BFS from O(V+E) into O(V^2) on the queue alone.
+	let queueHead = 0;
+	while (queueHead < queue.length) {
 		// Dequeue from front (FIFO)
-		const currentId = queue.shift();
-		if (currentId === undefined) break;
+		const currentId = queue[queueHead++];
 
 		// Add current node to visit order
 		const currentNode = graph.getNode(currentId);
