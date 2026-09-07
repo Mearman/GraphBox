@@ -131,19 +131,64 @@ const writeCache = async (cachePath: string, data: Uint8Array): Promise<void> =>
 // ============================================================================
 
 /**
+ * Total attempts for a single dataset download: the initial request plus two retries. Dataset hosts (SNAP, UCSC, umich) occasionally reset connections or return transient 5xx responses, which otherwise fails every integration test sharing the fixture at once.
+ */
+const FETCH_ATTEMPTS = 3;
+
+/**
+ * Per-request timeout. The largest bundled dataset (com-dblp) is ~50 MB compressed, so this leaves headroom for slow CI runners while preventing an indefinitely hung download from eating the CI job's runtime budget.
+ */
+const FETCH_TIMEOUT_MS = 120_000;
+
+/** Backoff before the first retry; doubles on each subsequent retry. */
+const FETCH_RETRY_DELAY_MS = 2000;
+
+/**
+ * A fetch failure that is deterministic on the server side (HTTP 4xx) — retrying cannot help, so it propagates immediately rather than burning the remaining attempts.
+ */
+class ClientFetchError extends Error {}
+
+/**
+ * Fetch a URL, retrying transient failures (5xx responses, network-level errors, timeouts) with linear backoff. Throws after exhausting FETCH_ATTEMPTS.
+ * @param url
+ */
+const fetchWithRetry = async (url: string): Promise<Response> => {
+	const failures: string[] = [];
+	for (let attempt = 1; attempt <= FETCH_ATTEMPTS; attempt++) {
+		try {
+			const response = await fetch(url, { signal: AbortSignal.timeout(FETCH_TIMEOUT_MS) });
+			if (response.ok) {
+				return response;
+			}
+			if (response.status < 500) {
+				throw new ClientFetchError(
+					`Failed to fetch ${url}: ${response.status} ${response.statusText}`,
+				);
+			}
+			failures.push(`HTTP ${response.status} ${response.statusText}`);
+		} catch (error) {
+			if (error instanceof ClientFetchError) {
+				throw error;
+			}
+			failures.push(error instanceof Error ? error.message : String(error));
+		}
+		if (attempt < FETCH_ATTEMPTS) {
+			await new Promise((resolve) => setTimeout(resolve, FETCH_RETRY_DELAY_MS * attempt));
+		}
+	}
+	throw new Error(`Failed to fetch ${url} after ${FETCH_ATTEMPTS} attempts: ${failures.join("; ")}`);
+};
+
+/**
  * Fetch with Node.js caching support.
  *
- * In Node.js, caches responses to os.tmpdir()/graphbox-cache/.
- * In browsers, fetches directly without caching.
+ * In Node.js, caches responses to os.tmpdir()/graphbox-cache/. In browsers, fetches directly without caching.
  * @param url
  */
 const cachedFetch = async (url: string): Promise<Uint8Array> => {
 	// Browser or non-Node environment: fetch directly
 	if (!isNode()) {
-		const response = await fetch(url);
-		if (!response.ok) {
-			throw new Error(`Failed to fetch ${url}: ${response.status} ${response.statusText}`);
-		}
+		const response = await fetchWithRetry(url);
 		return new Uint8Array(await response.arrayBuffer());
 	}
 
@@ -163,10 +208,7 @@ const cachedFetch = async (url: string): Promise<Uint8Array> => {
 	}
 
 	// Fetch from URL
-	const response = await fetch(url);
-	if (!response.ok) {
-		throw new Error(`Failed to fetch ${url}: ${response.status} ${response.statusText}`);
-	}
+	const response = await fetchWithRetry(url);
 	const data = new Uint8Array(await response.arrayBuffer());
 
 	// Save to cache
