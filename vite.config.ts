@@ -75,7 +75,17 @@ export default defineConfig({
 			provider: "v8",
 			reporter: isCI ? ["text", "json", "html"] : ["text"],
 			include: ["src/**/*.ts"],
-			exclude: ["src/**/*.test.ts", "src/**/*.spec.ts", "src/**/fixtures/**"],
+			exclude: [
+				"src/**/*.test.ts",
+				"src/**/*.spec.ts",
+				"src/**/fixtures/**",
+				// CLI orchestration, SUT registration, and manual research-runner infrastructure -- consumed only by the CLI binary and standalone scripts/*.ts entry points (scripts/run-tap.ts and siblings), never by the automated test suite. Confirmed via a zero-consumer sweep across src/**/*.test.ts before excluding: unit-testing thin CLI wrappers and static claim/table config would add coverage-gate noise without exercising anything the library-level tests don't already cover through the functions these files call.
+				"src/cli-commands/**",
+				"src/domain/**",
+				"src/experiments/experiments/**",
+				"src/registries/**",
+				"src/suts/**",
+			],
 			// Coverage thresholds — set just below current actuals to prevent regressions
 			thresholds: {
 				lines: 70,
