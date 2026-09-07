@@ -7,6 +7,8 @@
  * - Can be compared against MI ranking methods
  */
 
+import { Graph } from "@graph/algorithms/graph/graph.js";
+import type { Edge, Node } from "@graph/algorithms/types/graph.js";
 import { computeRankingMetrics } from "@graph/evaluation/__tests__/validation/common/path-ranking-helpers.js";
 import { loadBenchmarkByIdFromUrl } from "@graph/evaluation/fixtures/index.js";
 import { betweennessRanking } from "@graph/experiments/baselines/betweenness-ranking.js";
@@ -58,12 +60,17 @@ describe("Betweenness Centrality Baseline", { timeout: 60_000 }, () => {
 		});
 	}
 
-	it("should return None for disconnected nodes", async () => {
-		const benchmark = await loadBenchmarkByIdFromUrl("karate");
-		const graph = benchmark.graph;
+	it("should return None for disconnected nodes", () => {
+		// Karate Club is a single connected component (every node reaches every other), so there is no pair of real node IDs within it with no path between them -- a genuinely disconnected two-component graph is needed to exercise this case at all.
+		const graph = new Graph<Node, Edge>(false);
+		graph.addNode({ id: "a1", type: "node" });
+		graph.addNode({ id: "a2", type: "node" });
+		graph.addEdge({ id: "e-a", source: "a1", target: "a2", type: "edge" });
+		graph.addNode({ id: "b1", type: "node" });
+		graph.addNode({ id: "b2", type: "node" });
+		graph.addEdge({ id: "e-b", source: "b1", target: "b2", type: "edge" });
 
-		// Use node IDs that might not be connected
-		const result = betweennessRanking(graph, "999999", "888888", {
+		const result = betweennessRanking(graph, "a1", "b1", {
 			maxPaths: 10,
 		});
 
