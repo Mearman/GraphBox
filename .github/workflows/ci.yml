@@ -75,6 +75,12 @@ jobs:
           test -d dist
           test -f dist/index.js
 
+      - name: Verify published types resolve for both module systems
+        run: pnpm dlx @arethetypeswrong/cli --pack .
+
+      - name: Verify the package.json exports map matches what's on disk
+        run: pnpm dlx publint
+
   release:
     name: Release
     needs: validate
