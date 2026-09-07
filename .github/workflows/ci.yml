@@ -117,6 +117,7 @@ jobs:
     timeout-minutes: 10
     permissions:
       contents: read
+      actions: read
     steps:
       - name: Checkout
         uses: actions/checkout@v4
