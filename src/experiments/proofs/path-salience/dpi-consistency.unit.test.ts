@@ -40,8 +40,9 @@ describe("Data Processing Inequality Consistency", () => {
 				const best = ranked[0];
 				const minMI = Math.min(...best.edgeMIValues);
 
-				// Property: M(P) ≤ min(I(e)) for all edges e in P
-				// Geometric mean is always ≤ maximum value and ≥ minimum value
+				// Property: min(I(e)) ≤ M(P) ≤ max(I(e)) for all edges e in P
+				// (the geometric mean is bounded by the extremes; it does NOT respect the
+				// DPI ceiling min(I(e)) - only a bottleneck aggregation would)
 				// With lambda=0 (default), score = geometricMeanMI
 				expect(best.score).toBeLessThanOrEqual(Math.max(...best.edgeMIValues) + 0.001);
 				expect(best.score).toBeGreaterThanOrEqual(minMI - 0.001);
