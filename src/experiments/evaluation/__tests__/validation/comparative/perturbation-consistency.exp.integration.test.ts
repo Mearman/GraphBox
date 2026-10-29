@@ -10,70 +10,26 @@ import { describe, expect, it } from "vitest";
 
 import { DegreePrioritisedExpansion } from "../../../../../algorithms/traversal/degree-prioritised-expansion";
 import { StandardBfsExpansion } from "../../../../../experiments/baselines/standard-bfs"
+import { createSeededRng } from "../../../../proofs/test-utils";
 import {
 	createBenchmarkMeta,
 	loadBenchmarkByIdFromUrl,
 	loadBenchmarkFromContent,
 } from "../../../fixtures/benchmark-datasets";
 import { BenchmarkGraphExpander } from "../common/benchmark-graph-expander";
+import { addRandomEdges, perturbEdges } from "../common/graph-perturbation";
 import { pathDiversity } from "../common/statistical-functions";
 
+/** Fixed so the perturbed graphs, and therefore the method ranking, are identical on every run. */
+const PERTURBATION_SEED = 1;
+
 describe("Thesis Validation: Perturbed Graph Robustness", () => {
-	/**
-	 * Create a perturbed version of a graph by removing random edges.
-	 * @param edges
-	 * @param removeFraction
-	 */
-	const perturbEdges = (
-		edges: Array<{ source: string; target: string }>,
-		removeFraction: number
-	): Array<{ source: string; target: string }> => {
-		const shuffled = [...edges].sort(() => Math.random() - 0.5);
-		const keepCount = Math.floor(edges.length * (1 - removeFraction));
-		return shuffled.slice(0, keepCount);
-	};
-
-	/**
-	 * Create a perturbed version by adding random edges.
-	 * @param edges
-	 * @param nodeIds
-	 * @param addFraction
-	 */
-	const addRandomEdges = (
-		edges: Array<{ source: string; target: string }>,
-		nodeIds: string[],
-		addFraction: number
-	): Array<{ source: string; target: string }> => {
-		const addCount = Math.floor(edges.length * addFraction);
-		const newEdges: Array<{ source: string; target: string }> = [...edges];
-		const existing = new Set(edges.map((e) => `${e.source}-${e.target}`));
-
-		let added = 0;
-		let attempts = 0;
-		const maxAttempts = addCount * 10;
-
-		while (added < addCount && attempts < maxAttempts) {
-			const source = nodeIds[Math.floor(Math.random() * nodeIds.length)];
-			const target = nodeIds[Math.floor(Math.random() * nodeIds.length)];
-			const key = `${source}-${target}`;
-
-			if (source !== target && !existing.has(key)) {
-				newEdges.push({ source, target });
-				existing.add(key);
-				added++;
-			}
-			attempts++;
-		}
-
-		return newEdges;
-	};
-
 	it("should maintain performance under edge removal", async () => {
 		const benchmark = await loadBenchmarkByIdFromUrl("karate");
 		const originalEdges = benchmark.graph.getAllEdges();
 
 		// Remove 10% of edges
-		const perturbedEdges = perturbEdges(originalEdges, 0.1);
+		const perturbedEdges = perturbEdges(originalEdges, 0.1, createSeededRng(PERTURBATION_SEED));
 
 		const perturbedMeta = createBenchmarkMeta({
 			id: "karate-perturbed-removed",
@@ -110,7 +66,7 @@ describe("Thesis Validation: Perturbed Graph Robustness", () => {
 		const allNodes = benchmark.graph.getAllNodes().map((n) => n.id);
 
 		// Add 20% more random edges
-		const perturbedEdges = addRandomEdges(originalEdges, allNodes, 0.2);
+		const perturbedEdges = addRandomEdges(originalEdges, allNodes, 0.2, createSeededRng(PERTURBATION_SEED));
 
 		const perturbedMeta = createBenchmarkMeta({
 			id: "karate-perturbed-added",
@@ -144,13 +100,14 @@ describe("Thesis Validation: Perturbed Graph Robustness", () => {
 		const benchmark = await loadBenchmarkByIdFromUrl("lesmis");
 		const originalEdges = benchmark.graph.getAllEdges();
 
+		const random = createSeededRng(PERTURBATION_SEED);
 		const results: Array<{ perturbation: string; dpDiversity: number; bfsDiversity: number }> = [];
 
 		// Test original and two perturbed versions
 		const perturbations = [
 			{ name: "original", edges: originalEdges },
-			{ name: "5% removed", edges: perturbEdges(originalEdges, 0.05) },
-			{ name: "10% added", edges: addRandomEdges(originalEdges, benchmark.graph.getAllNodes().map((n) => n.id), 0.1) },
+			{ name: "5% removed", edges: perturbEdges(originalEdges, 0.05, random) },
+			{ name: "10% added", edges: addRandomEdges(originalEdges, benchmark.graph.getAllNodes().map((n) => n.id), 0.1, random) },
 		];
 
 		for (const { name, edges } of perturbations) {
