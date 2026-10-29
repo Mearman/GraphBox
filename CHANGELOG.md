@@ -1,3 +1,9 @@
+## [1.4.4](https://github.com/Mearman/GraphBox/compare/v1.4.3...v1.4.4) (2026-10-29)
+
+### Documentation
+
+* add the standard badge row to the README ([e1b2124](https://github.com/Mearman/GraphBox/commit/e1b2124ae86b82ed0b9bd7ff243e2140bdc3d517))
+
 ## [1.4.3](https://github.com/Mearman/GraphBox/compare/v1.4.2...v1.4.3) (2026-10-29)
 
 ### Bug Fixes
