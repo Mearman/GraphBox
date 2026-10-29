@@ -1,5 +1,7 @@
 # GraphBox
 
+[![GitHub](https://img.shields.io/badge/GitHub-181717?logo=github&logoColor=white)](https://github.com/Mearman/GraphBox) [![npm](https://img.shields.io/badge/npm-CB3837?logo=npm&logoColor=white)](https://www.npmjs.com/package/graphbox) [![Release](https://img.shields.io/github/v/release/Mearman/GraphBox)](https://github.com/Mearman/GraphBox/releases/latest) [![CI](https://img.shields.io/github/actions/workflow/status/Mearman/GraphBox/ci.yml?branch=main)](https://github.com/Mearman/GraphBox/actions)
+
 This file provides guidance to Claude Code (claude.ai/code) when working with this repository.
 
 **GraphBox** = Graph Sandbox + Graph Toolbox
