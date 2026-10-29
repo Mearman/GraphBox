@@ -1,3 +1,17 @@
+## [1.4.3](https://github.com/Mearman/GraphBox/compare/v1.4.2...v1.4.3) (2026-10-29)
+
+### Bug Fixes
+
+* **test:** seed the perturbed graph robustness tests ([98a0e71](https://github.com/Mearman/GraphBox/commit/98a0e71a32d309f222b3ab9eed9e1cc2e2fdad29))
+
+### Documentation
+
+* **test:** state the true dpi bound in the property comment ([8fba550](https://github.com/Mearman/GraphBox/commit/8fba55070230743c5001d588fffcfba1e29581f5))
+
+### Tests
+
+* add seeded graph perturbation helpers ([6f72a9e](https://github.com/Mearman/GraphBox/commit/6f72a9ec1cc8d0e3cd5506aa12a9d57d57aeac22))
+
 ## [1.4.2](https://github.com/Mearman/GraphBox/compare/v1.4.1...v1.4.2) (2026-09-07)
 
 ### Bug Fixes
