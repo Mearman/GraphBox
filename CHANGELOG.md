@@ -1,3 +1,9 @@
+## [1.4.5](https://github.com/Mearman/GraphBox/compare/v1.4.4...v1.4.5) (2026-10-31)
+
+### CI/CD
+
+* push the release with a deploy key ([dccbc9e](https://github.com/Mearman/GraphBox/commit/dccbc9e80a7c52246a1cab67158674f276fb95b8))
+
 ## [1.4.4](https://github.com/Mearman/GraphBox/compare/v1.4.3...v1.4.4) (2026-10-29)
 
 ### Documentation
