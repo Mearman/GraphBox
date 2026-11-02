@@ -3,12 +3,16 @@ import { describe, expect, it } from "vitest";
 import { DegreePrioritisedExpansion } from "../../../../../algorithms/traversal/degree-prioritised-expansion";
 import { RandomPriorityExpansion } from "../../../../../experiments/baselines/random-priority"
 import { StandardBfsExpansion } from "../../../../../experiments/baselines/standard-bfs"
+import { createSeededRng } from "../../../../proofs/test-utils";
 import { loadBenchmarkByIdFromUrl } from "../../../fixtures/benchmark-datasets";
 import { BenchmarkGraphExpander } from "../common/benchmark-graph-expander";
+import { selectSeedPair } from "../common/seed-pair-selection";
 import { cohensD, confidenceInterval, mannWhitneyUTest, pathDiversity } from "../common/statistical-functions";
 
 describe("Thesis Validation: Variability Injection", () => {
 	describe("Multiple Seed Pair Analysis", () => {
+		const SEED_PAIR_SEED = 1;
+
 		/**
 		 * Test across multiple random seed pairs to assess consistency of performance.
 		 * This provides better statistical power than single-seed tests.
@@ -19,6 +23,8 @@ describe("Thesis Validation: Variability Injection", () => {
 
 			const allNodes = expander.getAllNodeIds();
 			const numberSeedPairs = 10;
+			/** Fixed so the compared seed pairs are identical on every run. */
+			const random = createSeededRng(SEED_PAIR_SEED);
 
 			const results: Array<{
 				seeds: [string, string];
@@ -30,13 +36,7 @@ describe("Thesis Validation: Variability Injection", () => {
 
 			for (let index = 0; index < numberSeedPairs; index++) {
 				// Select random seed pair
-				const index1 = Math.floor(Math.random() * allNodes.length);
-				let index2 = Math.floor(Math.random() * allNodes.length);
-				while (index2 === index1) {
-					index2 = Math.floor(Math.random() * allNodes.length);
-				}
-
-				const seeds: [string, string] = [allNodes[index1], allNodes[index2]];
+				const seeds = selectSeedPair(allNodes, random);
 
 				const dp = new DegreePrioritisedExpansion(expander, seeds);
 				const bfs = new StandardBfsExpansion(expander, seeds);
