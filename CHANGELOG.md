@@ -1,3 +1,13 @@
+## [1.4.6](https://github.com/Mearman/GraphBox/compare/v1.4.5...v1.4.6) (2026-11-02)
+
+### Bug Fixes
+
+* **test:** seed the seed pair selection in the variability tests ([35b4f69](https://github.com/Mearman/GraphBox/commit/35b4f69cd830b63d982e0abe8f7527b0ed393a75))
+
+### Tests
+
+* add seeded seed pair selection helper ([55a51e4](https://github.com/Mearman/GraphBox/commit/55a51e4e0f4f08bd0f020a05d840d0fd09b1133d))
+
 ## [1.4.5](https://github.com/Mearman/GraphBox/compare/v1.4.4...v1.4.5) (2026-10-31)
 
 ### CI/CD
